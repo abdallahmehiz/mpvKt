@@ -25,45 +25,48 @@ import live.mehiz.mpvkt.ui.PlayerActivity
 import live.mehiz.mpvkt.ui.theme.MpvKtTheme
 
 class MainActivity : ComponentActivity() {
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
-        setContent {
-            MpvKtTheme {
-                Column(
-                    modifier = Modifier.fillMaxSize(),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center
-                ) {
-                    var uri by remember { mutableStateOf("") }
-                    TextField(value = uri, onValueChange = { uri = it })
-                    Button(onClick = { playFile(uri) }) {
-                        Text(text = "Start playing?")
-                    }
-                    val documentPicker = rememberLauncherForActivityResult(
-                        ActivityResultContracts.OpenDocument()) {
-                        if(it == null) return@rememberLauncherForActivityResult
-                        playFile(it.toString())
-                    }
-                    OutlinedButton(onClick = {
-                        documentPicker.launch(arrayOf("*/*"))
-                    }) {
-                        Text(text = "Pick a file")
-                    }
-                }
-            }
+  override fun onCreate(savedInstanceState: Bundle?) {
+    super.onCreate(savedInstanceState)
+    enableEdgeToEdge()
+    setContent {
+      MpvKtTheme {
+        Column(
+          modifier = Modifier.fillMaxSize(),
+          horizontalAlignment = Alignment.CenterHorizontally,
+          verticalArrangement = Arrangement.Center,
+        ) {
+          var uri by remember { mutableStateOf("") }
+          TextField(value = uri, onValueChange = { uri = it })
+          Button(onClick = { playFile(uri) }) {
+            Text(text = "Start playing?")
+          }
+          val documentPicker = rememberLauncherForActivityResult(
+            ActivityResultContracts.OpenDocument(),
+          ) {
+            if (it == null) return@rememberLauncherForActivityResult
+            playFile(it.toString())
+          }
+          OutlinedButton(
+            onClick = {
+              documentPicker.launch(arrayOf("*/*"))
+            },
+          ) {
+            Text(text = "Pick a file")
+          }
         }
+      }
     }
+  }
 
-    private fun playFile(filepath: String) {
-        val i: Intent
-        if (filepath.startsWith("content://")) {
-            i = Intent(Intent.ACTION_VIEW, Uri.parse(filepath))
-        } else {
-            i = Intent()
-            i.putExtra("uri", filepath)
-        }
-        i.setClass(this, PlayerActivity::class.java)
-        this.startActivity(i)
+  private fun playFile(filepath: String) {
+    val i: Intent
+    if (filepath.startsWith("content://")) {
+      i = Intent(Intent.ACTION_VIEW, Uri.parse(filepath))
+    } else {
+      i = Intent()
+      i.putExtra("uri", filepath)
     }
+    i.setClass(this, PlayerActivity::class.java)
+    this.startActivity(i)
+  }
 }
