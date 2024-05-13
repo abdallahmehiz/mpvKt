@@ -27,7 +27,7 @@
         </activity>
 
         <activity
-            android:name=".ui.PlayerActivity"
+            android:name=".ui.player.PlayerActivity"
             android:autoRemoveFromRecents="true"
             android:exported="true"
             android:launchMode="singleTask"

@@ -73,4 +73,6 @@ dependencies {
 
   implementation(libs.aniyomi.mpv.lib)
   implementation(libs.aniyomi.ffmpeg.kit)
+
+  implementation(libs.seeker)
 }

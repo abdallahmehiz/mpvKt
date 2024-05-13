@@ -28,8 +28,10 @@ androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version
 androidx-recyclerview = { group = "androidx.recyclerview", name = "recyclerview", version = "1.3.2" }
 androidx-constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version = "2.1.4" }
 
-aniyomi-mpv-lib = { module = "com.github.aniyomiorg:aniyomi-mpv-lib", version = "1.14.n" }
+aniyomi-mpv-lib = { module = "com.github.aniyomiorg:aniyomi-mpv-lib", version = "1.13.n" }
 aniyomi-ffmpeg-kit = { module = "com.github.jmir1:ffmpeg-kit", version = "1.13" }
+
+seeker = { module = "io.github.2307vivek:seeker", version = "1.2.2" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
