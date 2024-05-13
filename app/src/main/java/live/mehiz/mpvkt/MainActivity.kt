@@ -1,6 +1,7 @@
 package live.mehiz.mpvkt
 
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -20,7 +21,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import live.mehiz.mpvkt.ui.PlayerActivity
 import live.mehiz.mpvkt.ui.theme.MpvKtTheme
 
@@ -37,21 +37,13 @@ class MainActivity : ComponentActivity() {
                 ) {
                     var uri by remember { mutableStateOf("") }
                     TextField(value = uri, onValueChange = { uri = it })
-                    Button(onClick = {
-                        val intent = Intent(this@MainActivity, PlayerActivity::class.java)
-                        intent.putExtra("uri", uri)
-                        this@MainActivity.startActivity(intent)
-                    }) {
+                    Button(onClick = { playFile(uri) }) {
                         Text(text = "Start playing?")
                     }
-                    val context = LocalContext.current
-                    val documentPicker = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) {
+                    val documentPicker = rememberLauncherForActivityResult(
+                        ActivityResultContracts.OpenDocument()) {
                         if(it == null) return@rememberLauncherForActivityResult
-                        if(it.toString().startsWith("content://")) {
-                            val intent = Intent(context, PlayerActivity::class.java)
-                            intent.putExtra("uri", it.toString())
-                            context.startActivity(intent)
-                        }
+                        playFile(it.toString())
                     }
                     OutlinedButton(onClick = {
                         documentPicker.launch(arrayOf("*/*"))
@@ -61,5 +53,17 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+    }
+
+    private fun playFile(filepath: String) {
+        val i: Intent
+        if (filepath.startsWith("content://")) {
+            i = Intent(Intent.ACTION_VIEW, Uri.parse(filepath))
+        } else {
+            i = Intent()
+            i.putExtra("uri", filepath)
+        }
+        i.setClass(this, PlayerActivity::class.java)
+        this.startActivity(i)
     }
 }
