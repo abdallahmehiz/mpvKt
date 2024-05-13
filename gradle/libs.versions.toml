@@ -8,6 +8,7 @@ espressoCore = "3.5.1"
 lifecycleRuntimeKtx = "2.7.0"
 activityCompose = "1.9.0"
 composeBom = "2023.08.00"
+koin = "3.6.0-wasm-alpha2"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -32,6 +33,13 @@ aniyomi-mpv-lib = { module = "com.github.aniyomiorg:aniyomi-mpv-lib", version = 
 aniyomi-ffmpeg-kit = { module = "com.github.jmir1:ffmpeg-kit", version = "1.13" }
 
 seeker = { module = "io.github.2307vivek:seeker", version = "1.2.2" }
+
+koin-core = { module = "io.insert-koin:koin-core", version.ref = "koin" }
+koin-android = { module = "io.insert-koin:koin-android", version.ref = "koin" }
+koin-compose = { module = "io.insert-koin:koin-compose", version.ref = "koin" }
+
+[bundles]
+koin = ["koin-core", "koin-android", "koin-compose"]
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

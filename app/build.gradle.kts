@@ -75,4 +75,5 @@ dependencies {
   implementation(libs.aniyomi.ffmpeg.kit)
 
   implementation(libs.seeker)
+  implementation(libs.bundles.koin)
 }
