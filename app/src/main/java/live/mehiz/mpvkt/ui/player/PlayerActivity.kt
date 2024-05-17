@@ -9,8 +9,11 @@ import android.util.Log
 import android.view.WindowManager
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -24,6 +27,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.core.view.WindowCompat
@@ -33,6 +37,7 @@ import `is`.xyz.mpv.Utils
 import kotlinx.coroutines.delay
 import live.mehiz.mpvkt.databinding.PlayerLayoutBinding
 import live.mehiz.mpvkt.preferences.PlayerPreferences
+import live.mehiz.mpvkt.preferences.preference.collectAsState
 import org.koin.android.ext.android.inject
 import java.io.File
 
@@ -81,17 +86,19 @@ class PlayerActivity : AppCompatActivity() {
         }
       }
       ConstraintLayout(
-        modifier = Modifier.fillMaxSize().padding(horizontal = 8.dp),
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(horizontal = 8.dp),
       ) {
         val position by viewModel.pos.collectAsState()
         val (seekbar) = createRefs()
         AnimatedVisibility(
           visible = controlsShown,
-          enter = slideInVertically(initialOffsetY = { it }),
-          exit = slideOutVertically(targetOffsetY = { it }),
+          enter = slideInVertically(initialOffsetY = { it }) + fadeIn(),
+          exit = slideOutVertically(targetOffsetY = { it }) + fadeOut(),
           modifier = Modifier.constrainAs(seekbar) {
             bottom.linkTo(parent.bottom)
-          }
+          },
         ) {
           Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -99,6 +106,8 @@ class PlayerActivity : AppCompatActivity() {
             Text(
               text = Utils.prettyTime(player.timePos?: 0),
               color = Color.White,
+              modifier = Modifier.weight(0.1f),
+              textAlign = TextAlign.Center
             )
             Seeker(
               value = position,
@@ -109,7 +118,7 @@ class PlayerActivity : AppCompatActivity() {
                 player.timePos = it.toInt()
               },
               onValueChangeFinished = { player.paused = false },
-              modifier = Modifier.weight(1f),
+              modifier = Modifier.weight(0.8f),
             )
             val invertDuration by playerPreferences.invertDuration.collectAsState()
             val remainingTime = if(invertDuration) {
@@ -120,6 +129,8 @@ class PlayerActivity : AppCompatActivity() {
             Text(
               text = remainingTime,
               color = Color.White,
+              modifier = Modifier.weight(0.1f).clickable { playerPreferences.invertDuration.set(!invertDuration) },
+              textAlign = TextAlign.Center
             )
           }
         }
