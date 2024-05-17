@@ -1,3 +1,12 @@
 <resources>
     <string name="app_name">mpvKt</string>
+
+    <string name="pref_appearance_title">Appearance</string>
+    <string name="pref_appearance_category_theme">Theme</string>
+    <string name="pref_appearance_darkmode_system">System</string>
+    <string name="pref_appearance_darkmode_light">Light</string>
+    <string name="pref_appearance_darkmode_dark">Dark</string>
+    <string name="pref_appearance_material_you_title">Material You</string>
+    <string name="pref_appearance_material_you_summary">Enable Material You dynamic colors</string>
+    <string name="pref_appearance_material_you_summary_disabled">Only available for Android 12 and newer</string>
 </resources>

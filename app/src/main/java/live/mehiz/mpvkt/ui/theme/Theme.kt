@@ -1,6 +1,7 @@
 package live.mehiz.mpvkt.ui.theme
 
 import android.os.Build
+import androidx.annotation.StringRes
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
@@ -8,7 +9,12 @@ import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.LocalContext
+import live.mehiz.mpvkt.R
+import live.mehiz.mpvkt.preferences.AppearancePreferences
+import live.mehiz.mpvkt.preferences.preference.collectAsState
+import org.koin.compose.koinInject
 
 private val DarkColorScheme = darkColorScheme(
   primary = Purple80,
@@ -33,20 +39,24 @@ private val LightColorScheme = lightColorScheme(
 )
 
 @Composable
-fun MpvKtTheme(
-  darkTheme: Boolean = isSystemInDarkTheme(),
-  // Dynamic color is available on Android 12+
-  dynamicColor: Boolean = true,
-  content: @Composable () -> Unit,
-) {
+fun MpvKtTheme(content: @Composable () -> Unit) {
+  val preferences = koinInject<AppearancePreferences>()
+  val darkMode by preferences.darkMode.collectAsState()
+  val darkTheme = isSystemInDarkTheme()
+  val dynamicColor by preferences.materialYou.collectAsState()
+  val context = LocalContext.current
+
   val colorScheme = when {
     dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
-      val context = LocalContext.current
-      if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
+      when (darkMode) {
+        DarkMode.Dark -> dynamicDarkColorScheme(context)
+        DarkMode.Light -> dynamicLightColorScheme(context)
+        else -> if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
+      }
     }
-
-    darkTheme -> DarkColorScheme
-    else -> LightColorScheme
+    darkMode == DarkMode.Dark -> DarkColorScheme
+    darkMode == DarkMode.Light -> LightColorScheme
+    else -> if (darkTheme) DarkColorScheme else LightColorScheme
   }
 
   MaterialTheme(
@@ -54,4 +64,11 @@ fun MpvKtTheme(
     typography = Typography,
     content = content,
   )
+}
+
+enum class DarkMode(@StringRes val titleRes: Int) {
+  Dark(R.string.pref_appearance_darkmode_dark),
+  Light(R.string.pref_appearance_darkmode_light),
+  System(R.string.pref_appearance_darkmode_system),
+  ;
 }

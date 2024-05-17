@@ -67,7 +67,7 @@ dependencies {
   implementation(libs.androidx.ui)
   implementation(libs.androidx.ui.graphics)
   implementation(libs.androidx.ui.tooling.preview)
-  implementation(libs.androidx.material3)
+  implementation(libs.androidx.material3.android)
   testImplementation(libs.junit)
   androidTestImplementation(libs.androidx.junit)
   androidTestImplementation(libs.androidx.espresso.core)
@@ -78,10 +78,13 @@ dependencies {
   implementation(libs.androidx.appcompat)
   implementation(libs.androidx.recyclerview)
   implementation(libs.androidx.constraintlayout)
+  implementation(libs.androidx.material3.icons.extended)
 
   implementation(libs.aniyomi.mpv.lib)
   implementation(libs.aniyomi.ffmpeg.kit)
 
   implementation(libs.seeker)
   implementation(libs.bundles.koin)
+  implementation(libs.bundles.voyager)
+  implementation(libs.compose.prefs)
 }
