@@ -1,26 +1,36 @@
 package live.mehiz.mpvkt.ui.player
 
-import android.annotation.SuppressLint
 import android.content.Intent
 import android.content.pm.ActivityInfo
 import android.net.Uri
 import android.os.Bundle
 import android.os.ParcelFileDescriptor
 import android.util.Log
+import android.view.WindowManager
 import androidx.appcompat.app.AppCompatActivity
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Text
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.unit.dp
+import androidx.constraintlayout.compose.ConstraintLayout
+import androidx.core.view.WindowCompat
 import dev.vivvvek.seeker.Seeker
 import `is`.xyz.mpv.MPVLib
 import `is`.xyz.mpv.Utils
+import kotlinx.coroutines.delay
 import live.mehiz.mpvkt.databinding.PlayerLayoutBinding
 import live.mehiz.mpvkt.preferences.PlayerPreferences
 import org.koin.android.ext.android.inject
@@ -28,13 +38,14 @@ import java.io.File
 
 class PlayerActivity : AppCompatActivity() {
 
-  val viewModel: PlayerViewModel by lazy { PlayerViewModel(this) }
+  private val viewModel: PlayerViewModel by lazy { PlayerViewModel(this) }
   val binding by lazy { PlayerLayoutBinding.inflate(this.layoutInflater) }
   val player by lazy { binding.player }
+  val windowInsetsController by lazy { WindowCompat.getInsetsController(window, window.decorView) }
   private val playerPreferences by inject<PlayerPreferences>()
 
-  @SuppressLint("StateFlowValueCalledInComposition")
   override fun onCreate(savedInstanceState: Bundle?) {
+    window.setFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS, WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS)
     super.onCreate(savedInstanceState)
     if (intent.extras?.getString("uri")?.isNotBlank() == true) onDestroy()
     setContentView(binding.root)
@@ -53,10 +64,22 @@ class PlayerActivity : AppCompatActivity() {
     player.playFile(videoUri!!)
     setOrientation()
     binding.controls.setContent {
-      Column(
-        modifier = Modifier.fillMaxSize(),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Bottom,
+      val controlsShown by viewModel.controlsShown.collectAsState()
+      Box(
+        modifier = Modifier
+          .fillMaxSize()
+          .pointerInput(Unit) {
+            detectTapGestures {
+              viewModel.toggleControls()
+            }
+          },
+      )
+      LaunchedEffect(key1 = controlsShown) {
+        if (controlsShown) {
+          delay(5_000)
+          viewModel.hideControls()
+        }
+      }
       ConstraintLayout(
         modifier = Modifier.fillMaxSize().padding(horizontal = 8.dp),
       ) {
@@ -181,6 +204,7 @@ class PlayerActivity : AppCompatActivity() {
       MPVLib.mpvEventId.MPV_EVENT_FILE_LOADED -> {
         setOrientation()
       }
+
       MPVLib.mpvEventId.MPV_EVENT_END_FILE -> {
         onDestroy()
       }
@@ -199,6 +223,7 @@ class PlayerActivity : AppCompatActivity() {
       } else {
         ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
       }
+
       PlayerOrientation.Portrait -> ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
       PlayerOrientation.ReversePortrait -> ActivityInfo.SCREEN_ORIENTATION_REVERSE_PORTRAIT
       PlayerOrientation.SensorPortrait -> ActivityInfo.SCREEN_ORIENTATION_SENSOR_PORTRAIT
