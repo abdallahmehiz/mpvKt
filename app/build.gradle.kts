@@ -78,6 +78,7 @@ dependencies {
   implementation(libs.androidx.appcompat)
   implementation(libs.androidx.recyclerview)
   implementation(libs.androidx.constraintlayout)
+  implementation(libs.androidx.compose.constraintlayout)
   implementation(libs.androidx.material3.icons.extended)
 
   implementation(libs.aniyomi.mpv.lib)

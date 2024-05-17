@@ -57,30 +57,42 @@ class PlayerActivity : AppCompatActivity() {
         modifier = Modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Bottom,
+      ConstraintLayout(
+        modifier = Modifier.fillMaxSize().padding(horizontal = 8.dp),
       ) {
         val position by viewModel.pos.collectAsState()
-        Row(
-          verticalAlignment = Alignment.CenterVertically,
+        val (seekbar) = createRefs()
+        AnimatedVisibility(
+          visible = controlsShown,
+          enter = slideInVertically(initialOffsetY = { it }),
+          exit = slideOutVertically(targetOffsetY = { it }),
+          modifier = Modifier.constrainAs(seekbar) {
+            bottom.linkTo(parent.bottom)
+          }
         ) {
-          Text(
-            text = Utils.prettyTime(position.toInt()),
-            color = Color.White,
-          )
-          Seeker(
-            value = position,
-            range = 0f..(player.duration?.toFloat() ?: 0f),
-            onValueChange = {
-              player.paused = true
-              viewModel.updatePlayBackPos(it)
-              player.timePos = it.toInt()
-            },
-            onValueChangeFinished = { player.paused = false },
-            modifier = Modifier.weight(1f),
-          )
-          Text(
-            text = Utils.prettyTime(player.duration ?: 0),
-            color = Color.White,
-          )
+          Row(
+            verticalAlignment = Alignment.CenterVertically,
+          ) {
+            Text(
+              text = Utils.prettyTime(position.toInt()),
+              color = Color.White,
+            )
+            Seeker(
+              value = position,
+              range = 0f..(player.duration?.toFloat() ?: 0f),
+              onValueChange = {
+                player.paused = true
+                viewModel.updatePlayBackPos(it)
+                player.timePos = it.toInt()
+              },
+              onValueChangeFinished = { player.paused = false },
+              modifier = Modifier.weight(1f),
+            )
+            Text(
+              text = Utils.prettyTime(player.duration ?: 0),
+              color = Color.White,
+            )
+          }
         }
       }
     }
