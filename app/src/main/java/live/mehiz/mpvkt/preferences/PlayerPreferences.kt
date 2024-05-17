@@ -8,4 +8,5 @@ class PlayerPreferences(
   preferenceStore: PreferenceStore
 ) {
   val orientation = preferenceStore.getEnum("player_orientation", PlayerOrientation.SensorLandscape)
+  val invertDuration = preferenceStore.getBoolean("invert_duration", false)
 }

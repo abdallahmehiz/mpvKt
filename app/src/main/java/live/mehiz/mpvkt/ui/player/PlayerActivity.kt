@@ -97,7 +97,7 @@ class PlayerActivity : AppCompatActivity() {
             verticalAlignment = Alignment.CenterVertically,
           ) {
             Text(
-              text = Utils.prettyTime(position.toInt()),
+              text = Utils.prettyTime(player.timePos?: 0),
               color = Color.White,
             )
             Seeker(
@@ -111,8 +111,14 @@ class PlayerActivity : AppCompatActivity() {
               onValueChangeFinished = { player.paused = false },
               modifier = Modifier.weight(1f),
             )
+            val invertDuration by playerPreferences.invertDuration.collectAsState()
+            val remainingTime = if(invertDuration) {
+              "-" + Utils.prettyTime((player.duration?: 0) - (player.timePos?: 0))
+            } else {
+              Utils.prettyTime(player.duration?: 0)
+            }
             Text(
-              text = Utils.prettyTime(player.duration ?: 0),
+              text = remainingTime,
               color = Color.White,
             )
           }

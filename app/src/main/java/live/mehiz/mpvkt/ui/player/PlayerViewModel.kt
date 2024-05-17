@@ -20,7 +20,6 @@ class PlayerViewModel(
 
   fun showControls() {
     _controlsShown.value = true
-    activity.windowInsetsController.show(WindowInsetsCompat.Type.statusBars())
   }
   fun hideControls() {
     _controlsShown.value = false
