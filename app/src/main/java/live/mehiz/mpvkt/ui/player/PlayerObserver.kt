@@ -22,9 +22,10 @@ class PlayerObserver(
   }
 
   override fun event(eventId: Int) {
-
+    activity.runOnUiThread { activity.event(eventId) }
   }
 
   override fun efEvent(err: String?) {
+    activity.runOnUiThread { activity.efEvent(err) }
   }
 }

@@ -2,6 +2,7 @@ package live.mehiz.mpvkt.ui.player
 
 import android.annotation.SuppressLint
 import android.content.Intent
+import android.content.pm.ActivityInfo
 import android.net.Uri
 import android.os.Bundle
 import android.os.ParcelFileDescriptor
@@ -21,6 +22,8 @@ import dev.vivvvek.seeker.Seeker
 import `is`.xyz.mpv.MPVLib
 import `is`.xyz.mpv.Utils
 import live.mehiz.mpvkt.databinding.PlayerLayoutBinding
+import live.mehiz.mpvkt.preferences.PlayerPreferences
+import org.koin.android.ext.android.inject
 import java.io.File
 
 class PlayerActivity : AppCompatActivity() {
@@ -28,16 +31,17 @@ class PlayerActivity : AppCompatActivity() {
   val viewModel: PlayerViewModel by lazy { PlayerViewModel(this) }
   val binding by lazy { PlayerLayoutBinding.inflate(this.layoutInflater) }
   val player by lazy { binding.player }
+  private val playerPreferences by inject<PlayerPreferences>()
 
   @SuppressLint("StateFlowValueCalledInComposition")
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
     if (intent.extras?.getString("uri")?.isNotBlank() == true) onDestroy()
     setContentView(binding.root)
-    MPVLib.create(this, "v")
     player.initialize(
       applicationContext.filesDir.path,
       applicationContext.cacheDir.path,
+      "v",
     )
     player.addObserver(PlayerObserver(this))
     val uri = parsePathFromIntent(intent)
@@ -47,6 +51,7 @@ class PlayerActivity : AppCompatActivity() {
       uri
     }
     player.playFile(videoUri!!)
+    setOrientation()
     binding.controls.setContent {
       Column(
         modifier = Modifier.fillMaxSize(),
@@ -55,11 +60,11 @@ class PlayerActivity : AppCompatActivity() {
       ) {
         val position by viewModel.pos.collectAsState()
         Row(
-          verticalAlignment = Alignment.CenterVertically
+          verticalAlignment = Alignment.CenterVertically,
         ) {
           Text(
             text = Utils.prettyTime(position.toInt()),
-            color = Color.White
+            color = Color.White,
           )
           Seeker(
             value = position,
@@ -70,11 +75,11 @@ class PlayerActivity : AppCompatActivity() {
               player.timePos = it.toInt()
             },
             onValueChangeFinished = { player.paused = false },
-            modifier = Modifier.weight(1f)
+            modifier = Modifier.weight(1f),
           )
           Text(
-            text = Utils.prettyTime(player.duration?: 0),
-            color = Color.White
+            text = Utils.prettyTime(player.duration ?: 0),
+            color = Color.White,
           )
         }
       }
@@ -140,7 +145,6 @@ class PlayerActivity : AppCompatActivity() {
 
   // a bunch of observers
   internal fun onObserverEvent(property: String, value: Long) {
-
     when (property) {
       "time-pos" -> {
         viewModel.updatePlayBackPos(value.toFloat())
@@ -158,5 +162,37 @@ class PlayerActivity : AppCompatActivity() {
 
   internal fun onObserverEvent(property: String, value: String) {
 
+  }
+
+  internal fun event(eventId: Int) {
+    when (eventId) {
+      MPVLib.mpvEventId.MPV_EVENT_FILE_LOADED -> {
+        setOrientation()
+      }
+      MPVLib.mpvEventId.MPV_EVENT_END_FILE -> {
+        onDestroy()
+      }
+    }
+  }
+
+  internal fun efEvent(err: String?) {
+
+  }
+
+  private fun setOrientation() {
+    this.requestedOrientation = when (playerPreferences.orientation.get()) {
+      PlayerOrientation.Free -> ActivityInfo.SCREEN_ORIENTATION_SENSOR
+      PlayerOrientation.Video -> if ((player.videoAspect ?: 0.0) > 1.0) {
+        ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
+      } else {
+        ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+      }
+      PlayerOrientation.Portrait -> ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+      PlayerOrientation.ReversePortrait -> ActivityInfo.SCREEN_ORIENTATION_REVERSE_PORTRAIT
+      PlayerOrientation.SensorPortrait -> ActivityInfo.SCREEN_ORIENTATION_SENSOR_PORTRAIT
+      PlayerOrientation.Landscape -> ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
+      PlayerOrientation.ReverseLandscape -> ActivityInfo.SCREEN_ORIENTATION_REVERSE_PORTRAIT
+      PlayerOrientation.SensorLandscape -> ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
+    }
   }
 }

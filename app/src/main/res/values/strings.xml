@@ -9,4 +9,15 @@
     <string name="pref_appearance_material_you_title">Material You</string>
     <string name="pref_appearance_material_you_summary">Enable Material You dynamic colors</string>
     <string name="pref_appearance_material_you_summary_disabled">Only available for Android 12 and newer</string>
+
+    <string name="pref_player">Player</string>
+    <string name="pref_player_orientation">Orientation</string>
+    <string name="pref_player_orientation_free">Free</string>
+    <string name="pref_player_orientation_video">Video</string>
+    <string name="pref_player_orientation_portrait">Portrait</string>
+    <string name="pref_player_orientation_reverse_portrait">Reverse portrait</string>
+    <string name="pref_player_orientation_sensor_portrait">Sensor portrait</string>
+    <string name="pref_player_orientation_landscape">Landscape</string>
+    <string name="pref_player_orientation_reverse_landscape">Reverse landscape</string>
+    <string name="pref_player_orientation_sensor_landscape">Sensor landscape</string>
 </resources>
