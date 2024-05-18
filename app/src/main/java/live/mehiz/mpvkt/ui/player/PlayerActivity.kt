@@ -9,10 +9,13 @@ import android.util.Log
 import android.view.WindowManager
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
@@ -25,6 +28,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.style.TextAlign
@@ -85,10 +89,31 @@ class PlayerActivity : AppCompatActivity() {
           viewModel.hideControls()
         }
       }
+      val animatedColor by animateColorAsState(
+        Color.Black.copy(if (controlsShown) 0.7f else 0f),
+        animationSpec = tween(300),
+        label = "color",
+      )
+      Box(
+        modifier = Modifier
+          .fillMaxSize()
+          .background(
+            Brush.verticalGradient(
+              // :TF_FORSEN_DESPAIR: it works tho
+              listOf(
+                animatedColor,
+                Color.Transparent,
+                Color.Transparent,
+                Color.Transparent,
+                animatedColor,
+              ),
+            ),
+          ),
+      )
       ConstraintLayout(
         modifier = Modifier
-            .fillMaxSize()
-            .padding(horizontal = 8.dp),
+          .fillMaxSize()
+          .padding(horizontal = 8.dp),
       ) {
         val position by viewModel.pos.collectAsState()
         val (seekbar) = createRefs()
@@ -104,10 +129,10 @@ class PlayerActivity : AppCompatActivity() {
             verticalAlignment = Alignment.CenterVertically,
           ) {
             Text(
-              text = Utils.prettyTime(player.timePos?: 0),
+              text = Utils.prettyTime(player.timePos ?: 0),
               color = Color.White,
               modifier = Modifier.weight(0.1f),
-              textAlign = TextAlign.Center
+              textAlign = TextAlign.Center,
             )
             Seeker(
               value = position,
@@ -121,16 +146,18 @@ class PlayerActivity : AppCompatActivity() {
               modifier = Modifier.weight(0.8f),
             )
             val invertDuration by playerPreferences.invertDuration.collectAsState()
-            val remainingTime = if(invertDuration) {
-              "-" + Utils.prettyTime((player.duration?: 0) - (player.timePos?: 0))
+            val remainingTime = if (invertDuration) {
+              "-" + Utils.prettyTime((player.duration ?: 0) - (player.timePos ?: 0))
             } else {
-              Utils.prettyTime(player.duration?: 0)
+              Utils.prettyTime(player.duration ?: 0)
             }
             Text(
               text = remainingTime,
               color = Color.White,
-              modifier = Modifier.weight(0.1f).clickable { playerPreferences.invertDuration.set(!invertDuration) },
-              textAlign = TextAlign.Center
+              modifier = Modifier
+                .weight(0.1f)
+                .clickable { playerPreferences.invertDuration.set(!invertDuration) },
+              textAlign = TextAlign.Center,
             )
           }
         }
