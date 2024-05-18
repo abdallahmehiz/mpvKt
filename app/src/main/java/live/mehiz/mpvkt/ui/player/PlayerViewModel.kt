@@ -11,11 +11,19 @@ class PlayerViewModel(
   private val _pos = MutableStateFlow(0f)
   val pos = _pos.asStateFlow()
 
+  private val _paused = MutableStateFlow(false)
+  val paused = _paused.asStateFlow()
+
   private val _controlsShown = MutableStateFlow(true)
   val controlsShown = _controlsShown.asStateFlow()
 
   fun updatePlayBackPos(pos: Float) {
     _pos.value = pos
+  }
+
+  fun pauseUnpause() {
+    _paused.value = !(activity.player.paused?: false)
+    activity.player.paused = _paused.value
   }
 
   fun showControls() {

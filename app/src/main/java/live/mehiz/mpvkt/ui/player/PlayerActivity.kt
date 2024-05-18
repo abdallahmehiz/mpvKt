@@ -22,6 +22,12 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Pause
+import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -35,10 +41,12 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.core.view.WindowCompat
+import androidx.lifecycle.viewModelScope
 import dev.vivvvek.seeker.Seeker
 import `is`.xyz.mpv.MPVLib
 import `is`.xyz.mpv.Utils
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import live.mehiz.mpvkt.databinding.PlayerLayoutBinding
 import live.mehiz.mpvkt.preferences.PlayerPreferences
 import live.mehiz.mpvkt.preferences.preference.collectAsState
@@ -79,7 +87,16 @@ class PlayerActivity : AppCompatActivity() {
           .fillMaxSize()
           .pointerInput(Unit) {
             detectTapGestures {
-              viewModel.toggleControls()
+              viewModel.viewModelScope.launch {
+                detectTapGestures(
+                  onDoubleTap = {
+                    viewModel.pauseUnpause()
+                  },
+                  onTap = {
+                    viewModel.toggleControls()
+                  }
+                )
+              }
             }
           },
       )
@@ -116,7 +133,31 @@ class PlayerActivity : AppCompatActivity() {
           .padding(horizontal = 8.dp),
       ) {
         val position by viewModel.pos.collectAsState()
-        val (seekbar) = createRefs()
+        val (seekbar, playerPauseButton) = createRefs()
+        AnimatedVisibility(
+          visible = controlsShown,
+          enter = fadeIn(),
+          exit = fadeOut(),
+          modifier = Modifier.constrainAs(playerPauseButton) {
+            end.linkTo(parent.absoluteRight)
+            start.linkTo(parent.absoluteLeft)
+            top.linkTo(parent.top)
+            bottom.linkTo(parent.bottom)
+          }
+        ) {
+          val paused by viewModel.paused.collectAsState()
+          IconButton(
+            { viewModel.pauseUnpause() },
+            modifier = Modifier.size(64.dp)
+          ) {
+            Icon(
+              imageVector = if(paused) Icons.Default.Pause else Icons.Default.PlayArrow,
+              contentDescription = null,
+              tint = Color.White,
+              modifier = Modifier.size(64.dp)
+            )
+          }
+        }
         AnimatedVisibility(
           visible = controlsShown,
           enter = slideInVertically(initialOffsetY = { it }) + fadeIn(),
