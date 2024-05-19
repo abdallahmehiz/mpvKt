@@ -32,6 +32,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
@@ -41,12 +42,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.core.view.WindowCompat
-import androidx.lifecycle.viewModelScope
 import dev.vivvvek.seeker.Seeker
 import `is`.xyz.mpv.MPVLib
 import `is`.xyz.mpv.Utils
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import live.mehiz.mpvkt.databinding.PlayerLayoutBinding
 import live.mehiz.mpvkt.preferences.PlayerPreferences
 import live.mehiz.mpvkt.preferences.preference.collectAsState
@@ -82,32 +81,28 @@ class PlayerActivity : AppCompatActivity() {
     setOrientation()
     binding.controls.setContent {
       val controlsShown by viewModel.controlsShown.collectAsState()
+      val scope = rememberCoroutineScope()
       Box(
         modifier = Modifier
           .fillMaxSize()
           .pointerInput(Unit) {
-            detectTapGestures {
-              viewModel.viewModelScope.launch {
-                detectTapGestures(
-                  onDoubleTap = {
-                    viewModel.pauseUnpause()
-                  },
-                  onTap = {
-                    viewModel.toggleControls()
-                  }
-                )
+            detectTapGestures(
+              onTap = {
+                if(controlsShown) viewModel.hideControls()
+                else viewModel.showControls()
               }
-            }
+            )
           },
       )
-      LaunchedEffect(key1 = controlsShown) {
-        if (controlsShown) {
-          delay(5_000)
+      val paused by viewModel.paused.collectAsState()
+      LaunchedEffect(controlsShown, paused) {
+        if (controlsShown && !paused) {
+          delay(3_000)
           viewModel.hideControls()
         }
       }
       val animatedColor by animateColorAsState(
-        Color.Black.copy(if (controlsShown) 0.7f else 0f),
+        Color.Black.copy(if (controlsShown) 0.5f else 0f),
         animationSpec = tween(300),
         label = "color",
       )
@@ -143,18 +138,17 @@ class PlayerActivity : AppCompatActivity() {
             start.linkTo(parent.absoluteLeft)
             top.linkTo(parent.top)
             bottom.linkTo(parent.bottom)
-          }
+          },
         ) {
-          val paused by viewModel.paused.collectAsState()
           IconButton(
             { viewModel.pauseUnpause() },
-            modifier = Modifier.size(64.dp)
+            modifier = Modifier.size(64.dp),
           ) {
             Icon(
-              imageVector = if(paused) Icons.Default.Pause else Icons.Default.PlayArrow,
+              imageVector = if (paused) Icons.Default.Pause else Icons.Default.PlayArrow,
               contentDescription = null,
               tint = Color.White,
-              modifier = Modifier.size(64.dp)
+              modifier = Modifier.size(64.dp),
             )
           }
         }
