@@ -81,7 +81,6 @@ class PlayerActivity : AppCompatActivity() {
     setOrientation()
     binding.controls.setContent {
       val controlsShown by viewModel.controlsShown.collectAsState()
-      val scope = rememberCoroutineScope()
       Box(
         modifier = Modifier
           .fillMaxSize()
@@ -90,6 +89,9 @@ class PlayerActivity : AppCompatActivity() {
               onTap = {
                 if(controlsShown) viewModel.hideControls()
                 else viewModel.showControls()
+              },
+              onDoubleTap = {
+                viewModel.pauseUnpause()
               }
             )
           },
