@@ -16,6 +16,8 @@ class PlayerViewModel(
 
   private val _controlsShown = MutableStateFlow(true)
   val controlsShown = _controlsShown.asStateFlow()
+  private val _seekBarShown = MutableStateFlow(true)
+  val seekBarShown = _seekBarShown.asStateFlow()
 
   fun updatePlayBackPos(pos: Float) {
     _pos.value = pos
@@ -36,5 +38,14 @@ class PlayerViewModel(
   fun toggleControls() {
     if(controlsShown.value) hideControls()
     else showControls()
+  }
+  fun toggleSeekBar() {
+    _seekBarShown.value = !seekBarShown.value
+  }
+  fun hideSeekBar() {
+    _seekBarShown.value = false
+  }
+  fun showSeekBar() {
+    _seekBarShown.value = true
   }
 }

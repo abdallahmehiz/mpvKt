@@ -10,6 +10,7 @@ import android.view.WindowManager
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -18,25 +19,35 @@ import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.indication
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.PressInteraction
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -49,6 +60,8 @@ import kotlinx.coroutines.delay
 import live.mehiz.mpvkt.databinding.PlayerLayoutBinding
 import live.mehiz.mpvkt.preferences.PlayerPreferences
 import live.mehiz.mpvkt.preferences.preference.collectAsState
+import live.mehiz.mpvkt.presentation.LeftSideOvalShape
+import live.mehiz.mpvkt.presentation.RightSideOvalShape
 import org.koin.android.ext.android.inject
 import java.io.File
 
@@ -81,21 +94,78 @@ class PlayerActivity : AppCompatActivity() {
     setOrientation()
     binding.controls.setContent {
       val controlsShown by viewModel.controlsShown.collectAsState()
-      Box(
-        modifier = Modifier
-          .fillMaxSize()
-          .pointerInput(Unit) {
-            detectTapGestures(
-              onTap = {
-                if(controlsShown) viewModel.hideControls()
-                else viewModel.showControls()
+      val seekBarShown by viewModel.seekBarShown.collectAsState()
+      Row(modifier = Modifier.fillMaxSize()) {
+        repeat(2) { index ->
+          var seekAmount by remember { mutableIntStateOf(0) }
+          val alpha by animateFloatAsState(
+            if (seekAmount != 0) 0.5f else 0f,
+            label = "seekingAlpha",
+          )
+          LaunchedEffect(seekAmount) {
+            delay(600)
+            seekAmount = 0
+            viewModel.hideSeekBar()
+          }
+          val interactionSource = remember { MutableInteractionSource() }
+          val doubleTapToPause by playerPreferences.doubleTapToPause.collectAsState()
+          val doubleTapToSeek by playerPreferences.doubleTapToSeek.collectAsState()
+          val doubleTapToSeekDuration by playerPreferences.doubleTapToSeekDuration.collectAsState()
+          Box(
+            modifier = Modifier
+              .weight(0.5f)
+              .fillMaxHeight()
+              .graphicsLayer(alpha = alpha)
+              .clip(if (index == 0) LeftSideOvalShape else RightSideOvalShape)
+              .background(MaterialTheme.colorScheme.primary)
+              .indication(
+                interactionSource,
+                rememberRipple(color = MaterialTheme.colorScheme.secondary)
+              )
+              .pointerInput(Unit) {
+                detectTapGestures(
+                  onTap = {
+                    if (controlsShown) viewModel.hideControls()
+                    else viewModel.showControls()
+                  },
+                  onDoubleTap = {
+                    if(doubleTapToPause) {
+                      viewModel.pauseUnpause()
+                      return@detectTapGestures
+                    }
+                    if(!doubleTapToSeek) return@detectTapGestures
+                    val position = viewModel.pos.value.toInt()
+                    // Don't seek backwards if we're on 0:00 or forward if we're at the end
+                    if(((player.duration?: 0) == position && index == 1) || (position == 0 && index == 0)) {
+                      return@detectTapGestures
+                    }
+                    val seekDuration = if(index == 0) {
+                      -doubleTapToSeekDuration
+                    } else {
+                      doubleTapToSeekDuration
+                    }
+                    seekBy(seekDuration)
+                    seekAmount += seekDuration
+                    viewModel.showSeekBar()
+                  },
+                  onPress = {
+                    val press = PressInteraction.Press(it)
+                    interactionSource.emit(press)
+                    tryAwaitRelease()
+                    interactionSource.emit(PressInteraction.Release(press))
+                  }
+                )
               },
-              onDoubleTap = {
-                viewModel.pauseUnpause()
-              }
+            contentAlignment = Alignment.Center
+          ) {
+            Text(
+              (if(index == 1) "+" else "") + "${seekAmount}s",
+              color = MaterialTheme.colorScheme.onPrimary,
+              style = MaterialTheme.typography.displayMedium
             )
-          },
-      )
+          }
+        }
+      }
       val paused by viewModel.paused.collectAsState()
       LaunchedEffect(controlsShown, paused) {
         if (controlsShown && !paused) {
@@ -147,7 +217,7 @@ class PlayerActivity : AppCompatActivity() {
             modifier = Modifier.size(64.dp),
           ) {
             Icon(
-              imageVector = if (paused) Icons.Default.Pause else Icons.Default.PlayArrow,
+              imageVector = if (!paused) Icons.Default.Pause else Icons.Default.PlayArrow,
               contentDescription = null,
               tint = Color.White,
               modifier = Modifier.size(64.dp),
@@ -155,7 +225,7 @@ class PlayerActivity : AppCompatActivity() {
           }
         }
         AnimatedVisibility(
-          visible = controlsShown,
+          visible = controlsShown || seekBarShown,
           enter = slideInVertically(initialOffsetY = { it }) + fadeIn(),
           exit = slideOutVertically(targetOffsetY = { it }) + fadeOut(),
           modifier = Modifier.constrainAs(seekbar) {
@@ -205,6 +275,16 @@ class PlayerActivity : AppCompatActivity() {
   override fun onDestroy() {
     MPVLib.destroy()
     super.onDestroy()
+  }
+
+  fun seekBy(offset: Int) {
+    player.timePos = player.timePos?.plus(offset)
+  }
+
+  fun seekTo(position: Int) {
+    if(position < 0) return
+    if(position > (player.duration?: 0)) return
+    player.timePos = position
   }
 
   private fun parsePathFromIntent(intent: Intent): String? {

@@ -27,6 +27,7 @@ import live.mehiz.mpvkt.ui.player.PlayerOrientation
 import me.zhanghai.compose.preference.ListPreference
 import me.zhanghai.compose.preference.ProvidePreferenceLocals
 import me.zhanghai.compose.preference.listPreference
+import me.zhanghai.compose.preference.switchPreference
 import org.koin.compose.koinInject
 
 object PlayerPreferencesScreen : Screen {
@@ -36,6 +37,8 @@ object PlayerPreferencesScreen : Screen {
     val navigator = LocalNavigator.currentOrThrow
     val context = LocalContext.current
     val preferences = koinInject<PlayerPreferences>()
+    val doubleTapToPause by preferences.doubleTapToPause.collectAsState()
+    val doubleTapToSeek by preferences.doubleTapToSeek.collectAsState()
     Scaffold(
       topBar = {
         TopAppBar(
@@ -65,6 +68,26 @@ object PlayerPreferencesScreen : Screen {
               summary = { Text(text = stringResource(id = orientation.titleRes)) },
             )
           }
+          switchPreference(
+            key = preferences.doubleTapToPause.key(),
+            defaultValue = preferences.doubleTapToPause.defaultValue(),
+            title = { Text(text = stringResource(id = R.string.pref_player_double_tap_to_pause)) },
+          )
+          switchPreference(
+            key = preferences.doubleTapToSeek.key(),
+            defaultValue = preferences.doubleTapToSeek.defaultValue(),
+            title = { Text(text = stringResource(id = R.string.pref_player_double_tap_to_seek)) },
+            enabled = { !doubleTapToPause },
+          )
+          listPreference(
+            key = preferences.doubleTapToSeekDuration.key(),
+            defaultValue = 10,
+            values = listOf(5, 10, 15, 20, 25, 30),
+            valueToText = { AnnotatedString("${it}s") },
+            title = { Text(text = stringResource(id = R.string.pref_player_double_tap_seek_duration)) },
+            summary = { Text(text = "${it}s") },
+            enabled = { !doubleTapToPause && doubleTapToSeek },
+          )
         }
       }
     }
