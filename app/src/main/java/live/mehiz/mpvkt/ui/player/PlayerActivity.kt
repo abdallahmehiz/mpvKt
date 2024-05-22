@@ -112,49 +112,49 @@ class PlayerActivity : AppCompatActivity() {
             val doubleTapToSeekDuration by playerPreferences.doubleTapToSeekDuration.collectAsState()
             Box(
               modifier = Modifier
-                  .weight(0.5f)
-                  .fillMaxHeight()
-                  .graphicsLayer(alpha = alpha)
-                  .pointerInput(Unit) {
-                      detectTapGestures(
-                          onTap = {
-                              if (controlsShown) viewModel.hideControls()
-                              else viewModel.showControls()
-                          },
-                          onDoubleTap = {
-                              if (doubleTapToPause) {
-                                  viewModel.pauseUnpause()
-                                  return@detectTapGestures
-                              }
-                              if (!doubleTapToSeek) return@detectTapGestures
-                              val position = viewModel.pos.value.toInt()
-                              // Don't seek backwards if we're on 0:00 or forward if we're at the end
-                              if (((player.duration ?: 0) == position && index == 1) || (position == 0 && index == 0)) {
-                                  return@detectTapGestures
-                              }
-                              val seekDuration = if (index == 0) {
-                                  -doubleTapToSeekDuration
-                              } else {
-                                  doubleTapToSeekDuration
-                              }
-                              seekBy(seekDuration)
-                              seekAmount += seekDuration
-                              viewModel.showSeekBar()
-                          },
-                          onPress = {
-                              val press = PressInteraction.Press(it)
-                              interactionSource.emit(press)
-                              tryAwaitRelease()
-                              interactionSource.emit(PressInteraction.Release(press))
-                          },
-                      )
-                  }
-                  .clip(if (index == 0) LeftSideOvalShape else RightSideOvalShape)
-                  .background(MaterialTheme.colorScheme.primary)
-                  .indication(
-                      interactionSource,
-                      rememberRipple(color = MaterialTheme.colorScheme.secondary),
-                  ),
+                .weight(0.5f)
+                .fillMaxHeight()
+                .graphicsLayer(alpha = alpha)
+                .pointerInput(Unit) {
+                  detectTapGestures(
+                    onTap = {
+                      if (controlsShown) viewModel.hideControls()
+                      else viewModel.showControls()
+                    },
+                    onDoubleTap = {
+                      if (doubleTapToPause) {
+                        viewModel.pauseUnpause()
+                        return@detectTapGestures
+                      }
+                      if (!doubleTapToSeek) return@detectTapGestures
+                      val position = viewModel.pos.value.toInt()
+                      // Don't seek backwards if we're on 0:00 or forward if we're at the end
+                      if (((player.duration ?: 0) == position && index == 1) || (position == 0 && index == 0)) {
+                        return@detectTapGestures
+                      }
+                      val seekDuration = if (index == 0) {
+                        -doubleTapToSeekDuration
+                      } else {
+                        doubleTapToSeekDuration
+                      }
+                      seekBy(seekDuration)
+                      seekAmount += seekDuration
+                      viewModel.showSeekBar()
+                    },
+                    onPress = {
+                      val press = PressInteraction.Press(it)
+                      interactionSource.emit(press)
+                      tryAwaitRelease()
+                      interactionSource.emit(PressInteraction.Release(press))
+                    },
+                  )
+                }
+                .clip(if (index == 0) LeftSideOvalShape else RightSideOvalShape)
+                .background(MaterialTheme.colorScheme.primary)
+                .indication(
+                  interactionSource,
+                  rememberRipple(color = MaterialTheme.colorScheme.secondary),
+                ),
               contentAlignment = Alignment.Center,
             ) {
               Text(
@@ -174,14 +174,14 @@ class PlayerActivity : AppCompatActivity() {
           }
         }
         val transparentOverlay by animateColorAsState(
-            Color.Black.copy(if (controlsShown) 0.2f else 0f),
-            label = "",
+          Color.Black.copy(if (controlsShown) 0.2f else 0f),
+          label = "",
         )
         ConstraintLayout(
           modifier = Modifier
-              .fillMaxSize()
-              .background(transparentOverlay)
-              .padding(horizontal = 8.dp),
+            .fillMaxSize()
+            .background(transparentOverlay)
+            .padding(horizontal = 8.dp),
         ) {
           val position by viewModel.pos.collectAsState()
           val (seekbar, playerPauseButton) = createRefs()
@@ -200,12 +200,12 @@ class PlayerActivity : AppCompatActivity() {
             val interaction = remember { MutableInteractionSource() }
             Icon(
               modifier = Modifier
-                  .size(96.dp)
-                  .clip(CircleShape)
-                  .clickable(
-                      interaction,
-                      rememberRipple(color = MaterialTheme.colorScheme.onBackground),
-                  ) { viewModel.pauseUnpause() },
+                .size(96.dp)
+                .clip(CircleShape)
+                .clickable(
+                  interaction,
+                  rememberRipple(color = MaterialTheme.colorScheme.onBackground),
+                ) { viewModel.pauseUnpause() },
               imageVector = icon,
               contentDescription = null,
               tint = Color.White,
@@ -248,6 +248,12 @@ class PlayerActivity : AppCompatActivity() {
   override fun onDestroy() {
     MPVLib.destroy()
     super.onDestroy()
+  }
+
+  override fun onPause() {
+    super.onPause()
+    if(viewModel.paused.value) return
+    viewModel.pauseUnpause()
   }
 
   fun seekBy(offset: Int) {
