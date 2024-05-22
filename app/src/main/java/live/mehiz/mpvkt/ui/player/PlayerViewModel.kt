@@ -10,6 +10,9 @@ class PlayerViewModel(
 ): ViewModel() {
   private val _pos = MutableStateFlow(0f)
   val pos = _pos.asStateFlow()
+  var duration: Float = 0f
+  private val _readAhead = MutableStateFlow(0f)
+  val readAhead = _readAhead.asStateFlow()
 
   private val _paused = MutableStateFlow(false)
   val paused = _paused.asStateFlow()
@@ -21,6 +24,10 @@ class PlayerViewModel(
 
   fun updatePlayBackPos(pos: Float) {
     _pos.value = pos
+  }
+
+  fun updateReadAhead(value: Long) {
+    _readAhead.value = pos.value + value.toFloat()
   }
 
   fun pauseUnpause() {
