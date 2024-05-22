@@ -27,6 +27,7 @@ import live.mehiz.mpvkt.ui.player.PlayerOrientation
 import me.zhanghai.compose.preference.ListPreference
 import me.zhanghai.compose.preference.ProvidePreferenceLocals
 import me.zhanghai.compose.preference.listPreference
+import me.zhanghai.compose.preference.preferenceCategory
 import me.zhanghai.compose.preference.switchPreference
 import org.koin.compose.koinInject
 
@@ -87,6 +88,25 @@ object PlayerPreferencesScreen : Screen {
             title = { Text(text = stringResource(id = R.string.pref_player_double_tap_seek_duration)) },
             summary = { Text(text = "${it}s") },
             enabled = { !doubleTapToPause && doubleTapToSeek },
+          )
+          preferenceCategory(
+            "gestures",
+            title = { Text(stringResource(R.string.pref_player_gestures)) },
+          )
+          switchPreference(
+            preferences.horizontalSeekGesture.key(),
+            defaultValue = preferences.horizontalSeekGesture.get(),
+            title = { Text(stringResource(R.string.pref_player_gestures_seek)) },
+          )
+          switchPreference(
+            preferences.brightnessGesture.key(),
+            defaultValue = preferences.brightnessGesture.get(),
+            title = { Text(stringResource(R.string.pref_player_gestures_brightness)) },
+          )
+          switchPreference(
+            preferences.volumeGesture.key(),
+            defaultValue = preferences.volumeGesture.get(),
+            title = { Text(stringResource(R.string.pref_player_gestures_volume)) },
           )
         }
       }

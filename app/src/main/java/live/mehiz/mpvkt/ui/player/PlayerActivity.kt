@@ -1,7 +1,9 @@
 package live.mehiz.mpvkt.ui.player
 
+import android.content.Context
 import android.content.Intent
 import android.content.pm.ActivityInfo
+import android.media.AudioManager
 import android.net.Uri
 import android.os.Bundle
 import android.os.ParcelFileDescriptor
@@ -17,7 +19,9 @@ import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.gestures.detectVerticalDragGestures
 import androidx.compose.foundation.indication
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.PressInteraction
@@ -46,12 +50,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.core.view.WindowCompat
 import `is`.xyz.mpv.MPVLib
+import `is`.xyz.mpv.Utils
 import kotlinx.coroutines.delay
 import live.mehiz.mpvkt.databinding.PlayerLayoutBinding
 import live.mehiz.mpvkt.preferences.PlayerPreferences
@@ -66,10 +73,11 @@ import java.io.File
 class PlayerActivity : AppCompatActivity() {
 
   private val viewModel: PlayerViewModel by lazy { PlayerViewModel(this) }
-  val binding by lazy { PlayerLayoutBinding.inflate(this.layoutInflater) }
+  private val binding by lazy { PlayerLayoutBinding.inflate(this.layoutInflater) }
   val player by lazy { binding.player }
   val windowInsetsController by lazy { WindowCompat.getInsetsController(window, window.decorView) }
   private val playerPreferences by inject<PlayerPreferences>()
+  private val audioManager by lazy { getSystemService(Context.AUDIO_SERVICE) as AudioManager }
 
   override fun onCreate(savedInstanceState: Bundle?) {
     window.setFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS, WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS)
@@ -89,11 +97,19 @@ class PlayerActivity : AppCompatActivity() {
       uri
     }
     player.playFile(videoUri!!)
+    window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
     setOrientation()
     binding.controls.setContent {
       MpvKtTheme {
         val controlsShown by viewModel.controlsShown.collectAsState()
         val seekBarShown by viewModel.seekBarShown.collectAsState()
+        var gestureSeekAmount by remember { mutableIntStateOf(0) }
+        LaunchedEffect(gestureSeekAmount) {
+          if (gestureSeekAmount != 0) return@LaunchedEffect
+          delay(2000)
+          viewModel.hideSeekBar()
+        }
+        val position by viewModel.pos.collectAsState()
         Row(modifier = Modifier.fillMaxSize()) {
           repeat(2) { index ->
             var seekAmount by remember { mutableIntStateOf(0) }
@@ -110,6 +126,8 @@ class PlayerActivity : AppCompatActivity() {
             val doubleTapToPause by playerPreferences.doubleTapToPause.collectAsState()
             val doubleTapToSeek by playerPreferences.doubleTapToSeek.collectAsState()
             val doubleTapToSeekDuration by playerPreferences.doubleTapToSeekDuration.collectAsState()
+            val brightnessGesture = playerPreferences.brightnessGesture.get()
+            val volumeGesture = playerPreferences.volumeGesture.get()
             Box(
               modifier = Modifier
                 .weight(0.5f)
@@ -149,6 +167,51 @@ class PlayerActivity : AppCompatActivity() {
                     },
                   )
                 }
+                .pointerInput(Unit) {
+                  detectHorizontalDragGestures(
+                    onDragStart = {
+                      viewModel.pause()
+                    },
+                    onDragEnd = {
+                      gestureSeekAmount = 0
+                      viewModel.unpause()
+                    },
+                  ) { change, dragAmount ->
+                    if ((position >= viewModel.duration && dragAmount > 0) || (position <= 0f && dragAmount < 0))
+                      return@detectHorizontalDragGestures
+                    viewModel.showSeekBar()
+                    val seekBy = ((dragAmount / 8).coerceIn(0f - position, viewModel.duration - position)).toInt()
+                    gestureSeekAmount += seekBy
+                    seekBy(seekBy)
+                  }
+                }
+                .pointerInput(Unit) {
+                  if (!brightnessGesture && !volumeGesture) return@pointerInput
+                  var dragAmount = 0f
+                  detectVerticalDragGestures(
+                    onDragEnd = {
+                      dragAmount = 0f
+                    },
+                  ) { change, amount ->
+                    dragAmount -= amount / 10
+                    when {
+                      volumeGesture && brightnessGesture -> {
+                        if (index == 0) changeBrightnessWithDrag(dragAmount)
+                        else changeVolumeWithDrag(dragAmount)
+                      }
+
+                      brightnessGesture -> {
+                        changeBrightnessWithDrag(dragAmount)
+                      }
+
+                      volumeGesture -> {
+                        changeVolumeWithDrag(dragAmount)
+                      }
+
+                      else -> {}
+                    }
+                  }
+                }
                 .clip(if (index == 0) LeftSideOvalShape else RightSideOvalShape)
                 .background(MaterialTheme.colorScheme.primary)
                 .indication(
@@ -183,8 +246,26 @@ class PlayerActivity : AppCompatActivity() {
             .background(transparentOverlay)
             .padding(horizontal = 8.dp),
         ) {
-          val position by viewModel.pos.collectAsState()
-          val (seekbar, playerPauseButton) = createRefs()
+          val (seekbar, playerPauseButton, seekValue) = createRefs()
+          AnimatedVisibility(
+            visible = gestureSeekAmount != 0,
+            enter = fadeIn(),
+            exit = fadeOut(),
+            modifier = Modifier.constrainAs(seekValue) {
+              top.linkTo(if (controlsShown) playerPauseButton.bottom else parent.top)
+              start.linkTo(parent.absoluteLeft)
+              end.linkTo(parent.absoluteRight)
+              if (!controlsShown) bottom.linkTo(seekbar.top)
+            },
+          ) {
+            Text(
+              (if (gestureSeekAmount > 0) "+" else "") + gestureSeekAmount + "\n" +
+                Utils.prettyTime(position.toInt()),
+              style = MaterialTheme.typography.displayMedium.copy(shadow = Shadow(blurRadius = 5f)),
+              color = MaterialTheme.colorScheme.onBackground,
+              textAlign = TextAlign.Center,
+            )
+          }
           AnimatedVisibility(
             visible = controlsShown,
             enter = fadeIn(),
@@ -252,7 +333,7 @@ class PlayerActivity : AppCompatActivity() {
 
   override fun onPause() {
     super.onPause()
-    if(viewModel.paused.value) return
+    if (viewModel.paused.value) return
     viewModel.pauseUnpause()
   }
 
@@ -264,6 +345,20 @@ class PlayerActivity : AppCompatActivity() {
     if (position < 0) return
     if (position > (player.duration ?: 0)) return
     player.timePos = position
+  }
+
+  fun changeBrightnessWithDrag(dragAmount: Float) {
+    window.attributes = window.attributes.apply {
+      screenBrightness = dragAmount.coerceIn(0f, 1f)
+    }
+  }
+
+  fun changeVolumeWithDrag(dragAmount: Float) {
+    audioManager.setStreamVolume(
+      AudioManager.STREAM_MUSIC,
+      dragAmount.toInt(),
+      AudioManager.FLAG_SHOW_UI,
+    )
   }
 
   private fun parsePathFromIntent(intent: Intent): String? {

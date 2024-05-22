@@ -31,8 +31,16 @@ class PlayerViewModel(
   }
 
   fun pauseUnpause() {
-    _paused.value = !(activity.player.paused?: false)
-    activity.player.paused = _paused.value
+    if(paused.value) unpause()
+    else pause()
+  }
+  fun pause() {
+    activity.player.paused = true
+    _paused.value = true
+  }
+  fun unpause() {
+    activity.player.paused = false
+    _paused.value = false
   }
 
   fun showControls() {
