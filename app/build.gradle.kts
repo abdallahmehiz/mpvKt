@@ -1,6 +1,7 @@
 plugins {
   alias(libs.plugins.android.application)
   alias(libs.plugins.jetbrains.kotlin.android)
+  alias(libs.plugins.kotlin.compose.compiler)
 }
 
 android {
@@ -48,8 +49,8 @@ android {
     compose = true
     viewBinding = true
   }
-  composeOptions {
-    kotlinCompilerExtensionVersion = "1.5.1"
+  composeCompiler {
+    includeSourceInformation = true
   }
   packaging {
     resources {

@@ -1,6 +1,6 @@
 [versions]
-agp = "8.6.0-alpha02"
-kotlin = "1.9.0"
+agp = "8.4.1"
+kotlin = "2.0.0"
 coreKtx = "1.13.1"
 junit = "4.13.2"
 junitVersion = "1.1.5"
@@ -54,4 +54,4 @@ voyager = ["voyager-navigator", "voyager-transitions"]
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
 jetbrains-kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
-
+kotlin-compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
