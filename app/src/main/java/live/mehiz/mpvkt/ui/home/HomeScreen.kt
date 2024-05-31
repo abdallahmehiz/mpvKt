@@ -36,7 +36,7 @@ import live.mehiz.mpvkt.R
 import live.mehiz.mpvkt.ui.player.PlayerActivity
 import live.mehiz.mpvkt.ui.preferences.PreferencesScreen
 
-object HomeScreen: Screen {
+object HomeScreen : Screen {
   @OptIn(ExperimentalMaterial3Api::class)
   @Composable
   override fun Content() {
@@ -55,7 +55,9 @@ object HomeScreen: Screen {
       },
     ) { padding ->
       Column(
-        modifier = Modifier.fillMaxSize().padding(padding),
+        modifier = Modifier
+          .fillMaxSize()
+          .padding(padding),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
       ) {
@@ -71,9 +73,7 @@ object HomeScreen: Screen {
           context.playFile(it.toString())
         }
         OutlinedButton(
-          onClick = {
-            documentPicker.launch(arrayOf("*/*"))
-          },
+          onClick = { documentPicker.launch(arrayOf("*/*")) },
         ) {
           Text(text = "Pick a file")
         }
@@ -82,14 +82,8 @@ object HomeScreen: Screen {
   }
 
   private fun Context.playFile(filepath: String) {
-    val i: Intent
-    if (filepath.startsWith("content://")) {
-      i = Intent(Intent.ACTION_VIEW, Uri.parse(filepath))
-    } else {
-      i = Intent()
-      i.putExtra("uri", filepath)
-    }
+    val i = Intent(Intent.ACTION_VIEW, Uri.parse(filepath))
     i.setClass(this, PlayerActivity::class.java)
-    this.startActivity(i)
+    startActivity(i)
   }
 }

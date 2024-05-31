@@ -82,7 +82,6 @@ class PlayerActivity : AppCompatActivity() {
   override fun onCreate(savedInstanceState: Bundle?) {
     window.setFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS, WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS)
     super.onCreate(savedInstanceState)
-    if (intent.extras?.getString("uri")?.isNotBlank() == true) onDestroy()
     setContentView(binding.root)
     player.initialize(
       applicationContext.filesDir.path,
