@@ -150,6 +150,7 @@ class PlayerActivity : AppCompatActivity() {
         setOrientation()
         viewModel.changeVideoAspect(playerPreferences.videoAspect.get())
         viewModel.duration = player.duration!!.toFloat()
+        viewModel.loadTracks()
       }
 
       MPVLib.mpvEventId.MPV_EVENT_END_FILE -> {

@@ -6,13 +6,24 @@ import androidx.lifecycle.ViewModel
 import `is`.xyz.mpv.MPVLib
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import live.mehiz.mpvkt.preferences.PlayerPreferences
 import org.koin.java.KoinJavaComponent.inject
 
 class PlayerViewModel(
-  private val activity: PlayerActivity,
+  val activity: PlayerActivity,
 ) : ViewModel() {
   private val playerPreferences: PlayerPreferences by inject(PlayerPreferences::class.java)
+
+  private val _subtitleTracks = MutableStateFlow<List<Track>>(emptyList())
+  val subtitleTracks = _subtitleTracks.asStateFlow()
+  private val _selectedSubtitles = MutableStateFlow((-1))
+  val selectedSubtitles = _selectedSubtitles.asStateFlow()
+
+  private val _audioTracks = MutableStateFlow<List<Track>>(emptyList())
+  val audioTracks = _audioTracks.asStateFlow()
+  private val _selectedAudio = MutableStateFlow(-1)
+  val selectedAudio = _selectedAudio.asStateFlow()
 
   private val _pos = MutableStateFlow(0f)
   val pos = _pos.asStateFlow()
@@ -31,6 +42,54 @@ class PlayerViewModel(
   val seekBarShown = _seekBarShown.asStateFlow()
   private val _areControlsLocked = MutableStateFlow(false)
   val areControlsLocked = _areControlsLocked.asStateFlow()
+
+  val getTrackLanguage: (Int) -> String = {
+    if (it != -1) MPVLib.getPropertyString("track-list/$it/lang") ?: ""
+    else "Off"
+  }
+  val getTrackTitle: (Int) -> String = {
+    if (it != -1) MPVLib.getPropertyString("track-list/$it/title") ?: ""
+    else "Off"
+  }
+  val getTrackMPVId: (Int) -> Int = {
+    if (it != -1) MPVLib.getPropertyInt("track-list/$it/id")
+    else -1
+  }
+  val getTrackType: (Int) -> String? = {
+    MPVLib.getPropertyString("track-list/$it/type")
+  }
+
+  fun loadTracks() {
+    val tracksCount = MPVLib.getPropertyInt("track-list/count")!!
+    val possibleTrackTypes = listOf("video", "audio", "sub")
+    val vidTracks = mutableListOf<Track>()
+    val subTracks = mutableListOf<Track>()
+    val audioTracks = mutableListOf<Track>()
+    for (i in 0..<tracksCount) {
+      val type = getTrackType(i) ?: continue
+      if (!possibleTrackTypes.contains(type)) continue
+      when (type) {
+        "audio" -> audioTracks.add(Track(getTrackMPVId(i), getTrackTitle(i), getTrackLanguage(i)))
+        "video" -> vidTracks.add(Track(getTrackMPVId(i), getTrackTitle(i), getTrackLanguage(i)))
+        "sub" -> subTracks.add(Track(getTrackMPVId(i), getTrackTitle(i), getTrackLanguage(i)))
+        else -> throw IllegalStateException()
+      }
+    }
+    _subtitleTracks.update { subTracks }
+    _selectedSubtitles.update { activity.player.sid }
+    _audioTracks.update { audioTracks }
+    _selectedAudio.update { activity.player.aid }
+  }
+
+  fun selectSub(id: Int) {
+    activity.player.sid = id
+    _selectedSubtitles.update { id }
+  }
+
+  fun selectAudio(id: Int) {
+    activity.player.aid = id
+    _selectedAudio.update { id }
+  }
 
   fun updatePlayBackPos(pos: Float) {
     _pos.value = pos
@@ -141,3 +200,9 @@ class PlayerViewModel(
     playerPreferences.videoAspect.set(aspect)
   }
 }
+
+data class Track(
+  val id: Int,
+  val name: String,
+  val language: String?,
+)

@@ -1,5 +1,6 @@
 package live.mehiz.mpvkt.ui.player.controls
 
+import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateFloatAsState
@@ -26,10 +27,12 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AspectRatio
+import androidx.compose.material.icons.filled.Audiotrack
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.LockOpen
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.Subtitles
 import androidx.compose.material.ripple.LocalRippleTheme
 import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.material3.Icon
@@ -51,7 +54,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.input.pointer.PointerInputFilter
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -66,6 +68,9 @@ import live.mehiz.mpvkt.ui.player.PlayerViewModel
 import live.mehiz.mpvkt.ui.player.VideoAspect
 import live.mehiz.mpvkt.ui.player.controls.components.ControlsButton
 import live.mehiz.mpvkt.ui.player.controls.components.SeekbarWithTimers
+import live.mehiz.mpvkt.ui.player.controls.components.sheets.AudioTracksSheet
+import live.mehiz.mpvkt.ui.player.controls.components.sheets.Sheets
+import live.mehiz.mpvkt.ui.player.controls.components.sheets.SubtitlesSheet
 import live.mehiz.mpvkt.ui.theme.PlayerRippleTheme
 import org.koin.compose.koinInject
 
@@ -86,6 +91,7 @@ class PlayerControls(
       delay(2000)
       viewModel.hideSeekBar()
     }
+    var sheetShown by remember { mutableStateOf(Sheets.None) }
     val position by viewModel.pos.collectAsState()
     Row(modifier = Modifier.fillMaxSize()) {
       repeat(2) { index ->
@@ -234,7 +240,7 @@ class PlayerControls(
     )
     CompositionLocalProvider(
       LocalRippleTheme provides PlayerRippleTheme,
-      LocalPlayerButtonsClickEvent provides { resetControls = !resetControls }
+      LocalPlayerButtonsClickEvent provides { resetControls = !resetControls },
     ) {
       ConstraintLayout(
         modifier = Modifier
@@ -246,9 +252,10 @@ class PlayerControls(
           seekbar,
           playerPauseButton,
           seekValue,
+          topRightControls,
           bottomLeftControls,
           bottomRightControls,
-          unlockControlsButton
+          unlockControlsButton,
         ) = createRefs()
         AnimatedVisibility(
           controlsShown && areControlsLocked,
@@ -257,7 +264,7 @@ class PlayerControls(
           modifier = Modifier.constrainAs(unlockControlsButton) {
             top.linkTo(parent.top, 16.dp)
             start.linkTo(parent.start, 16.dp)
-          }
+          },
         ) {
           ControlsButton(
             Icons.Filled.LockOpen,
@@ -269,8 +276,7 @@ class PlayerControls(
           visible = gestureSeekAmount != 0 && !areControlsLocked,
           enter = fadeIn(),
           exit = fadeOut(),
-          modifier = Modifier
-            .constrainAs(seekValue) {
+          modifier = Modifier.constrainAs(seekValue) {
               top.linkTo(if (controlsShown) playerPauseButton.bottom else parent.top)
               start.linkTo(parent.absoluteLeft)
               end.linkTo(parent.absoluteRight)
@@ -288,8 +294,7 @@ class PlayerControls(
           visible = controlsShown && !areControlsLocked,
           enter = fadeIn(),
           exit = fadeOut(),
-          modifier = Modifier
-            .constrainAs(playerPauseButton) {
+          modifier = Modifier.constrainAs(playerPauseButton) {
               end.linkTo(parent.absoluteRight)
               start.linkTo(parent.absoluteLeft)
               top.linkTo(parent.top)
@@ -315,8 +320,7 @@ class PlayerControls(
           visible = (controlsShown || seekBarShown) && !areControlsLocked,
           enter = slideInVertically(initialOffsetY = { it }) + fadeIn(),
           exit = slideOutVertically(targetOffsetY = { it }) + fadeOut(),
-          modifier = Modifier
-            .constrainAs(seekbar) {
+          modifier = Modifier.constrainAs(seekbar) {
               bottom.linkTo(parent.bottom, 16.dp)
             },
         ) {
@@ -345,8 +349,29 @@ class PlayerControls(
           controlsShown && !areControlsLocked,
           enter = slideInHorizontally(initialOffsetX = { it }) + fadeIn(),
           exit = slideOutHorizontally(targetOffsetX = { it }) + fadeOut(),
-          modifier = Modifier
-            .constrainAs(bottomRightControls) {
+          modifier = Modifier.constrainAs(topRightControls) {
+            top.linkTo(parent.top, 16.dp)
+            end.linkTo(parent.end)
+          },
+        ) {
+          Row {
+            ControlsButton(
+              Icons.Default.Subtitles,
+            ) {
+              sheetShown = Sheets.SubtitlesSheet
+            }
+            ControlsButton(
+              Icons.Default.Audiotrack,
+            ) {
+              sheetShown = Sheets.AudioSheet
+            }
+          }
+        }
+        AnimatedVisibility(
+          controlsShown && !areControlsLocked,
+          enter = slideInHorizontally(initialOffsetX = { it }) + fadeIn(),
+          exit = slideOutHorizontally(targetOffsetX = { it }) + fadeOut(),
+          modifier = Modifier.constrainAs(bottomRightControls) {
               bottom.linkTo(seekbar.top)
               end.linkTo(seekbar.end)
             },
@@ -371,13 +396,37 @@ class PlayerControls(
           modifier = Modifier.constrainAs(bottomLeftControls) {
             bottom.linkTo(seekbar.top)
             start.linkTo(seekbar.start)
-          }
+          },
         ) {
           ControlsButton(
-            Icons.Default.Lock
+            Icons.Default.Lock,
           ) {
             viewModel.lockControls()
           }
+        }
+      }
+      val subtitles by viewModel.subtitleTracks.collectAsState()
+      val selectedSubs by viewModel.selectedSubtitles.collectAsState()
+      val audioTracks by viewModel.audioTracks.collectAsState()
+      val selectedAudio by viewModel.selectedAudio.collectAsState()
+      when (sheetShown) {
+        Sheets.None -> {}
+        Sheets.SubtitlesSheet -> {
+          viewModel.pause()
+          SubtitlesSheet(
+            subtitles,
+            selectedSubs,
+            { viewModel.selectSub(it) },
+          ) { sheetShown = Sheets.None }
+        }
+        Sheets.AudioSheet -> {
+          Log.d("", audioTracks.toString())
+          viewModel.pause()
+          AudioTracksSheet(
+            audioTracks,
+            selectedAudio,
+            { viewModel.selectAudio(it) }
+          ) { sheetShown = Sheets.None }
         }
       }
     }
