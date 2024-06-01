@@ -49,17 +49,11 @@ class PlayerActivity : AppCompatActivity() {
     setOrientation()
     val controls = PlayerControls(viewModel)
 
-    setupPlayer()
-
     binding.controls.setContent {
       MpvKtTheme {
         controls.Content()
       }
     }
-  }
-
-  private fun setupPlayer() {
-    viewModel.changeVideoAspect(playerPreferences.videoAspect.get())
   }
 
   override fun onDestroy() {
@@ -154,6 +148,7 @@ class PlayerActivity : AppCompatActivity() {
     when (eventId) {
       MPVLib.mpvEventId.MPV_EVENT_FILE_LOADED -> {
         setOrientation()
+        viewModel.changeVideoAspect(playerPreferences.videoAspect.get())
         viewModel.duration = player.duration!!.toFloat()
       }
 
