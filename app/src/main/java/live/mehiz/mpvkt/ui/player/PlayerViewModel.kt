@@ -1,5 +1,6 @@
 package live.mehiz.mpvkt.ui.player
 
+import android.media.AudioManager
 import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.ViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -10,7 +11,9 @@ class PlayerViewModel(
 ): ViewModel() {
   private val _pos = MutableStateFlow(0f)
   val pos = _pos.asStateFlow()
+
   var duration: Float = 0f
+
   private val _readAhead = MutableStateFlow(0f)
   val readAhead = _readAhead.asStateFlow()
 
@@ -57,10 +60,37 @@ class PlayerViewModel(
   fun toggleSeekBar() {
     _seekBarShown.value = !seekBarShown.value
   }
+
   fun hideSeekBar() {
     _seekBarShown.value = false
   }
   fun showSeekBar() {
     _seekBarShown.value = true
+  }
+
+  fun seekBy(offset: Int) {
+    activity.player.timePos = activity.player.timePos?.plus(offset)
+  }
+
+  fun seekTo(position: Int) {
+    if (position < 0) return
+    if (position > (activity.player.duration ?: 0)) return
+    activity.player.timePos = position
+  }
+
+  fun changeBrightnessWithDrag(
+    dragAmount: Float,
+  ) {
+    activity.window.attributes = activity.window.attributes.apply {
+      screenBrightness = dragAmount.coerceIn(0f, 1f)
+    }
+  }
+
+  fun changeVolumeWithDrag(dragAmount: Float) {
+    activity.audioManager.setStreamVolume(
+      AudioManager.STREAM_MUSIC,
+      dragAmount.toInt(),
+      AudioManager.FLAG_SHOW_UI,
+    )
   }
 }
