@@ -1,4 +1,4 @@
-package live.mehiz.mpvkt.ui.player.controls
+package live.mehiz.mpvkt.ui.player.controls.components
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -38,16 +38,14 @@ fun SeekbarWithTimers(
   durationTimerOnCLick: () -> Unit,
 ) {
   Row(
-    modifier = Modifier
-      .height(48.dp)
-      .padding(horizontal = 8.dp),
+    modifier = Modifier.height(48.dp),
     verticalAlignment = Alignment.CenterVertically,
-    horizontalArrangement = Arrangement.spacedBy(4.dp)
+    horizontalArrangement = Arrangement.spacedBy(4.dp),
   ) {
     VideoTimer(
       value = position,
       timersInverted.first,
-      modifier = Modifier.weight(0.1f),
+      modifier = Modifier.weight(0.05f),
       positionTimerOnClick,
     )
     Seeker(
@@ -57,18 +55,18 @@ fun SeekbarWithTimers(
       onValueChangeFinished = onValueChangeFinished,
       readAheadValue = readAheadValue,
       segments = chapters?.map { it.toSegment() } ?: emptyList(),
-      modifier = Modifier.weight(0.8f),
+      modifier = Modifier.weight(0.9f),
       colors = SeekerDefaults.seekerColors(
         progressColor = MaterialTheme.colorScheme.primary,
         thumbColor = MaterialTheme.colorScheme.primary,
         trackColor = MaterialTheme.colorScheme.background,
-        readAheadColor = MaterialTheme.colorScheme.secondary
-      )
+        readAheadColor = MaterialTheme.colorScheme.secondary,
+      ),
     )
     VideoTimer(
       value = if (timersInverted.second) position - duration else duration,
       isInverted = timersInverted.second,
-      modifier = Modifier.weight(0.1f),
+      modifier = Modifier.weight(0.05f),
       durationTimerOnCLick,
     )
   }
@@ -87,8 +85,9 @@ fun VideoTimer(
       .fillMaxHeight()
       .clickable(
         interactionSource = interactionSource,
-        indication = rememberRipple(color = MaterialTheme.colorScheme.primaryContainer),
-        onClick = onClick)
+        indication = rememberRipple(),
+        onClick = onClick,
+      )
       .wrapContentHeight(Alignment.CenterVertically),
     text = Utils.prettyTime(value.toInt(), isInverted),
     color = Color.White,
@@ -102,15 +101,15 @@ fun Chapter.toSegment(): Segment {
 
 @Preview
 @Composable
-fun previewSeekBar() {
+private fun PreviewSeekBar() {
   SeekbarWithTimers(
-      5f,
-      20f,
-      4f,
-      {},
-      {},
-      null,
-      Pair(true, true),
-      {},
+    5f,
+    20f,
+    4f,
+    {},
+    {},
+    null,
+    Pair(true, true),
+    {},
   ) { }
 }

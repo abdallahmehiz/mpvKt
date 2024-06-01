@@ -3,6 +3,7 @@ package live.mehiz.mpvkt.preferences
 import live.mehiz.mpvkt.preferences.preference.PreferenceStore
 import live.mehiz.mpvkt.preferences.preference.getEnum
 import live.mehiz.mpvkt.ui.player.PlayerOrientation
+import live.mehiz.mpvkt.ui.player.VideoAspect
 
 class PlayerPreferences(
   preferenceStore: PreferenceStore
@@ -17,4 +18,6 @@ class PlayerPreferences(
   val horizontalSeekGesture = preferenceStore.getBoolean("horizontal_seek_gesture", true)
   val brightnessGesture = preferenceStore.getBoolean("gestures_brightness", true)
   val volumeGesture = preferenceStore.getBoolean("volume_brightness", true)
+
+  val videoAspect = preferenceStore.getEnum("video_aspect", VideoAspect.Fit)
 }

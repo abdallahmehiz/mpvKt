@@ -5,7 +5,9 @@ import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -23,13 +25,16 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AspectRatio
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.ripple.LocalRippleTheme
 import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -37,12 +42,14 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.pointer.PointerInputFilter
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -54,7 +61,13 @@ import live.mehiz.mpvkt.preferences.preference.collectAsState
 import live.mehiz.mpvkt.presentation.LeftSideOvalShape
 import live.mehiz.mpvkt.presentation.RightSideOvalShape
 import live.mehiz.mpvkt.ui.player.PlayerViewModel
+import live.mehiz.mpvkt.ui.player.VideoAspect
+import live.mehiz.mpvkt.ui.player.controls.components.ControlsButton
+import live.mehiz.mpvkt.ui.player.controls.components.SeekbarWithTimers
+import live.mehiz.mpvkt.ui.theme.PlayerRippleTheme
 import org.koin.compose.koinInject
+
+val LocalPlayerButtonsClickEvent = staticCompositionLocalOf { {} }
 
 class PlayerControls(
   private val viewModel: PlayerViewModel,
@@ -130,7 +143,7 @@ class PlayerControls(
               )
             }
             .pointerInput(Unit) {
-              if(!seekGesture) return@pointerInput
+              if (!seekGesture) return@pointerInput
               var startingPosition = position
               detectHorizontalDragGestures(
                 onDragStart = {
@@ -146,8 +159,10 @@ class PlayerControls(
                   return@detectHorizontalDragGestures
                 }
                 viewModel.showSeekBar()
-                val seekBy = ((dragAmount * 150f / size.width).coerceIn(0f - position, viewModel.duration - position))
-                  .toInt()
+                val seekBy = ((dragAmount * 150f / size.width).coerceIn(
+                  0f - position,
+                  viewModel.duration - position,
+                )).toInt()
                 viewModel.seekBy(seekBy)
                 gestureSeekAmount = (position - startingPosition).toInt()
               }
@@ -197,7 +212,13 @@ class PlayerControls(
     }
     val paused by viewModel.paused.collectAsState()
     var isSeeking by remember { mutableStateOf(false) }
-    LaunchedEffect(controlsShown, paused, isSeeking) {
+    var resetControls by remember { mutableStateOf(true) }
+    LaunchedEffect(
+      controlsShown,
+      paused,
+      isSeeking,
+      resetControls,
+    ) {
       if (controlsShown && !paused && !isSeeking) {
         delay(3_000)
         viewModel.hideControls()
@@ -207,85 +228,121 @@ class PlayerControls(
       Color.Black.copy(if (controlsShown) 0.2f else 0f),
       label = "",
     )
-    ConstraintLayout(
-      modifier = Modifier
-        .fillMaxSize()
-        .background(transparentOverlay)
-        .padding(horizontal = 8.dp),
+    CompositionLocalProvider(
+      LocalRippleTheme provides PlayerRippleTheme,
+      LocalPlayerButtonsClickEvent provides { resetControls = !resetControls }
     ) {
-      val (seekbar, playerPauseButton, seekValue) = createRefs()
-      AnimatedVisibility(
-        visible = gestureSeekAmount != 0,
-        enter = fadeIn(),
-        exit = fadeOut(),
-        modifier = Modifier.constrainAs(seekValue) {
-          top.linkTo(if (controlsShown) playerPauseButton.bottom else parent.top)
-          start.linkTo(parent.absoluteLeft)
-          end.linkTo(parent.absoluteRight)
-          if (!controlsShown) bottom.linkTo(seekbar.top)
-        },
+      ConstraintLayout(
+        modifier = Modifier
+          .fillMaxSize()
+          .background(transparentOverlay)
+          .padding(horizontal = 16.dp),
       ) {
-        Text(
-          (if (gestureSeekAmount > 0) "+" else "") + gestureSeekAmount + "\n" + Utils.prettyTime(position.toInt()),
-          style = MaterialTheme.typography.displayMedium.copy(shadow = Shadow(blurRadius = 5f)),
-          color = Color.White,
-          textAlign = TextAlign.Center,
-        )
-      }
-      AnimatedVisibility(
-        visible = controlsShown,
-        enter = fadeIn(),
-        exit = fadeOut(),
-        modifier = Modifier.constrainAs(playerPauseButton) {
-          end.linkTo(parent.absoluteRight)
-          start.linkTo(parent.absoluteLeft)
-          top.linkTo(parent.top)
-          bottom.linkTo(seekbar.top)
-        },
-      ) {
-        val icon = if (!paused) Icons.Default.Pause else Icons.Default.PlayArrow
-        val interaction = remember { MutableInteractionSource() }
-        Icon(
+        val (
+          seekbar,
+          playerPauseButton,
+          seekValue,
+          bottomRightControls,
+        ) = createRefs()
+        AnimatedVisibility(
+          visible = gestureSeekAmount != 0,
+          enter = fadeIn(),
+          exit = fadeOut(),
           modifier = Modifier
-            .size(96.dp)
-            .clip(CircleShape)
-            .clickable(
-              interaction,
-              rememberRipple(color = MaterialTheme.colorScheme.onBackground),
-            ) { viewModel.pauseUnpause() },
-          imageVector = icon,
-          contentDescription = null,
-          tint = Color.White,
-        )
-      }
-      AnimatedVisibility(
-        visible = controlsShown || seekBarShown,
-        enter = slideInVertically(initialOffsetY = { it }) + fadeIn(),
-        exit = slideOutVertically(targetOffsetY = { it }) + fadeOut(),
-        modifier = Modifier.constrainAs(seekbar) {
-          bottom.linkTo(parent.bottom, 16.dp)
-        },
-      ) {
-        val invertDuration by playerPreferences.invertDuration.collectAsState()
-        val readAhead by viewModel.readAhead.collectAsState()
-        SeekbarWithTimers(
-          position = position,
-          duration = viewModel.duration,
-          readAheadValue = readAhead,
-          onValueChange = {
-            isSeeking = true
-            viewModel.pause()
-            viewModel.updatePlayBackPos(it)
-            viewModel.seekTo(it.toInt())
-          },
-          onValueChangeFinished = {
-            if (!paused) viewModel.unpause()
-            isSeeking = false
-          },
-          timersInverted = Pair(false, invertDuration),
-          durationTimerOnCLick = { playerPreferences.invertDuration.set(!invertDuration) },
-          positionTimerOnClick = {},
-        )
+            .constrainAs(seekValue) {
+              top.linkTo(if (controlsShown) playerPauseButton.bottom else parent.top)
+              start.linkTo(parent.absoluteLeft)
+              end.linkTo(parent.absoluteRight)
+              if (!controlsShown) bottom.linkTo(seekbar.top)
+            },
+        ) {
+          Text(
+            (if (gestureSeekAmount > 0) "+" else "") + gestureSeekAmount + "\n" + Utils.prettyTime(position.toInt()),
+            style = MaterialTheme.typography.displayMedium.copy(shadow = Shadow(blurRadius = 5f)),
+            color = Color.White,
+            textAlign = TextAlign.Center,
+          )
+        }
+        AnimatedVisibility(
+          visible = controlsShown,
+          enter = fadeIn(),
+          exit = fadeOut(),
+          modifier = Modifier
+            .constrainAs(playerPauseButton) {
+              end.linkTo(parent.absoluteRight)
+              start.linkTo(parent.absoluteLeft)
+              top.linkTo(parent.top)
+              bottom.linkTo(seekbar.top)
+            },
+        ) {
+          val icon = if (!paused) Icons.Default.Pause else Icons.Default.PlayArrow
+          val interaction = remember { MutableInteractionSource() }
+          Icon(
+            modifier = Modifier
+              .size(96.dp)
+              .clip(CircleShape)
+              .clickable(
+                interaction,
+                rememberRipple(color = MaterialTheme.colorScheme.onBackground),
+              ) { viewModel.pauseUnpause() },
+            imageVector = icon,
+            contentDescription = null,
+            tint = Color.White,
+          )
+        }
+        AnimatedVisibility(
+          visible = controlsShown || seekBarShown,
+          enter = slideInVertically(initialOffsetY = { it }) + fadeIn(),
+          exit = slideOutVertically(targetOffsetY = { it }) + fadeOut(),
+          modifier = Modifier
+            .constrainAs(seekbar) {
+              bottom.linkTo(parent.bottom, 16.dp)
+            },
+        ) {
+          val invertDuration by playerPreferences.invertDuration.collectAsState()
+          val readAhead by viewModel.readAhead.collectAsState()
+          SeekbarWithTimers(
+            position = position,
+            duration = viewModel.duration,
+            readAheadValue = readAhead,
+            onValueChange = {
+              isSeeking = true
+              viewModel.pause()
+              viewModel.updatePlayBackPos(it)
+              viewModel.seekTo(it.toInt())
+            },
+            onValueChangeFinished = {
+              if (!paused) viewModel.unpause()
+              isSeeking = false
+            },
+            timersInverted = Pair(false, invertDuration),
+            durationTimerOnCLick = { playerPreferences.invertDuration.set(!invertDuration) },
+            positionTimerOnClick = {},
+          )
+        }
+        AnimatedVisibility(
+          controlsShown,
+          enter = slideInHorizontally(initialOffsetX = { it }) + fadeIn(),
+          exit = slideOutHorizontally(targetOffsetX = { it }) + fadeOut(),
+          modifier = Modifier
+            .constrainAs(bottomRightControls) {
+              bottom.linkTo(seekbar.top)
+              end.linkTo(seekbar.end)
+            },
+        ) {
+          val aspect by playerPreferences.videoAspect.collectAsState()
+          Row {
+            ControlsButton(
+              Icons.Default.AspectRatio,
+            ) {
+              when (aspect) {
+                VideoAspect.Fit -> viewModel.changeVideoAspect(VideoAspect.Crop)
+                VideoAspect.Crop -> viewModel.changeVideoAspect(VideoAspect.Stretch)
+                VideoAspect.Stretch -> viewModel.changeVideoAspect(VideoAspect.Fit)
+              }
+            }
+          }
+        }
       }
     }
   }

@@ -3,12 +3,18 @@ package live.mehiz.mpvkt.ui.player
 import android.media.AudioManager
 import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.ViewModel
+import `is`.xyz.mpv.MPVLib
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import live.mehiz.mpvkt.preferences.PlayerPreferences
+import org.koin.java.KoinJavaComponent.inject
 
 class PlayerViewModel(
-  private val activity: PlayerActivity
-): ViewModel() {
+  private val activity: PlayerActivity,
+) : ViewModel() {
+
+  private val playerPreferences: PlayerPreferences by inject(PlayerPreferences::class.java)
+
   private val _pos = MutableStateFlow(0f)
   val pos = _pos.asStateFlow()
 
@@ -34,13 +40,15 @@ class PlayerViewModel(
   }
 
   fun pauseUnpause() {
-    if(paused.value) unpause()
+    if (paused.value) unpause()
     else pause()
   }
+
   fun pause() {
     activity.player.paused = true
     _paused.value = true
   }
+
   fun unpause() {
     activity.player.paused = false
     _paused.value = false
@@ -49,14 +57,18 @@ class PlayerViewModel(
   fun showControls() {
     _controlsShown.value = true
   }
+
   fun hideControls() {
     _controlsShown.value = false
     activity.windowInsetsController.hide(WindowInsetsCompat.Type.systemBars())
   }
+
   fun toggleControls() {
-    if(controlsShown.value) hideControls()
+    if (controlsShown.value) hideControls()
+    if (seekBarShown.value) hideSeekBar()
     else showControls()
   }
+
   fun toggleSeekBar() {
     _seekBarShown.value = !seekBarShown.value
   }
@@ -64,6 +76,7 @@ class PlayerViewModel(
   fun hideSeekBar() {
     _seekBarShown.value = false
   }
+
   fun showSeekBar() {
     _seekBarShown.value = true
   }
@@ -92,5 +105,30 @@ class PlayerViewModel(
       dragAmount.toInt(),
       AudioManager.FLAG_SHOW_UI,
     )
+  }
+
+  fun changeVideoAspect(aspect: VideoAspect) {
+    var ratio = -1.0
+    var pan = 1.0
+    when (aspect) {
+      VideoAspect.Crop -> {
+        pan = 1.0
+        playerPreferences.videoAspect.set(VideoAspect.Crop)
+      }
+
+      VideoAspect.Fit -> {
+        pan = 0.0
+        MPVLib.setPropertyDouble("panscan", 0.0)
+      }
+
+      VideoAspect.Stretch -> {
+        ratio =
+          activity.resources.displayMetrics.widthPixels / activity.resources.displayMetrics.heightPixels.toDouble()
+        pan = 0.0
+      }
+    }
+    MPVLib.setPropertyDouble("panscan", pan)
+    MPVLib.setPropertyDouble("video-aspect-override", ratio)
+    playerPreferences.videoAspect.set(aspect)
   }
 }

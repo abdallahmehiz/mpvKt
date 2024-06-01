@@ -14,3 +14,10 @@ enum class PlayerOrientation(@StringRes val titleRes: Int) {
   SensorLandscape(R.string.pref_player_orientation_sensor_landscape),
   ;
 }
+
+enum class VideoAspect {
+  Crop,
+  Fit,
+  Stretch,
+  ;
+}

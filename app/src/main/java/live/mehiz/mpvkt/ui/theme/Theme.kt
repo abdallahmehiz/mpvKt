@@ -3,6 +3,8 @@ package live.mehiz.mpvkt.ui.theme
 import android.os.Build
 import androidx.annotation.StringRes
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.material.ripple.RippleAlpha
+import androidx.compose.material.ripple.RippleTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.dynamicDarkColorScheme
@@ -10,6 +12,7 @@ import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import live.mehiz.mpvkt.R
 import live.mehiz.mpvkt.preferences.AppearancePreferences
@@ -54,6 +57,7 @@ fun MpvKtTheme(content: @Composable () -> Unit) {
         else -> if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
       }
     }
+
     darkMode == DarkMode.Dark -> DarkColorScheme
     darkMode == DarkMode.Light -> LightColorScheme
     else -> if (darkTheme) DarkColorScheme else LightColorScheme
@@ -71,4 +75,20 @@ enum class DarkMode(@StringRes val titleRes: Int) {
   Light(R.string.pref_appearance_darkmode_light),
   System(R.string.pref_appearance_darkmode_system),
   ;
+}
+
+object PlayerRippleTheme : RippleTheme {
+
+  private val alpha = RippleAlpha(
+    0.5f,
+    1f,
+    1f,
+    1f,
+  )
+
+  @Composable
+  override fun defaultColor() = Color.White
+
+  @Composable
+  override fun rippleAlpha() = alpha
 }
