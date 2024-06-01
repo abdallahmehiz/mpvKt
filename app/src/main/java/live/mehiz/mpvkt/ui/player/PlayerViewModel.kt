@@ -12,7 +12,6 @@ import org.koin.java.KoinJavaComponent.inject
 class PlayerViewModel(
   private val activity: PlayerActivity,
 ) : ViewModel() {
-
   private val playerPreferences: PlayerPreferences by inject(PlayerPreferences::class.java)
 
   private val _pos = MutableStateFlow(0f)
@@ -30,6 +29,8 @@ class PlayerViewModel(
   val controlsShown = _controlsShown.asStateFlow()
   private val _seekBarShown = MutableStateFlow(true)
   val seekBarShown = _seekBarShown.asStateFlow()
+  private val _areControlsLocked = MutableStateFlow(false)
+  val areControlsLocked = _areControlsLocked.asStateFlow()
 
   fun updatePlayBackPos(pos: Float) {
     _pos.value = pos
@@ -79,6 +80,14 @@ class PlayerViewModel(
 
   fun showSeekBar() {
     _seekBarShown.value = true
+  }
+
+  fun lockControls() {
+    _areControlsLocked.value = true
+  }
+
+  fun unlockControls() {
+    _areControlsLocked.value = false
   }
 
   fun seekBy(offset: Int) {

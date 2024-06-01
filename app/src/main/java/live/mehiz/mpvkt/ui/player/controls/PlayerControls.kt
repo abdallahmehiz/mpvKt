@@ -26,6 +26,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AspectRatio
+import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.LockOpen
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.ripple.LocalRippleTheme
@@ -76,6 +78,7 @@ class PlayerControls(
   fun Content() {
     val playerPreferences = koinInject<PlayerPreferences>()
     val controlsShown by viewModel.controlsShown.collectAsState()
+    val areControlsLocked by viewModel.areControlsLocked.collectAsState()
     val seekBarShown by viewModel.seekBarShown.collectAsState()
     var gestureSeekAmount by remember { mutableIntStateOf(0) }
     LaunchedEffect(gestureSeekAmount) {
@@ -115,6 +118,7 @@ class PlayerControls(
                   else viewModel.showControls()
                 },
                 onDoubleTap = {
+                  if (areControlsLocked) return@detectTapGestures
                   if (doubleTapToPause) {
                     viewModel.pauseUnpause()
                     return@detectTapGestures
@@ -143,7 +147,7 @@ class PlayerControls(
               )
             }
             .pointerInput(Unit) {
-              if (!seekGesture) return@pointerInput
+              if (!seekGesture || areControlsLocked) return@pointerInput
               var startingPosition = position
               detectHorizontalDragGestures(
                 onDragStart = {
@@ -168,7 +172,7 @@ class PlayerControls(
               }
             }
             .pointerInput(Unit) {
-              if (!brightnessGesture && !volumeGesture) return@pointerInput
+              if ((!brightnessGesture && !volumeGesture) || areControlsLocked) return@pointerInput
               var dragAmount = 0f
               detectVerticalDragGestures(
                 onDragEnd = {
@@ -242,10 +246,27 @@ class PlayerControls(
           seekbar,
           playerPauseButton,
           seekValue,
+          bottomLeftControls,
           bottomRightControls,
+          unlockControlsButton
         ) = createRefs()
         AnimatedVisibility(
-          visible = gestureSeekAmount != 0,
+          controlsShown && areControlsLocked,
+          enter = fadeIn(),
+          exit = fadeOut(),
+          modifier = Modifier.constrainAs(unlockControlsButton) {
+            top.linkTo(parent.top, 16.dp)
+            start.linkTo(parent.start, 16.dp)
+          }
+        ) {
+          ControlsButton(
+            Icons.Filled.LockOpen,
+          ) {
+            viewModel.unlockControls()
+          }
+        }
+        AnimatedVisibility(
+          visible = gestureSeekAmount != 0 && !areControlsLocked,
           enter = fadeIn(),
           exit = fadeOut(),
           modifier = Modifier
@@ -264,7 +285,7 @@ class PlayerControls(
           )
         }
         AnimatedVisibility(
-          visible = controlsShown,
+          visible = controlsShown && !areControlsLocked,
           enter = fadeIn(),
           exit = fadeOut(),
           modifier = Modifier
@@ -291,7 +312,7 @@ class PlayerControls(
           )
         }
         AnimatedVisibility(
-          visible = controlsShown || seekBarShown,
+          visible = (controlsShown || seekBarShown) && !areControlsLocked,
           enter = slideInVertically(initialOffsetY = { it }) + fadeIn(),
           exit = slideOutVertically(targetOffsetY = { it }) + fadeOut(),
           modifier = Modifier
@@ -321,7 +342,7 @@ class PlayerControls(
           )
         }
         AnimatedVisibility(
-          controlsShown,
+          controlsShown && !areControlsLocked,
           enter = slideInHorizontally(initialOffsetX = { it }) + fadeIn(),
           exit = slideOutHorizontally(targetOffsetX = { it }) + fadeOut(),
           modifier = Modifier
@@ -341,6 +362,21 @@ class PlayerControls(
                 VideoAspect.Stretch -> viewModel.changeVideoAspect(VideoAspect.Fit)
               }
             }
+          }
+        }
+        AnimatedVisibility(
+          controlsShown && !areControlsLocked,
+          enter = slideInHorizontally(initialOffsetX = { -it }) + fadeIn(),
+          exit = slideOutHorizontally(targetOffsetX = { -it }) + fadeOut(),
+          modifier = Modifier.constrainAs(bottomLeftControls) {
+            bottom.linkTo(seekbar.top)
+            start.linkTo(seekbar.start)
+          }
+        ) {
+          ControlsButton(
+            Icons.Default.Lock
+          ) {
+            viewModel.lockControls()
           }
         }
       }
