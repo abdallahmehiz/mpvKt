@@ -7,6 +7,7 @@ import `is`.xyz.mpv.MPVLib
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import live.mehiz.mpvkt.R
 import live.mehiz.mpvkt.preferences.PlayerPreferences
 import org.koin.java.KoinJavaComponent.inject
 
@@ -17,7 +18,7 @@ class PlayerViewModel(
 
   private val _subtitleTracks = MutableStateFlow<List<Track>>(emptyList())
   val subtitleTracks = _subtitleTracks.asStateFlow()
-  private val _selectedSubtitles = MutableStateFlow((-1))
+  private val _selectedSubtitles = MutableStateFlow(listOf(-1, -1))
   val selectedSubtitles = _selectedSubtitles.asStateFlow()
 
   private val _audioTracks = MutableStateFlow<List<Track>>(emptyList())
@@ -45,11 +46,11 @@ class PlayerViewModel(
 
   val getTrackLanguage: (Int) -> String = {
     if (it != -1) MPVLib.getPropertyString("track-list/$it/lang") ?: ""
-    else "Off"
+    else activity.getString(R.string.player_sheets_tracks_off)
   }
   val getTrackTitle: (Int) -> String = {
     if (it != -1) MPVLib.getPropertyString("track-list/$it/title") ?: ""
-    else "Off"
+    else activity.getString(R.string.player_sheets_tracks_off)
   }
   val getTrackMPVId: (Int) -> Int = {
     if (it != -1) MPVLib.getPropertyInt("track-list/$it/id")
@@ -64,7 +65,7 @@ class PlayerViewModel(
     val possibleTrackTypes = listOf("video", "audio", "sub")
     val vidTracks = mutableListOf<Track>()
     val subTracks = mutableListOf<Track>()
-    val audioTracks = mutableListOf<Track>()
+    val audioTracks = mutableListOf(Track(-1, activity.getString(R.string.player_sheets_tracks_off), null))
     for (i in 0..<tracksCount) {
       val type = getTrackType(i) ?: continue
       if (!possibleTrackTypes.contains(type)) continue
@@ -76,14 +77,28 @@ class PlayerViewModel(
       }
     }
     _subtitleTracks.update { subTracks }
-    _selectedSubtitles.update { activity.player.sid }
+    _selectedSubtitles.update { listOf(activity.player.sid, activity.player.secondarySid) }
     _audioTracks.update { audioTracks }
     _selectedAudio.update { activity.player.aid }
   }
 
   fun selectSub(id: Int) {
-    activity.player.sid = id
-    _selectedSubtitles.update { id }
+    val selectedSubs = selectedSubtitles.value
+    _selectedSubtitles.update {
+      when (id) {
+        selectedSubs[0] -> listOf(selectedSubs[1], -1)
+        selectedSubs[1] -> listOf(selectedSubs[0], -1)
+        else -> {
+          if (selectedSubs[0] != -1) {
+            listOf(selectedSubs[0], id)
+          } else {
+            listOf(id, -1)
+          }
+        }
+      }
+    }
+    activity.player.sid = _selectedSubtitles.value[0]
+    activity.player.secondarySid = _selectedSubtitles.value[1]
   }
 
   fun selectAudio(id: Int) {

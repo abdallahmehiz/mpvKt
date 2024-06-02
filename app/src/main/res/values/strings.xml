@@ -27,4 +27,10 @@
     <string name="pref_player_gestures_seek">Horizontal seek gestures</string>
     <string name="pref_player_gestures_brightness">Brightness gestures</string>
     <string name="pref_player_gestures_volume">Volume gestures</string>
+
+    <string name="player_sheets_tracks_off">Off</string>
+    <string name="player_sheets_track_title_w_lang">#%d: %s (%s)</string>
+    <string name="player_sheets_track_title_wo_lang">#%d: %s</string>
+    <string name="player_sheets_track_lang_wo_title">#%d: %s</string>
+    <string name="player_sheets_subtitles_footer_secondary_sid_no_styles">Secondary subtitles will have no ASS/SSA Styling</string>
 </resources>

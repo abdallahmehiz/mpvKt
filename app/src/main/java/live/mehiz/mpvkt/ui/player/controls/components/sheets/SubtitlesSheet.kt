@@ -5,21 +5,26 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import live.mehiz.mpvkt.R
 import live.mehiz.mpvkt.ui.player.Track
+import me.zhanghai.compose.preference.FooterPreference
+import me.zhanghai.compose.preference.ProvidePreferenceLocals
 
 @Composable
 fun SubtitlesSheet(
   tracks: List<Track>,
-  selectedTracks: Int,
+  selectedTracks: List<Int>,
   onSelect: (Int) -> Unit,
   onDismissRequest: () -> Unit,
 ) {
@@ -27,11 +32,20 @@ fun SubtitlesSheet(
     tracks,
     onDismissRequest = onDismissRequest,
     track = { track ->
-      // TODO implement secondary subtitles
-      AudioTrackRow(
-        "#${track.id} - ${track.name} - (${track.language})",
-        selectedTracks == track.id
-      ) { onSelect(track.id) }// cursed
+      SubtitleTrackRow(
+        getTrackTitle(track),
+        selectedTracks.indexOf(track.id),
+      ) { onSelect(track.id) }
+    },
+    footer = {
+      ProvidePreferenceLocals {
+        FooterPreference(
+          summary = {
+            Text(stringResource(R.string.player_sheets_subtitles_footer_secondary_sid_no_styles))
+          },
+          modifier = Modifier.height(100.dp),
+        )
+      }
     },
   )
 }
@@ -56,15 +70,15 @@ fun SubtitleTrackRow(
     )
     Text(
       title,
-      fontStyle = if(selected > -1) FontStyle.Italic else FontStyle.Normal,
-      fontWeight = if(selected > -1) FontWeight.ExtraBold else FontWeight.Normal
+      fontStyle = if (selected > -1) FontStyle.Italic else FontStyle.Normal,
+      fontWeight = if (selected > -1) FontWeight.ExtraBold else FontWeight.Normal,
     )
     Spacer(modifier = Modifier.weight(1f))
     if (selected != -1) {
       Text(
         "#${selected + 1}",
-        fontStyle = if(selected > -1) FontStyle.Italic else FontStyle.Normal,
-        fontWeight = if(selected > -1) FontWeight.ExtraBold else FontWeight.Normal
+        fontStyle = if (selected > -1) FontStyle.Italic else FontStyle.Normal,
+        fontWeight = if (selected > -1) FontWeight.ExtraBold else FontWeight.Normal,
       )
     }
   }

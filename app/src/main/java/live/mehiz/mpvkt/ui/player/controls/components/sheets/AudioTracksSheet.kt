@@ -27,7 +27,7 @@ fun AudioTracksSheet(
     onDismissRequest = onDismissRequest,
     track = {
       AudioTrackRow(
-        title = it.name,
+        title = getTrackTitle(it),
         isSelected = selectedId == it.id
       ) { onSelect(it.id) }
     },

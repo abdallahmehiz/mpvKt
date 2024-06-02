@@ -12,6 +12,7 @@ import android.view.WindowManager
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.WindowCompat
 import `is`.xyz.mpv.MPVLib
+import `is`.xyz.mpv.Utils
 import live.mehiz.mpvkt.databinding.PlayerLayoutBinding
 import live.mehiz.mpvkt.preferences.PlayerPreferences
 import live.mehiz.mpvkt.ui.player.controls.PlayerControls
@@ -38,6 +39,7 @@ class PlayerActivity : AppCompatActivity() {
       "v",
     )
     player.addObserver(PlayerObserver(this))
+    Utils.copyAssets(this)
     val uri = parsePathFromIntent(intent)
     val videoUri = if (uri?.startsWith("content://") == true) {
       openContentFd(Uri.parse(uri))
