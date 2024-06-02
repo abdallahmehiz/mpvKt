@@ -22,12 +22,14 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AspectRatio
 import androidx.compose.material.icons.filled.Audiotrack
+import androidx.compose.material.icons.filled.Bookmarks
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.LockOpen
 import androidx.compose.material.icons.filled.Pause
@@ -58,6 +60,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
+import androidx.constraintlayout.compose.Dimension
 import `is`.xyz.mpv.Utils
 import kotlinx.coroutines.delay
 import live.mehiz.mpvkt.preferences.PlayerPreferences
@@ -67,8 +70,10 @@ import live.mehiz.mpvkt.presentation.RightSideOvalShape
 import live.mehiz.mpvkt.ui.player.PlayerViewModel
 import live.mehiz.mpvkt.ui.player.VideoAspect
 import live.mehiz.mpvkt.ui.player.controls.components.ControlsButton
+import live.mehiz.mpvkt.ui.player.controls.components.CurrentChapter
 import live.mehiz.mpvkt.ui.player.controls.components.SeekbarWithTimers
 import live.mehiz.mpvkt.ui.player.controls.components.sheets.AudioTracksSheet
+import live.mehiz.mpvkt.ui.player.controls.components.sheets.ChaptersSheet
 import live.mehiz.mpvkt.ui.player.controls.components.sheets.Sheets
 import live.mehiz.mpvkt.ui.player.controls.components.sheets.SubtitlesSheet
 import live.mehiz.mpvkt.ui.theme.PlayerRippleTheme
@@ -93,6 +98,7 @@ class PlayerControls(
     }
     var sheetShown by remember { mutableStateOf(Sheets.None) }
     val position by viewModel.pos.collectAsState()
+    val currentChapter by viewModel.currentChapter.collectAsState()
     Row(modifier = Modifier.fillMaxSize()) {
       repeat(2) { index ->
         var seekAmount by remember { mutableIntStateOf(0) }
@@ -238,6 +244,7 @@ class PlayerControls(
       Color.Black.copy(if (controlsShown) 0.2f else 0f),
       label = "",
     )
+
     CompositionLocalProvider(
       LocalRippleTheme provides PlayerRippleTheme,
       LocalPlayerButtonsClickEvent provides { resetControls = !resetControls },
@@ -247,6 +254,7 @@ class PlayerControls(
           .fillMaxSize()
           .background(transparentOverlay)
           .padding(horizontal = 16.dp),
+
       ) {
         val (
           seekbar,
@@ -277,11 +285,11 @@ class PlayerControls(
           enter = fadeIn(),
           exit = fadeOut(),
           modifier = Modifier.constrainAs(seekValue) {
-              top.linkTo(if (controlsShown) playerPauseButton.bottom else parent.top)
-              start.linkTo(parent.absoluteLeft)
-              end.linkTo(parent.absoluteRight)
-              if (!controlsShown) bottom.linkTo(seekbar.top)
-            },
+            top.linkTo(if (controlsShown) playerPauseButton.bottom else parent.top)
+            start.linkTo(parent.absoluteLeft)
+            end.linkTo(parent.absoluteRight)
+            if (!controlsShown) bottom.linkTo(seekbar.top)
+          },
         ) {
           Text(
             (if (gestureSeekAmount > 0) "+" else "") + gestureSeekAmount + "\n" + Utils.prettyTime(position.toInt()),
@@ -295,11 +303,11 @@ class PlayerControls(
           enter = fadeIn(),
           exit = fadeOut(),
           modifier = Modifier.constrainAs(playerPauseButton) {
-              end.linkTo(parent.absoluteRight)
-              start.linkTo(parent.absoluteLeft)
-              top.linkTo(parent.top)
-              bottom.linkTo(seekbar.top)
-            },
+            end.linkTo(parent.absoluteRight)
+            start.linkTo(parent.absoluteLeft)
+            top.linkTo(parent.top)
+            bottom.linkTo(seekbar.top)
+          },
         ) {
           val icon = if (!paused) Icons.Default.Pause else Icons.Default.PlayArrow
           val interaction = remember { MutableInteractionSource() }
@@ -309,7 +317,7 @@ class PlayerControls(
               .clip(CircleShape)
               .clickable(
                 interaction,
-                rememberRipple(color = MaterialTheme.colorScheme.onBackground),
+                rememberRipple()
               ) { viewModel.pauseUnpause() },
             imageVector = icon,
             contentDescription = null,
@@ -321,8 +329,8 @@ class PlayerControls(
           enter = slideInVertically(initialOffsetY = { it }) + fadeIn(),
           exit = slideOutVertically(targetOffsetY = { it }) + fadeOut(),
           modifier = Modifier.constrainAs(seekbar) {
-              bottom.linkTo(parent.bottom, 16.dp)
-            },
+            bottom.linkTo(parent.bottom, 16.dp)
+          },
         ) {
           val invertDuration by playerPreferences.invertDuration.collectAsState()
           val readAhead by viewModel.readAhead.collectAsState()
@@ -345,6 +353,7 @@ class PlayerControls(
             positionTimerOnClick = {},
           )
         }
+        // Top right controls
         AnimatedVisibility(
           controlsShown && !areControlsLocked,
           enter = slideInHorizontally(initialOffsetX = { it }) + fadeIn(),
@@ -355,32 +364,32 @@ class PlayerControls(
           },
         ) {
           Row {
-            ControlsButton(
-              Icons.Default.Subtitles,
-            ) {
+            if(playerPreferences.showChaptersButton.get() && viewModel.chapters.isNotEmpty()) {
+              ControlsButton(Icons.Default.Bookmarks) {
+                sheetShown = Sheets.Chapters
+              }
+            }
+            ControlsButton(Icons.Default.Subtitles) {
               sheetShown = Sheets.SubtitlesSheet
             }
-            ControlsButton(
-              Icons.Default.Audiotrack,
-            ) {
+            ControlsButton(Icons.Default.Audiotrack) {
               sheetShown = Sheets.AudioSheet
             }
           }
         }
+        // Bottom right controls
         AnimatedVisibility(
           controlsShown && !areControlsLocked,
           enter = slideInHorizontally(initialOffsetX = { it }) + fadeIn(),
           exit = slideOutHorizontally(targetOffsetX = { it }) + fadeOut(),
           modifier = Modifier.constrainAs(bottomRightControls) {
-              bottom.linkTo(seekbar.top)
-              end.linkTo(seekbar.end)
-            },
+            bottom.linkTo(seekbar.top)
+            end.linkTo(seekbar.end)
+          },
         ) {
           val aspect by playerPreferences.videoAspect.collectAsState()
           Row {
-            ControlsButton(
-              Icons.Default.AspectRatio,
-            ) {
+            ControlsButton(Icons.Default.AspectRatio) {
               when (aspect) {
                 VideoAspect.Fit -> viewModel.changeVideoAspect(VideoAspect.Crop)
                 VideoAspect.Crop -> viewModel.changeVideoAspect(VideoAspect.Stretch)
@@ -389,6 +398,7 @@ class PlayerControls(
             }
           }
         }
+        // Bottom left controls
         AnimatedVisibility(
           controlsShown && !areControlsLocked,
           enter = slideInHorizontally(initialOffsetX = { -it }) + fadeIn(),
@@ -396,12 +406,29 @@ class PlayerControls(
           modifier = Modifier.constrainAs(bottomLeftControls) {
             bottom.linkTo(seekbar.top)
             start.linkTo(seekbar.start)
+            width = Dimension.fillToConstraints
+            end.linkTo(bottomRightControls.start)
           },
         ) {
-          ControlsButton(
-            Icons.Default.Lock,
+          Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
           ) {
-            viewModel.lockControls()
+            ControlsButton(Icons.Default.Lock) {
+              viewModel.lockControls()
+            }
+            AnimatedVisibility(
+              currentChapter != null && playerPreferences.currentChaptersIndicator.get(),
+              enter = fadeIn(),
+              exit = fadeOut()
+            ) {
+              CurrentChapter(
+                currentChapter!!,
+                modifier = Modifier.clickable {
+                  sheetShown = Sheets.Chapters
+                }
+              )
+            }
           }
         }
       }
@@ -419,13 +446,26 @@ class PlayerControls(
             { viewModel.selectSub(it) },
           ) { sheetShown = Sheets.None }
         }
+
         Sheets.AudioSheet -> {
-          Log.d("", audioTracks.toString())
           viewModel.pause()
           AudioTracksSheet(
             audioTracks,
             selectedAudio,
-            { viewModel.selectAudio(it) }
+            { viewModel.selectAudio(it) },
+          ) { sheetShown = Sheets.None }
+        }
+
+        Sheets.Chapters -> {
+          viewModel.pause()
+          ChaptersSheet(
+            viewModel.chapters,
+            currentChapter = currentChapter?.index?: 0,
+            {
+              viewModel.selectChapter(it)
+              sheetShown = Sheets.None
+              viewModel.unpause()
+            }
           ) { sheetShown = Sheets.None }
         }
       }

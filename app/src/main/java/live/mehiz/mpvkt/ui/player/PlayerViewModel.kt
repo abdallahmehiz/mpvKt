@@ -4,6 +4,7 @@ import android.media.AudioManager
 import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.ViewModel
 import `is`.xyz.mpv.MPVLib
+import `is`.xyz.mpv.MPVView
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -25,6 +26,10 @@ class PlayerViewModel(
   val audioTracks = _audioTracks.asStateFlow()
   private val _selectedAudio = MutableStateFlow(-1)
   val selectedAudio = _selectedAudio.asStateFlow()
+
+  var chapters: List<MPVView.Chapter> = listOf()
+  private val _currentChapter = MutableStateFlow<MPVView.Chapter?>(null)
+  val currentChapter = _currentChapter.asStateFlow()
 
   private val _pos = MutableStateFlow(0f)
   val pos = _pos.asStateFlow()
@@ -99,6 +104,22 @@ class PlayerViewModel(
     }
     activity.player.sid = _selectedSubtitles.value[0]
     activity.player.secondarySid = _selectedSubtitles.value[1]
+  }
+
+  fun loadChapters() {
+    chapters = activity.player.loadChapters()
+    updateChapter(pos.value.toLong())
+  }
+  fun selectChapter(index: Int) {
+    val time = chapters[index].time
+    seekTo(time.toInt())
+    updateChapter(time.toLong())
+  }
+
+  fun updateChapter(time: Long) {
+    runCatching {
+      _currentChapter.update { chapters.last { it.time <= time } }
+    }
   }
 
   fun selectAudio(id: Int) {

@@ -126,6 +126,7 @@ class PlayerActivity : AppCompatActivity() {
     when (property) {
       "time-pos" -> {
         viewModel.updatePlayBackPos(value.toFloat())
+        viewModel.updateChapter(value)
       }
 
       "demuxer-cache-time" -> {
@@ -152,6 +153,7 @@ class PlayerActivity : AppCompatActivity() {
         setOrientation()
         viewModel.changeVideoAspect(playerPreferences.videoAspect.get())
         viewModel.duration = player.duration!!.toFloat()
+        viewModel.loadChapters()
         viewModel.loadTracks()
       }
 

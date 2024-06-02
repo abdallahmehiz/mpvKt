@@ -1,7 +1,6 @@
 package live.mehiz.mpvkt.ui.player.controls.components.sheets
 
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -61,7 +60,6 @@ fun SubtitleTrackRow(
       .fillMaxWidth()
       .clickable(onClick = onClick)
       .padding(start = 8.dp, end = 16.dp),
-    horizontalArrangement = Arrangement.SpaceBetween,
     verticalAlignment = Alignment.CenterVertically,
   ) {
     Checkbox(

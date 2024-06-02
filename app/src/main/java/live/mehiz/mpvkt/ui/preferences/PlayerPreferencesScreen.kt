@@ -82,7 +82,7 @@ object PlayerPreferencesScreen : Screen {
           )
           listPreference(
             key = preferences.doubleTapToSeekDuration.key(),
-            defaultValue = 10,
+            defaultValue = preferences.doubleTapToSeekDuration.defaultValue(),
             values = listOf(5, 10, 15, 20, 25, 30),
             valueToText = { AnnotatedString("${it}s") },
             title = { Text(text = stringResource(id = R.string.pref_player_double_tap_seek_duration)) },
@@ -107,6 +107,22 @@ object PlayerPreferencesScreen : Screen {
             preferences.volumeGesture.key(),
             defaultValue = preferences.volumeGesture.get(),
             title = { Text(stringResource(R.string.pref_player_gestures_volume)) },
+          )
+          preferenceCategory(
+            "controls",
+            title = { Text(stringResource(R.string.pref_player_controls)) },
+          )
+          switchPreference(
+            preferences.showChaptersButton.key(),
+            defaultValue = preferences.showChaptersButton.defaultValue(),
+            title = { Text(stringResource(R.string.pref_player_controls_show_chapters_button)) },
+            summary = { Text(stringResource(R.string.pref_player_controls_show_chapters_subtitle)) },
+          )
+          switchPreference(
+            preferences.currentChaptersIndicator.key(),
+            defaultValue = preferences.currentChaptersIndicator.defaultValue(),
+            title = { Text(stringResource(R.string.pref_player_controls_show_chapter_indicator)) },
+            summary = { Text(stringResource(R.string.pref_player_controls_show_chapters_subtitle)) },
           )
         }
       }

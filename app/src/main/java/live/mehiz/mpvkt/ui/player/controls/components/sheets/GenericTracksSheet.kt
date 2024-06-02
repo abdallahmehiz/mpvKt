@@ -58,5 +58,6 @@ enum class Sheets {
   None,
   SubtitlesSheet,
   AudioSheet,
+  Chapters,
   ;
 }
