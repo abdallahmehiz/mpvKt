@@ -1,6 +1,8 @@
 package live.mehiz.mpvkt.ui.player
 
 import android.media.AudioManager
+import android.net.Uri
+import android.util.Log
 import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.ViewModel
 import `is`.xyz.mpv.MPVLib
@@ -11,9 +13,10 @@ import kotlinx.coroutines.flow.update
 import live.mehiz.mpvkt.R
 import live.mehiz.mpvkt.preferences.PlayerPreferences
 import org.koin.java.KoinJavaComponent.inject
+import java.io.File
 
 class PlayerViewModel(
-  val activity: PlayerActivity,
+  private val activity: PlayerActivity,
 ) : ViewModel() {
   private val playerPreferences: PlayerPreferences by inject(PlayerPreferences::class.java)
 
@@ -110,6 +113,7 @@ class PlayerViewModel(
     chapters = activity.player.loadChapters()
     updateChapter(pos.value.toLong())
   }
+
   fun selectChapter(index: Int) {
     val time = chapters[index].time
     seekTo(time.toInt())
@@ -125,6 +129,32 @@ class PlayerViewModel(
   fun selectAudio(id: Int) {
     activity.player.aid = id
     _selectedAudio.update { id }
+  }
+
+  fun addSubtitle(uri: Uri) {
+    val url = uri.toString()
+    val path = if (url.startsWith("content://")) {
+      activity.openContentFd(Uri.parse(url))
+    } else {
+      url
+    } ?: return
+    MPVLib.command(arrayOf("sub-add", path, "cached"))
+    if(activity.player.sid != subtitleTracks.value.size + 1) return
+    _subtitleTracks.update { it.plus(Track(activity.player.sid, path, null)) }
+    _selectedSubtitles.update { listOf(activity.player.sid, activity.player.secondarySid) }
+  }
+
+  fun addAudio(uri: Uri) {
+    val url = uri.toString()
+    val path = if (url.startsWith("content://")) {
+      activity.openContentFd(Uri.parse(url))
+    } else {
+      url
+    } ?: return
+    MPVLib.command(arrayOf("audio-add", path, "cached"))
+    if(activity.player.aid != audioTracks.value.size) return
+    _audioTracks.update { it.plus(Track(activity.player.aid, path, null)) }
+    _selectedAudio.update { activity.player.aid }
   }
 
   fun updatePlayBackPos(pos: Float) {

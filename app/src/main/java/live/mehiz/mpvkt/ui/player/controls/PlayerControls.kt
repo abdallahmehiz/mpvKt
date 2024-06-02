@@ -1,6 +1,8 @@
 package live.mehiz.mpvkt.ui.player.controls
 
 import android.util.Log
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateFloatAsState
@@ -255,7 +257,7 @@ class PlayerControls(
           .background(transparentOverlay)
           .padding(horizontal = 16.dp),
 
-      ) {
+        ) {
         val (
           seekbar,
           playerPauseButton,
@@ -274,9 +276,7 @@ class PlayerControls(
             start.linkTo(parent.start, 16.dp)
           },
         ) {
-          ControlsButton(
-            Icons.Filled.LockOpen,
-          ) {
+          ControlsButton(Icons.Filled.LockOpen) {
             viewModel.unlockControls()
           }
         }
@@ -306,7 +306,7 @@ class PlayerControls(
             end.linkTo(parent.absoluteRight)
             start.linkTo(parent.absoluteLeft)
             top.linkTo(parent.top)
-            bottom.linkTo(seekbar.top)
+            bottom.linkTo(parent.bottom)
           },
         ) {
           val icon = if (!paused) Icons.Default.Pause else Icons.Default.PlayArrow
@@ -317,7 +317,7 @@ class PlayerControls(
               .clip(CircleShape)
               .clickable(
                 interaction,
-                rememberRipple()
+                rememberRipple(),
               ) { viewModel.pauseUnpause() },
             imageVector = icon,
             contentDescription = null,
@@ -364,7 +364,7 @@ class PlayerControls(
           },
         ) {
           Row {
-            if(playerPreferences.showChaptersButton.get() && viewModel.chapters.isNotEmpty()) {
+            if (playerPreferences.showChaptersButton.get() && viewModel.chapters.isNotEmpty()) {
               ControlsButton(Icons.Default.Bookmarks) {
                 sheetShown = Sheets.Chapters
               }
@@ -412,7 +412,7 @@ class PlayerControls(
         ) {
           Row(
             modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
           ) {
             ControlsButton(Icons.Default.Lock) {
               viewModel.lockControls()
@@ -420,13 +420,14 @@ class PlayerControls(
             AnimatedVisibility(
               currentChapter != null && playerPreferences.currentChaptersIndicator.get(),
               enter = fadeIn(),
-              exit = fadeOut()
+              exit = fadeOut(),
             ) {
               CurrentChapter(
                 currentChapter!!,
-                modifier = Modifier.clickable {
+                onClick = {
+                  viewModel.pause()
                   sheetShown = Sheets.Chapters
-                }
+                },
               )
             }
           }
@@ -439,20 +440,36 @@ class PlayerControls(
       when (sheetShown) {
         Sheets.None -> {}
         Sheets.SubtitlesSheet -> {
+          val subtitlesPicker = rememberLauncherForActivityResult(
+            ActivityResultContracts.OpenDocument(),
+          ) {
+            if (it == null) return@rememberLauncherForActivityResult
+            viewModel.addSubtitle(it)
+          }
           viewModel.pause()
           SubtitlesSheet(
             subtitles,
             selectedSubs,
             { viewModel.selectSub(it) },
+            {
+              subtitlesPicker.launch(arrayOf("*/*"))
+            },
           ) { sheetShown = Sheets.None }
         }
 
         Sheets.AudioSheet -> {
+          val audioPicker = rememberLauncherForActivityResult(
+            ActivityResultContracts.OpenDocument(),
+          ) {
+            if (it == null) return@rememberLauncherForActivityResult
+            viewModel.addAudio(it)
+          }
           viewModel.pause()
           AudioTracksSheet(
             audioTracks,
             selectedAudio,
             { viewModel.selectAudio(it) },
+            { audioPicker.launch(arrayOf("*/*")) },
           ) { sheetShown = Sheets.None }
         }
 
@@ -460,12 +477,12 @@ class PlayerControls(
           viewModel.pause()
           ChaptersSheet(
             viewModel.chapters,
-            currentChapter = currentChapter?.index?: 0,
+            currentChapter = currentChapter?.index ?: 0,
             {
               viewModel.selectChapter(it)
               sheetShown = Sheets.None
               viewModel.unpause()
-            }
+            },
           ) { sheetShown = Sheets.None }
         }
       }

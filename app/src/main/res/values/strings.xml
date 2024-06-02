@@ -34,6 +34,8 @@
     <string name="pref_player_controls_show_chapters_button">Show chapters select button</string>
     <string name="pref_player_controls_show_chapters_subtitle">Only appears if the video has chapters</string>
 
+    <string name="player_sheets_add_ext_sub">Add external subtitles</string>
+    <string name="player_sheets_add_ext_audio">Add external audio tracks</string>
     <string name="player_sheets_tracks_off">Off</string>
     <string name="player_sheets_track_title_w_lang">#%d: %s (%s)</string>
     <string name="player_sheets_track_title_wo_lang">#%d: %s</string>

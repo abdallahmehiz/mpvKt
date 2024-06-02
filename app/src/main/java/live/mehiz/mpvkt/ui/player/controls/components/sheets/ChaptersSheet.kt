@@ -26,7 +26,7 @@ fun ChaptersSheet(
 ) {
   GenericTracksSheet(
     chapters,
-    {
+    track = {
       ChapterTrack(
         title = it.title,
         time = it.time.toInt(),

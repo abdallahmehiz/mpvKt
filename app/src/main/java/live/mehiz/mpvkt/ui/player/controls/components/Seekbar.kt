@@ -45,8 +45,7 @@ fun SeekbarWithTimers(
     VideoTimer(
       value = position,
       timersInverted.first,
-      modifier = Modifier.weight(0.05f),
-      positionTimerOnClick,
+      onClick = positionTimerOnClick,
     )
     Seeker(
       value = position,
@@ -66,8 +65,7 @@ fun SeekbarWithTimers(
     VideoTimer(
       value = if (timersInverted.second) position - duration else duration,
       isInverted = timersInverted.second,
-      modifier = Modifier.weight(0.05f),
-      durationTimerOnCLick,
+      onClick = durationTimerOnCLick,
     )
   }
 }

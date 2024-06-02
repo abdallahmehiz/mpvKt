@@ -1,12 +1,16 @@
 package live.mehiz.mpvkt.ui.player.controls.components.sheets
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -25,11 +29,13 @@ fun SubtitlesSheet(
   tracks: List<Track>,
   selectedTracks: List<Int>,
   onSelect: (Int) -> Unit,
+  onAddSubtitle: () -> Unit,
   onDismissRequest: () -> Unit,
 ) {
   GenericTracksSheet(
     tracks,
     onDismissRequest = onDismissRequest,
+    header = { AddTrackRow(stringResource(R.string.player_sheets_add_ext_sub), onAddSubtitle) },
     track = { track ->
       SubtitleTrackRow(
         getTrackTitle(track),
@@ -42,7 +48,6 @@ fun SubtitlesSheet(
           summary = {
             Text(stringResource(R.string.player_sheets_subtitles_footer_secondary_sid_no_styles))
           },
-          modifier = Modifier.height(100.dp),
         )
       }
     },

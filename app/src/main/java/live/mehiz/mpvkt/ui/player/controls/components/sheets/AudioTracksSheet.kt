@@ -10,9 +10,11 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import live.mehiz.mpvkt.R
 import live.mehiz.mpvkt.ui.player.Track
 
 @Composable
@@ -20,15 +22,17 @@ fun AudioTracksSheet(
   tracks: List<Track>,
   selectedId: Int,
   onSelect: (Int) -> Unit,
+  onAddAudioTrack: () -> Unit,
   onDismissRequest: () -> Unit,
 ) {
   GenericTracksSheet(
     tracks,
     onDismissRequest = onDismissRequest,
+    header = { AddTrackRow(stringResource(R.string.player_sheets_add_ext_audio), onAddAudioTrack) },
     track = {
       AudioTrackRow(
         title = getTrackTitle(it),
-        isSelected = selectedId == it.id
+        isSelected = selectedId == it.id,
       ) { onSelect(it.id) }
     },
   )
@@ -46,11 +50,11 @@ fun AudioTrackRow(
       .clickable(onClick = onClick)
       .padding(start = 8.dp, end = 16.dp),
     verticalAlignment = Alignment.CenterVertically,
-    horizontalArrangement = Arrangement.spacedBy(8.dp)
+    horizontalArrangement = Arrangement.spacedBy(8.dp),
   ) {
     RadioButton(
       isSelected,
-      onClick
+      onClick,
     )
     Text(
       title,

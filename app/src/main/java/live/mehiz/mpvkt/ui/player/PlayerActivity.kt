@@ -96,7 +96,7 @@ class PlayerActivity : AppCompatActivity() {
     return filepath
   }
 
-  private fun openContentFd(uri: Uri): String? {
+  fun openContentFd(uri: Uri): String? {
     if (uri.scheme != "content") return null
     val resolver = applicationContext.contentResolver
     Log.d("mpvKt", "Resolving content URI: $uri")
