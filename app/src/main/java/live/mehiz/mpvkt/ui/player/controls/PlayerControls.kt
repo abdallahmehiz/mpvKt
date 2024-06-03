@@ -1,6 +1,5 @@
 package live.mehiz.mpvkt.ui.player.controls
 
-import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
@@ -351,6 +350,7 @@ class PlayerControls(
             timersInverted = Pair(false, invertDuration),
             durationTimerOnCLick = { playerPreferences.invertDuration.set(!invertDuration) },
             positionTimerOnClick = {},
+            chapters = viewModel.chapters
           )
         }
         // Top right controls
