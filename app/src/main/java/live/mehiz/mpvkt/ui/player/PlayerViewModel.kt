@@ -2,6 +2,7 @@ package live.mehiz.mpvkt.ui.player
 
 import android.media.AudioManager
 import android.net.Uri
+import android.util.DisplayMetrics
 import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.ViewModel
 import `is`.xyz.mpv.MPVLib
@@ -286,8 +287,9 @@ class PlayerViewModel(
       }
 
       VideoAspect.Stretch -> {
-        ratio =
-          activity.resources.displayMetrics.widthPixels / activity.resources.displayMetrics.heightPixels.toDouble()
+        val dm = DisplayMetrics()
+        activity.windowManager.defaultDisplay.getRealMetrics(dm)
+        ratio = dm.widthPixels / dm.heightPixels.toDouble()
         pan = 0.0
       }
     }
