@@ -14,8 +14,10 @@ import androidx.core.view.WindowCompat
 import `is`.xyz.mpv.MPVLib
 import `is`.xyz.mpv.Utils
 import live.mehiz.mpvkt.databinding.PlayerLayoutBinding
+import live.mehiz.mpvkt.preferences.AudioPreferences
 import live.mehiz.mpvkt.preferences.DecoderPreferences
 import live.mehiz.mpvkt.preferences.PlayerPreferences
+import live.mehiz.mpvkt.preferences.SubtitlesPreferences
 import live.mehiz.mpvkt.ui.player.controls.PlayerControls
 import live.mehiz.mpvkt.ui.theme.MpvKtTheme
 import org.koin.android.ext.android.inject
@@ -30,6 +32,8 @@ class PlayerActivity : AppCompatActivity() {
   val audioManager by lazy { getSystemService(Context.AUDIO_SERVICE) as AudioManager }
   private val playerPreferences by inject<PlayerPreferences>()
   private val decoderPreferences by inject<DecoderPreferences>()
+  private val audioPreferences by inject<AudioPreferences>()
+  private val subtitlesPreferences by inject<SubtitlesPreferences>()
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
@@ -38,6 +42,8 @@ class PlayerActivity : AppCompatActivity() {
     setContentView(binding.root)
 
     setupMPV()
+    setupAudio()
+    setupSubtitles()
     val uri = parsePathFromIntent(intent)
     val videoUri = if (uri?.startsWith("content://") == true) {
       openContentFd(Uri.parse(uri))
@@ -88,12 +94,15 @@ class PlayerActivity : AppCompatActivity() {
     }
     if(decoderPreferences.useYUV420P.get()) MPVLib.setPropertyString("vf", "format=yuv420p")
 
-    MPVLib.command(arrayOf("script-binding", "stats/display-stats-toggle"))
-    MPVLib.command(
-      arrayOf("script-binding", "stats/display-page-1"),
-    )
-
     player.addObserver(PlayerObserver(this))
+  }
+
+  private fun setupAudio() {
+    MPVLib.setPropertyString("alang", audioPreferences.preferredLanguages.get())
+  }
+
+  private fun setupSubtitles() {
+    MPVLib.setPropertyString("slang", subtitlesPreferences.preferredLanguages.get())
   }
 
   private fun parsePathFromIntent(intent: Intent): String? {

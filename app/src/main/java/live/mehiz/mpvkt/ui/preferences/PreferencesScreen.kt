@@ -5,9 +5,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
+import androidx.compose.material.icons.outlined.Audiotrack
 import androidx.compose.material.icons.outlined.Memory
 import androidx.compose.material.icons.outlined.Palette
 import androidx.compose.material.icons.outlined.PlayCircle
+import androidx.compose.material.icons.outlined.Subtitles
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -58,13 +60,25 @@ object PreferencesScreen : Screen {
             key = "player",
             title = { Text(text = stringResource(id = R.string.pref_player)) },
             icon = { Icon(Icons.Outlined.PlayCircle, null) },
-            onClick = { navigator.push(PlayerPreferencesScreen) }
+            onClick = { navigator.push(PlayerPreferencesScreen) },
           )
           preference(
             key = "decoder",
             title = { Text(text = stringResource(id = R.string.pref_decoder)) },
             icon = { Icon(Icons.Outlined.Memory, null) },
-            onClick = { navigator.push(DecoderPreferencesScreen) }
+            onClick = { navigator.push(DecoderPreferencesScreen) },
+          )
+          preference(
+            key = "subtitles",
+            title = { Text(text = stringResource(id = R.string.pref_subtitles)) },
+            icon = { Icon(Icons.Outlined.Subtitles, null) },
+            onClick = { navigator.push(SubtitlesPreferencesScreen) },
+          )
+          preference(
+            key = "audio",
+            title = { Text(text = stringResource(id = R.string.pref_audio)) },
+            icon = { Icon(Icons.Outlined.Audiotrack, null) },
+            onClick = { navigator.push(AudioPreferencesScreen) },
           )
         }
       }
