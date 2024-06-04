@@ -40,7 +40,10 @@ class PlayerActivity : AppCompatActivity() {
       applicationContext.cacheDir.path,
       "v",
     )
-    if(!decoderPreferences.tryHWDecoding.get()) MPVLib.setPropertyString("hwdec", "no")
+    MPVLib.setPropertyString(
+      "hwdec",
+      if (decoderPreferences.tryHWDecoding.get()) "auto-copy" else "no"
+    )
     player.addObserver(PlayerObserver(this))
     Utils.copyAssets(this)
     val uri = parsePathFromIntent(intent)
