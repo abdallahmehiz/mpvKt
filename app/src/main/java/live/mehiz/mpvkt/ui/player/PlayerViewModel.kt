@@ -2,7 +2,6 @@ package live.mehiz.mpvkt.ui.player
 
 import android.media.AudioManager
 import android.net.Uri
-import android.util.Log
 import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.ViewModel
 import `is`.xyz.mpv.MPVLib
@@ -13,12 +12,14 @@ import kotlinx.coroutines.flow.update
 import live.mehiz.mpvkt.R
 import live.mehiz.mpvkt.preferences.PlayerPreferences
 import org.koin.java.KoinJavaComponent.inject
-import java.io.File
 
 class PlayerViewModel(
   private val activity: PlayerActivity,
 ) : ViewModel() {
   private val playerPreferences: PlayerPreferences by inject(PlayerPreferences::class.java)
+
+  private val _currentDecoder = MutableStateFlow(getDecoderFromValue(MPVLib.getPropertyString("hwdec")))
+  val currentDecoder = _currentDecoder.asStateFlow()
 
   private val _subtitleTracks = MutableStateFlow<List<Track>>(emptyList())
   val subtitleTracks = _subtitleTracks.asStateFlow()
@@ -51,6 +52,34 @@ class PlayerViewModel(
   val seekBarShown = _seekBarShown.asStateFlow()
   private val _areControlsLocked = MutableStateFlow(false)
   val areControlsLocked = _areControlsLocked.asStateFlow()
+
+  fun getDecoder() {
+    _currentDecoder.update { getDecoderFromValue(activity.player.hwdecActive) }
+  }
+
+  fun cycleDecoders() {
+    MPVLib.setPropertyString(
+      "hwdec",
+      when (currentDecoder.value) {
+        Decoder.HWPlus -> Decoder.HW.value
+        Decoder.HW -> Decoder.SW.value
+        Decoder.SW -> Decoder.HWPlus.value
+        Decoder.Auto -> Decoder.SW.value
+      }
+    )
+    val newDecoder = activity.player.hwdecActive
+    if(newDecoder != currentDecoder.value.value) {
+      _currentDecoder.update { getDecoderFromValue(newDecoder) }
+    }
+  }
+
+  fun updateDecoder(decoder: Decoder) {
+    MPVLib.setPropertyString("hwdec", decoder.value)
+    val newDecoder = activity.player.hwdecActive
+    if(newDecoder != currentDecoder.value.value) {
+      _currentDecoder.update { getDecoderFromValue(newDecoder) }
+    }
+  }
 
   val getTrackLanguage: (Int) -> String = {
     if (it != -1) MPVLib.getPropertyString("track-list/$it/lang") ?: ""
@@ -89,6 +118,7 @@ class PlayerViewModel(
     _audioTracks.update { audioTracks }
     _selectedAudio.update { activity.player.aid }
   }
+
 
   fun selectSub(id: Int) {
     val selectedSubs = selectedSubtitles.value
@@ -139,7 +169,7 @@ class PlayerViewModel(
       url
     } ?: return
     MPVLib.command(arrayOf("sub-add", path, "cached"))
-    if(activity.player.sid != subtitleTracks.value.size + 1) return
+    if (activity.player.sid != subtitleTracks.value.size + 1) return
     _subtitleTracks.update { it.plus(Track(activity.player.sid, path, null)) }
     _selectedSubtitles.update { listOf(activity.player.sid, activity.player.secondarySid) }
   }
@@ -152,7 +182,7 @@ class PlayerViewModel(
       url
     } ?: return
     MPVLib.command(arrayOf("audio-add", path, "cached"))
-    if(activity.player.aid != audioTracks.value.size) return
+    if (activity.player.aid != audioTracks.value.size) return
     _audioTracks.update { it.plus(Track(activity.player.aid, path, null)) }
     _selectedAudio.update { activity.player.aid }
   }

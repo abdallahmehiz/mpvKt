@@ -14,6 +14,7 @@ import androidx.core.view.WindowCompat
 import `is`.xyz.mpv.MPVLib
 import `is`.xyz.mpv.Utils
 import live.mehiz.mpvkt.databinding.PlayerLayoutBinding
+import live.mehiz.mpvkt.preferences.DecoderPreferences
 import live.mehiz.mpvkt.preferences.PlayerPreferences
 import live.mehiz.mpvkt.ui.player.controls.PlayerControls
 import live.mehiz.mpvkt.ui.theme.MpvKtTheme
@@ -27,6 +28,7 @@ class PlayerActivity : AppCompatActivity() {
   val player by lazy { binding.player }
   val windowInsetsController by lazy { WindowCompat.getInsetsController(window, window.decorView) }
   private val playerPreferences by inject<PlayerPreferences>()
+  private val decoderPreferences by inject<DecoderPreferences>()
   val audioManager by lazy { getSystemService(Context.AUDIO_SERVICE) as AudioManager }
 
   override fun onCreate(savedInstanceState: Bundle?) {
@@ -38,6 +40,7 @@ class PlayerActivity : AppCompatActivity() {
       applicationContext.cacheDir.path,
       "v",
     )
+    if(!decoderPreferences.tryHWDecoding.get()) MPVLib.setPropertyString("hwdec", "no")
     player.addObserver(PlayerObserver(this))
     Utils.copyAssets(this)
     val uri = parsePathFromIntent(intent)
@@ -155,6 +158,7 @@ class PlayerActivity : AppCompatActivity() {
         viewModel.duration = player.duration!!.toFloat()
         viewModel.loadChapters()
         viewModel.loadTracks()
+        viewModel.getDecoder()
       }
 
       MPVLib.mpvEventId.MPV_EVENT_END_FILE -> {

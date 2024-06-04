@@ -21,3 +21,15 @@ enum class VideoAspect {
   Stretch,
   ;
 }
+
+enum class Decoder(val title: String, val value: String) {
+  Auto("Auto", "auto"),
+  SW("SW", "no"),
+  HW("HW", "mediacodec"),
+  HWPlus("HW+", "mediacodec-copy"),
+  ;
+}
+
+fun getDecoderFromValue(value: String): Decoder {
+  return Decoder.entries.first { it.value == value }
+}

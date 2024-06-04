@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
+import androidx.compose.material.icons.outlined.Memory
 import androidx.compose.material.icons.outlined.Palette
 import androidx.compose.material.icons.outlined.PlayCircle
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -58,6 +59,12 @@ object PreferencesScreen : Screen {
             title = { Text(text = stringResource(id = R.string.pref_player)) },
             icon = { Icon(Icons.Outlined.PlayCircle, null) },
             onClick = { navigator.push(PlayerPreferencesScreen) }
+          )
+          preference(
+            key = "decoder",
+            title = { Text(text = stringResource(id = R.string.pref_decoder)) },
+            icon = { Icon(Icons.Outlined.Memory, null) },
+            onClick = { navigator.push(DecoderPreferencesScreen) }
           )
         }
       }

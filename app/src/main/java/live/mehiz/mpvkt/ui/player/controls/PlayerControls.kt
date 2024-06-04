@@ -75,6 +75,7 @@ import live.mehiz.mpvkt.ui.player.controls.components.CurrentChapter
 import live.mehiz.mpvkt.ui.player.controls.components.SeekbarWithTimers
 import live.mehiz.mpvkt.ui.player.controls.components.sheets.AudioTracksSheet
 import live.mehiz.mpvkt.ui.player.controls.components.sheets.ChaptersSheet
+import live.mehiz.mpvkt.ui.player.controls.components.sheets.DecodersSheet
 import live.mehiz.mpvkt.ui.player.controls.components.sheets.Sheets
 import live.mehiz.mpvkt.ui.player.controls.components.sheets.SubtitlesSheet
 import live.mehiz.mpvkt.ui.theme.PlayerRippleTheme
@@ -98,8 +99,12 @@ class PlayerControls(
       viewModel.hideSeekBar()
     }
     var sheetShown by remember { mutableStateOf(Sheets.None) }
+    LaunchedEffect(sheetShown) {
+      if(sheetShown == Sheets.None) viewModel.pause()
+    }
     val position by viewModel.pos.collectAsState()
     val currentChapter by viewModel.currentChapter.collectAsState()
+    val currentDecoder by viewModel.currentDecoder.collectAsState()
     Row(modifier = Modifier.fillMaxSize()) {
       repeat(2) { index ->
         var seekAmount by remember { mutableIntStateOf(0) }
@@ -255,8 +260,7 @@ class PlayerControls(
           .fillMaxSize()
           .background(transparentOverlay)
           .padding(horizontal = 16.dp),
-
-        ) {
+      ) {
         val (
           seekbar,
           playerPauseButton,
@@ -266,6 +270,7 @@ class PlayerControls(
           bottomRightControls,
           unlockControlsButton,
         ) = createRefs()
+
         AnimatedVisibility(
           controlsShown && areControlsLocked,
           enter = fadeIn(),
@@ -275,9 +280,10 @@ class PlayerControls(
             start.linkTo(parent.start, 16.dp)
           },
         ) {
-          ControlsButton(Icons.Filled.LockOpen) {
-            viewModel.unlockControls()
-          }
+          ControlsButton(
+            Icons.Filled.LockOpen,
+            onClick = { viewModel.unlockControls() },
+          )
         }
         AnimatedVisibility(
           visible = gestureSeekAmount != 0 && !areControlsLocked,
@@ -350,7 +356,7 @@ class PlayerControls(
             timersInverted = Pair(false, invertDuration),
             durationTimerOnCLick = { playerPreferences.invertDuration.set(!invertDuration) },
             positionTimerOnClick = {},
-            chapters = viewModel.chapters
+            chapters = viewModel.chapters,
           )
         }
         // Top right controls
@@ -364,17 +370,27 @@ class PlayerControls(
           },
         ) {
           Row {
-            if (playerPreferences.showChaptersButton.get() && viewModel.chapters.isNotEmpty()) {
-              ControlsButton(Icons.Default.Bookmarks) {
-                sheetShown = Sheets.Chapters
+            ControlsButton(
+              currentDecoder.title,
+              onClick = { viewModel.cycleDecoders() },
+              onLongClick = {
+                sheetShown = Sheets.Decoders
               }
+            )
+            if (playerPreferences.showChaptersButton.get() && viewModel.chapters.isNotEmpty()) {
+              ControlsButton(
+                Icons.Default.Bookmarks,
+                onClick = { sheetShown = Sheets.Chapters },
+              )
             }
-            ControlsButton(Icons.Default.Subtitles) {
-              sheetShown = Sheets.SubtitlesSheet
-            }
-            ControlsButton(Icons.Default.Audiotrack) {
-              sheetShown = Sheets.AudioSheet
-            }
+            ControlsButton(
+              Icons.Default.Subtitles,
+              onClick = { sheetShown = Sheets.SubtitlesSheet },
+            )
+            ControlsButton(
+              Icons.Default.Audiotrack,
+              onClick = { sheetShown = Sheets.AudioSheet },
+            )
           }
         }
         // Bottom right controls
@@ -389,13 +405,16 @@ class PlayerControls(
         ) {
           val aspect by playerPreferences.videoAspect.collectAsState()
           Row {
-            ControlsButton(Icons.Default.AspectRatio) {
-              when (aspect) {
-                VideoAspect.Fit -> viewModel.changeVideoAspect(VideoAspect.Crop)
-                VideoAspect.Crop -> viewModel.changeVideoAspect(VideoAspect.Stretch)
-                VideoAspect.Stretch -> viewModel.changeVideoAspect(VideoAspect.Fit)
-              }
-            }
+            ControlsButton(
+              Icons.Default.AspectRatio,
+              onClick = {
+                when (aspect) {
+                  VideoAspect.Fit -> viewModel.changeVideoAspect(VideoAspect.Crop)
+                  VideoAspect.Crop -> viewModel.changeVideoAspect(VideoAspect.Stretch)
+                  VideoAspect.Stretch -> viewModel.changeVideoAspect(VideoAspect.Fit)
+                }
+              },
+            )
           }
         }
         // Bottom left controls
@@ -414,9 +433,10 @@ class PlayerControls(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
           ) {
-            ControlsButton(Icons.Default.Lock) {
-              viewModel.lockControls()
-            }
+            ControlsButton(
+              Icons.Default.Lock,
+              onClick = { viewModel.lockControls() },
+            )
             AnimatedVisibility(
               currentChapter != null && playerPreferences.currentChaptersIndicator.get(),
               enter = fadeIn(),
@@ -464,7 +484,6 @@ class PlayerControls(
             if (it == null) return@rememberLauncherForActivityResult
             viewModel.addAudio(it)
           }
-          viewModel.pause()
           AudioTracksSheet(
             audioTracks,
             selectedAudio,
@@ -474,7 +493,6 @@ class PlayerControls(
         }
 
         Sheets.Chapters -> {
-          viewModel.pause()
           ChaptersSheet(
             viewModel.chapters,
             currentChapter = currentChapter?.index ?: 0,
@@ -483,6 +501,13 @@ class PlayerControls(
               sheetShown = Sheets.None
               viewModel.unpause()
             },
+          ) { sheetShown = Sheets.None }
+        }
+
+        Sheets.Decoders -> {
+          DecodersSheet(
+            selectedDecoder = currentDecoder,
+            onSelect = { viewModel.updateDecoder(it) },
           ) { sheetShown = Sheets.None }
         }
       }
