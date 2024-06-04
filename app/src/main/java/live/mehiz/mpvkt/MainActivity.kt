@@ -12,7 +12,6 @@ import live.mehiz.mpvkt.ui.theme.MpvKtTheme
 class MainActivity : ComponentActivity() {
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
-    enableEdgeToEdge()
     setContent {
       MpvKtTheme {
         Navigator(HomeScreen) {

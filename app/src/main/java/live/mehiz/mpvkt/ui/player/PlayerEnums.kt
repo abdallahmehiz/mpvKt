@@ -33,3 +33,9 @@ enum class Decoder(val title: String, val value: String) {
 fun getDecoderFromValue(value: String): Decoder {
   return Decoder.entries.first { it.value == value }
 }
+
+enum class Debanding {
+  None,
+  CPU,
+  GPU,
+}

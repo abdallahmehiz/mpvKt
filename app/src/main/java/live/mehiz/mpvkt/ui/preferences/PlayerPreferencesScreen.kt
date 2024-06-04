@@ -116,13 +116,13 @@ object PlayerPreferencesScreen : Screen {
             preferences.showChaptersButton.key(),
             defaultValue = preferences.showChaptersButton.defaultValue(),
             title = { Text(stringResource(R.string.pref_player_controls_show_chapters_button)) },
-            summary = { Text(stringResource(R.string.pref_player_controls_show_chapters_subtitle)) },
+            summary = { Text(stringResource(R.string.pref_player_controls_show_chapters_summary)) },
           )
           switchPreference(
             preferences.currentChaptersIndicator.key(),
             defaultValue = preferences.currentChaptersIndicator.defaultValue(),
             title = { Text(stringResource(R.string.pref_player_controls_show_chapter_indicator)) },
-            summary = { Text(stringResource(R.string.pref_player_controls_show_chapters_subtitle)) },
+            summary = { Text(stringResource(R.string.pref_player_controls_show_chapters_summary)) },
           )
         }
       }

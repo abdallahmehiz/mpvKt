@@ -27,26 +27,17 @@ class PlayerActivity : AppCompatActivity() {
   private val binding by lazy { PlayerLayoutBinding.inflate(this.layoutInflater) }
   val player by lazy { binding.player }
   val windowInsetsController by lazy { WindowCompat.getInsetsController(window, window.decorView) }
+  val audioManager by lazy { getSystemService(Context.AUDIO_SERVICE) as AudioManager }
   private val playerPreferences by inject<PlayerPreferences>()
   private val decoderPreferences by inject<DecoderPreferences>()
-  val audioManager by lazy { getSystemService(Context.AUDIO_SERVICE) as AudioManager }
 
   override fun onCreate(savedInstanceState: Bundle?) {
-    window.setFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS, WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS)
     super.onCreate(savedInstanceState)
+    window.setFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS, WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS)
+    window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
     setContentView(binding.root)
-    player.initialize(
-      applicationContext.filesDir.path,
-      applicationContext.cacheDir.path,
-      "v",
-      if(decoderPreferences.gpuNext.get()) "gpu-next" else "gpu"
-    )
-    MPVLib.setPropertyString(
-      "hwdec",
-      if (decoderPreferences.tryHWDecoding.get()) "auto-copy" else "no"
-    )
-    player.addObserver(PlayerObserver(this))
-    Utils.copyAssets(this)
+
+    setupMPV()
     val uri = parsePathFromIntent(intent)
     val videoUri = if (uri?.startsWith("content://") == true) {
       openContentFd(Uri.parse(uri))
@@ -54,7 +45,6 @@ class PlayerActivity : AppCompatActivity() {
       uri
     }
     player.playFile(videoUri!!)
-    window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
     setOrientation()
     val controls = PlayerControls(viewModel)
 
@@ -74,6 +64,36 @@ class PlayerActivity : AppCompatActivity() {
     super.onPause()
     if (viewModel.paused.value) return
     viewModel.pauseUnpause()
+  }
+
+  private fun setupMPV() {
+
+    Utils.copyAssets(this)
+
+    player.initialize(
+      applicationContext.filesDir.path,
+      applicationContext.cacheDir.path,
+      "v",
+      if(decoderPreferences.gpuNext.get()) "gpu-next" else "gpu"
+    )
+
+    MPVLib.setPropertyString(
+      "hwdec",
+      if (decoderPreferences.tryHWDecoding.get()) "auto-copy" else "no"
+    )
+    when(decoderPreferences.debanding.get()) {
+      Debanding.None -> {}
+      Debanding.CPU -> MPVLib.setPropertyString("vf", "gradfun=radius=12")
+      Debanding.GPU -> MPVLib.setPropertyString("deband", "yes")
+    }
+    if(decoderPreferences.useYUV420P.get()) MPVLib.setPropertyString("vf", "format=yuv420p")
+
+    MPVLib.command(arrayOf("script-binding", "stats/display-stats-toggle"))
+    MPVLib.command(
+      arrayOf("script-binding", "stats/display-page-1"),
+    )
+
+    player.addObserver(PlayerObserver(this))
   }
 
   private fun parsePathFromIntent(intent: Intent): String? {
