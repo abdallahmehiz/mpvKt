@@ -39,6 +39,7 @@ class PlayerActivity : AppCompatActivity() {
       applicationContext.filesDir.path,
       applicationContext.cacheDir.path,
       "v",
+      if(decoderPreferences.gpuNext.get()) "gpu-next" else "gpu"
     )
     MPVLib.setPropertyString(
       "hwdec",
