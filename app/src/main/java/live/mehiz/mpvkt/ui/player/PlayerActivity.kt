@@ -9,6 +9,7 @@ import android.os.Bundle
 import android.os.ParcelFileDescriptor
 import android.util.Log
 import android.view.WindowManager
+import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.WindowCompat
 import `is`.xyz.mpv.MPVLib
@@ -36,6 +37,7 @@ class PlayerActivity : AppCompatActivity() {
   private val subtitlesPreferences by inject<SubtitlesPreferences>()
 
   override fun onCreate(savedInstanceState: Bundle?) {
+    enableEdgeToEdge()
     super.onCreate(savedInstanceState)
     window.setFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS, WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS)
     window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)

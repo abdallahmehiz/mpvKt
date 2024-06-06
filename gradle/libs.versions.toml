@@ -35,6 +35,7 @@ androidx-compose-constraintlayout = { group = "androidx.constraintlayout", name 
 
 aniyomi-mpv-lib = { module = "com.github.aniyomiorg:aniyomi-mpv-lib", version = "1.15.n" }
 aniyomi-ffmpeg-kit = { module = "com.github.jmir1:ffmpeg-kit", version = "1.15" }
+arthentica-smartexceptions = { module = "com.arthenica:smart-exception-java", version = "0.2.1" }
 
 seeker = { module = "io.github.2307vivek:seeker", version = "1.2.2" }
 

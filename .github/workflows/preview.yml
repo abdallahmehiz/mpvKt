@@ -1,0 +1,31 @@
+name: Preview
+
+on: [workflow_dispatch]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Setup JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'adopt'
+          java-version: 17
+          cache: 'gradle'
+
+      - name: Make gradlew executable
+        run: chmod +x ./gradlew
+
+      - name: Build with Gradle
+        run: ./gradlew assemblePreview
+
+      - name: Upload the APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          path: ./app/build/outputs/apk/preview/*.apk
+          name: packages
+          retention-days: 14

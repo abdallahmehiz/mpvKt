@@ -30,12 +30,22 @@ android {
   }
 
   buildTypes {
-    release {
-      isMinifyEnabled = false
+    named("release") {
+      isMinifyEnabled = true
+      isShrinkResources = true
       proguardFiles(
         getDefaultProguardFile("proguard-android-optimize.txt"),
         "proguard-rules.pro",
       )
+    }
+    create("preview") {
+      initWith(getByName("release"))
+
+      signingConfig = signingConfigs["debug"]
+      applicationIdSuffix = ".preview"
+    }
+    named("debug") {
+      applicationIdSuffix = ".debug"
     }
   }
   compileOptions {
@@ -84,6 +94,7 @@ dependencies {
 
   implementation(libs.aniyomi.mpv.lib)
   implementation(libs.aniyomi.ffmpeg.kit)
+  implementation(libs.arthentica.smartexceptions)
 
   implementation(libs.seeker)
   implementation(libs.bundles.koin)
