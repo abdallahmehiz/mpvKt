@@ -1,5 +1,6 @@
 package live.mehiz.mpvkt.di
 
+import live.mehiz.mpvkt.preferences.AdvancedPreferences
 import live.mehiz.mpvkt.preferences.AppearancePreferences
 import live.mehiz.mpvkt.preferences.AudioPreferences
 import live.mehiz.mpvkt.preferences.DecoderPreferences
@@ -19,4 +20,5 @@ val PreferencesModule = module {
   singleOf(::DecoderPreferences)
   singleOf(::SubtitlesPreferences)
   singleOf(::AudioPreferences)
+  singleOf(::AdvancedPreferences)
 }

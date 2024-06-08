@@ -12,9 +12,11 @@ import android.view.WindowManager
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.WindowCompat
+import androidx.documentfile.provider.DocumentFile
 import `is`.xyz.mpv.MPVLib
 import `is`.xyz.mpv.Utils
 import live.mehiz.mpvkt.databinding.PlayerLayoutBinding
+import live.mehiz.mpvkt.preferences.AdvancedPreferences
 import live.mehiz.mpvkt.preferences.AudioPreferences
 import live.mehiz.mpvkt.preferences.DecoderPreferences
 import live.mehiz.mpvkt.preferences.PlayerPreferences
@@ -35,9 +37,10 @@ class PlayerActivity : AppCompatActivity() {
   private val decoderPreferences by inject<DecoderPreferences>()
   private val audioPreferences by inject<AudioPreferences>()
   private val subtitlesPreferences by inject<SubtitlesPreferences>()
+  private val advancedPreferences by inject<AdvancedPreferences>()
 
   override fun onCreate(savedInstanceState: Bundle?) {
-    if(playerPreferences.drawOverDisplayCutout.get()) enableEdgeToEdge()
+    if (playerPreferences.drawOverDisplayCutout.get()) enableEdgeToEdge()
     super.onCreate(savedInstanceState)
     window.setFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS, WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS)
     window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
@@ -77,24 +80,25 @@ class PlayerActivity : AppCompatActivity() {
   private fun setupMPV() {
 
     Utils.copyAssets(this)
+    copyMPVConfigFiles()
 
     player.initialize(
       applicationContext.filesDir.path,
       applicationContext.cacheDir.path,
       "v",
-      if(decoderPreferences.gpuNext.get()) "gpu-next" else "gpu"
+      if (decoderPreferences.gpuNext.get()) "gpu-next" else "gpu",
     )
 
     MPVLib.setPropertyString(
       "hwdec",
-      if (decoderPreferences.tryHWDecoding.get()) "auto-copy" else "no"
+      if (decoderPreferences.tryHWDecoding.get()) "auto-copy" else "no",
     )
-    when(decoderPreferences.debanding.get()) {
+    when (decoderPreferences.debanding.get()) {
       Debanding.None -> {}
       Debanding.CPU -> MPVLib.setPropertyString("vf", "gradfun=radius=12")
       Debanding.GPU -> MPVLib.setPropertyString("deband", "yes")
     }
-    if(decoderPreferences.useYUV420P.get()) MPVLib.setPropertyString("vf", "format=yuv420p")
+    if (decoderPreferences.useYUV420P.get()) MPVLib.setPropertyString("vf", "format=yuv420p")
 
     player.addObserver(PlayerObserver(this))
   }
@@ -105,6 +109,23 @@ class PlayerActivity : AppCompatActivity() {
 
   private fun setupSubtitles() {
     MPVLib.setPropertyString("slang", subtitlesPreferences.preferredLanguages.get())
+  }
+
+  private fun copyMPVConfigFiles() {
+    val applicationPath = applicationContext.filesDir.path
+    try {
+      DocumentFile.fromTreeUri(this, Uri.parse(advancedPreferences.mpvConfStorageUri.get()))!!.listFiles().forEach {
+        if (it.isDirectory) {
+          DocumentFile.fromFile(File(applicationPath)).createDirectory(it.name!!)
+          return@forEach
+        }
+        val input = contentResolver.openInputStream(it.uri)
+        input!!.copyTo(File(applicationPath + "/" + it.name).outputStream())
+      }
+    } catch (e: Exception) {
+      File(applicationContext.filesDir.path + "/mpv.conf").writeText(advancedPreferences.mpvConf.get())
+      Log.e("PlayerActivity", "Couldn't copy mpv configuration files: ${e.message}")
+    }
   }
 
   private fun parsePathFromIntent(intent: Intent): String? {

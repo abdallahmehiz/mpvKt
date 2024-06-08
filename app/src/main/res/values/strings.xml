@@ -48,6 +48,11 @@
 
     <string name="pref_audio">Audio</string>
 
+    <string name="pref_advanced">Advanced</string>
+    <string name="pref_advanced_mpv_conf_storage_location">pick mpv configuration storage location</string>
+    <string name="pref_advanced_mpv_conf">Edit mpv.conf</string>
+    <string name="pref_advanced_input_conf">Edit input.conf</string>
+
     <string name="player_sheets_add_ext_sub">Add external subtitles</string>
     <string name="player_sheets_add_ext_audio">Add external audio tracks</string>
     <string name="player_sheets_tracks_off">Off</string>

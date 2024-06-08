@@ -6,6 +6,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.outlined.Audiotrack
+import androidx.compose.material.icons.outlined.Code
 import androidx.compose.material.icons.outlined.Memory
 import androidx.compose.material.icons.outlined.Palette
 import androidx.compose.material.icons.outlined.PlayCircle
@@ -25,7 +26,6 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 import live.mehiz.mpvkt.R
 import me.zhanghai.compose.preference.ProvidePreferenceLocals
 import me.zhanghai.compose.preference.preference
-import me.zhanghai.compose.preference.preferenceTheme
 
 object PreferencesScreen : Screen {
   @OptIn(ExperimentalMaterial3Api::class)
@@ -79,6 +79,12 @@ object PreferencesScreen : Screen {
             title = { Text(text = stringResource(id = R.string.pref_audio)) },
             icon = { Icon(Icons.Outlined.Audiotrack, null) },
             onClick = { navigator.push(AudioPreferencesScreen) },
+          )
+          preference(
+            key = "advanced",
+            title = { Text(text = stringResource(R.string.pref_advanced)) },
+            icon = { Icon(Icons.Outlined.Code, null) },
+            onClick = { navigator.push(AdvancedPreferencesScreen) }
           )
         }
       }
