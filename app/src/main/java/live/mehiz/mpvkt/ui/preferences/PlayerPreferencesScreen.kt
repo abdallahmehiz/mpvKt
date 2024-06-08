@@ -70,6 +70,11 @@ object PlayerPreferencesScreen : Screen {
             )
           }
           switchPreference(
+            key = preferences.drawOverDisplayCutout.key(),
+            defaultValue = preferences.drawOverDisplayCutout.defaultValue(),
+            title = { Text(stringResource(R.string.pref_player_draw_over_cutout)) },
+          )
+          switchPreference(
             key = preferences.doubleTapToPause.key(),
             defaultValue = preferences.doubleTapToPause.defaultValue(),
             title = { Text(text = stringResource(id = R.string.pref_player_double_tap_to_pause)) },

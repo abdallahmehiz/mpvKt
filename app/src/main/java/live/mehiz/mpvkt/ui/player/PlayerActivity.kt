@@ -37,7 +37,7 @@ class PlayerActivity : AppCompatActivity() {
   private val subtitlesPreferences by inject<SubtitlesPreferences>()
 
   override fun onCreate(savedInstanceState: Bundle?) {
-    enableEdgeToEdge()
+    if(playerPreferences.drawOverDisplayCutout.get()) enableEdgeToEdge()
     super.onCreate(savedInstanceState)
     window.setFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS, WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS)
     window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
