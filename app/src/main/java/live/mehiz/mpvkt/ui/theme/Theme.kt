@@ -12,7 +12,6 @@ import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import live.mehiz.mpvkt.R
 import live.mehiz.mpvkt.preferences.AppearancePreferences
@@ -80,14 +79,14 @@ enum class DarkMode(@StringRes val titleRes: Int) {
 object PlayerRippleTheme : RippleTheme {
 
   private val alpha = RippleAlpha(
-    0.5f,
-    1f,
-    1f,
-    1f,
+    .5f,
+    .5f,
+    .3f,
+    .8f,
   )
 
   @Composable
-  override fun defaultColor() = Color.White
+  override fun defaultColor() = MaterialTheme.colorScheme.primaryContainer
 
   @Composable
   override fun rippleAlpha() = alpha

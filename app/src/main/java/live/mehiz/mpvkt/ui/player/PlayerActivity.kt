@@ -5,6 +5,7 @@ import android.content.Intent
 import android.content.pm.ActivityInfo
 import android.media.AudioManager
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.os.ParcelFileDescriptor
 import android.util.Log
@@ -89,6 +90,13 @@ class PlayerActivity : AppCompatActivity() {
       if (decoderPreferences.gpuNext.get()) "gpu-next" else "gpu",
     )
 
+    val statisticsPage = advancedPreferences.enabledStatisticsPage.get()
+    if(statisticsPage != 0) {
+      MPVLib.command(arrayOf("script-binding", "stats/display-stats-toggle"))
+      MPVLib.command(
+        arrayOf("script-binding", "stats/display-page-$statisticsPage"),
+      )
+    }
     MPVLib.setPropertyString(
       "hwdec",
       if (decoderPreferences.tryHWDecoding.get()) "auto-copy" else "no",

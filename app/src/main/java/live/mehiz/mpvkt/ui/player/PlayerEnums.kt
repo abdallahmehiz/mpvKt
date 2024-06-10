@@ -39,3 +39,14 @@ enum class Debanding {
   CPU,
   GPU,
 }
+
+enum class Sheets {
+  None,
+  SubtitlesSheet,
+  AudioSheet,
+  Chapters,
+  Decoders,
+  More
+  ;
+}
+

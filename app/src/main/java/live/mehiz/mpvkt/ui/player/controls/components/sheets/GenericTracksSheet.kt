@@ -2,6 +2,7 @@ package live.mehiz.mpvkt.ui.player.controls.components.sheets
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -11,9 +12,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -21,9 +20,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import live.mehiz.mpvkt.R
+import live.mehiz.mpvkt.presentation.PlayerSheet
 import live.mehiz.mpvkt.ui.player.Track
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun <T> GenericTracksSheet(
   tracks: List<T>,
@@ -32,25 +31,27 @@ fun <T> GenericTracksSheet(
   footer: @Composable () -> Unit = {},
   onDismissRequest: () -> Unit,
 ) {
-  ModalBottomSheet(
+  PlayerSheet(
     onDismissRequest,
   ) {
-    header()
-    LazyColumn(
-      modifier = Modifier.weight(1f)
-    ) {
-      items(tracks) {
-        track(it)
+    Column {
+      header()
+      LazyColumn(
+        modifier = Modifier.weight(1f, fill = false),
+      ) {
+        items(tracks) {
+          track(it)
+        }
       }
+      footer()
     }
-    footer()
   }
 }
 
 @Composable
 fun AddTrackRow(
   title: String,
-  onClick: () -> Unit
+  onClick: () -> Unit,
 ) {
   Row(
     modifier = Modifier
@@ -59,12 +60,12 @@ fun AddTrackRow(
       .height(48.dp)
       .padding(horizontal = 16.dp),
     verticalAlignment = Alignment.CenterVertically,
-    horizontalArrangement = Arrangement.spacedBy(8.dp)
+    horizontalArrangement = Arrangement.spacedBy(8.dp),
   ) {
     Icon(
       Icons.Default.Add,
       null,
-      modifier = Modifier.size(32.dp)
+      modifier = Modifier.size(32.dp),
     )
     Text(title)
   }
@@ -76,24 +77,19 @@ fun getTrackTitle(track: Track): String {
     track.id == -1 -> {
       track.name
     }
+
     track.language.isNullOrBlank() && track.name.isNotBlank() -> {
       stringResource(R.string.player_sheets_track_title_wo_lang, track.id, track.name)
     }
+
     !track.language.isNullOrBlank() && track.name.isNotBlank() -> {
       stringResource(R.string.player_sheets_track_title_w_lang, track.id, track.name, track.language)
     }
+
     !track.language.isNullOrBlank() && track.name.isBlank() -> {
       stringResource(R.string.player_sheets_track_lang_wo_title, track.id, track.language)
     }
+
     else -> stringResource(R.string.player_sheets_track_title_wo_lang, track.id, track.name)
   }
-}
-
-enum class Sheets {
-  None,
-  SubtitlesSheet,
-  AudioSheet,
-  Chapters,
-  Decoders,
-  ;
 }

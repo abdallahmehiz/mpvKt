@@ -34,6 +34,7 @@ import androidx.compose.material.icons.filled.Audiotrack
 import androidx.compose.material.icons.filled.Bookmarks
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.LockOpen
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Subtitles
@@ -70,6 +71,7 @@ import live.mehiz.mpvkt.preferences.preference.collectAsState
 import live.mehiz.mpvkt.presentation.LeftSideOvalShape
 import live.mehiz.mpvkt.presentation.RightSideOvalShape
 import live.mehiz.mpvkt.ui.player.PlayerViewModel
+import live.mehiz.mpvkt.ui.player.Sheets
 import live.mehiz.mpvkt.ui.player.VideoAspect
 import live.mehiz.mpvkt.ui.player.controls.components.ControlsButton
 import live.mehiz.mpvkt.ui.player.controls.components.CurrentChapter
@@ -77,7 +79,7 @@ import live.mehiz.mpvkt.ui.player.controls.components.SeekbarWithTimers
 import live.mehiz.mpvkt.ui.player.controls.components.sheets.AudioTracksSheet
 import live.mehiz.mpvkt.ui.player.controls.components.sheets.ChaptersSheet
 import live.mehiz.mpvkt.ui.player.controls.components.sheets.DecodersSheet
-import live.mehiz.mpvkt.ui.player.controls.components.sheets.Sheets
+import live.mehiz.mpvkt.ui.player.controls.components.sheets.MoreSheet
 import live.mehiz.mpvkt.ui.player.controls.components.sheets.SubtitlesSheet
 import live.mehiz.mpvkt.ui.theme.PlayerRippleTheme
 import org.koin.compose.koinInject
@@ -100,8 +102,15 @@ class PlayerControls(
       viewModel.hideSeekBar()
     }
     var sheetShown by remember { mutableStateOf(Sheets.None) }
+    var pausedByASheet by remember { mutableStateOf(false) }
     LaunchedEffect(sheetShown) {
-      if(sheetShown == Sheets.None) viewModel.pause()
+      if (sheetShown != Sheets.None) {
+        pausedByASheet = !viewModel.paused.value
+        viewModel.pause()
+      } else {
+        if (pausedByASheet) viewModel.unpause()
+        pausedByASheet = false
+      }
     }
     val position by viewModel.pos.collectAsState()
     val currentChapter by viewModel.currentChapter.collectAsState()
@@ -377,7 +386,7 @@ class PlayerControls(
               onClick = { viewModel.cycleDecoders() },
               onLongClick = {
                 sheetShown = Sheets.Decoders
-              }
+              },
             )
             if (playerPreferences.showChaptersButton.get() && viewModel.chapters.isNotEmpty()) {
               ControlsButton(
@@ -392,6 +401,10 @@ class PlayerControls(
             ControlsButton(
               Icons.Default.Audiotrack,
               onClick = { sheetShown = Sheets.AudioSheet },
+            )
+            ControlsButton(
+              Icons.Default.MoreVert,
+              onClick = { sheetShown = Sheets.More },
             )
           }
         }
@@ -411,9 +424,9 @@ class PlayerControls(
               Icons.Default.AspectRatio,
               onClick = {
                 when (aspect) {
-                  VideoAspect.Fit -> viewModel.changeVideoAspect(VideoAspect.Crop)
-                  VideoAspect.Crop -> viewModel.changeVideoAspect(VideoAspect.Stretch)
-                  VideoAspect.Stretch -> viewModel.changeVideoAspect(VideoAspect.Fit)
+                  VideoAspect.Fit -> viewModel.changeVideoAspect(VideoAspect.Stretch)
+                  VideoAspect.Stretch -> viewModel.changeVideoAspect(VideoAspect.Crop)
+                  VideoAspect.Crop -> viewModel.changeVideoAspect(VideoAspect.Fit)
                 }
               },
             )
@@ -446,10 +459,7 @@ class PlayerControls(
             ) {
               CurrentChapter(
                 currentChapter!!,
-                onClick = {
-                  viewModel.pause()
-                  sheetShown = Sheets.Chapters
-                },
+                onClick = { sheetShown = Sheets.Chapters },
               )
             }
           }
@@ -468,14 +478,11 @@ class PlayerControls(
             if (it == null) return@rememberLauncherForActivityResult
             viewModel.addSubtitle(it)
           }
-          viewModel.pause()
           SubtitlesSheet(
             subtitles,
             selectedSubs,
             { viewModel.selectSub(it) },
-            {
-              subtitlesPicker.launch(arrayOf("*/*"))
-            },
+            { subtitlesPicker.launch(arrayOf("*/*")) },
           ) { sheetShown = Sheets.None }
         }
 
@@ -511,6 +518,12 @@ class PlayerControls(
             selectedDecoder = currentDecoder,
             onSelect = { viewModel.updateDecoder(it) },
           ) { sheetShown = Sheets.None }
+        }
+
+        Sheets.More -> {
+          MoreSheet {
+            sheetShown = Sheets.None
+          }
         }
       }
     }
