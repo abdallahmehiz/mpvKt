@@ -79,10 +79,10 @@ enum class DarkMode(@StringRes val titleRes: Int) {
 object PlayerRippleTheme : RippleTheme {
 
   private val alpha = RippleAlpha(
-    .5f,
-    .5f,
     .3f,
-    .8f,
+    .4f,
+    .2f,
+    .4f,
   )
 
   @Composable

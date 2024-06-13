@@ -35,7 +35,7 @@
             android:supportsPictureInPicture="true"
             android:resizeableActivity="true"
             android:configChanges="orientation|screenLayout|screenSize|smallestScreenSize|keyboardHidden|keyboard"
-            android:theme="@style/Theme.AppCompat.DayNight.NoActionBar">
+            android:theme="@style/Theme.MpvKt">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
 

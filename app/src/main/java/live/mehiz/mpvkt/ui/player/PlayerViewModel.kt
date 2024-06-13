@@ -5,11 +5,13 @@ import android.net.Uri
 import android.util.DisplayMetrics
 import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import `is`.xyz.mpv.MPVLib
 import `is`.xyz.mpv.MPVView
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import live.mehiz.mpvkt.R
 import live.mehiz.mpvkt.preferences.PlayerPreferences
 import org.koin.java.KoinJavaComponent.inject
@@ -21,6 +23,10 @@ class PlayerViewModel(
 
   private val _currentDecoder = MutableStateFlow(getDecoderFromValue(MPVLib.getPropertyString("hwdec")))
   val currentDecoder = _currentDecoder.asStateFlow()
+
+  var fileName = ""
+
+  val isLoading = MutableStateFlow(true)
 
   private val _subtitleTracks = MutableStateFlow<List<Track>>(emptyList())
   val subtitleTracks = _subtitleTracks.asStateFlow()
@@ -39,7 +45,7 @@ class PlayerViewModel(
   private val _pos = MutableStateFlow(0f)
   val pos = _pos.asStateFlow()
 
-  var duration: Float = 0f
+  val duration = MutableStateFlow(0f)
 
   private val _readAhead = MutableStateFlow(0f)
   val readAhead = _readAhead.asStateFlow()
@@ -66,10 +72,10 @@ class PlayerViewModel(
         Decoder.HW -> Decoder.SW.value
         Decoder.SW -> Decoder.HWPlus.value
         Decoder.Auto -> Decoder.SW.value
-      }
+      },
     )
     val newDecoder = activity.player.hwdecActive
-    if(newDecoder != currentDecoder.value.value) {
+    if (newDecoder != currentDecoder.value.value) {
       _currentDecoder.update { getDecoderFromValue(newDecoder) }
     }
   }
@@ -77,7 +83,7 @@ class PlayerViewModel(
   fun updateDecoder(decoder: Decoder) {
     MPVLib.setPropertyString("hwdec", decoder.value)
     val newDecoder = activity.player.hwdecActive
-    if(newDecoder != currentDecoder.value.value) {
+    if (newDecoder != currentDecoder.value.value) {
       _currentDecoder.update { getDecoderFromValue(newDecoder) }
     }
   }
@@ -99,25 +105,28 @@ class PlayerViewModel(
   }
 
   fun loadTracks() {
-    val tracksCount = MPVLib.getPropertyInt("track-list/count")!!
-    val possibleTrackTypes = listOf("video", "audio", "sub")
-    val vidTracks = mutableListOf<Track>()
-    val subTracks = mutableListOf<Track>()
-    val audioTracks = mutableListOf(Track(-1, activity.getString(R.string.player_sheets_tracks_off), null))
-    for (i in 0..<tracksCount) {
-      val type = getTrackType(i) ?: continue
-      if (!possibleTrackTypes.contains(type)) continue
-      when (type) {
-        "audio" -> audioTracks.add(Track(getTrackMPVId(i), getTrackTitle(i), getTrackLanguage(i)))
-        "video" -> vidTracks.add(Track(getTrackMPVId(i), getTrackTitle(i), getTrackLanguage(i)))
-        "sub" -> subTracks.add(Track(getTrackMPVId(i), getTrackTitle(i), getTrackLanguage(i)))
-        else -> throw IllegalStateException()
+    viewModelScope.launch {
+      fileName = MPVLib.getPropertyString("media-title")
+      val tracksCount = MPVLib.getPropertyInt("track-list/count")!!
+      val possibleTrackTypes = listOf("video", "audio", "sub")
+      val vidTracks = mutableListOf<Track>()
+      val subTracks = mutableListOf<Track>()
+      val audioTracks = mutableListOf(Track(-1, activity.getString(R.string.player_sheets_tracks_off), null))
+      for (i in 0..<tracksCount) {
+        val type = getTrackType(i) ?: continue
+        if (!possibleTrackTypes.contains(type)) continue
+        when (type) {
+          "sub" -> subTracks.add(Track(getTrackMPVId(i), getTrackTitle(i), getTrackLanguage(i)))
+          "audio" -> audioTracks.add(Track(getTrackMPVId(i), getTrackTitle(i), getTrackLanguage(i)))
+          "video" -> vidTracks.add(Track(getTrackMPVId(i), getTrackTitle(i), getTrackLanguage(i)))
+          else -> throw IllegalStateException()
+        }
       }
+      _subtitleTracks.update { subTracks }
+      _selectedSubtitles.update { listOf(activity.player.sid, activity.player.secondarySid) }
+      _audioTracks.update { audioTracks }
+      _selectedAudio.update { activity.player.aid }
     }
-    _subtitleTracks.update { subTracks }
-    _selectedSubtitles.update { listOf(activity.player.sid, activity.player.secondarySid) }
-    _audioTracks.update { audioTracks }
-    _selectedAudio.update { activity.player.aid }
   }
 
 
@@ -193,7 +202,7 @@ class PlayerViewModel(
   }
 
   fun updateReadAhead(value: Long) {
-    _readAhead.value = pos.value + value.toFloat()
+    _readAhead.update { value.toFloat() }
   }
 
   fun pauseUnpause() {
@@ -208,15 +217,15 @@ class PlayerViewModel(
 
   fun unpause() {
     activity.player.paused = false
-    _paused.value = false
+    _paused.update { false }
   }
 
   fun showControls() {
-    _controlsShown.value = true
+    _controlsShown.update { true }
   }
 
   fun hideControls() {
-    _controlsShown.value = false
+    _controlsShown.update { false }
     activity.windowInsetsController.hide(WindowInsetsCompat.Type.systemBars())
   }
 
@@ -227,33 +236,35 @@ class PlayerViewModel(
   }
 
   fun toggleSeekBar() {
-    _seekBarShown.value = !seekBarShown.value
+    _seekBarShown.update { !seekBarShown.value }
   }
 
   fun hideSeekBar() {
-    _seekBarShown.value = false
+    _seekBarShown.update { false }
   }
 
   fun showSeekBar() {
-    _seekBarShown.value = true
+    _seekBarShown.update { true }
   }
 
   fun lockControls() {
-    _areControlsLocked.value = true
+    _areControlsLocked.update { true }
   }
 
   fun unlockControls() {
-    _areControlsLocked.value = false
+    _areControlsLocked.update { false }
   }
 
   fun seekBy(offset: Int) {
     activity.player.timePos = activity.player.timePos?.plus(offset)
+    isLoading.update { true }
   }
 
   fun seekTo(position: Int) {
     if (position < 0) return
     if (position > (activity.player.duration ?: 0)) return
     activity.player.timePos = position
+    isLoading.update { true }
   }
 
   fun changeBrightnessWithDrag(

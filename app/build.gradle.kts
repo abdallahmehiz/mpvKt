@@ -92,6 +92,8 @@ dependencies {
   implementation(libs.androidx.compose.constraintlayout)
   implementation(libs.androidx.material3.icons.extended)
   implementation(libs.androidx.documentfile)
+  implementation(libs.androidx.compose.animation.graphics)
+  implementation(libs.material)
 
   implementation(libs.aniyomi.mpv.lib)
   implementation(libs.aniyomi.ffmpeg.kit)

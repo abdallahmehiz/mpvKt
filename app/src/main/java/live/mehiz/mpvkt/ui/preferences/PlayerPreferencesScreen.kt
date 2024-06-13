@@ -83,7 +83,6 @@ object PlayerPreferencesScreen : Screen {
             key = preferences.doubleTapToSeek.key(),
             defaultValue = preferences.doubleTapToSeek.defaultValue(),
             title = { Text(text = stringResource(id = R.string.pref_player_double_tap_to_seek)) },
-            enabled = { !doubleTapToPause },
           )
           listPreference(
             key = preferences.doubleTapToSeekDuration.key(),
@@ -92,7 +91,7 @@ object PlayerPreferencesScreen : Screen {
             valueToText = { AnnotatedString("${it}s") },
             title = { Text(text = stringResource(id = R.string.pref_player_double_tap_seek_duration)) },
             summary = { Text(text = "${it}s") },
-            enabled = { !doubleTapToPause && doubleTapToSeek },
+            enabled = { doubleTapToSeek },
           )
           preferenceCategory(
             "gestures",

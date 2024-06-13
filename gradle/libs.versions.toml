@@ -33,11 +33,11 @@ androidx-constraintlayout = { group = "androidx.constraintlayout", name = "const
 androidx-material3-icons-extended = { group = "androidx.compose.material", name = "material-icons-extended", version = "1.6.7" }
 androidx-compose-constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout-compose", version = "1.0.1" }
 androidx-documentfile = { group = "androidx.documentfile", name = "documentfile", version = "1.0.1" }
-
+androidx-compose-animation-graphics = { group = "androidx.compose.animation", name = "animation-graphics-android" }
 aniyomi-mpv-lib = { module = "com.github.aniyomiorg:aniyomi-mpv-lib", version = "1.15.n" }
 aniyomi-ffmpeg-kit = { module = "com.github.jmir1:ffmpeg-kit", version = "1.15" }
 arthentica-smartexceptions = { module = "com.arthenica:smart-exception-java", version = "0.2.1" }
-
+material = "com.google.android.material:material:1.12.0"
 seeker = { module = "io.github.2307vivek:seeker", version = "1.2.2" }
 
 koin-core = { module = "io.insert-koin:koin-core", version.ref = "koin" }

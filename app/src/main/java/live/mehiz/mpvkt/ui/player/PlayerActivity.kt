@@ -16,6 +16,7 @@ import androidx.core.view.WindowCompat
 import androidx.documentfile.provider.DocumentFile
 import `is`.xyz.mpv.MPVLib
 import `is`.xyz.mpv.Utils
+import kotlinx.coroutines.flow.update
 import live.mehiz.mpvkt.databinding.PlayerLayoutBinding
 import live.mehiz.mpvkt.preferences.AdvancedPreferences
 import live.mehiz.mpvkt.preferences.AudioPreferences
@@ -91,7 +92,7 @@ class PlayerActivity : AppCompatActivity() {
     )
 
     val statisticsPage = advancedPreferences.enabledStatisticsPage.get()
-    if(statisticsPage != 0) {
+    if (statisticsPage != 0) {
       MPVLib.command(arrayOf("script-binding", "stats/display-stats-toggle"))
       MPVLib.command(
         arrayOf("script-binding", "stats/display-page-$statisticsPage"),
@@ -191,14 +192,9 @@ class PlayerActivity : AppCompatActivity() {
   // a bunch of observers
   internal fun onObserverEvent(property: String, value: Long) {
     when (property) {
-      "time-pos" -> {
-        viewModel.updatePlayBackPos(value.toFloat())
-        viewModel.updateChapter(value)
-      }
-
-      "demuxer-cache-time" -> {
-        viewModel.updateReadAhead(value = value)
-      }
+      "time-pos" -> viewModel.updatePlayBackPos(value.toFloat())
+      "duration" -> viewModel.duration.update { value.toFloat() }
+      "demuxer-cache-time" -> viewModel.updateReadAhead(value = value)
     }
   }
 
@@ -207,7 +203,14 @@ class PlayerActivity : AppCompatActivity() {
   }
 
   internal fun onObserverEvent(property: String, value: Boolean) {
-
+    when (property) {
+      "paused-for-cache" -> {
+        viewModel.isLoading.update { value }
+      }
+      "seeking" -> {
+        viewModel.isLoading.update { value }
+      }
+    }
   }
 
   internal fun onObserverEvent(property: String, value: String) {
@@ -219,10 +222,14 @@ class PlayerActivity : AppCompatActivity() {
       MPVLib.mpvEventId.MPV_EVENT_FILE_LOADED -> {
         setOrientation()
         viewModel.changeVideoAspect(playerPreferences.videoAspect.get())
-        viewModel.duration = player.duration!!.toFloat()
+        viewModel.duration.value = player.duration!!.toFloat()
         viewModel.loadChapters()
         viewModel.loadTracks()
         viewModel.getDecoder()
+      }
+
+      MPVLib.mpvEventId.MPV_EVENT_SEEK -> {
+        viewModel.isLoading.update { true }
       }
 
       MPVLib.mpvEventId.MPV_EVENT_END_FILE -> {
