@@ -29,6 +29,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import `is`.xyz.mpv.MPVView
 import `is`.xyz.mpv.Utils
+import live.mehiz.mpvkt.ui.theme.spacing
 
 @Composable
 fun CurrentChapter(
@@ -41,7 +42,7 @@ fun CurrentChapter(
       .clip(RoundedCornerShape(25))
       .background(MaterialTheme.colorScheme.background.copy(alpha = 0.6F))
       .clickable(onClick = onClick)
-      .padding(horizontal = 16.dp, vertical = 8.dp),
+      .padding(horizontal = MaterialTheme.spacing.medium, vertical = MaterialTheme.spacing.smaller),
   ) {
     AnimatedContent(
       targetState = chapter,

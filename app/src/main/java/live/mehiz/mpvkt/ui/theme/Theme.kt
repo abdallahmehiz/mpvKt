@@ -11,6 +11,7 @@ import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.LocalContext
 import live.mehiz.mpvkt.R
@@ -62,11 +63,15 @@ fun MpvKtTheme(content: @Composable () -> Unit) {
     else -> if (darkTheme) DarkColorScheme else LightColorScheme
   }
 
-  MaterialTheme(
-    colorScheme = colorScheme,
-    typography = Typography,
-    content = content,
-  )
+  CompositionLocalProvider(
+    LocalSpacing provides Spacing()
+  ) {
+    MaterialTheme(
+      colorScheme = colorScheme,
+      typography = Typography,
+      content = content,
+    )
+  }
 }
 
 enum class DarkMode(@StringRes val titleRes: Int) {

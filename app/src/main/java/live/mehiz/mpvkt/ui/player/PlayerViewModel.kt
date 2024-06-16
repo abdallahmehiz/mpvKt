@@ -60,6 +60,9 @@ class PlayerViewModel(
   private val _areControlsLocked = MutableStateFlow(false)
   val areControlsLocked = _areControlsLocked.asStateFlow()
 
+  val sheetShown = MutableStateFlow(Sheets.None)
+  val gestureSeekAmount = MutableStateFlow(0)
+
   fun getDecoder() {
     _currentDecoder.update { getDecoderFromValue(activity.player.hwdecActive) }
   }

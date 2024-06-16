@@ -24,6 +24,7 @@ import dev.vivvvek.seeker.SeekerDefaults
 import dev.vivvvek.seeker.Segment
 import `is`.xyz.mpv.MPVView.Chapter
 import `is`.xyz.mpv.Utils
+import live.mehiz.mpvkt.ui.theme.spacing
 
 @Composable
 fun SeekbarWithTimers(
@@ -40,7 +41,7 @@ fun SeekbarWithTimers(
   Row(
     modifier = Modifier.height(48.dp),
     verticalAlignment = Alignment.CenterVertically,
-    horizontalArrangement = Arrangement.spacedBy(4.dp),
+    horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.extraSmall),
   ) {
     VideoTimer(
       value = position,
