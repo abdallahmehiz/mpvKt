@@ -137,6 +137,12 @@ class PlayerActivity : AppCompatActivity() {
     }
   }
 
+  private fun setupIntents(intent: Intent) {
+    val title = intent.getStringExtra("title")
+    if (title?.isNotBlank() == true) viewModel.fileName = intent.getStringExtra("title") ?: ""
+    player.timePos = intent.getIntExtra("position", 0) / 1000
+  }
+
   private fun parsePathFromIntent(intent: Intent): String? {
     val filepath: String? = when (intent.action) {
       Intent.ACTION_VIEW -> intent.data?.let { resolveUri(it) }
@@ -226,6 +232,7 @@ class PlayerActivity : AppCompatActivity() {
         viewModel.loadChapters()
         viewModel.loadTracks()
         viewModel.getDecoder()
+        setupIntents(intent)
       }
 
       MPVLib.mpvEventId.MPV_EVENT_SEEK -> {
@@ -233,9 +240,26 @@ class PlayerActivity : AppCompatActivity() {
       }
 
       MPVLib.mpvEventId.MPV_EVENT_END_FILE -> {
-        onDestroy()
+        endPlayback(EndPlaybackReason.PlaybackCompleted)
       }
     }
+  }
+
+  override fun finish() {
+    endPlayback(EndPlaybackReason.ExternalAction)
+  }
+
+  private fun endPlayback(reason: EndPlaybackReason) {
+    if (!intent.getBooleanExtra("return_result", false)) {
+      super.finish()
+      return
+    }
+    val returnIntent = Intent()
+    returnIntent.putExtra("end_by", reason.value)
+    player.timePos?.let { returnIntent.putExtra("position", it * 1000) }
+    player.duration?.let { returnIntent.putExtra("duration", it * 1000) }
+    setResult(RESULT_OK, returnIntent)
+    super.finish()
   }
 
   internal fun efEvent(err: String?) {

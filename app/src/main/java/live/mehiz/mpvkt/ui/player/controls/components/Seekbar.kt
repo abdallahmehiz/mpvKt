@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.material3.MaterialTheme
@@ -94,9 +93,8 @@ fun VideoTimer(
   )
 }
 
-fun Chapter.toSegment(): Segment {
-  return Segment(this.title ?: "", this.time.toFloat())
-}
+// Seeker doesn't like the first chapter's time being bigger than 0
+fun Chapter.toSegment() = Segment(title ?: time.toString(), if(index != 0) time.toFloat() else 0f)
 
 @Preview
 @Composable

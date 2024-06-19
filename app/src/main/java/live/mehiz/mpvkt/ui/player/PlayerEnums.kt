@@ -50,3 +50,8 @@ enum class Sheets {
   ;
 }
 
+enum class EndPlaybackReason(val value: String) {
+  ExternalAction("external_action"),
+  PlaybackCompleted("playback_completion"),
+  Error("error"),
+}
