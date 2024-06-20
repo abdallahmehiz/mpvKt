@@ -5,7 +5,6 @@ import android.content.Intent
 import android.content.pm.ActivityInfo
 import android.media.AudioManager
 import android.net.Uri
-import android.os.Build
 import android.os.Bundle
 import android.os.ParcelFileDescriptor
 import android.util.Log
@@ -16,7 +15,12 @@ import androidx.core.view.WindowCompat
 import androidx.documentfile.provider.DocumentFile
 import `is`.xyz.mpv.MPVLib
 import `is`.xyz.mpv.Utils
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
+import live.mehiz.mpvkt.database.MpvKtDatabase
+import live.mehiz.mpvkt.database.entities.PlaybackStateEntity
 import live.mehiz.mpvkt.databinding.PlayerLayoutBinding
 import live.mehiz.mpvkt.preferences.AdvancedPreferences
 import live.mehiz.mpvkt.preferences.AudioPreferences
@@ -32,14 +36,15 @@ class PlayerActivity : AppCompatActivity() {
 
   private val viewModel: PlayerViewModel by lazy { PlayerViewModel(this) }
   private val binding by lazy { PlayerLayoutBinding.inflate(this.layoutInflater) }
+  private val mpvKtDatabase: MpvKtDatabase by inject()
   val player by lazy { binding.player }
   val windowInsetsController by lazy { WindowCompat.getInsetsController(window, window.decorView) }
   val audioManager by lazy { getSystemService(Context.AUDIO_SERVICE) as AudioManager }
-  private val playerPreferences by inject<PlayerPreferences>()
-  private val decoderPreferences by inject<DecoderPreferences>()
-  private val audioPreferences by inject<AudioPreferences>()
-  private val subtitlesPreferences by inject<SubtitlesPreferences>()
-  private val advancedPreferences by inject<AdvancedPreferences>()
+  private val playerPreferences: PlayerPreferences by inject()
+  private val decoderPreferences: DecoderPreferences by inject()
+  private val audioPreferences: AudioPreferences by inject()
+  private val subtitlesPreferences: SubtitlesPreferences by inject()
+  private val advancedPreferences: AdvancedPreferences by inject()
 
   override fun onCreate(savedInstanceState: Bundle?) {
     if (playerPreferences.drawOverDisplayCutout.get()) enableEdgeToEdge()
@@ -107,8 +112,11 @@ class PlayerActivity : AppCompatActivity() {
       Debanding.CPU -> MPVLib.setPropertyString("vf", "gradfun=radius=12")
       Debanding.GPU -> MPVLib.setPropertyString("deband", "yes")
     }
-    if (decoderPreferences.useYUV420P.get()) MPVLib.setPropertyString("vf", "format=yuv420p")
-    MPVLib.setPropertyDouble("speed", playerPreferences.defaultSpeed.get().toDouble())
+    if (decoderPreferences.useYUV420P.get()) {
+      MPVLib.setPropertyString("vf", "format=yuv420p")
+    }
+    player.playbackSpeed = playerPreferences.defaultSpeed.get().toDouble()
+    MPVLib.setPropertyString("keep-open", "yes")
 
     player.addObserver(PlayerObserver(this))
   }
@@ -139,8 +147,7 @@ class PlayerActivity : AppCompatActivity() {
   }
 
   private fun setupIntents(intent: Intent) {
-    val title = intent.getStringExtra("title")
-    if (title?.isNotBlank() == true) viewModel.fileName = intent.getStringExtra("title") ?: ""
+    viewModel.fileName = intent.getStringExtra("title") ?: ""
     player.timePos = intent.getIntExtra("position", 0) / 1000
   }
 
@@ -229,11 +236,14 @@ class PlayerActivity : AppCompatActivity() {
       MPVLib.mpvEventId.MPV_EVENT_FILE_LOADED -> {
         setOrientation()
         viewModel.changeVideoAspect(playerPreferences.videoAspect.get())
+        CoroutineScope(Dispatchers.IO).launch {
+          reuseVideoPlaybackState(MPVLib.getPropertyString("media-title"))
+          if (intent.hasExtra("position")) setupIntents(intent)
+        }
         viewModel.duration.value = player.duration!!.toFloat()
         viewModel.loadChapters()
         viewModel.loadTracks()
         viewModel.getDecoder()
-        setupIntents(intent)
       }
 
       MPVLib.mpvEventId.MPV_EVENT_SEEK -> {
@@ -246,11 +256,36 @@ class PlayerActivity : AppCompatActivity() {
     }
   }
 
+  private suspend fun saveVideoPlaybackState() {
+    mpvKtDatabase.videoDataDao().upsert(
+      PlaybackStateEntity(
+        MPVLib.getPropertyString("media-title"),
+        player.timePos?: 0,
+        player.sid,
+        player.secondarySid,
+        player.aid
+      )
+    )
+  }
+
+  private suspend fun reuseVideoPlaybackState(mediaTitle: String) {
+    val state = mpvKtDatabase.videoDataDao().getVideoDataByTitle(mediaTitle)
+    state?.let {
+      player.timePos = it.lastPosition
+      player.sid = it.sid
+      player.secondarySid = it.secondarySid
+      player.aid = it.aid
+    }
+  }
+
   override fun finish() {
     endPlayback(EndPlaybackReason.ExternalAction)
   }
 
   private fun endPlayback(reason: EndPlaybackReason) {
+    CoroutineScope(Dispatchers.IO).launch {
+      saveVideoPlaybackState()
+    }
     if (!intent.getBooleanExtra("return_result", false)) {
       super.finish()
       return

@@ -11,6 +11,7 @@ composeBom = "2024.05.00"
 koin = "3.6.0-wasm-alpha2"
 voyager = "1.0.0"
 material3Android = "1.2.1"
+room = "2.6.1"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -49,11 +50,17 @@ voyager-transitions = { module = "cafe.adriel.voyager:voyager-transitions", vers
 
 compose-prefs = { module = "me.zhanghai.compose.preference:library", version = "1.0.0" }
 
+room-runtime = { module = "androidx.room:room-runtime", version.ref = "room" }
+room-compiler = { module = "androidx.room:room-compiler", version.ref = "room" }
+room-ktx = { module = "androidx.room:room-ktx", version.ref = "room" }
+
 [bundles]
 koin = ["koin-core", "koin-android", "koin-compose"]
 voyager = ["voyager-navigator", "voyager-transitions"]
 
 [plugins]
+ksp = { id = "com.google.devtools.ksp", version = "2.0.0-1.0.22" }
 android-application = { id = "com.android.application", version.ref = "agp" }
 jetbrains-kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+room = { id = "androidx.room", version.ref = "room" }
