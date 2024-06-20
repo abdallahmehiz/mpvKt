@@ -108,6 +108,7 @@ class PlayerActivity : AppCompatActivity() {
       Debanding.GPU -> MPVLib.setPropertyString("deband", "yes")
     }
     if (decoderPreferences.useYUV420P.get()) MPVLib.setPropertyString("vf", "format=yuv420p")
+    MPVLib.setPropertyDouble("speed", playerPreferences.defaultSpeed.get().toDouble())
 
     player.addObserver(PlayerObserver(this))
   }

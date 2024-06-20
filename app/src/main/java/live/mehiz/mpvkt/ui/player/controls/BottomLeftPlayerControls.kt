@@ -12,8 +12,12 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import `is`.xyz.mpv.MPVLib
 import kotlinx.coroutines.flow.update
+import live.mehiz.mpvkt.R
 import live.mehiz.mpvkt.preferences.PlayerPreferences
+import live.mehiz.mpvkt.preferences.preference.collectAsState
 import live.mehiz.mpvkt.ui.player.PlayerViewModel
 import live.mehiz.mpvkt.ui.player.Sheets
 import live.mehiz.mpvkt.ui.player.controls.components.ControlsButton
@@ -31,6 +35,15 @@ fun BottomLeftPlayerControls(viewModel: PlayerViewModel) {
     ControlsButton(
       Icons.Default.Lock,
       onClick = { viewModel.lockControls() },
+    )
+    val defaultSpeed by playerPreferences.defaultSpeed.collectAsState()
+    ControlsButton(
+      text = stringResource(R.string.player_speed, defaultSpeed),
+      onClick = {
+        val newSpeed = if (defaultSpeed >= 2) 0.25f else defaultSpeed + 0.25f
+        MPVLib.setPropertyDouble("speed", newSpeed.toDouble())
+        playerPreferences.defaultSpeed.set(newSpeed)
+      }
     )
     AnimatedVisibility(
       currentChapter != null && playerPreferences.currentChaptersIndicator.get(),
