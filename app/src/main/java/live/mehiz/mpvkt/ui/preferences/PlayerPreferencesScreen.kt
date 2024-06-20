@@ -75,6 +75,11 @@ object PlayerPreferencesScreen : Screen {
             title = { Text(stringResource(R.string.pref_player_draw_over_cutout)) },
           )
           switchPreference(
+            key = preferences.savePositionOnQuit.key(),
+            defaultValue = preferences.savePositionOnQuit.defaultValue(),
+            title = { Text(stringResource(R.string.pref_player_save_position_on_quit)) },
+          )
+          switchPreference(
             key = preferences.doubleTapToPause.key(),
             defaultValue = preferences.doubleTapToPause.defaultValue(),
             title = { Text(text = stringResource(id = R.string.pref_player_double_tap_to_pause)) },

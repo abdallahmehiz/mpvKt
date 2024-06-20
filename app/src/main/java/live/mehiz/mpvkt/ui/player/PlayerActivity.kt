@@ -117,6 +117,9 @@ class PlayerActivity : AppCompatActivity() {
     }
     player.playbackSpeed = playerPreferences.defaultSpeed.get().toDouble()
     MPVLib.setPropertyString("keep-open", "yes")
+    if (playerPreferences.savePositionOnQuit.get()) {
+      MPVLib.setPropertyString("save-position-on-quit", "yes")
+    }
 
     player.addObserver(PlayerObserver(this))
   }
@@ -221,6 +224,7 @@ class PlayerActivity : AppCompatActivity() {
       "paused-for-cache" -> {
         viewModel.isLoading.update { value }
       }
+
       "seeking" -> {
         viewModel.isLoading.update { value }
       }
@@ -234,12 +238,12 @@ class PlayerActivity : AppCompatActivity() {
   internal fun event(eventId: Int) {
     when (eventId) {
       MPVLib.mpvEventId.MPV_EVENT_FILE_LOADED -> {
-        setOrientation()
-        viewModel.changeVideoAspect(playerPreferences.videoAspect.get())
         CoroutineScope(Dispatchers.IO).launch {
           reuseVideoPlaybackState(MPVLib.getPropertyString("media-title"))
           if (intent.hasExtra("position")) setupIntents(intent)
         }
+        setOrientation()
+        viewModel.changeVideoAspect(playerPreferences.videoAspect.get())
         viewModel.duration.value = player.duration!!.toFloat()
         viewModel.loadChapters()
         viewModel.loadTracks()
@@ -260,11 +264,11 @@ class PlayerActivity : AppCompatActivity() {
     mpvKtDatabase.videoDataDao().upsert(
       PlaybackStateEntity(
         MPVLib.getPropertyString("media-title"),
-        player.timePos?: 0,
+        if (playerPreferences.savePositionOnQuit.get()) player.timePos ?: 0 else 0,
         player.sid,
         player.secondarySid,
-        player.aid
-      )
+        player.aid,
+      ),
     )
   }
 

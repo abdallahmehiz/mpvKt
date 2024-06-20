@@ -25,4 +25,5 @@ class PlayerPreferences(
   val showChaptersButton = preferenceStore.getBoolean("show_video_chapters_button", false)
 
   val defaultSpeed = preferenceStore.getFloat("default_speed", 1f)
+  val savePositionOnQuit = preferenceStore.getBoolean("save_position", true)
 }
