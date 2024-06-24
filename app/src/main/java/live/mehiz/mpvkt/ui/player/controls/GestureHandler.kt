@@ -34,12 +34,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.viewinterop.AndroidView
+import `is`.xyz.mpv.MPVLib
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.update
 import live.mehiz.mpvkt.preferences.PlayerPreferences
 import live.mehiz.mpvkt.preferences.preference.collectAsState
 import live.mehiz.mpvkt.presentation.LeftSideOvalShape
 import live.mehiz.mpvkt.presentation.RightSideOvalShape
+import live.mehiz.mpvkt.ui.player.PlayerUpdates
 import live.mehiz.mpvkt.ui.player.PlayerViewModel
 import live.mehiz.mpvkt.ui.player.controls.components.DoubleTapSecondsView
 import live.mehiz.mpvkt.ui.theme.PlayerRippleTheme
@@ -77,7 +79,7 @@ fun GestureHandler(
   val brightnessGesture = playerPreferences.brightnessGesture.get()
   val volumeGesture = playerPreferences.volumeGesture.get()
   val seekGesture = playerPreferences.horizontalSeekGesture.get()
-
+  val defaultSpeed by playerPreferences.defaultSpeed.collectAsState()
   val doubleTapSeek: (Offset, IntSize) -> Unit = { offset, size ->
     targetAlpha = 0.2f
     val isForward = offset.x > 3 * size.width / 5
@@ -89,6 +91,7 @@ fun GestureHandler(
     viewModel.seekBy(if (isSeekingForwards) doubleTapToSeekDuration else -doubleTapToSeekDuration)
     viewModel.showSeekBar()
   }
+  var isLongPressing by remember { mutableStateOf(false) }
   Box(
     modifier = Modifier
       .fillMaxSize()
@@ -117,7 +120,19 @@ fun GestureHandler(
             )
             interactionSource.emit(press)
             tryAwaitRelease()
+            if (isLongPressing) {
+              isLongPressing = false
+              MPVLib.setPropertyDouble("speed", defaultSpeed.toDouble())
+              viewModel.playerUpdate.update { PlayerUpdates.None }
+            }
             interactionSource.emit(PressInteraction.Release(press))
+          },
+          onLongPress = {
+            if (!isLongPressing && !viewModel.paused.value) {
+              isLongPressing = true
+              MPVLib.setPropertyDouble("speed", 2.0)
+              viewModel.playerUpdate.update { PlayerUpdates.DoubleSpeed }
+            }
           },
         )
       }

@@ -12,14 +12,12 @@ enum class PlayerOrientation(@StringRes val titleRes: Int) {
   Landscape(R.string.pref_player_orientation_landscape),
   ReverseLandscape(R.string.pref_player_orientation_reverse_landscape),
   SensorLandscape(R.string.pref_player_orientation_sensor_landscape),
-  ;
 }
 
-enum class VideoAspect {
-  Crop,
-  Fit,
-  Stretch,
-  ;
+enum class VideoAspect(@StringRes val titleRes: Int) {
+  Crop(R.string.player_aspect_crop),
+  Fit(R.string.player_aspect_fit),
+  Stretch(R.string.player_aspect_stretch),
 }
 
 enum class Decoder(val title: String, val value: String) {
@@ -27,7 +25,6 @@ enum class Decoder(val title: String, val value: String) {
   SW("SW", "no"),
   HW("HW", "mediacodec"),
   HWPlus("HW+", "mediacodec-copy"),
-  ;
 }
 
 fun getDecoderFromValue(value: String): Decoder {
@@ -46,8 +43,13 @@ enum class Sheets {
   AudioSheet,
   Chapters,
   Decoders,
-  More
-  ;
+  More,
+}
+
+enum class PlayerUpdates {
+  None,
+  DoubleSpeed,
+  AspectRatio,
 }
 
 enum class EndPlaybackReason(val value: String) {

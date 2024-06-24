@@ -40,18 +40,23 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shadow
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import `is`.xyz.mpv.Utils
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.update
 import live.mehiz.mpvkt.R
 import live.mehiz.mpvkt.preferences.PlayerPreferences
 import live.mehiz.mpvkt.preferences.preference.collectAsState
+import live.mehiz.mpvkt.ui.player.PlayerUpdates
 import live.mehiz.mpvkt.ui.player.PlayerViewModel
 import live.mehiz.mpvkt.ui.player.controls.components.ControlsButton
+import live.mehiz.mpvkt.ui.player.controls.components.DoubleSpeedPlayerUpdate
 import live.mehiz.mpvkt.ui.player.controls.components.SeekbarWithTimers
+import live.mehiz.mpvkt.ui.player.controls.components.TextPlayerUpdate
 import live.mehiz.mpvkt.ui.theme.PlayerRippleTheme
 import live.mehiz.mpvkt.ui.theme.spacing
 import org.koin.compose.koinInject
@@ -106,6 +111,7 @@ class PlayerControls(private val viewModel: PlayerViewModel) {
           .padding(horizontal = MaterialTheme.spacing.medium),
       ) {
         val (
+          playerUpdates,
           seekbar,
           playerPauseButton,
           seekValue,
@@ -115,6 +121,31 @@ class PlayerControls(private val viewModel: PlayerViewModel) {
           bottomRightControls,
           unlockControlsButton,
         ) = createRefs()
+
+        val currentPlayerUpdate by viewModel.playerUpdate.collectAsState()
+        val aspectRatio by playerPreferences.videoAspect.collectAsState()
+        LaunchedEffect(currentPlayerUpdate, aspectRatio) {
+          if (currentPlayerUpdate == PlayerUpdates.DoubleSpeed || currentPlayerUpdate == PlayerUpdates.None)
+            return@LaunchedEffect
+          delay(2000)
+          viewModel.playerUpdate.update { PlayerUpdates.None }
+        }
+        AnimatedVisibility(
+          currentPlayerUpdate != PlayerUpdates.None,
+          enter = fadeIn(),
+          exit = fadeOut(),
+          modifier = Modifier.constrainAs(playerUpdates) {
+            linkTo(parent.start, parent.end)
+            linkTo(parent.top, parent.bottom, bias = 0.2f)
+          },
+        ) {
+          val latestOne by remember { mutableStateOf(currentPlayerUpdate) }
+          when (latestOne) {
+            PlayerUpdates.DoubleSpeed -> DoubleSpeedPlayerUpdate()
+            PlayerUpdates.AspectRatio -> TextPlayerUpdate(stringResource(aspectRatio.titleRes))
+            else -> {}
+          }
+        }
 
         AnimatedVisibility(
           controlsShown && areControlsLocked,

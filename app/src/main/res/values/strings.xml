@@ -65,4 +65,8 @@
     <string name="player_sheets_stats_page_chip">Page %d</string>
     <string name="player_seek_n_seconds">%d seconds</string>
     <string name="player_speed">x%.2f</string>
+
+    <string name="player_aspect_fit">Fit Screen</string>
+    <string name="player_aspect_crop">Crop</string>
+    <string name="player_aspect_stretch">Stretch</string>
 </resources>

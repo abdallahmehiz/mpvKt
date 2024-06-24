@@ -60,6 +60,8 @@ class PlayerViewModel(
   private val _areControlsLocked = MutableStateFlow(false)
   val areControlsLocked = _areControlsLocked.asStateFlow()
 
+  val playerUpdate = MutableStateFlow(PlayerUpdates.None)
+
   val sheetShown = MutableStateFlow(Sheets.None)
   val gestureSeekAmount = MutableStateFlow(0)
 
@@ -310,6 +312,7 @@ class PlayerViewModel(
     MPVLib.setPropertyDouble("panscan", pan)
     MPVLib.setPropertyDouble("video-aspect-override", ratio)
     playerPreferences.videoAspect.set(aspect)
+    playerUpdate.update { PlayerUpdates.AspectRatio }
   }
 }
 
