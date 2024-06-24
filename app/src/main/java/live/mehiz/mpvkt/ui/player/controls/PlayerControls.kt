@@ -25,6 +25,7 @@ import androidx.compose.material.icons.filled.LockOpen
 import androidx.compose.material.ripple.LocalRippleTheme
 import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -53,10 +54,12 @@ import live.mehiz.mpvkt.preferences.PlayerPreferences
 import live.mehiz.mpvkt.preferences.preference.collectAsState
 import live.mehiz.mpvkt.ui.player.PlayerUpdates
 import live.mehiz.mpvkt.ui.player.PlayerViewModel
+import live.mehiz.mpvkt.ui.player.controls.components.BrightnessSlider
 import live.mehiz.mpvkt.ui.player.controls.components.ControlsButton
 import live.mehiz.mpvkt.ui.player.controls.components.DoubleSpeedPlayerUpdate
 import live.mehiz.mpvkt.ui.player.controls.components.SeekbarWithTimers
 import live.mehiz.mpvkt.ui.player.controls.components.TextPlayerUpdate
+import live.mehiz.mpvkt.ui.player.controls.components.VolumeSlider
 import live.mehiz.mpvkt.ui.theme.PlayerRippleTheme
 import live.mehiz.mpvkt.ui.theme.spacing
 import org.koin.compose.koinInject
@@ -103,6 +106,7 @@ class PlayerControls(private val viewModel: PlayerViewModel) {
     CompositionLocalProvider(
       LocalRippleTheme provides PlayerRippleTheme,
       LocalPlayerButtonsClickEvent provides { resetControls = !resetControls },
+      LocalContentColor provides Color.White
     ) {
       ConstraintLayout(
         modifier = Modifier
@@ -120,7 +124,45 @@ class PlayerControls(private val viewModel: PlayerViewModel) {
           bottomLeftControls,
           bottomRightControls,
           unlockControlsButton,
+          brightnessSlider,
+          volumeSlider
         ) = createRefs()
+
+        val isBrightnessSliderShown by viewModel.isBrightnessSliderShown.collectAsState()
+        val isVolumeSliderShown by viewModel.isVolumeSliderShown.collectAsState()
+        val brightness by viewModel.currentBrightness.collectAsState()
+        val volume by viewModel.currentVolume.collectAsState()
+        LaunchedEffect(volume, brightness) {
+          delay(1000)
+          if (isVolumeSliderShown) viewModel.isVolumeSliderShown.update { false }
+          if (isBrightnessSliderShown) viewModel.isBrightnessSliderShown.update { false }
+        }
+        AnimatedVisibility(
+          isBrightnessSliderShown,
+          enter = slideInHorizontally { it } + fadeIn(),
+          exit = slideOutHorizontally { it } + fadeOut(),
+          modifier = Modifier.constrainAs(brightnessSlider) {
+            end.linkTo(parent.end, spacing.medium)
+            top.linkTo(parent.top)
+            bottom.linkTo(parent.bottom)
+          }
+        ) { BrightnessSlider(brightness, 0f..1f) }
+
+        AnimatedVisibility(
+          isVolumeSliderShown,
+          enter = slideInHorizontally { -it } + fadeIn(),
+          exit = slideOutHorizontally { -it } + fadeOut(),
+          modifier = Modifier.constrainAs(volumeSlider) {
+            start.linkTo(parent.start, spacing.medium)
+            top.linkTo(parent.top)
+            bottom.linkTo(parent.bottom)
+          }
+        ) {
+          VolumeSlider(
+            volume,
+            0..viewModel.maxVolume
+          )
+        }
 
         val currentPlayerUpdate by viewModel.playerUpdate.collectAsState()
         val aspectRatio by playerPreferences.videoAspect.collectAsState()
@@ -139,8 +181,7 @@ class PlayerControls(private val viewModel: PlayerViewModel) {
             linkTo(parent.top, parent.bottom, bias = 0.2f)
           },
         ) {
-          val latestOne by remember { mutableStateOf(currentPlayerUpdate) }
-          when (latestOne) {
+          when (currentPlayerUpdate) {
             PlayerUpdates.DoubleSpeed -> DoubleSpeedPlayerUpdate()
             PlayerUpdates.AspectRatio -> TextPlayerUpdate(stringResource(aspectRatio.titleRes))
             else -> {}

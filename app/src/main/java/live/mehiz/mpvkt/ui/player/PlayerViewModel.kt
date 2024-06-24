@@ -61,6 +61,10 @@ class PlayerViewModel(
   val areControlsLocked = _areControlsLocked.asStateFlow()
 
   val playerUpdate = MutableStateFlow(PlayerUpdates.None)
+  val isBrightnessSliderShown = MutableStateFlow(false)
+  val isVolumeSliderShown = MutableStateFlow(false)
+  val currentBrightness = MutableStateFlow(activity.window.attributes.screenBrightness)
+  val currentVolume = MutableStateFlow(activity.audioManager.getStreamVolume(AudioManager.STREAM_MUSIC))
 
   val sheetShown = MutableStateFlow(Sheets.None)
   val gestureSeekAmount = MutableStateFlow(0)
@@ -217,7 +221,7 @@ class PlayerViewModel(
 
   fun pause() {
     activity.player.paused = true
-    _paused.value = true
+    _paused.update { true }
   }
 
   fun unpause() {
@@ -272,20 +276,35 @@ class PlayerViewModel(
     isLoading.update { true }
   }
 
-  fun changeBrightnessWithDrag(
-    dragAmount: Float,
+  fun changeBrightnessBy(change: Float) {
+    changeBrightnessTo(currentBrightness.value + change)
+  }
+
+  fun changeBrightnessTo(
+    brightness: Float,
   ) {
+    isBrightnessSliderShown.update { true }
+    currentBrightness.update { brightness.coerceIn(0f, 1f) }
     activity.window.attributes = activity.window.attributes.apply {
-      screenBrightness = dragAmount.coerceIn(0f, 1f)
+      screenBrightness = brightness.coerceIn(0f, 1f)
     }
   }
 
-  fun changeVolumeWithDrag(dragAmount: Float) {
+  fun changeVolumeBy(change: Int) {
+    changeVolumeTo(currentVolume.value + change)
+  }
+
+  val maxVolume = activity.audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC)
+  fun changeVolumeTo(volume: Int) {
+    isVolumeSliderShown.update { true }
+    val newVolume = volume.coerceIn(0..maxVolume)
     activity.audioManager.setStreamVolume(
       AudioManager.STREAM_MUSIC,
-      dragAmount.toInt(),
-      AudioManager.FLAG_SHOW_UI,
+      newVolume,
+      0,
     )
+    println(activity.audioManager.getStreamVolume(AudioManager.STREAM_MUSIC))
+    currentVolume.update { newVolume }
   }
 
   fun changeVideoAspect(aspect: VideoAspect) {

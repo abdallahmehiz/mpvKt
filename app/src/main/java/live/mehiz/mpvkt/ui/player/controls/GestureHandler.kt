@@ -92,6 +92,8 @@ fun GestureHandler(
     viewModel.showSeekBar()
   }
   var isLongPressing by remember { mutableStateOf(false) }
+  val currentVolume by viewModel.currentVolume.collectAsState()
+  val currentBrightness by viewModel.currentBrightness.collectAsState()
   Box(
     modifier = Modifier
       .fillMaxSize()
@@ -163,23 +165,32 @@ fun GestureHandler(
       }
       .pointerInput(Unit) {
         if ((!brightnessGesture && !volumeGesture) || areControlsLocked) return@pointerInput
-        var dragAmount = 0f
+        var startingY = 0f
+        var originalVolume = currentVolume
+        var originalBrightness = currentBrightness
         detectVerticalDragGestures(
-          onDragEnd = { dragAmount = 0f },
+          onDragEnd = { startingY = 0f },
+          onDragStart = {
+            startingY = it.y
+            originalVolume = currentVolume
+            originalBrightness = currentBrightness
+          }
         ) { change, amount ->
-          dragAmount -= amount / 10
           when {
             volumeGesture && brightnessGesture -> {
-              if (change.position.x < size.width / 2) viewModel.changeBrightnessWithDrag(dragAmount)
-              else viewModel.changeVolumeWithDrag(dragAmount)
+              if (change.position.x < size.width / 2) {
+                viewModel.changeBrightnessTo(originalBrightness + ((startingY - change.position.y) * 0.005f))
+              } else {
+                viewModel.changeVolumeTo(originalVolume + ((startingY - change.position.y) * 0.1f).toInt())
+              }
             }
 
             brightnessGesture -> {
-              viewModel.changeBrightnessWithDrag(dragAmount)
+              viewModel.changeBrightnessTo(originalBrightness + ((startingY - change.position.y) * 0.005f))
             }
             // it's not always true, AS is drunk
             volumeGesture -> {
-              viewModel.changeVolumeWithDrag(dragAmount)
+              viewModel.changeVolumeTo(originalVolume + ((startingY - change.position.y) * 0.1f).toInt())
             }
 
             else -> {}

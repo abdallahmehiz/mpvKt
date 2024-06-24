@@ -34,13 +34,7 @@ fun PlayerUpdate(
       .padding(vertical = 8.dp, horizontal = 16.dp)
       .animateContentSize(),
     contentAlignment = Alignment.Center,
-  ) {
-    CompositionLocalProvider(
-      LocalContentColor provides Color.White,
-    ) {
-      content()
-    }
-  }
+  ) { content() }
 }
 
 @Composable

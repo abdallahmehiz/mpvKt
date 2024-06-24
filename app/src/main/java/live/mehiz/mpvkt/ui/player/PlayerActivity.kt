@@ -8,6 +8,7 @@ import android.net.Uri
 import android.os.Bundle
 import android.os.ParcelFileDescriptor
 import android.util.Log
+import android.view.KeyEvent
 import android.view.WindowManager
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
@@ -322,5 +323,14 @@ class PlayerActivity : AppCompatActivity() {
       PlayerOrientation.ReverseLandscape -> ActivityInfo.SCREEN_ORIENTATION_REVERSE_PORTRAIT
       PlayerOrientation.SensorLandscape -> ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
     }
+  }
+
+  override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
+    when (keyCode) {
+      KeyEvent.KEYCODE_VOLUME_UP -> { viewModel.changeVolumeBy(1) }
+      KeyEvent.KEYCODE_VOLUME_DOWN -> { viewModel.changeVolumeBy(-1) }
+      else -> { super.onKeyDown(keyCode, event) }
+    }
+    return true
   }
 }
