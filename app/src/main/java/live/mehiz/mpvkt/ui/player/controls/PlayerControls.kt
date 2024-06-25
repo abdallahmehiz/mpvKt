@@ -42,6 +42,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
@@ -207,16 +208,16 @@ class PlayerControls(private val viewModel: PlayerViewModel) {
           enter = fadeIn(),
           exit = fadeOut(),
           modifier = Modifier.constrainAs(seekValue) {
-            top.linkTo(if (controlsShown) playerPauseButton.bottom else parent.top)
             start.linkTo(parent.absoluteLeft)
             end.linkTo(parent.absoluteRight)
-            if (!controlsShown) bottom.linkTo(seekbar.top)
+            bottom.linkTo(seekbar.top)
           },
         ) {
           Text(
-            (if (gestureSeekAmount > 0) "+" else "") + gestureSeekAmount + "\n" + Utils.prettyTime(position.toInt()),
-            style = MaterialTheme.typography.displayMedium.copy(shadow = Shadow(blurRadius = 5f)),
+            stringResource(R.string.player_gesture_seek_text, gestureSeekAmount, Utils.prettyTime(position.toInt())),
+            style = MaterialTheme.typography.headlineMedium.copy(shadow = Shadow(blurRadius = 5f)),
             color = Color.White,
+            fontWeight = FontWeight.Bold,
             textAlign = TextAlign.Center,
           )
         }

@@ -211,7 +211,7 @@ class PlayerViewModel(
   }
 
   fun updatePlayBackPos(pos: Float) {
-    _pos.value = pos
+    _pos.update { pos }
   }
 
   fun updateReadAhead(value: Long) {
@@ -269,7 +269,7 @@ class PlayerViewModel(
   }
 
   fun seekBy(offset: Int) {
-    activity.player.timePos = activity.player.timePos?.plus(offset)
+    MPVLib.command(arrayOf("seek", offset.toString(), "relative"))
     isLoading.update { true }
   }
 
