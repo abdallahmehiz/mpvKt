@@ -2,6 +2,7 @@ package live.mehiz.mpvkt.ui.player
 
 import android.media.AudioManager
 import android.net.Uri
+import android.provider.Settings
 import android.util.DisplayMetrics
 import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.ViewModel
@@ -63,7 +64,10 @@ class PlayerViewModel(
   val playerUpdate = MutableStateFlow(PlayerUpdates.None)
   val isBrightnessSliderShown = MutableStateFlow(false)
   val isVolumeSliderShown = MutableStateFlow(false)
-  val currentBrightness = MutableStateFlow(activity.window.attributes.screenBrightness)
+  val currentBrightness = MutableStateFlow(
+    Settings.System.getFloat(activity.contentResolver, Settings.System.SCREEN_BRIGHTNESS)
+      .normalize(0f, 255f, 0f, 1f)
+  )
   val currentVolume = MutableStateFlow(activity.audioManager.getStreamVolume(AudioManager.STREAM_MUSIC))
 
   val sheetShown = MutableStateFlow(Sheets.None)
@@ -340,3 +344,7 @@ data class Track(
   val name: String,
   val language: String?,
 )
+
+fun Float.normalize(inMin: Float, inMax: Float, outMin: Float, outMax: Float): Float {
+  return (this - inMin) * (outMax - outMin) / (inMax - inMin) + outMin
+}
