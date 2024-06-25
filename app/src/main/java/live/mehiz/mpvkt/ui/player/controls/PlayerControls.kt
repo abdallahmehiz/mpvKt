@@ -48,6 +48,7 @@ import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import `is`.xyz.mpv.Utils
+import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.update
 import live.mehiz.mpvkt.R
@@ -65,12 +66,16 @@ import live.mehiz.mpvkt.ui.theme.PlayerRippleTheme
 import live.mehiz.mpvkt.ui.theme.spacing
 import org.koin.compose.koinInject
 
+@Suppress("CompositionLocalAllowlist")
 val LocalPlayerButtonsClickEvent = staticCompositionLocalOf { {} }
 
 class PlayerControls(private val viewModel: PlayerViewModel) {
   @OptIn(ExperimentalAnimationGraphicsApi::class)
   @Composable
-  fun Content() {
+  @Suppress("CyclomaticComplexMethod")
+  fun Content(
+    modifier: Modifier = Modifier
+  ) {
     val spacing = MaterialTheme.spacing
     val playerPreferences = koinInject<PlayerPreferences>()
     val controlsShown by viewModel.controlsShown.collectAsState()
@@ -110,24 +115,18 @@ class PlayerControls(private val viewModel: PlayerViewModel) {
       LocalContentColor provides Color.White
     ) {
       ConstraintLayout(
-        modifier = Modifier
+        modifier = modifier
           .fillMaxSize()
           .background(transparentOverlay)
           .padding(horizontal = MaterialTheme.spacing.medium),
       ) {
-        val (
-          playerUpdates,
-          seekbar,
-          playerPauseButton,
-          seekValue,
-          topLeftControls,
-          topRightControls,
-          bottomLeftControls,
-          bottomRightControls,
-          unlockControlsButton,
-          brightnessSlider,
-          volumeSlider
-        ) = createRefs()
+        val (topLeftControls, topRightControls) = createRefs()
+        val (volumeSlider, brightnessSlider) = createRefs()
+        val unlockControlsButton = createRef()
+        val (bottomRightControls, bottomLeftControls) = createRefs()
+        val playerPauseButton = createRef()
+        val seekbar = createRef()
+        val (seekValue, playerUpdates) = createRefs()
 
         val isBrightnessSliderShown by viewModel.isBrightnessSliderShown.collectAsState()
         val isVolumeSliderShown by viewModel.isVolumeSliderShown.collectAsState()
@@ -168,8 +167,9 @@ class PlayerControls(private val viewModel: PlayerViewModel) {
         val currentPlayerUpdate by viewModel.playerUpdate.collectAsState()
         val aspectRatio by playerPreferences.videoAspect.collectAsState()
         LaunchedEffect(currentPlayerUpdate, aspectRatio) {
-          if (currentPlayerUpdate == PlayerUpdates.DoubleSpeed || currentPlayerUpdate == PlayerUpdates.None)
+          if (currentPlayerUpdate == PlayerUpdates.DoubleSpeed || currentPlayerUpdate == PlayerUpdates.None) {
             return@LaunchedEffect
+          }
           delay(2000)
           viewModel.playerUpdate.update { PlayerUpdates.None }
         }
@@ -277,7 +277,7 @@ class PlayerControls(private val viewModel: PlayerViewModel) {
             timersInverted = Pair(false, invertDuration),
             durationTimerOnCLick = { playerPreferences.invertDuration.set(!invertDuration) },
             positionTimerOnClick = {},
-            chapters = viewModel.chapters,
+            chapters = viewModel.chapters.toImmutableList(),
           )
         }
         AnimatedVisibility(

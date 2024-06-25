@@ -19,22 +19,24 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import kotlinx.collections.immutable.ImmutableList
 import live.mehiz.mpvkt.R
 import live.mehiz.mpvkt.presentation.PlayerSheet
 import live.mehiz.mpvkt.ui.player.Track
 
 @Composable
 fun <T> GenericTracksSheet(
-  tracks: List<T>,
-  header: @Composable () -> Unit = {},
-  track: @Composable (T) -> Unit,
-  footer: @Composable () -> Unit = {},
+  tracks: ImmutableList<T>,
   onDismissRequest: () -> Unit,
+  modifier: Modifier = Modifier,
+  header: @Composable () -> Unit = {},
+  track: @Composable (T) -> Unit = {},
+  footer: @Composable () -> Unit = {},
 ) {
   PlayerSheet(
     onDismissRequest,
   ) {
-    Column {
+    Column(modifier) {
       header()
       LazyColumn(
         modifier = Modifier.weight(1f, fill = false),
@@ -52,9 +54,10 @@ fun <T> GenericTracksSheet(
 fun AddTrackRow(
   title: String,
   onClick: () -> Unit,
+  modifier: Modifier = Modifier
 ) {
   Row(
-    modifier = Modifier
+    modifier = modifier
       .fillMaxWidth()
       .clickable(onClick = onClick)
       .height(48.dp)

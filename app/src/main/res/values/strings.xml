@@ -30,6 +30,7 @@
     <string name="pref_player_gestures_seek">Horizontal seek gestures</string>
     <string name="pref_player_gestures_brightness">Brightness gestures</string>
     <string name="pref_player_gestures_volume">Volume gestures</string>
+    <string name="pref_player_gestures_hold_for_double_speed">Hold for x2 speed</string>
 
     <string name="pref_player_controls">Controls</string>
     <string name="pref_player_controls_show_chapter_indicator">Show current chapter indicator</string>

@@ -25,11 +25,14 @@ import live.mehiz.mpvkt.ui.player.controls.components.CurrentChapter
 import org.koin.compose.koinInject
 
 @Composable
-fun BottomLeftPlayerControls(viewModel: PlayerViewModel) {
+fun BottomLeftPlayerControls(
+  viewModel: PlayerViewModel,
+  modifier: Modifier = Modifier
+) {
   val playerPreferences = koinInject<PlayerPreferences>()
   val currentChapter by viewModel.currentChapter.collectAsState()
   Row(
-    modifier = Modifier.fillMaxWidth(),
+    modifier = modifier.fillMaxWidth(),
     verticalAlignment = Alignment.CenterVertically,
   ) {
     ControlsButton(

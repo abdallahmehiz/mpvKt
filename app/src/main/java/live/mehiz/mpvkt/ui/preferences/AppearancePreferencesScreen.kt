@@ -20,6 +20,7 @@ import androidx.compose.ui.res.stringResource
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
+import kotlinx.collections.immutable.toImmutableList
 import live.mehiz.mpvkt.R
 import live.mehiz.mpvkt.preferences.AppearancePreferences
 import live.mehiz.mpvkt.preferences.preference.collectAsState
@@ -62,11 +63,10 @@ object AppearancePreferencesScreen : Screen {
           item {
             val darkMode by preferences.darkMode.collectAsState()
             MultiChoiceSegmentedButton(
-              choices = DarkMode.entries.map { context.getString(it.titleRes) },
-              selectedIndices = listOf(DarkMode.entries.indexOf(darkMode)),
-            ) {
-              preferences.darkMode.set(DarkMode.entries[it])
-            }
+              choices = DarkMode.entries.map { context.getString(it.titleRes) }.toImmutableList(),
+              selectedIndices = listOf(DarkMode.entries.indexOf(darkMode)).toImmutableList(),
+              onClick = { preferences.darkMode.set(DarkMode.entries[it]) }
+            )
           }
           val isMaterialYouAvailable = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
           switchPreference(

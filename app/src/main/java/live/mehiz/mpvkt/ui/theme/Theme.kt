@@ -38,7 +38,7 @@ private val LightColorScheme = lightColorScheme(
   onTertiary = Color.White,
   onBackground = Color(0xFF1C1B1F),
   onSurface = Color(0xFF1C1B1F),
-  */
+   */
 )
 
 @Composable
@@ -78,16 +78,20 @@ enum class DarkMode(@StringRes val titleRes: Int) {
   Dark(R.string.pref_appearance_darkmode_dark),
   Light(R.string.pref_appearance_darkmode_light),
   System(R.string.pref_appearance_darkmode_system),
-  ;
 }
 
 object PlayerRippleTheme : RippleTheme {
 
+  private const val draggedAlpha = .3f
+  private const val focusedAlpha = .4f
+  private const val hoveredAlpha = .2f
+  private const val pressedAlpha = .4f
+
   private val alpha = RippleAlpha(
-    .3f,
-    .4f,
-    .2f,
-    .4f,
+    draggedAlpha = draggedAlpha,
+    focusedAlpha = focusedAlpha,
+    hoveredAlpha = hoveredAlpha,
+    pressedAlpha = pressedAlpha,
   )
 
   @Composable

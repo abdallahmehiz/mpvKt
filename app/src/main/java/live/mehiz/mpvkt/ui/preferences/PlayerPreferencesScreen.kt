@@ -117,6 +117,11 @@ object PlayerPreferencesScreen : Screen {
             defaultValue = preferences.volumeGesture.get(),
             title = { Text(stringResource(R.string.pref_player_gestures_volume)) },
           )
+          switchPreference(
+            preferences.holdForDoubleSpeed.key(),
+            defaultValue = preferences.holdForDoubleSpeed.defaultValue(),
+            title = { Text(stringResource(R.string.pref_player_gestures_hold_for_double_speed)) }
+          )
           preferenceCategory(
             "controls",
             title = { Text(stringResource(R.string.pref_player_controls)) },

@@ -10,16 +10,18 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import kotlinx.collections.immutable.ImmutableList
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MultiChoiceSegmentedButton(
-  choices: List<String>,
-  selectedIndices: List<Int>,
+  choices: ImmutableList<String>,
+  selectedIndices: ImmutableList<Int>,
   onClick: (Int) -> Unit,
+  modifier: Modifier = Modifier,
 ) {
   MultiChoiceSegmentedButtonRow(
-    modifier = Modifier
+    modifier = modifier
       .fillMaxWidth()
       .padding(16.dp),
   ) {

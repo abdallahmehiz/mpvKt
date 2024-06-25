@@ -9,10 +9,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DoubleArrow
 import androidx.compose.material3.Icon
-import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -23,12 +21,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 @Composable
-@Preview
 fun PlayerUpdate(
+  modifier: Modifier = Modifier,
   content: @Composable () -> Unit = {},
 ) {
   Box(
-    modifier = Modifier
+    modifier = modifier
       .clip(RoundedCornerShape(16.dp))
       .background(Color.Black.copy(0.4f))
       .padding(vertical = 8.dp, horizontal = 16.dp)
@@ -40,16 +38,18 @@ fun PlayerUpdate(
 @Composable
 fun TextPlayerUpdate(
   text: String,
+  modifier: Modifier = Modifier
 ) {
-  PlayerUpdate {
+  PlayerUpdate(modifier) {
     Text(text)
   }
 }
 
 @Composable
-@Preview
-fun DoubleSpeedPlayerUpdate() {
-  PlayerUpdate {
+fun DoubleSpeedPlayerUpdate(
+  modifier: Modifier = Modifier
+) {
+  PlayerUpdate(modifier) {
     Row(
       verticalAlignment = Alignment.Bottom,
     ) {
@@ -64,4 +64,10 @@ fun DoubleSpeedPlayerUpdate() {
       )
     }
   }
+}
+
+@Composable
+@Preview
+private fun PreviewDoubleSpeedPlayerUpdate() {
+  DoubleSpeedPlayerUpdate()
 }

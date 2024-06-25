@@ -22,11 +22,13 @@ import org.koin.compose.koinInject
 @Composable
 fun MoreSheet(
   onDismissRequest: () -> Unit,
+  modifier: Modifier = Modifier
 ) {
   val advancedPreferences = koinInject<AdvancedPreferences>()
   val statisticsPage by advancedPreferences.enabledStatisticsPage.collectAsState()
   PlayerSheet(
     onDismissRequest,
+    modifier
   ) {
     Column(
       modifier = Modifier

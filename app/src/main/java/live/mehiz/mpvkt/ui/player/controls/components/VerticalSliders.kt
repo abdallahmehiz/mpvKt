@@ -26,7 +26,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 
 val percentage: (Float, ClosedFloatingPointRange<Float>) -> Float = { value, range ->
@@ -38,14 +37,14 @@ val percentageInt: (Int, ClosedRange<Int>) -> Float = { value, range ->
 }
 
 @Composable
-@Preview
 fun VerticalSlider(
-  value: Float = 5f,
-  range: ClosedFloatingPointRange<Float> = 0f..100f
+  value: Float,
+  range: ClosedFloatingPointRange<Float>,
+  modifier: Modifier = Modifier
 ) {
   require(range.contains(value)) { "Value must be within the provided range" }
   Box(
-    modifier = Modifier
+    modifier = modifier
       .height(120.dp)
       .aspectRatio(0.2f)
       .clip(RoundedCornerShape(16.dp))
@@ -62,16 +61,15 @@ fun VerticalSlider(
   }
 }
 
-
 @Composable
-@Preview
 fun VerticalSlider(
-  value: Int = 5,
-  range: ClosedRange<Int> = 0..100
+  value: Int,
+  range: ClosedRange<Int>,
+  modifier: Modifier = Modifier
 ) {
   require(range.contains(value)) { "Value must be within the provided range" }
   Box(
-    modifier = Modifier
+    modifier = modifier
       .height(120.dp)
       .aspectRatio(0.2f)
       .clip(RoundedCornerShape(16.dp))
@@ -92,8 +90,10 @@ fun VerticalSlider(
 fun BrightnessSlider(
   brightness: Float,
   range: ClosedFloatingPointRange<Float>,
+  modifier: Modifier = Modifier
 ) {
   Column(
+    modifier = modifier,
     horizontalAlignment = Alignment.CenterHorizontally,
     verticalArrangement = Arrangement.spacedBy(8.dp)
   ) {
@@ -117,13 +117,14 @@ fun BrightnessSlider(
   }
 }
 
-
 @Composable
 fun VolumeSlider(
   volume: Int,
-  range: ClosedRange<Int>
+  range: ClosedRange<Int>,
+  modifier: Modifier = Modifier
 ) {
   Column(
+    modifier = modifier,
     horizontalAlignment = Alignment.CenterHorizontally,
     verticalArrangement = Arrangement.spacedBy(8.dp)
   ) {
@@ -136,7 +137,7 @@ fun VolumeSlider(
       range
     )
     Icon(
-      when(percentageInt(volume, range)) {
+      when (percentageInt(volume, range)) {
         0f -> Icons.AutoMirrored.Default.VolumeOff
         in 0f..0.3f -> Icons.AutoMirrored.Default.VolumeMute
         in 0.3f..0.6f -> Icons.AutoMirrored.Default.VolumeDown

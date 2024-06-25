@@ -1,9 +1,12 @@
+import io.gitlab.arturbosch.detekt.Detekt
+
 plugins {
   alias(libs.plugins.ksp)
   alias(libs.plugins.android.application)
   alias(libs.plugins.jetbrains.kotlin.android)
   alias(libs.plugins.kotlin.compose.compiler)
   alias(libs.plugins.room)
+  alias(libs.plugins.detekt)
 }
 
 android {
@@ -100,6 +103,7 @@ dependencies {
   implementation(libs.androidx.documentfile)
   implementation(libs.androidx.compose.animation.graphics)
   implementation(libs.material)
+  implementation(libs.androidx.preferences.ktx)
 
   implementation(libs.aniyomi.mpv.lib)
   implementation(libs.aniyomi.ffmpeg.kit)
@@ -113,4 +117,26 @@ dependencies {
   implementation(libs.room.runtime)
   ksp(libs.room.compiler)
   implementation(libs.room.ktx)
+
+  implementation(libs.detekt.gradle.plugin)
+  detektPlugins(libs.detekt.rules.compose)
+  detektPlugins(libs.detekt.formatter)
+
+  implementation(libs.kotlinx.immutable.collections)
+}
+
+detekt {
+  parallel = true
+  allRules = false
+  buildUponDefaultConfig = true
+  config.setFrom("$rootDir/config/detekt/detekt.yml")
+}
+
+tasks.withType<Detekt>().configureEach {
+  setSource(files(project.projectDir))
+  exclude("**/build/**")
+  reports {
+    html.required.set(true)
+    md.required.set(true)
+  }
 }

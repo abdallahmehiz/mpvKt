@@ -33,6 +33,7 @@ import live.mehiz.mpvkt.ui.theme.MpvKtTheme
 import org.koin.android.ext.android.inject
 import java.io.File
 
+@Suppress("TooManyFunctions")
 class PlayerActivity : AppCompatActivity() {
 
   private val viewModel: PlayerViewModel by lazy { PlayerViewModel(this) }
@@ -86,7 +87,6 @@ class PlayerActivity : AppCompatActivity() {
   }
 
   private fun setupMPV() {
-
     Utils.copyAssets(this)
     copyMPVConfigFiles()
 
@@ -182,6 +182,7 @@ class PlayerActivity : AppCompatActivity() {
     return filepath
   }
 
+  @Suppress("ReturnCount")
   fun openContentFd(uri: Uri): String? {
     if (uri.scheme != "content") return null
     val resolver = applicationContext.contentResolver
@@ -201,7 +202,6 @@ class PlayerActivity : AppCompatActivity() {
         return path
       }
     } catch (_: Exception) {
-
     }
     // Else, pass the fd to mpv
     return "fdclose://$fd"
@@ -217,7 +217,9 @@ class PlayerActivity : AppCompatActivity() {
   }
 
   internal fun onObserverEvent(property: String) {
-
+    when (property) {
+      "chapter-list" -> viewModel.loadChapters()
+    }
   }
 
   internal fun onObserverEvent(property: String, value: Boolean) {
@@ -232,9 +234,8 @@ class PlayerActivity : AppCompatActivity() {
     }
   }
 
-  internal fun onObserverEvent(property: String, value: String) {
-
-  }
+  @Suppress("EmptyFunctionBlock", "UnusedParameter")
+  internal fun onObserverEvent(property: String, value: String) {}
 
   internal fun event(eventId: Int) {
     when (eventId) {
@@ -303,9 +304,8 @@ class PlayerActivity : AppCompatActivity() {
     super.finish()
   }
 
-  internal fun efEvent(err: String?) {
-
-  }
+  @Suppress("EmptyFunctionBlock", "UnusedParameter")
+  internal fun efEvent(err: String?) {}
 
   private fun setOrientation() {
     this.requestedOrientation = when (playerPreferences.orientation.get()) {

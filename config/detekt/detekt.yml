@@ -1,0 +1,41 @@
+complexity:
+  LongParameterList:
+    ignoreDefaultParameters: true
+    ignoreAnnotated:
+      - "Composable"
+  LongMethod:
+    ignoreAnnotated:
+      - "Composable"
+
+naming:
+  FunctionNaming:
+    ignoreAnnotated:
+      - "Composable"
+      - "Preview"
+  MatchingDeclarationName:
+    active: false
+  PackageNaming:
+    active: false
+
+style:
+  MagicNumber:
+    active: false
+  UnusedPrivateMember:
+    ignoreAnnotated:
+      - "Preview"
+
+exceptions:
+  SwallowedException:
+    active: false
+  TooGenericExceptionCaught:
+    active: false
+  TooGenericExceptionThrown:
+    active: false
+
+empty-blocks:
+  EmptyCatchBlock:
+    active: false
+
+formatting:
+  Indentation:
+    indentSize: 2

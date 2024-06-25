@@ -14,16 +14,18 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import kotlinx.collections.immutable.ImmutableList
 import live.mehiz.mpvkt.R
 import live.mehiz.mpvkt.ui.player.Track
 
 @Composable
 fun AudioTracksSheet(
-  tracks: List<Track>,
+  tracks: ImmutableList<Track>,
   selectedId: Int,
   onSelect: (Int) -> Unit,
   onAddAudioTrack: () -> Unit,
   onDismissRequest: () -> Unit,
+  modifier: Modifier = Modifier
 ) {
   GenericTracksSheet(
     tracks,
@@ -33,8 +35,10 @@ fun AudioTracksSheet(
       AudioTrackRow(
         title = getTrackTitle(it),
         isSelected = selectedId == it.id,
-      ) { onSelect(it.id) }
+        onClick = { onSelect(it.id) },
+      )
     },
+    modifier = modifier
   )
 }
 
@@ -43,9 +47,10 @@ fun AudioTrackRow(
   title: String,
   isSelected: Boolean,
   onClick: () -> Unit,
+  modifier: Modifier = Modifier
 ) {
   Row(
-    modifier = Modifier
+    modifier = modifier
       .fillMaxWidth()
       .clickable(onClick = onClick)
       .padding(start = 8.dp, end = 16.dp),

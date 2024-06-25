@@ -2,17 +2,16 @@ package live.mehiz.mpvkt.preferences.preference
 
 import android.content.Context
 import android.content.SharedPreferences
-import android.preference.PreferenceManager
+import androidx.preference.PreferenceManager
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.callbackFlow
-import live.mehiz.mpvkt.preferences.preference.AndroidPreference.Object
-import live.mehiz.mpvkt.preferences.preference.AndroidPreference.LongPrimitive
+import live.mehiz.mpvkt.preferences.preference.AndroidPreference.BooleanPrimitive
 import live.mehiz.mpvkt.preferences.preference.AndroidPreference.FloatPrimitive
 import live.mehiz.mpvkt.preferences.preference.AndroidPreference.IntPrimitive
-import live.mehiz.mpvkt.preferences.preference.AndroidPreference.BooleanPrimitive
+import live.mehiz.mpvkt.preferences.preference.AndroidPreference.LongPrimitive
+import live.mehiz.mpvkt.preferences.preference.AndroidPreference.Object
 import live.mehiz.mpvkt.preferences.preference.AndroidPreference.StringPrimitive
 import live.mehiz.mpvkt.preferences.preference.AndroidPreference.StringSetPrimitive
-
 
 class AndroidPreferenceStore(
   context: Context,

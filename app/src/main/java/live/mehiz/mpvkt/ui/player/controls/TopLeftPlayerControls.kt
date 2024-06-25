@@ -8,6 +8,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextOverflow
@@ -15,8 +16,14 @@ import live.mehiz.mpvkt.ui.player.PlayerViewModel
 import live.mehiz.mpvkt.ui.player.controls.components.ControlsButton
 
 @Composable
-fun TopLeftPlayerControls(viewModel: PlayerViewModel) {
-  Row(verticalAlignment = Alignment.CenterVertically) {
+fun TopLeftPlayerControls(
+  viewModel: PlayerViewModel,
+  modifier: Modifier = Modifier
+) {
+  Row(
+    modifier = modifier,
+    verticalAlignment = Alignment.CenterVertically
+  ) {
     val activity = LocalContext.current as Activity
     ControlsButton(
       icon = Icons.AutoMirrored.Default.ArrowBack,

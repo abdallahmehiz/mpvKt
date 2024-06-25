@@ -216,4 +216,3 @@ private fun <T> AnchoredDraggableState<T>.preUpPostDownNestedScrollConnection() 
 
   private fun Offset.toFloat(): Float = y
 }
-

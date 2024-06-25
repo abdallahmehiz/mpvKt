@@ -5,7 +5,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import kotlinx.coroutines.flow.last
+import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.flow.update
 import live.mehiz.mpvkt.ui.player.PlayerViewModel
 import live.mehiz.mpvkt.ui.player.Sheets
@@ -35,8 +35,8 @@ fun PlayerSheets(viewModel: PlayerViewModel) {
         viewModel.addSubtitle(it)
       }
       SubtitlesSheet(
-        subtitles,
-        selectedSubs,
+        subtitles.toImmutableList(),
+        selectedSubs.toImmutableList(),
         { viewModel.selectSub(it) },
         { subtitlesPicker.launch(arrayOf("*/*")) },
         onDismissRequest
@@ -51,7 +51,7 @@ fun PlayerSheets(viewModel: PlayerViewModel) {
         viewModel.addAudio(it)
       }
       AudioTracksSheet(
-        audioTracks,
+        audioTracks.toImmutableList(),
         selectedAudio,
         { viewModel.selectAudio(it) },
         { audioPicker.launch(arrayOf("*/*")) },
@@ -61,7 +61,7 @@ fun PlayerSheets(viewModel: PlayerViewModel) {
 
     Sheets.Chapters -> {
       ChaptersSheet(
-        viewModel.chapters,
+        viewModel.chapters.toImmutableList(),
         currentChapter = viewModel.currentChapter.value?.index ?: 0,
         onClick = {
           viewModel.selectChapter(it)

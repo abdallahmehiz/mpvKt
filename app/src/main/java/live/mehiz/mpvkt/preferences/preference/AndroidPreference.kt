@@ -190,4 +190,3 @@ sealed class AndroidPreference<T>(
     }
   }
 }
-

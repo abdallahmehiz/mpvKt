@@ -23,6 +23,7 @@ import dev.vivvvek.seeker.SeekerDefaults
 import dev.vivvvek.seeker.Segment
 import `is`.xyz.mpv.MPVView.Chapter
 import `is`.xyz.mpv.Utils
+import kotlinx.collections.immutable.ImmutableList
 import live.mehiz.mpvkt.ui.theme.spacing
 
 @Composable
@@ -32,13 +33,15 @@ fun SeekbarWithTimers(
   readAheadValue: Float,
   onValueChange: (Float) -> Unit,
   onValueChangeFinished: () -> Unit,
-  chapters: List<Chapter>? = null,
   timersInverted: Pair<Boolean, Boolean>,
   positionTimerOnClick: () -> Unit,
   durationTimerOnCLick: () -> Unit,
+  modifier: Modifier = Modifier,
+  chapters: ImmutableList<Chapter>? = null,
+
 ) {
   Row(
-    modifier = Modifier.height(48.dp),
+    modifier = modifier.height(48.dp),
     verticalAlignment = Alignment.CenterVertically,
     horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.extraSmall),
   ) {
@@ -94,7 +97,7 @@ fun VideoTimer(
 }
 
 // Seeker doesn't like the first chapter's time being bigger than 0
-fun Chapter.toSegment() = Segment(title ?: time.toString(), if(index != 0) time.toFloat() else 0f)
+fun Chapter.toSegment() = Segment(title ?: time.toString(), if (index != 0) time.toFloat() else 0f)
 
 @Preview
 @Composable
@@ -105,8 +108,8 @@ private fun PreviewSeekBar() {
     4f,
     {},
     {},
-    null,
-    Pair(true, true),
+    Pair(false, true),
     {},
-  ) { }
+    {},
+  )
 }

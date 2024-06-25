@@ -18,6 +18,7 @@ data class Spacing(
   val largest: Dp = 64.dp
 )
 
+@Suppress("CompositionLocalAllowlist")
 val LocalSpacing = compositionLocalOf { Spacing() }
 
 val MaterialTheme.spacing

@@ -15,7 +15,7 @@ import live.mehiz.mpvkt.databinding.PlayerDoubleTapSeekViewBinding
  * Originally from https://github.com/aniyomiorg/aniyomi
  * Thanks @Quickdesh for allowing me to use it
  */
-class DoubleTapSecondsView(context: Context, attrs: AttributeSet?) : LinearLayout(context, attrs) {
+class DoubleTapSeekSecondsView(context: Context, attrs: AttributeSet?) : LinearLayout(context, attrs) {
 
   var binding: PlayerDoubleTapSeekViewBinding
 

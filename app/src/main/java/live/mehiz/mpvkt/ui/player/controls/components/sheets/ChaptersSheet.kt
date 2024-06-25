@@ -15,11 +15,12 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import `is`.xyz.mpv.MPVView
 import `is`.xyz.mpv.Utils
+import kotlinx.collections.immutable.ImmutableList
 import live.mehiz.mpvkt.R
 
 @Composable
 fun ChaptersSheet(
-  chapters: List<MPVView.Chapter>,
+  chapters: ImmutableList<MPVView.Chapter>,
   currentChapter: Int,
   onClick: (Int) -> Unit,
   onDismissRequest: () -> Unit,
@@ -31,8 +32,9 @@ fun ChaptersSheet(
         title = it.title,
         time = it.time.toInt(),
         index = it.index,
-        selected = currentChapter == it.index
-      ) { onClick(it.index) }
+        selected = currentChapter == it.index,
+        onClick = { onClick(it.index) },
+      )
     },
     onDismissRequest = onDismissRequest,
   )
@@ -45,9 +47,10 @@ fun ChapterTrack(
   index: Int,
   selected: Boolean,
   onClick: () -> Unit,
+  modifier: Modifier = Modifier
 ) {
   Row(
-    modifier = Modifier
+    modifier = modifier
       .fillMaxWidth()
       .clickable(onClick = onClick)
       .padding(vertical = 8.dp, horizontal = 16.dp),
@@ -55,16 +58,16 @@ fun ChapterTrack(
   ) {
     Text(
       stringResource(R.string.player_sheets_track_title_wo_lang, index + 1, title ?: ""),
-      fontStyle = if(selected) FontStyle.Italic else FontStyle.Normal,
-      fontWeight = if(selected) FontWeight.ExtraBold else FontWeight.Normal,
+      fontStyle = if (selected) FontStyle.Italic else FontStyle.Normal,
+      fontWeight = if (selected) FontWeight.ExtraBold else FontWeight.Normal,
       maxLines = 1,
       modifier = Modifier.weight(1f),
       overflow = TextOverflow.Ellipsis
     )
     Text(
       Utils.prettyTime(time),
-      fontStyle = if(selected) FontStyle.Italic else FontStyle.Normal,
-      fontWeight = if(selected) FontWeight.ExtraBold else FontWeight.Normal,
+      fontStyle = if (selected) FontStyle.Italic else FontStyle.Normal,
+      fontWeight = if (selected) FontWeight.ExtraBold else FontWeight.Normal,
     )
   }
 }

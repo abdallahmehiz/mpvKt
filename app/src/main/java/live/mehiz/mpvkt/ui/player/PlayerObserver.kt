@@ -4,7 +4,7 @@ import `is`.xyz.mpv.MPVLib
 
 class PlayerObserver(
   private val activity: PlayerActivity
-): MPVLib.EventObserver {
+) : MPVLib.EventObserver {
   override fun eventProperty(property: String) {
     activity.runOnUiThread { activity.onObserverEvent(property) }
   }

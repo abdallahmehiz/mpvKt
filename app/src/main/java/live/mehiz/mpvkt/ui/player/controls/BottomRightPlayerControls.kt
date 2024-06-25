@@ -5,6 +5,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AspectRatio
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Modifier
 import live.mehiz.mpvkt.preferences.PlayerPreferences
 import live.mehiz.mpvkt.preferences.preference.collectAsState
 import live.mehiz.mpvkt.ui.player.PlayerViewModel
@@ -13,10 +14,13 @@ import live.mehiz.mpvkt.ui.player.controls.components.ControlsButton
 import org.koin.compose.koinInject
 
 @Composable
-fun BottomRightPlayerControls(viewModel: PlayerViewModel) {
+fun BottomRightPlayerControls(
+  viewModel: PlayerViewModel,
+  modifier: Modifier = Modifier
+) {
   val playerPreferences = koinInject<PlayerPreferences>()
   val aspect by playerPreferences.videoAspect.collectAsState()
-  Row {
+  Row(modifier) {
     ControlsButton(
       Icons.Default.AspectRatio,
       onClick = {

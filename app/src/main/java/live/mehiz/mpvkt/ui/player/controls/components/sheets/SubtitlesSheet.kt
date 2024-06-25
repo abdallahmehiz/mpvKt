@@ -1,16 +1,11 @@
 package live.mehiz.mpvkt.ui.player.controls.components.sheets
 
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.Checkbox
-import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -19,6 +14,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import kotlinx.collections.immutable.ImmutableList
 import live.mehiz.mpvkt.R
 import live.mehiz.mpvkt.ui.player.Track
 import me.zhanghai.compose.preference.FooterPreference
@@ -26,11 +22,12 @@ import me.zhanghai.compose.preference.ProvidePreferenceLocals
 
 @Composable
 fun SubtitlesSheet(
-  tracks: List<Track>,
-  selectedTracks: List<Int>,
+  tracks: ImmutableList<Track>,
+  selectedTracks: ImmutableList<Int>,
   onSelect: (Int) -> Unit,
   onAddSubtitle: () -> Unit,
   onDismissRequest: () -> Unit,
+  modifier: Modifier = Modifier
 ) {
   GenericTracksSheet(
     tracks,
@@ -38,9 +35,10 @@ fun SubtitlesSheet(
     header = { AddTrackRow(stringResource(R.string.player_sheets_add_ext_sub), onAddSubtitle) },
     track = { track ->
       SubtitleTrackRow(
-        getTrackTitle(track),
-        selectedTracks.indexOf(track.id),
-      ) { onSelect(track.id) }
+        title = getTrackTitle(track),
+        selected = selectedTracks.indexOf(track.id),
+        onClick = { onSelect(track.id) },
+      )
     },
     footer = {
       ProvidePreferenceLocals {
@@ -51,6 +49,7 @@ fun SubtitlesSheet(
         )
       }
     },
+    modifier = modifier,
   )
 }
 
@@ -59,9 +58,10 @@ fun SubtitleTrackRow(
   title: String,
   selected: Int, // -1 unselected, otherwise return 0 and 1 for the selected indices
   onClick: () -> Unit,
+  modifier: Modifier = Modifier,
 ) {
   Row(
-    modifier = Modifier
+    modifier = modifier
       .fillMaxWidth()
       .clickable(onClick = onClick)
       .padding(start = 8.dp, end = 16.dp),

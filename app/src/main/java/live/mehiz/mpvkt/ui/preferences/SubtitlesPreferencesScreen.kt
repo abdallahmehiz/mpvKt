@@ -58,7 +58,7 @@ object SubtitlesPreferencesScreen : Screen {
             defaultValue = preferences.preferredLanguages.defaultValue(),
             textToValue = { it },
             title = { Text(stringResource(R.string.pref_preferred_languages)) },
-            summary = { if(it.isNotBlank()) Text(it) },
+            summary = { if (it.isNotBlank()) Text(it) },
             textField = { value, onValueChange, _ ->
               Column {
                 Text(stringResource(`is`.xyz.mpv.R.string.pref_default_subtitle_language_message))

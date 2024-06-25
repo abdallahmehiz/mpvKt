@@ -12,6 +12,7 @@ koin = "3.6.0-wasm-alpha2"
 voyager = "1.0.0"
 material3Android = "1.2.1"
 room = "2.6.1"
+detekt = "1.23.6"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -35,10 +36,14 @@ androidx-material3-icons-extended = { group = "androidx.compose.material", name 
 androidx-compose-constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout-compose", version = "1.0.1" }
 androidx-documentfile = { group = "androidx.documentfile", name = "documentfile", version = "1.0.1" }
 androidx-compose-animation-graphics = { group = "androidx.compose.animation", name = "animation-graphics-android" }
+androidx-preferences-ktx = { group = "androidx.preference", name = "preference-ktx", version = "1.2.1" }
+
 aniyomi-mpv-lib = { module = "com.github.aniyomiorg:aniyomi-mpv-lib", version = "1.15.n" }
 aniyomi-ffmpeg-kit = { module = "com.github.jmir1:ffmpeg-kit", version = "1.15" }
 arthentica-smartexceptions = { module = "com.arthenica:smart-exception-java", version = "0.2.1" }
+
 material = "com.google.android.material:material:1.12.0"
+
 seeker = { module = "io.github.2307vivek:seeker", version = "1.2.2" }
 
 koin-core = { module = "io.insert-koin:koin-core", version.ref = "koin" }
@@ -54,6 +59,11 @@ room-runtime = { module = "androidx.room:room-runtime", version.ref = "room" }
 room-compiler = { module = "androidx.room:room-compiler", version.ref = "room" }
 room-ktx = { module = "androidx.room:room-ktx", version.ref = "room" }
 
+detekt-gradle-plugin = { module = "io.gitlab.arturbosch.detekt:detekt-gradle-plugin", version.ref = "detekt"}
+detekt-formatter = { module = "io.gitlab.arturbosch.detekt:detekt-formatting", version.ref = "detekt"}
+detekt-rules-compose = { module = "io.nlopez.compose.rules:detekt", version = "0.3.13" }
+
+kotlinx-immutable-collections = { module = "org.jetbrains.kotlinx:kotlinx-collections-immutable", version = "0.3.7" }
 [bundles]
 koin = ["koin-core", "koin-android", "koin-compose"]
 voyager = ["voyager-navigator", "voyager-transitions"]
@@ -64,3 +74,4 @@ android-application = { id = "com.android.application", version.ref = "agp" }
 jetbrains-kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 room = { id = "androidx.room", version.ref = "room" }
+detekt = { id = "io.gitlab.arturbosch.detekt", version.ref = "detekt" }

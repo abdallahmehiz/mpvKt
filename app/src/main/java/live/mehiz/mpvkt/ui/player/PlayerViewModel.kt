@@ -17,6 +17,7 @@ import live.mehiz.mpvkt.R
 import live.mehiz.mpvkt.preferences.PlayerPreferences
 import org.koin.java.KoinJavaComponent.inject
 
+@Suppress("TooManyFunctions")
 class PlayerViewModel(
   private val activity: PlayerActivity,
 ) : ViewModel() {
@@ -102,16 +103,25 @@ class PlayerViewModel(
   }
 
   val getTrackLanguage: (Int) -> String = {
-    if (it != -1) MPVLib.getPropertyString("track-list/$it/lang") ?: ""
-    else activity.getString(R.string.player_sheets_tracks_off)
+    if (it != -1) {
+      MPVLib.getPropertyString("track-list/$it/lang") ?: ""
+    } else {
+      activity.getString(R.string.player_sheets_tracks_off)
+    }
   }
   val getTrackTitle: (Int) -> String = {
-    if (it != -1) MPVLib.getPropertyString("track-list/$it/title") ?: ""
-    else activity.getString(R.string.player_sheets_tracks_off)
+    if (it != -1) {
+      MPVLib.getPropertyString("track-list/$it/title") ?: ""
+    } else {
+      activity.getString(R.string.player_sheets_tracks_off)
+    }
   }
   val getTrackMPVId: (Int) -> Int = {
-    if (it != -1) MPVLib.getPropertyInt("track-list/$it/id")
-    else -1
+    if (it != -1) {
+      MPVLib.getPropertyInt("track-list/$it/id")
+    } else {
+      -1
+    }
   }
   val getTrackType: (Int) -> String? = {
     MPVLib.getPropertyString("track-list/$it/type")
@@ -126,13 +136,13 @@ class PlayerViewModel(
       val subTracks = mutableListOf<Track>()
       val audioTracks = mutableListOf(Track(-1, activity.getString(R.string.player_sheets_tracks_off), null))
       for (i in 0..<tracksCount) {
-        val type = getTrackType(i) ?: continue
-        if (!possibleTrackTypes.contains(type)) continue
+        val type = getTrackType(i)
+        if (!possibleTrackTypes.contains(type) || type == null) continue
         when (type) {
           "sub" -> subTracks.add(Track(getTrackMPVId(i), getTrackTitle(i), getTrackLanguage(i)))
           "audio" -> audioTracks.add(Track(getTrackMPVId(i), getTrackTitle(i), getTrackLanguage(i)))
           "video" -> vidTracks.add(Track(getTrackMPVId(i), getTrackTitle(i), getTrackLanguage(i)))
-          else -> throw IllegalStateException()
+          else -> error("Unrecognized track type")
         }
       }
       _subtitleTracks.update { subTracks }
@@ -141,7 +151,6 @@ class PlayerViewModel(
       _selectedAudio.update { activity.player.aid }
     }
   }
-
 
   fun selectSub(id: Int) {
     val selectedSubs = selectedSubtitles.value
@@ -219,8 +228,11 @@ class PlayerViewModel(
   }
 
   fun pauseUnpause() {
-    if (paused.value) unpause()
-    else pause()
+    if (paused.value) {
+      unpause()
+    } else {
+      pause()
+    }
   }
 
   fun pause() {
@@ -244,8 +256,11 @@ class PlayerViewModel(
 
   fun toggleControls() {
     if (controlsShown.value) hideControls()
-    if (seekBarShown.value) hideSeekBar()
-    else showControls()
+    if (seekBarShown.value) {
+      hideSeekBar()
+    } else {
+      showControls()
+    }
   }
 
   fun toggleSeekBar() {

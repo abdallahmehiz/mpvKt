@@ -26,9 +26,12 @@ object RightSideOvalShape : Shape {
       lineTo(size.width, 0f)
       lineTo(size.width / 10, 0f)
       cubicTo(
-        size.width / 10, 0f,
-        -30f, size.height / 2,
-        size.width / 10, size.height
+        size.width / 10,
+        0f,
+        -30f,
+        size.height / 2,
+        size.width / 10,
+        size.height
       )
       close()
     }
@@ -36,7 +39,7 @@ object RightSideOvalShape : Shape {
   }
 }
 
-object LeftSideOvalShape: Shape {
+object LeftSideOvalShape : Shape {
   override fun createOutline(
     size: Size,
     layoutDirection: LayoutDirection,
@@ -47,9 +50,12 @@ object LeftSideOvalShape: Shape {
       lineTo(0f, size.height)
       lineTo(size.width - size.width / 10, size.height)
       cubicTo(
-        size.width - size.width / 10, size.height,
-        size.width, size.height / 2,
-        size.width - size.width / 10, 0f
+        size.width - size.width / 10,
+        size.height,
+        size.width,
+        size.height / 2,
+        size.width - size.width / 10,
+        0f
       )
       close()
     }
@@ -59,7 +65,7 @@ object LeftSideOvalShape: Shape {
 
 @Preview
 @Composable
-fun PreviewRightSideOvalBox() {
+private fun PreviewRightSideOvalBox() {
   Box(
     modifier = Modifier
       .fillMaxSize()
@@ -70,7 +76,7 @@ fun PreviewRightSideOvalBox() {
 
 @Preview
 @Composable
-fun PreviewLeftSideOvalBox() {
+private fun PreviewLeftSideOvalBox() {
   Box(
     modifier = Modifier
       .fillMaxSize()

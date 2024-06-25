@@ -25,7 +25,6 @@ import live.mehiz.mpvkt.preferences.preference.collectAsState
 import live.mehiz.mpvkt.ui.player.Debanding
 import me.zhanghai.compose.preference.ListPreference
 import me.zhanghai.compose.preference.ProvidePreferenceLocals
-import me.zhanghai.compose.preference.listPreference
 import me.zhanghai.compose.preference.switchPreference
 import org.koin.compose.koinInject
 
@@ -52,8 +51,8 @@ object DecoderPreferencesScreen : Screen {
       ProvidePreferenceLocals {
         LazyColumn(
           modifier = Modifier
-              .fillMaxSize()
-              .padding(padding),
+            .fillMaxSize()
+            .padding(padding),
         ) {
           switchPreference(
             preferences.tryHWDecoding.key(),

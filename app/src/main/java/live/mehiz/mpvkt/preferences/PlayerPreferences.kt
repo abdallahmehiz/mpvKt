@@ -12,9 +12,10 @@ class PlayerPreferences(
   val invertDuration = preferenceStore.getBoolean("invert_duration", false)
   val drawOverDisplayCutout = preferenceStore.getBoolean("draw_over_cutout", true)
 
-  val doubleTapToPause = preferenceStore.getBoolean("double_tap_to_pause", false)
+  val doubleTapToPause = preferenceStore.getBoolean("double_tap_to_pause", true)
   val doubleTapToSeek = preferenceStore.getBoolean("double_tap_to_seek", true)
   val doubleTapToSeekDuration = preferenceStore.getInt("double_tap_to_seek_duration", 10)
+  val holdForDoubleSpeed = preferenceStore.getBoolean("hold_for_double_speed", true)
 
   val horizontalSeekGesture = preferenceStore.getBoolean("horizontal_seek_gesture", true)
   val brightnessGesture = preferenceStore.getBoolean("gestures_brightness", true)

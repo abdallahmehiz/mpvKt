@@ -43,13 +43,15 @@ import live.mehiz.mpvkt.presentation.LeftSideOvalShape
 import live.mehiz.mpvkt.presentation.RightSideOvalShape
 import live.mehiz.mpvkt.ui.player.PlayerUpdates
 import live.mehiz.mpvkt.ui.player.PlayerViewModel
-import live.mehiz.mpvkt.ui.player.controls.components.DoubleTapSecondsView
+import live.mehiz.mpvkt.ui.player.controls.components.DoubleTapSeekSecondsView
 import live.mehiz.mpvkt.ui.theme.PlayerRippleTheme
 import org.koin.compose.koinInject
 
+@Suppress("CyclomaticComplexMethod")
 @Composable
 fun GestureHandler(
   viewModel: PlayerViewModel,
+  modifier: Modifier = Modifier,
 ) {
   val playerPreferences = koinInject<PlayerPreferences>()
   val duration by viewModel.duration.collectAsState()
@@ -83,11 +85,16 @@ fun GestureHandler(
   val doubleTapSeek: (Offset, IntSize) -> Unit = { offset, size ->
     targetAlpha = 0.2f
     val isForward = offset.x > 3 * size.width / 5
-    if (isSeekingForwards != isForward) seekAmount = 0
+    if (isForward != isSeekingForwards) seekAmount = 0
     isSeekingForwards = isForward
-    if (!((duration <= position && isSeekingForwards) || (position <= 0f && !isSeekingForwards))) {
-      seekAmount += if (isSeekingForwards) doubleTapToSeekDuration else -doubleTapToSeekDuration
+    seekAmount += if (isSeekingForwards && position < duration) {
+      doubleTapToSeekDuration
+    } else if (!isSeekingForwards && position > 0) {
+      -doubleTapToSeekDuration
+    } else {
+      0
     }
+    println(seekAmount)
     viewModel.seekBy(if (isSeekingForwards) doubleTapToSeekDuration else -doubleTapToSeekDuration)
     viewModel.showSeekBar()
   }
@@ -95,13 +102,16 @@ fun GestureHandler(
   val currentVolume by viewModel.currentVolume.collectAsState()
   val currentBrightness by viewModel.currentBrightness.collectAsState()
   Box(
-    modifier = Modifier
+    modifier = modifier
       .fillMaxSize()
       .pointerInput(Unit) {
         detectTapGestures(
           onTap = {
-            if (controlsShown) viewModel.hideControls()
-            else viewModel.showControls()
+            if (controlsShown) {
+              viewModel.hideControls()
+            } else {
+              viewModel.showControls()
+            }
           },
           onDoubleTap = {
             if (areControlsLocked) return@detectTapGestures
@@ -151,14 +161,15 @@ fun GestureHandler(
             viewModel.unpause()
           },
         ) { change, dragAmount ->
-          if ((position >= duration && dragAmount > 0) || (position <= 0f && dragAmount < 0)) {
-            return@detectHorizontalDragGestures
-          }
+          if (position >= duration && dragAmount > 0) return@detectHorizontalDragGestures
+          if (position <= 0f && dragAmount < 0) return@detectHorizontalDragGestures
           viewModel.showSeekBar()
-          val seekBy = ((dragAmount * 150f / size.width).coerceIn(
-            0f - position,
-            duration - position,
-          )).toInt()
+          val seekBy = (
+            (dragAmount * 150f / size.width).coerceIn(
+              0f - position,
+              duration - position,
+            )
+            ).toInt()
           viewModel.seekBy(seekBy)
           viewModel.gestureSeekAmount.update { (position - startingPosition).toInt() }
         }
@@ -217,7 +228,7 @@ fun GestureHandler(
               .indication(interactionSource, rememberRipple()),
           )
           AndroidView(
-            factory = { DoubleTapSecondsView(it, null) },
+            factory = { DoubleTapSeekSecondsView(it, null) },
             update = {
               if (seekAmount != 0) {
                 it.isForward = isSeekingForwards

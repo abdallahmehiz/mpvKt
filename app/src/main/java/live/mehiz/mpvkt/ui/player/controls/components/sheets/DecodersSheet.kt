@@ -1,6 +1,7 @@
 package live.mehiz.mpvkt.ui.player.controls.components.sheets
 
 import androidx.compose.runtime.Composable
+import kotlinx.collections.immutable.toImmutableList
 import live.mehiz.mpvkt.ui.player.Decoder
 
 @Composable
@@ -10,14 +11,13 @@ fun DecodersSheet(
   onDismissRequest: () -> Unit,
 ) {
   GenericTracksSheet(
-    Decoder.entries.minusElement(Decoder.Auto),
+    Decoder.entries.minusElement(Decoder.Auto).toImmutableList(),
     track = {
       AudioTrackRow(
         title = it.title,
         isSelected = selectedDecoder == it,
-      ) {
-        onSelect(it)
-      }
+        onClick = { onSelect(it) }
+      )
     },
     onDismissRequest = onDismissRequest
   )
