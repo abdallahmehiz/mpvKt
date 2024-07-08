@@ -7,6 +7,8 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -29,8 +31,9 @@ fun TopLeftPlayerControls(
       icon = Icons.AutoMirrored.Default.ArrowBack,
       onClick = { activity.finish() },
     )
+    val mediaTitle by viewModel.mediaTitle.collectAsState()
     Text(
-      viewModel.fileName,
+      mediaTitle,
       maxLines = 1,
       overflow = TextOverflow.Ellipsis,
       color = Color.White,

@@ -48,6 +48,8 @@ class PlayerActivity : AppCompatActivity() {
   private val subtitlesPreferences: SubtitlesPreferences by inject()
   private val advancedPreferences: AdvancedPreferences by inject()
 
+  private lateinit var fileName: String
+
   override fun onCreate(savedInstanceState: Bundle?) {
     if (playerPreferences.drawOverDisplayCutout.get()) enableEdgeToEdge()
     super.onCreate(savedInstanceState)
@@ -118,9 +120,6 @@ class PlayerActivity : AppCompatActivity() {
     }
     player.playbackSpeed = playerPreferences.defaultSpeed.get().toDouble()
     MPVLib.setPropertyString("keep-open", "yes")
-    if (playerPreferences.savePositionOnQuit.get()) {
-      MPVLib.setPropertyString("save-position-on-quit", "yes")
-    }
 
     player.addObserver(PlayerObserver(this))
   }
@@ -151,7 +150,7 @@ class PlayerActivity : AppCompatActivity() {
   }
 
   private fun setupIntents(intent: Intent) {
-    viewModel.fileName = intent.getStringExtra("title") ?: ""
+    intent.getStringExtra("title")?.ifBlank { viewModel.mediaTitle.update { it } }
     player.timePos = intent.getIntExtra("position", 0) / 1000
   }
 
@@ -240,8 +239,12 @@ class PlayerActivity : AppCompatActivity() {
   internal fun event(eventId: Int) {
     when (eventId) {
       MPVLib.mpvEventId.MPV_EVENT_FILE_LOADED -> {
+        fileName = intent.data!!.lastPathSegment!!.substringAfterLast('/')
+        viewModel.mediaTitle.update {
+          MPVLib.getPropertyString("media-title").ifBlank { fileName }
+        }
         CoroutineScope(Dispatchers.IO).launch {
-          reuseVideoPlaybackState(MPVLib.getPropertyString("media-title"))
+          loadVideoPlaybackState(fileName)
           if (intent.hasExtra("position")) setupIntents(intent)
         }
         setOrientation()
@@ -265,7 +268,7 @@ class PlayerActivity : AppCompatActivity() {
   private suspend fun saveVideoPlaybackState() {
     mpvKtDatabase.videoDataDao().upsert(
       PlaybackStateEntity(
-        MPVLib.getPropertyString("media-title"),
+        fileName,
         if (playerPreferences.savePositionOnQuit.get()) player.timePos ?: 0 else 0,
         player.sid,
         player.secondarySid,
@@ -274,10 +277,10 @@ class PlayerActivity : AppCompatActivity() {
     )
   }
 
-  private suspend fun reuseVideoPlaybackState(mediaTitle: String) {
+  private suspend fun loadVideoPlaybackState(mediaTitle: String) {
     val state = mpvKtDatabase.videoDataDao().getVideoDataByTitle(mediaTitle)
     state?.let {
-      player.timePos = it.lastPosition
+      player.timePos = if (playerPreferences.savePositionOnQuit.get()) it.lastPosition else 0
       player.sid = it.sid
       player.secondarySid = it.secondarySid
       player.aid = it.aid

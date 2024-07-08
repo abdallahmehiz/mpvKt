@@ -26,7 +26,7 @@ class PlayerViewModel(
   private val _currentDecoder = MutableStateFlow(getDecoderFromValue(MPVLib.getPropertyString("hwdec")))
   val currentDecoder = _currentDecoder.asStateFlow()
 
-  var fileName = ""
+  var mediaTitle = MutableStateFlow("")
 
   val isLoading = MutableStateFlow(true)
 
@@ -129,7 +129,6 @@ class PlayerViewModel(
 
   fun loadTracks() {
     viewModelScope.launch {
-      fileName = MPVLib.getPropertyString("media-title")
       val tracksCount = MPVLib.getPropertyInt("track-list/count")!!
       val possibleTrackTypes = listOf("video", "audio", "sub")
       val vidTracks = mutableListOf<Track>()
