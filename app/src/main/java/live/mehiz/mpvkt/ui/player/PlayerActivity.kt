@@ -78,6 +78,7 @@ class PlayerActivity : AppCompatActivity() {
   }
 
   override fun onDestroy() {
+    audioManager.abandonAudioFocus(audioFocusChangeListener)
     MPVLib.destroy()
     super.onDestroy()
   }
@@ -146,6 +147,13 @@ class PlayerActivity : AppCompatActivity() {
     } catch (e: Exception) {
       File(applicationContext.filesDir.path + "/mpv.conf").writeText(advancedPreferences.mpvConf.get())
       Log.e("PlayerActivity", "Couldn't copy mpv configuration files: ${e.message}")
+    }
+  }
+
+  private val audioFocusChangeListener = AudioManager.OnAudioFocusChangeListener {
+    when (it) {
+      AudioManager.AUDIOFOCUS_LOSS,
+      AudioManager.AUDIOFOCUS_LOSS_TRANSIENT -> viewModel.pause()
     }
   }
 
@@ -253,6 +261,11 @@ class PlayerActivity : AppCompatActivity() {
         viewModel.loadChapters()
         viewModel.loadTracks()
         viewModel.getDecoder()
+        audioManager.requestAudioFocus(
+          audioFocusChangeListener,
+          AudioManager.STREAM_MUSIC,
+          AudioManager.AUDIOFOCUS_GAIN
+        )
       }
 
       MPVLib.mpvEventId.MPV_EVENT_SEEK -> {
