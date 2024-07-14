@@ -27,7 +27,6 @@ import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -40,14 +39,10 @@ import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
-import `is`.xyz.mpv.Utils
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.update
@@ -81,14 +76,8 @@ class PlayerControls(private val viewModel: PlayerViewModel) {
     val controlsShown by viewModel.controlsShown.collectAsState()
     val areControlsLocked by viewModel.areControlsLocked.collectAsState()
     val seekBarShown by viewModel.seekBarShown.collectAsState()
-    val gestureSeekAmount by viewModel.gestureSeekAmount.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
     val duration by viewModel.duration.collectAsState()
-    LaunchedEffect(gestureSeekAmount) {
-      if (gestureSeekAmount != 0) return@LaunchedEffect
-      delay(3000)
-      viewModel.hideSeekBar()
-    }
     val position by viewModel.pos.collectAsState()
     val paused by viewModel.paused.collectAsState()
     var isSeeking by remember { mutableStateOf(false) }
@@ -126,12 +115,13 @@ class PlayerControls(private val viewModel: PlayerViewModel) {
         val (bottomRightControls, bottomLeftControls) = createRefs()
         val playerPauseButton = createRef()
         val seekbar = createRef()
-        val (seekValue, playerUpdates) = createRefs()
+        val (playerUpdates) = createRefs()
 
         val isBrightnessSliderShown by viewModel.isBrightnessSliderShown.collectAsState()
         val isVolumeSliderShown by viewModel.isVolumeSliderShown.collectAsState()
         val brightness by viewModel.currentBrightness.collectAsState()
         val volume by viewModel.currentVolume.collectAsState()
+
         LaunchedEffect(volume, brightness) {
           delay(1000)
           if (isVolumeSliderShown) viewModel.isVolumeSliderShown.update { false }
@@ -201,24 +191,6 @@ class PlayerControls(private val viewModel: PlayerViewModel) {
           ControlsButton(
             Icons.Filled.LockOpen,
             onClick = { viewModel.unlockControls() },
-          )
-        }
-        AnimatedVisibility(
-          visible = gestureSeekAmount != 0 && !areControlsLocked,
-          enter = fadeIn(),
-          exit = fadeOut(),
-          modifier = Modifier.constrainAs(seekValue) {
-            start.linkTo(parent.absoluteLeft)
-            end.linkTo(parent.absoluteRight)
-            bottom.linkTo(seekbar.top)
-          },
-        ) {
-          Text(
-            stringResource(R.string.player_gesture_seek_text, gestureSeekAmount, Utils.prettyTime(position.toInt())),
-            style = MaterialTheme.typography.headlineMedium.copy(shadow = Shadow(blurRadius = 5f)),
-            color = Color.White,
-            fontWeight = FontWeight.Bold,
-            textAlign = TextAlign.Center,
           )
         }
         AnimatedVisibility(

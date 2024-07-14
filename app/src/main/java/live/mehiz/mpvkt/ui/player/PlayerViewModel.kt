@@ -321,7 +321,6 @@ class PlayerViewModel(
       newVolume,
       0,
     )
-    println(activity.audioManager.getStreamVolume(AudioManager.STREAM_MUSIC))
     currentVolume.update { newVolume }
   }
 

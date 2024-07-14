@@ -94,7 +94,6 @@ fun GestureHandler(
     } else {
       0
     }
-    println(seekAmount)
     viewModel.seekBy(if (isSeekingForwards) doubleTapToSeekDuration else -doubleTapToSeekDuration)
     viewModel.showSeekBar()
   }
@@ -158,18 +157,14 @@ fun GestureHandler(
           },
           onDragEnd = {
             viewModel.gestureSeekAmount.update { 0 }
+            viewModel.hideSeekBar()
             viewModel.unpause()
           },
         ) { change, dragAmount ->
           if (position >= duration && dragAmount > 0) return@detectHorizontalDragGestures
           if (position <= 0f && dragAmount < 0) return@detectHorizontalDragGestures
           viewModel.showSeekBar()
-          val seekBy = (
-            (dragAmount * 150f / size.width).coerceIn(
-              0f - position,
-              duration - position,
-            )
-            ).toInt()
+          val seekBy = ((dragAmount * 150f / size.width).coerceIn(0f - position, duration - position)).toInt()
           viewModel.seekBy(seekBy)
           viewModel.gestureSeekAmount.update { (position - startingPosition).toInt() }
         }
@@ -179,29 +174,39 @@ fun GestureHandler(
         var startingY = 0f
         var originalVolume = currentVolume
         var originalBrightness = currentBrightness
+        val brightnessGestureSens = 0.001f
+        val volumeGestureSens = 0.03f
         detectVerticalDragGestures(
           onDragEnd = { startingY = 0f },
           onDragStart = {
             startingY = it.y
             originalVolume = currentVolume
             originalBrightness = currentBrightness
-          }
+          },
         ) { change, amount ->
           when {
             volumeGesture && brightnessGesture -> {
               if (change.position.x < size.width / 2) {
-                viewModel.changeBrightnessTo(originalBrightness + ((startingY - change.position.y) * 0.005f))
+                viewModel.changeBrightnessTo(
+                  originalBrightness + ((startingY - change.position.y) * brightnessGestureSens),
+                )
               } else {
-                viewModel.changeVolumeTo(originalVolume + ((startingY - change.position.y) * 0.1f).toInt())
+                viewModel.changeVolumeTo(
+                  originalVolume + ((startingY - change.position.y) * volumeGestureSens).toInt(),
+                )
               }
             }
 
             brightnessGesture -> {
-              viewModel.changeBrightnessTo(originalBrightness + ((startingY - change.position.y) * 0.005f))
+              viewModel.changeBrightnessTo(
+                originalBrightness + ((startingY - change.position.y) * brightnessGestureSens),
+              )
             }
             // it's not always true, AS is drunk
             volumeGesture -> {
-              viewModel.changeVolumeTo(originalVolume + ((startingY - change.position.y) * 0.1f).toInt())
+              viewModel.changeVolumeTo(
+                originalVolume + ((startingY - change.position.y) * volumeGestureSens).toInt(),
+              )
             }
 
             else -> {}
