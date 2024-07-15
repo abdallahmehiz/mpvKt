@@ -50,6 +50,8 @@ class PlayerActivity : AppCompatActivity() {
 
   private lateinit var fileName: String
 
+  private var restoreAudioFocus: () -> Unit = {}
+
   override fun onCreate(savedInstanceState: Bundle?) {
     if (playerPreferences.drawOverDisplayCutout.get()) enableEdgeToEdge()
     super.onCreate(savedInstanceState)
@@ -153,7 +155,25 @@ class PlayerActivity : AppCompatActivity() {
   private val audioFocusChangeListener = AudioManager.OnAudioFocusChangeListener {
     when (it) {
       AudioManager.AUDIOFOCUS_LOSS,
-      AudioManager.AUDIOFOCUS_LOSS_TRANSIENT -> viewModel.pause()
+      AudioManager.AUDIOFOCUS_LOSS_TRANSIENT -> {
+        val oldRestore = restoreAudioFocus
+        val wasPlayerPaused = player.paused ?: false
+        viewModel.pause()
+        restoreAudioFocus = {
+          oldRestore()
+          if (!wasPlayerPaused) viewModel.unpause()
+        }
+      }
+      AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK -> {
+        MPVLib.command(arrayOf("multiply", "volume", "0.5"))
+        restoreAudioFocus = {
+          MPVLib.command(arrayOf("multiply", "volume", "2"))
+        }
+      }
+      AudioManager.AUDIOFOCUS_GAIN -> {
+        restoreAudioFocus()
+        restoreAudioFocus = {}
+      }
     }
   }
 
