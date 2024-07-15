@@ -23,8 +23,8 @@ enum class VideoAspect(@StringRes val titleRes: Int) {
 enum class Decoder(val title: String, val value: String) {
   Auto("Auto", "auto-copy"),
   SW("SW", "no"),
-  HW("HW", "mediacodec"),
-  HWPlus("HW+", "mediacodec-copy"),
+  HW("HW", "mediacodec-copy"),
+  HWPlus("HW+", "mediacodec"),
 }
 
 fun getDecoderFromValue(value: String): Decoder {
