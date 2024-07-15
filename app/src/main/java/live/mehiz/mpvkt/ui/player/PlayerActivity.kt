@@ -14,6 +14,9 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.WindowCompat
 import androidx.documentfile.provider.DocumentFile
+import androidx.media.AudioAttributesCompat
+import androidx.media.AudioFocusRequestCompat
+import androidx.media.AudioManagerCompat
 import `is`.xyz.mpv.MPVLib
 import `is`.xyz.mpv.Utils
 import kotlinx.coroutines.CoroutineScope
@@ -37,7 +40,7 @@ import java.io.File
 class PlayerActivity : AppCompatActivity() {
 
   private val viewModel: PlayerViewModel by lazy { PlayerViewModel(this) }
-  private val binding by lazy { PlayerLayoutBinding.inflate(this.layoutInflater) }
+  private val binding by lazy { PlayerLayoutBinding.inflate(layoutInflater) }
   private val mpvKtDatabase: MpvKtDatabase by inject()
   val player by lazy { binding.player }
   val windowInsetsController by lazy { WindowCompat.getInsetsController(window, window.decorView) }
@@ -50,6 +53,7 @@ class PlayerActivity : AppCompatActivity() {
 
   private lateinit var fileName: String
 
+  private var audioFocusRequest: AudioFocusRequestCompat? = null
   private var restoreAudioFocus: () -> Unit = {}
 
   override fun onCreate(savedInstanceState: Bundle?) {
@@ -80,15 +84,17 @@ class PlayerActivity : AppCompatActivity() {
   }
 
   override fun onDestroy() {
-    audioManager.abandonAudioFocus(audioFocusChangeListener)
+    audioFocusRequest?.let {
+      AudioManagerCompat.abandonAudioFocusRequest(audioManager, it)
+    }
+    audioFocusRequest = null
     MPVLib.destroy()
     super.onDestroy()
   }
 
   override fun onPause() {
     super.onPause()
-    if (viewModel.paused.value) return
-    viewModel.pauseUnpause()
+    viewModel.pause()
   }
 
   private fun setupMPV() {
@@ -129,6 +135,23 @@ class PlayerActivity : AppCompatActivity() {
 
   private fun setupAudio() {
     MPVLib.setPropertyString("alang", audioPreferences.preferredLanguages.get())
+
+    val request = AudioFocusRequestCompat
+      .Builder(AudioManagerCompat.AUDIOFOCUS_GAIN)
+      .also {
+        it.setAudioAttributes(
+          AudioAttributesCompat
+            .Builder()
+            .setUsage(AudioAttributesCompat.USAGE_MEDIA)
+            .setContentType(AudioAttributesCompat.CONTENT_TYPE_MUSIC)
+            .build(),
+        )
+        it.setOnAudioFocusChangeListener(audioFocusChangeListener)
+      }.build()
+    AudioManagerCompat.requestAudioFocus(audioManager, request).let {
+      if (it == AudioManager.AUDIOFOCUS_REQUEST_FAILED) return@let
+      audioFocusRequest = request
+    }
   }
 
   private fun setupSubtitles() {
@@ -164,15 +187,21 @@ class PlayerActivity : AppCompatActivity() {
           if (!wasPlayerPaused) viewModel.unpause()
         }
       }
+
       AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK -> {
         MPVLib.command(arrayOf("multiply", "volume", "0.5"))
         restoreAudioFocus = {
           MPVLib.command(arrayOf("multiply", "volume", "2"))
         }
       }
+
       AudioManager.AUDIOFOCUS_GAIN -> {
         restoreAudioFocus()
         restoreAudioFocus = {}
+      }
+
+      AudioManager.AUDIOFOCUS_REQUEST_FAILED -> {
+        Log.d("PlayerActivity", "didn't get audio focus")
       }
     }
   }
@@ -251,6 +280,10 @@ class PlayerActivity : AppCompatActivity() {
 
   internal fun onObserverEvent(property: String, value: Boolean) {
     when (property) {
+      "pause" -> {
+        if (value) viewModel.pause()
+      }
+
       "paused-for-cache" -> {
         viewModel.isLoading.update { value }
       }
@@ -262,7 +295,8 @@ class PlayerActivity : AppCompatActivity() {
   }
 
   @Suppress("EmptyFunctionBlock", "UnusedParameter")
-  internal fun onObserverEvent(property: String, value: String) {}
+  internal fun onObserverEvent(property: String, value: String) {
+  }
 
   internal fun event(eventId: Int) {
     when (eventId) {
@@ -281,11 +315,6 @@ class PlayerActivity : AppCompatActivity() {
         viewModel.loadChapters()
         viewModel.loadTracks()
         viewModel.getDecoder()
-        audioManager.requestAudioFocus(
-          audioFocusChangeListener,
-          AudioManager.STREAM_MUSIC,
-          AudioManager.AUDIOFOCUS_GAIN
-        )
       }
 
       MPVLib.mpvEventId.MPV_EVENT_SEEK -> {
@@ -341,7 +370,8 @@ class PlayerActivity : AppCompatActivity() {
   }
 
   @Suppress("EmptyFunctionBlock", "UnusedParameter")
-  internal fun efEvent(err: String?) {}
+  internal fun efEvent(err: String?) {
+  }
 
   private fun setOrientation() {
     this.requestedOrientation = when (playerPreferences.orientation.get()) {
@@ -363,9 +393,17 @@ class PlayerActivity : AppCompatActivity() {
 
   override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
     when (keyCode) {
-      KeyEvent.KEYCODE_VOLUME_UP -> { viewModel.changeVolumeBy(1) }
-      KeyEvent.KEYCODE_VOLUME_DOWN -> { viewModel.changeVolumeBy(-1) }
-      else -> { super.onKeyDown(keyCode, event) }
+      KeyEvent.KEYCODE_VOLUME_UP -> {
+        viewModel.changeVolumeBy(1)
+      }
+
+      KeyEvent.KEYCODE_VOLUME_DOWN -> {
+        viewModel.changeVolumeBy(-1)
+      }
+
+      else -> {
+        super.onKeyDown(keyCode, event)
+      }
     }
     return true
   }

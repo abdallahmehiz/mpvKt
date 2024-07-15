@@ -37,6 +37,7 @@ androidx-compose-constraintlayout = { group = "androidx.constraintlayout", name 
 androidx-documentfile = { group = "androidx.documentfile", name = "documentfile", version = "1.0.1" }
 androidx-compose-animation-graphics = { group = "androidx.compose.animation", name = "animation-graphics-android" }
 androidx-preferences-ktx = { group = "androidx.preference", name = "preference-ktx", version = "1.2.1" }
+mediasession = "androidx.media:media:1.7.0"
 
 aniyomi-mpv-lib = { module = "com.github.aniyomiorg:aniyomi-mpv-lib", version = "1.15.n" }
 aniyomi-ffmpeg-kit = { module = "com.github.jmir1:ffmpeg-kit", version = "1.15" }

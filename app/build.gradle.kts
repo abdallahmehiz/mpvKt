@@ -104,6 +104,7 @@ dependencies {
   implementation(libs.androidx.compose.animation.graphics)
   implementation(libs.material)
   implementation(libs.androidx.preferences.ktx)
+  implementation(libs.mediasession)
 
   implementation(libs.aniyomi.mpv.lib)
   implementation(libs.aniyomi.ffmpeg.kit)
