@@ -2,6 +2,7 @@ package live.mehiz.mpvkt.ui.player
 
 import android.media.AudioManager
 import android.net.Uri
+import android.os.Build
 import android.provider.Settings
 import android.util.DisplayMetrics
 import androidx.core.view.WindowInsetsCompat
@@ -237,6 +238,11 @@ class PlayerViewModel(
   fun pause() {
     activity.player.paused = true
     _paused.update { true }
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+      runCatching {
+        activity.setPictureInPictureParams(activity.createPipParams())
+      }
+    }
   }
 
   fun unpause() {
@@ -349,6 +355,11 @@ class PlayerViewModel(
     MPVLib.setPropertyDouble("video-aspect-override", ratio)
     playerPreferences.videoAspect.set(aspect)
     playerUpdate.update { PlayerUpdates.AspectRatio }
+    runCatching {
+      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+        activity.setPictureInPictureParams(activity.createPipParams())
+      }
+    }
   }
 }
 

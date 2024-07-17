@@ -27,4 +27,6 @@ class PlayerPreferences(
 
   val defaultSpeed = preferenceStore.getFloat("default_speed", 1f)
   val savePositionOnQuit = preferenceStore.getBoolean("save_position", true)
+
+  val automaticallyEnterPip = preferenceStore.getBoolean("automatic_pip")
 }

@@ -1,5 +1,6 @@
 package live.mehiz.mpvkt.ui.preferences
 
+import android.content.pm.PackageManager
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -38,7 +39,6 @@ object PlayerPreferencesScreen : Screen {
     val navigator = LocalNavigator.currentOrThrow
     val context = LocalContext.current
     val preferences = koinInject<PlayerPreferences>()
-    val doubleTapToPause by preferences.doubleTapToPause.collectAsState()
     val doubleTapToSeek by preferences.doubleTapToSeek.collectAsState()
     Scaffold(
       topBar = {
@@ -98,6 +98,13 @@ object PlayerPreferencesScreen : Screen {
             summary = { Text(text = "${it}s") },
             enabled = { doubleTapToSeek },
           )
+          if (context.packageManager.hasSystemFeature(PackageManager.FEATURE_PICTURE_IN_PICTURE)) {
+            switchPreference(
+              key = preferences.automaticallyEnterPip.key(),
+              defaultValue = preferences.automaticallyEnterPip.defaultValue(),
+              title = { Text(text = stringResource(id = R.string.pref_player_automatically_enter_pip)) },
+            )
+          }
           preferenceCategory(
             "gestures",
             title = { Text(stringResource(R.string.pref_player_gestures)) },
@@ -120,7 +127,7 @@ object PlayerPreferencesScreen : Screen {
           switchPreference(
             preferences.holdForDoubleSpeed.key(),
             defaultValue = preferences.holdForDoubleSpeed.defaultValue(),
-            title = { Text(stringResource(R.string.pref_player_gestures_hold_for_double_speed)) }
+            title = { Text(stringResource(R.string.pref_player_gestures_hold_for_double_speed)) },
           )
           preferenceCategory(
             "controls",

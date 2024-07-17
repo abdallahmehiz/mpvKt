@@ -1,17 +1,29 @@
 package live.mehiz.mpvkt.ui.player
 
+import android.app.PictureInPictureParams
+import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.content.pm.ActivityInfo
+import android.content.pm.PackageManager
+import android.content.res.Configuration
 import android.media.AudioManager
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.os.ParcelFileDescriptor
 import android.util.Log
+import android.util.Rational
 import android.view.KeyEvent
 import android.view.WindowManager
 import androidx.activity.enableEdgeToEdge
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.toAndroidRect
+import androidx.compose.ui.layout.boundsInWindow
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.core.view.WindowCompat
 import androidx.documentfile.provider.DocumentFile
 import androidx.media.AudioAttributesCompat
@@ -56,6 +68,16 @@ class PlayerActivity : AppCompatActivity() {
   private var audioFocusRequest: AudioFocusRequestCompat? = null
   private var restoreAudioFocus: () -> Unit = {}
 
+  private var pipRect: android.graphics.Rect? = null
+  private val isPipSupported by lazy {
+    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N) {
+      false
+    } else {
+      packageManager.hasSystemFeature(PackageManager.FEATURE_PICTURE_IN_PICTURE)
+    }
+  }
+  private var pipReceiver: BroadcastReceiver? = null
+
   override fun onCreate(savedInstanceState: Bundle?) {
     if (playerPreferences.drawOverDisplayCutout.get()) enableEdgeToEdge()
     super.onCreate(savedInstanceState)
@@ -78,23 +100,56 @@ class PlayerActivity : AppCompatActivity() {
 
     binding.controls.setContent {
       MpvKtTheme {
-        controls.Content()
+        controls.Content(
+          modifier = Modifier.onGloballyPositioned {
+            pipRect = it.boundsInWindow().toAndroidRect()
+          },
+        )
       }
     }
   }
 
   override fun onDestroy() {
+    super.onDestroy()
     audioFocusRequest?.let {
       AudioManagerCompat.abandonAudioFocusRequest(audioManager, it)
     }
     audioFocusRequest = null
     MPVLib.destroy()
-    super.onDestroy()
+  }
+
+  override fun finish() {
+    endPlayback(EndPlaybackReason.ExternalAction)
+    super.finish()
   }
 
   override fun onPause() {
     super.onPause()
+    CoroutineScope(Dispatchers.IO).launch {
+      saveVideoPlaybackState()
+    }
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+      if (isInPictureInPictureMode) return
+    }
     viewModel.pause()
+  }
+
+  override fun onUserLeaveHint() {
+    if (!isPipSupported) {
+      super.onUserLeaveHint()
+      return
+    }
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N && player.paused == false) {
+      enterPictureInPictureMode()
+    }
+    super.onUserLeaveHint()
+  }
+
+  override fun onStart() {
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+      setPictureInPictureParams(createPipParams())
+    }
+    super.onStart()
   }
 
   private fun setupMPV() {
@@ -178,7 +233,8 @@ class PlayerActivity : AppCompatActivity() {
   private val audioFocusChangeListener = AudioManager.OnAudioFocusChangeListener {
     when (it) {
       AudioManager.AUDIOFOCUS_LOSS,
-      AudioManager.AUDIOFOCUS_LOSS_TRANSIENT -> {
+      AudioManager.AUDIOFOCUS_LOSS_TRANSIENT,
+      -> {
         val oldRestore = restoreAudioFocus
         val wasPlayerPaused = player.paused ?: false
         viewModel.pause()
@@ -207,7 +263,10 @@ class PlayerActivity : AppCompatActivity() {
   }
 
   private fun setupIntents(intent: Intent) {
-    intent.getStringExtra("title")?.ifBlank { viewModel.mediaTitle.update { it } }
+    intent.getStringExtra("title")?.let {
+      viewModel.mediaTitle.update { _ -> it }
+      MPVLib.setPropertyString("force-media-title", it)
+    }
     player.timePos = intent.getIntExtra("position", 0) / 1000
   }
 
@@ -327,6 +386,10 @@ class PlayerActivity : AppCompatActivity() {
     }
   }
 
+  @Suppress("EmptyFunctionBlock", "UnusedParameter")
+  internal fun efEvent(err: String?) {
+  }
+
   private suspend fun saveVideoPlaybackState() {
     mpvKtDatabase.videoDataDao().upsert(
       PlaybackStateEntity(
@@ -349,16 +412,11 @@ class PlayerActivity : AppCompatActivity() {
     }
   }
 
-  override fun finish() {
-    endPlayback(EndPlaybackReason.ExternalAction)
-  }
-
   private fun endPlayback(reason: EndPlaybackReason) {
     CoroutineScope(Dispatchers.IO).launch {
       saveVideoPlaybackState()
     }
     if (!intent.getBooleanExtra("return_result", false)) {
-      super.finish()
       return
     }
     val returnIntent = Intent()
@@ -366,11 +424,68 @@ class PlayerActivity : AppCompatActivity() {
     player.timePos?.let { returnIntent.putExtra("position", it * 1000) }
     player.duration?.let { returnIntent.putExtra("duration", it * 1000) }
     setResult(RESULT_OK, returnIntent)
-    super.finish()
   }
 
-  @Suppress("EmptyFunctionBlock", "UnusedParameter")
-  internal fun efEvent(err: String?) {
+  @RequiresApi(Build.VERSION_CODES.O)
+  fun createPipParams(): PictureInPictureParams {
+    val builder = PictureInPictureParams.Builder()
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+      builder.setTitle(viewModel.mediaTitle.value)
+    }
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+      val autoEnter = playerPreferences.automaticallyEnterPip.get()
+      builder.setAutoEnterEnabled(player.paused == false && autoEnter)
+      builder.setSeamlessResizeEnabled(player.paused == false && autoEnter)
+    }
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+      builder.setActions(createPipActions(this, player.paused ?: true))
+    }
+    builder.setSourceRectHint(pipRect)
+    player.videoH?.let {
+      val height = it
+      val width = it * player.getVideoOutAspect()!!
+      val rational = Rational(height, width.toInt()).toFloat()
+      if (rational in 0.41..2.40) builder.setAspectRatio(Rational(width.toInt(), height))
+    }
+    return builder.build()
+  }
+
+  override fun onPictureInPictureModeChanged(isInPictureInPictureMode: Boolean, newConfig: Configuration) {
+    if (!isInPictureInPictureMode) {
+      pipReceiver?.let {
+        unregisterReceiver(pipReceiver)
+        pipReceiver = null
+      }
+      super.onPictureInPictureModeChanged(isInPictureInPictureMode, newConfig)
+      return
+    }
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+      setPictureInPictureParams(createPipParams())
+    }
+    viewModel.hideControls()
+    viewModel.hideSeekBar()
+    viewModel.isBrightnessSliderShown.update { false }
+    viewModel.isVolumeSliderShown.update { false }
+    pipReceiver = object : BroadcastReceiver() {
+      override fun onReceive(context: Context?, intent: Intent?) {
+        if (intent == null || intent.action != PIP_INTENTS_FILTER) return
+        when (intent.getIntExtra(PIP_INTENT_ACTION, 0)) {
+          PIP_PAUSE -> viewModel.pause()
+          PIP_PLAY -> viewModel.unpause()
+          PIP_FF -> viewModel.seekBy(playerPreferences.doubleTapToSeekDuration.get())
+          PIP_FR -> viewModel.seekBy(-playerPreferences.doubleTapToSeekDuration.get())
+        }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+          setPictureInPictureParams(createPipParams())
+        }
+      }
+    }
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+      registerReceiver(pipReceiver, IntentFilter(PIP_INTENTS_FILTER), RECEIVER_NOT_EXPORTED)
+    } else {
+      registerReceiver(pipReceiver, IntentFilter(PIP_INTENTS_FILTER))
+    }
+    super.onPictureInPictureModeChanged(isInPictureInPictureMode, newConfig)
   }
 
   private fun setOrientation() {
