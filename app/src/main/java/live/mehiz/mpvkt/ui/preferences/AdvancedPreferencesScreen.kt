@@ -135,7 +135,49 @@ object AdvancedPreferencesScreen : Screen {
                 }
                 it
               },
-              summary = { Text(mpvConf.lines()[0]) },
+              summary = { if (mpvConf.isNotBlank()) Text(mpvConf.lines()[0]) },
+            )
+          }
+          item {
+            var inputConf by remember { mutableStateOf(preferences.inputConf.get()) }
+            LaunchedEffect(true) {
+              if (mpvConfStorageLocation.isBlank()) return@LaunchedEffect
+              withContext(Dispatchers.IO) {
+                val tempFile = kotlin.io.path.createTempFile()
+                runCatching {
+                  val uri = DocumentFile.fromTreeUri(
+                    context,
+                    Uri.parse(mpvConfStorageLocation),
+                  )!!.findFile("input.conf")!!.uri
+                  context.contentResolver.openInputStream(uri)?.copyTo(tempFile.outputStream())
+                  preferences.inputConf.set(tempFile.readLines().fastJoinToString("\n"))
+                }
+                tempFile.deleteIfExists()
+              }
+            }
+            TextFieldPreference(
+              value = inputConf,
+              onValueChange = { inputConf = it },
+              title = { Text(stringResource(R.string.pref_advanced_input_conf)) },
+              textToValue = {
+                preferences.inputConf.set(it)
+                if (mpvConfStorageLocation.isNotBlank()) {
+                  val tree = DocumentFile.fromTreeUri(context, Uri.parse(mpvConfStorageLocation))!!
+                  val uri = if (tree.findFile("input.conf") == null) {
+                    val conf = tree.createFile("text/plain", "input.conf")!!
+                    conf.renameTo("input.conf")
+                    conf.uri
+                  } else {
+                    tree.findFile("input.conf")!!.uri
+                  }
+                  val out = context.contentResolver.openOutputStream(uri)
+                  out!!.write(it.toByteArray())
+                  out.flush()
+                  out.close()
+                }
+                it
+              },
+              summary = { if (inputConf.isNotBlank()) Text(inputConf.lines()[0]) },
             )
           }
         }

@@ -122,11 +122,11 @@ class PlayerControls(private val viewModel: PlayerViewModel) {
         val brightness by viewModel.currentBrightness.collectAsState()
         val volume by viewModel.currentVolume.collectAsState()
 
-        LaunchedEffect(volume) {
+        LaunchedEffect(volume, isVolumeSliderShown) {
           delay(1000)
           if (isVolumeSliderShown) viewModel.isVolumeSliderShown.update { false }
         }
-        LaunchedEffect(brightness) {
+        LaunchedEffect(brightness, isBrightnessSliderShown) {
           delay(1000)
           if (isBrightnessSliderShown) viewModel.isBrightnessSliderShown.update { false }
         }

@@ -185,6 +185,8 @@ class PlayerActivity : AppCompatActivity() {
     player.playbackSpeed = playerPreferences.defaultSpeed.get().toDouble()
     MPVLib.setPropertyString("keep-open", "yes")
 
+    MPVLib.setPropertyString("input-default-bindings", "yes")
+
     player.addObserver(PlayerObserver(this))
   }
 
@@ -226,6 +228,7 @@ class PlayerActivity : AppCompatActivity() {
       }
     } catch (e: Exception) {
       File(applicationContext.filesDir.path + "/mpv.conf").writeText(advancedPreferences.mpvConf.get())
+      File(applicationContext.filesDir.path + "/input.conf").writeText(advancedPreferences.inputConf.get())
       Log.e("PlayerActivity", "Couldn't copy mpv configuration files: ${e.message}")
     }
   }
@@ -516,10 +519,29 @@ class PlayerActivity : AppCompatActivity() {
         viewModel.changeVolumeBy(-1)
       }
 
+      KeyEvent.KEYCODE_DPAD_RIGHT -> {
+        viewModel.seekBy(playerPreferences.doubleTapToSeekDuration.get())
+      }
+
+      KeyEvent.KEYCODE_DPAD_LEFT -> {
+        viewModel.seekBy(-playerPreferences.doubleTapToSeekDuration.get())
+      }
+
+      KeyEvent.KEYCODE_SPACE -> {
+        viewModel.pauseUnpause()
+      }
+
+      // other keys should be bound by the user in input.conf ig
       else -> {
+        event?.let { player.onKey(it) }
         super.onKeyDown(keyCode, event)
       }
     }
     return true
+  }
+
+  override fun onKeyUp(keyCode: Int, event: KeyEvent?): Boolean {
+    if (player.onKey(event!!)) return true
+    return super.onKeyUp(keyCode, event)
   }
 }
