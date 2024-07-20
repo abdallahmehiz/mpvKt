@@ -31,7 +31,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.viewinterop.AndroidView
 import `is`.xyz.mpv.MPVLib
@@ -100,6 +102,7 @@ fun GestureHandler(
   var isLongPressing by remember { mutableStateOf(false) }
   val currentVolume by viewModel.currentVolume.collectAsState()
   val currentBrightness by viewModel.currentBrightness.collectAsState()
+  val haptics = LocalHapticFeedback.current
   Box(
     modifier = modifier
       .fillMaxSize()
@@ -140,6 +143,7 @@ fun GestureHandler(
           },
           onLongPress = {
             if (!isLongPressing && !viewModel.paused.value) {
+              haptics.performHapticFeedback(HapticFeedbackType.LongPress)
               isLongPressing = true
               MPVLib.setPropertyDouble("speed", 2.0)
               viewModel.playerUpdate.update { PlayerUpdates.DoubleSpeed }
