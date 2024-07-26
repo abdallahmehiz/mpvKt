@@ -130,8 +130,10 @@ class PlayerActivity : AppCompatActivity() {
     }
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
       if (isInPictureInPictureMode) return
+      else viewModel.pause()
+    } else {
+      viewModel.pause()
     }
-    viewModel.pause()
   }
 
   override fun onUserLeaveHint() {
@@ -172,7 +174,7 @@ class PlayerActivity : AppCompatActivity() {
     }
     MPVLib.setPropertyString(
       "hwdec",
-      if (decoderPreferences.tryHWDecoding.get()) "auto-copy" else "no",
+      if (decoderPreferences.tryHWDecoding.get()) "auto" else "no",
     )
     when (decoderPreferences.debanding.get()) {
       Debanding.None -> {}
@@ -399,8 +401,12 @@ class PlayerActivity : AppCompatActivity() {
         fileName,
         if (playerPreferences.savePositionOnQuit.get()) player.timePos ?: 0 else 0,
         player.sid,
+        MPVLib.getPropertyDouble("sub-delay"),
+        MPVLib.getPropertyDouble("sub-speed"),
         player.secondarySid,
+        MPVLib.getPropertyDouble("secondary-sub-delay"),
         player.aid,
+        MPVLib.getPropertyDouble("audio-delay")
       ),
     )
   }
@@ -469,6 +475,7 @@ class PlayerActivity : AppCompatActivity() {
     viewModel.hideSeekBar()
     viewModel.isBrightnessSliderShown.update { false }
     viewModel.isVolumeSliderShown.update { false }
+    viewModel.sheetShown.update { Sheets.None }
     pipReceiver = object : BroadcastReceiver() {
       override fun onReceive(context: Context?, intent: Intent?) {
         if (intent == null || intent.action != PIP_INTENTS_FILTER) return

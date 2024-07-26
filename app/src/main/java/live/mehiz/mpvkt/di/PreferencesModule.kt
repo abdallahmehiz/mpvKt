@@ -10,10 +10,11 @@ import live.mehiz.mpvkt.preferences.preference.AndroidPreferenceStore
 import live.mehiz.mpvkt.preferences.preference.PreferenceStore
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.module.dsl.singleOf
+import org.koin.dsl.bind
 import org.koin.dsl.module
 
 val PreferencesModule = module {
-  single<PreferenceStore> { AndroidPreferenceStore(androidContext()) }
+  single { AndroidPreferenceStore(androidContext()) }.bind(PreferenceStore::class)
 
   singleOf(::AppearancePreferences)
   singleOf(::PlayerPreferences)

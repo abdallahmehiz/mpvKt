@@ -21,7 +21,8 @@ enum class VideoAspect(@StringRes val titleRes: Int) {
 }
 
 enum class Decoder(val title: String, val value: String) {
-  Auto("Auto", "auto-copy"),
+  AutoCopy("Auto", "auto-copy"),
+  Auto("Auto", "auto"),
   SW("SW", "no"),
   HW("HW", "mediacodec-copy"),
   HWPlus("HW+", "mediacodec"),

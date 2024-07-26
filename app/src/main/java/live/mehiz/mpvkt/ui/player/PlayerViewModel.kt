@@ -86,6 +86,7 @@ class PlayerViewModel(
         Decoder.HWPlus -> Decoder.HW.value
         Decoder.HW -> Decoder.SW.value
         Decoder.SW -> Decoder.HWPlus.value
+        Decoder.AutoCopy -> Decoder.SW.value
         Decoder.Auto -> Decoder.SW.value
       },
     )
@@ -221,6 +222,7 @@ class PlayerViewModel(
 
   fun updatePlayBackPos(pos: Float) {
     _pos.update { pos }
+    updateChapter(pos.toLong())
   }
 
   fun updateReadAhead(value: Long) {
