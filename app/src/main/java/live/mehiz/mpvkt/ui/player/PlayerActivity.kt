@@ -128,11 +128,10 @@ class PlayerActivity : AppCompatActivity() {
     CoroutineScope(Dispatchers.IO).launch {
       saveVideoPlaybackState()
     }
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-      if (isInPictureInPictureMode) return
-      else viewModel.pause()
-    } else {
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N && !isInPictureInPictureMode) {
       viewModel.pause()
+    } else {
+      return
     }
   }
 
@@ -401,12 +400,8 @@ class PlayerActivity : AppCompatActivity() {
         fileName,
         if (playerPreferences.savePositionOnQuit.get()) player.timePos ?: 0 else 0,
         player.sid,
-        MPVLib.getPropertyDouble("sub-delay"),
-        MPVLib.getPropertyDouble("sub-speed"),
         player.secondarySid,
-        MPVLib.getPropertyDouble("secondary-sub-delay"),
         player.aid,
-        MPVLib.getPropertyDouble("audio-delay")
       ),
     )
   }
