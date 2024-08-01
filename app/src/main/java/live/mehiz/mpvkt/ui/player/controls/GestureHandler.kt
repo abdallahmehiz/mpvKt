@@ -11,9 +11,12 @@ import androidx.compose.foundation.indication
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.PressInteraction
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.safeGestures
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material.ripple.LocalRippleTheme
 import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.runtime.Composable
@@ -49,7 +52,7 @@ import live.mehiz.mpvkt.ui.player.controls.components.DoubleTapSeekSecondsView
 import live.mehiz.mpvkt.ui.theme.PlayerRippleTheme
 import org.koin.compose.koinInject
 
-@Suppress("CyclomaticComplexMethod")
+@Suppress("CyclomaticComplexMethod", "MultipleEmitters")
 @Composable
 fun GestureHandler(modifier: Modifier = Modifier) {
   val viewModel = koinInject<PlayerViewModel>()
@@ -102,8 +105,9 @@ fun GestureHandler(modifier: Modifier = Modifier) {
   val currentBrightness by viewModel.currentBrightness.collectAsState()
   val haptics = LocalHapticFeedback.current
   Box(
-    modifier = modifier
+    modifier = Modifier
       .fillMaxSize()
+      .windowInsetsPadding(WindowInsets.safeGestures)
       .pointerInput(Unit) {
         detectTapGestures(
           onTap = {
@@ -217,6 +221,9 @@ fun GestureHandler(modifier: Modifier = Modifier) {
           }
         }
       },
+  )
+  Box(
+    modifier = modifier.fillMaxSize(),
     contentAlignment = if (isSeekingForwards) Alignment.CenterEnd else Alignment.CenterStart,
   ) {
     CompositionLocalProvider(

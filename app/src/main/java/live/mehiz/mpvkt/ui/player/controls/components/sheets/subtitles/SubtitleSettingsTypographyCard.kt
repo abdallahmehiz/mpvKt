@@ -2,15 +2,16 @@ package live.mehiz.mpvkt.ui.player.controls.components.sheets.subtitles
 
 import android.annotation.SuppressLint
 import android.net.Uri
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.BorderColor
 import androidx.compose.material.icons.filled.FormatBold
@@ -102,41 +103,40 @@ fun SubtitleSettingsTypographyCard(
       val isBold by preferences.bold.collectAsState()
       val isItalic by preferences.italic.collectAsState()
       val justify by preferences.justification.collectAsState()
-      LazyRow(
-        Modifier.padding(start = 4.dp, end = 16.dp),
+      Row(
+        Modifier
+          .fillMaxWidth()
+          .horizontalScroll(rememberScrollState())
+          .padding(start = 4.dp, end = 16.dp),
         verticalAlignment = Alignment.CenterVertically,
       ) {
-        item {
-          IconToggleButton(
-            checked = isBold,
-            onCheckedChange = {
-              preferences.bold.set(it)
-              MPVLib.setPropertyBoolean("sub-bold", it)
-            },
-          ) {
-            Icon(
-              Icons.Default.FormatBold,
-              null,
-              modifier = Modifier.size(32.dp),
-            )
-          }
+        IconToggleButton(
+          checked = isBold,
+          onCheckedChange = {
+            preferences.bold.set(it)
+            MPVLib.setPropertyBoolean("sub-bold", it)
+          },
+        ) {
+          Icon(
+            Icons.Default.FormatBold,
+            null,
+            modifier = Modifier.size(32.dp),
+          )
         }
-        item {
-          IconToggleButton(
-            checked = isItalic,
-            onCheckedChange = {
-              preferences.italic.set(it)
-              MPVLib.setPropertyBoolean("sub-italic", it)
-            },
-          ) {
-            Icon(
-              Icons.Default.FormatItalic,
-              null,
-              modifier = Modifier.size(32.dp),
-            )
-          }
+        IconToggleButton(
+          checked = isItalic,
+          onCheckedChange = {
+            preferences.italic.set(it)
+            MPVLib.setPropertyBoolean("sub-italic", it)
+          },
+        ) {
+          Icon(
+            Icons.Default.FormatItalic,
+            null,
+            modifier = Modifier.size(32.dp),
+          )
         }
-        items(SubtitleJustification.entries.minus(SubtitleJustification.Auto)) { justification ->
+        SubtitleJustification.entries.minus(SubtitleJustification.Auto).forEach { justification ->
           IconToggleButton(
             checked = justify.value == justification.value,
             onCheckedChange = {
@@ -152,13 +152,11 @@ fun SubtitleSettingsTypographyCard(
             Icon(justification.icon, null)
           }
         }
-        item {
-          Spacer(Modifier.weight(1f))
-          TextButton(onClick = { resetTypography(preferences) }) {
-            Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-              Icon(Icons.Default.FormatClear, null)
-              Text(stringResource(R.string.generic_reset))
-            }
+        Spacer(Modifier.weight(1f))
+        TextButton(onClick = { resetTypography(preferences) }) {
+          Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+            Icon(Icons.Default.FormatClear, null)
+            Text(stringResource(R.string.generic_reset))
           }
         }
       }

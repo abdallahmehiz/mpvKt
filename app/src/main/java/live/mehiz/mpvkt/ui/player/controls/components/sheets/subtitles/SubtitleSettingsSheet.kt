@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.pager.HorizontalPager
@@ -53,11 +52,7 @@ fun SubtitleSettingsSheet(
 
   val orientation = LocalConfiguration.current.orientation
 
-  ConstraintLayout(
-    modifier = modifier
-      .fillMaxSize()
-      .windowInsetsPadding(WindowInsets.systemBars),
-  ) {
+  ConstraintLayout(modifier = modifier.fillMaxSize()) {
     val vposSlider = createRef()
     val subSettingsCards = createRef()
     val cards: @Composable (Int) -> Unit = {
@@ -154,7 +149,7 @@ val CARDS_MAX_WIDTH = 420.dp
 val SubtitleSettingsCardColors: @Composable () -> CardColors = {
   val colors = CardDefaults.cardColors()
   colors.copy(
-    containerColor = colors.containerColor.copy(0.8f),
-    disabledContainerColor = colors.disabledContainerColor.copy(0.8f),
+    containerColor = colors.containerColor.copy(0.6f),
+    disabledContainerColor = colors.disabledContainerColor.copy(0.6f),
   )
 }

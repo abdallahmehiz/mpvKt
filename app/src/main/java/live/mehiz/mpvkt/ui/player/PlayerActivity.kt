@@ -26,6 +26,7 @@ import androidx.compose.ui.layout.boundsInWindow
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import androidx.documentfile.provider.DocumentFile
 import androidx.lifecycle.lifecycleScope
 import androidx.media.AudioAttributesCompat
@@ -157,6 +158,8 @@ class PlayerActivity : AppCompatActivity() {
       setPictureInPictureParams(createPipParams())
     }
     windowInsetsController.hide(WindowInsetsCompat.Type.systemBars())
+    windowInsetsController.hide(WindowInsetsCompat.Type.navigationBars())
+    windowInsetsController.systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
     super.onStart()
   }
 

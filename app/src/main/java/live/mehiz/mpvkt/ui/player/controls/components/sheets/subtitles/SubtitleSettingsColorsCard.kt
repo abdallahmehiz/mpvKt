@@ -1,14 +1,15 @@
 package live.mehiz.mpvkt.ui.player.controls.components.sheets.subtitles
 
 import androidx.annotation.StringRes
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.BorderColor
 import androidx.compose.material.icons.filled.FormatColorFill
@@ -68,12 +69,15 @@ fun SubtitleSettingsColorsCard(
     Column {
       var currentColorType by remember { mutableStateOf(SubColorType.Text) }
       var currentColor by remember { mutableIntStateOf(preferences.textColor.get()) }
-      LazyRow(
+      Row(
         horizontalArrangement = Arrangement.Center,
         verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier.padding(start = 4.dp, end = 16.dp),
+        modifier = Modifier
+          .fillMaxWidth()
+          .horizontalScroll(rememberScrollState())
+          .padding(start = 4.dp, end = 16.dp),
       ) {
-        items(SubColorType.entries) { type ->
+        SubColorType.entries.forEach { type ->
           IconToggleButton(
             checked = currentColorType == type,
             onCheckedChange = {
@@ -95,14 +99,12 @@ fun SubtitleSettingsColorsCard(
             )
           }
         }
-        item { Text(stringResource(currentColorType.titleRes)) }
-        item {
-          Spacer(Modifier.weight(1f))
-          TextButton(onClick = { resetColors(preferences) }) {
-            Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-              Icon(Icons.Default.FormatColorReset, null)
-              Text(stringResource(R.string.generic_reset))
-            }
+        Text(stringResource(currentColorType.titleRes))
+        Spacer(Modifier.weight(1f))
+        TextButton(onClick = { resetColors(preferences) }) {
+          Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+            Icon(Icons.Default.FormatColorReset, null)
+            Text(stringResource(R.string.generic_reset))
           }
         }
       }
