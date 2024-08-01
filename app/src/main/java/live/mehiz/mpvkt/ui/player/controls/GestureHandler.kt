@@ -51,10 +51,8 @@ import org.koin.compose.koinInject
 
 @Suppress("CyclomaticComplexMethod")
 @Composable
-fun GestureHandler(
-  viewModel: PlayerViewModel,
-  modifier: Modifier = Modifier,
-) {
+fun GestureHandler(modifier: Modifier = Modifier) {
+  val viewModel = koinInject<PlayerViewModel>()
   val playerPreferences = koinInject<PlayerPreferences>()
   val duration by viewModel.duration.collectAsState()
   val position by viewModel.pos.collectAsState()
@@ -154,15 +152,17 @@ fun GestureHandler(
       .pointerInput(Unit) {
         if (!seekGesture || areControlsLocked) return@pointerInput
         var startingPosition = position
+        var wasPlayerAlreadyPause = false
         detectHorizontalDragGestures(
           onDragStart = {
             startingPosition = position
+            wasPlayerAlreadyPause = viewModel.paused.value
             viewModel.pause()
           },
           onDragEnd = {
             viewModel.gestureSeekAmount.update { 0 }
             viewModel.hideSeekBar()
-            viewModel.unpause()
+            if (!wasPlayerAlreadyPause) viewModel.unpause()
           },
         ) { change, dragAmount ->
           if (position >= duration && dragAmount > 0) return@detectHorizontalDragGestures

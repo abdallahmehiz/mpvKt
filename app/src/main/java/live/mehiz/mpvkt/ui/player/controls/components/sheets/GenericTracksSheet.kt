@@ -4,6 +4,8 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -54,14 +56,15 @@ fun <T> GenericTracksSheet(
 fun AddTrackRow(
   title: String,
   onClick: () -> Unit,
-  modifier: Modifier = Modifier
+  modifier: Modifier = Modifier,
+  actions: @Composable RowScope.() -> Unit = {},
 ) {
   Row(
     modifier = modifier
       .fillMaxWidth()
       .clickable(onClick = onClick)
       .height(48.dp)
-      .padding(horizontal = 16.dp),
+      .padding(start = 16.dp),
     verticalAlignment = Alignment.CenterVertically,
     horizontalArrangement = Arrangement.spacedBy(8.dp),
   ) {
@@ -71,6 +74,8 @@ fun AddTrackRow(
       modifier = Modifier.size(32.dp),
     )
     Text(title)
+    Spacer(Modifier.weight(1f))
+    actions()
   }
 }
 

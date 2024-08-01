@@ -41,6 +41,7 @@ enum class Debanding {
 enum class Sheets {
   None,
   SubtitlesSheet,
+  SubtitleSettings,
   AudioSheet,
   Chapters,
   Decoders,

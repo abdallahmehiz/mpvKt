@@ -1,11 +1,15 @@
-package live.mehiz.mpvkt.ui.player.controls.components.sheets
+package live.mehiz.mpvkt.ui.player.controls.components.sheets.subtitles
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -17,6 +21,9 @@ import androidx.compose.ui.unit.dp
 import kotlinx.collections.immutable.ImmutableList
 import live.mehiz.mpvkt.R
 import live.mehiz.mpvkt.ui.player.Track
+import live.mehiz.mpvkt.ui.player.controls.components.sheets.AddTrackRow
+import live.mehiz.mpvkt.ui.player.controls.components.sheets.GenericTracksSheet
+import live.mehiz.mpvkt.ui.player.controls.components.sheets.getTrackTitle
 import me.zhanghai.compose.preference.FooterPreference
 import me.zhanghai.compose.preference.ProvidePreferenceLocals
 
@@ -26,13 +33,26 @@ fun SubtitlesSheet(
   selectedTracks: ImmutableList<Int>,
   onSelect: (Int) -> Unit,
   onAddSubtitle: () -> Unit,
+  onOpenSubtitleSettings: () -> Unit,
   onDismissRequest: () -> Unit,
   modifier: Modifier = Modifier
 ) {
   GenericTracksSheet(
     tracks,
     onDismissRequest = onDismissRequest,
-    header = { AddTrackRow(stringResource(R.string.player_sheets_add_ext_sub), onAddSubtitle) },
+    header = {
+      AddTrackRow(
+        stringResource(R.string.player_sheets_add_ext_sub),
+        onAddSubtitle,
+        actions = {
+          IconButton(
+            onClick = onOpenSubtitleSettings
+          ) {
+            Icon(Icons.Default.Palette, null)
+          }
+        }
+      )
+    },
     track = { track ->
       SubtitleTrackRow(
         title = getTrackTitle(track),

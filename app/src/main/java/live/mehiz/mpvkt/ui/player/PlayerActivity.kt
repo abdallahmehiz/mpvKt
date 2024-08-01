@@ -25,7 +25,9 @@ import androidx.compose.ui.graphics.toAndroidRect
 import androidx.compose.ui.layout.boundsInWindow
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.documentfile.provider.DocumentFile
+import androidx.lifecycle.lifecycleScope
 import androidx.media.AudioAttributesCompat
 import androidx.media.AudioFocusRequestCompat
 import androidx.media.AudioManagerCompat
@@ -44,8 +46,12 @@ import live.mehiz.mpvkt.preferences.DecoderPreferences
 import live.mehiz.mpvkt.preferences.PlayerPreferences
 import live.mehiz.mpvkt.preferences.SubtitlesPreferences
 import live.mehiz.mpvkt.ui.player.controls.PlayerControls
+import live.mehiz.mpvkt.ui.player.controls.components.sheets.subtitles.toColorHexString
 import live.mehiz.mpvkt.ui.theme.MpvKtTheme
 import org.koin.android.ext.android.inject
+import org.koin.androidx.viewmodel.dsl.viewModel
+import org.koin.core.context.loadKoinModules
+import org.koin.dsl.module
 import java.io.File
 
 @Suppress("TooManyFunctions")
@@ -96,11 +102,11 @@ class PlayerActivity : AppCompatActivity() {
     }
     player.playFile(videoUri!!)
     setOrientation()
-    val controls = PlayerControls(viewModel)
+    loadKoinModules(module { viewModel { viewModel } })
 
     binding.controls.setContent {
       MpvKtTheme {
-        controls.Content(
+        PlayerControls(
           modifier = Modifier.onGloballyPositioned {
             pipRect = it.boundsInWindow().toAndroidRect()
           },
@@ -150,12 +156,13 @@ class PlayerActivity : AppCompatActivity() {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
       setPictureInPictureParams(createPipParams())
     }
+    windowInsetsController.hide(WindowInsetsCompat.Type.systemBars())
     super.onStart()
   }
 
   private fun setupMPV() {
     Utils.copyAssets(this)
-    copyMPVConfigFiles()
+    lifecycleScope.launch(Dispatchers.IO) { copyMPVConfigFiles() }
 
     player.initialize(
       applicationContext.filesDir.path,
@@ -213,7 +220,19 @@ class PlayerActivity : AppCompatActivity() {
   }
 
   private fun setupSubtitles() {
+    lifecycleScope.launch(Dispatchers.IO) { copyMPVFonts() }
+
     MPVLib.setPropertyString("slang", subtitlesPreferences.preferredLanguages.get())
+    MPVLib.setPropertyString("sub-ass-override", if (subtitlesPreferences.overrideAssSubs.get()) "force" else "no")
+
+    MPVLib.setPropertyString("sub-fonts-dir", applicationContext.cacheDir.path + "/fonts/")
+    MPVLib.setPropertyString("sub-font", subtitlesPreferences.font.get())
+
+    MPVLib.setPropertyString("sub-color", subtitlesPreferences.textColor.get().toColorHexString())
+    MPVLib.setPropertyString("sub-border-color", subtitlesPreferences.borderColor.get().toColorHexString())
+    MPVLib.setPropertyString("sub-back-color", subtitlesPreferences.backgroundColor.get().toColorHexString())
+
+    MPVLib.setPropertyInt("sub-pos", subtitlesPreferences.position.get())
   }
 
   private fun copyMPVConfigFiles() {
@@ -226,11 +245,32 @@ class PlayerActivity : AppCompatActivity() {
         }
         val input = contentResolver.openInputStream(it.uri)
         input!!.copyTo(File(applicationPath + "/" + it.name).outputStream())
+        input.close()
       }
     } catch (e: Exception) {
-      File(applicationContext.filesDir.path + "/mpv.conf").writeText(advancedPreferences.mpvConf.get())
-      File(applicationContext.filesDir.path + "/input.conf").writeText(advancedPreferences.inputConf.get())
+      File("$applicationPath/mpv.conf").writeText(advancedPreferences.mpvConf.get())
+      File("$applicationPath/input.conf").writeText(advancedPreferences.inputConf.get())
       Log.e("PlayerActivity", "Couldn't copy mpv configuration files: ${e.message}")
+    }
+  }
+
+  private fun copyMPVFonts() {
+    val cachePath = applicationContext.cacheDir.path
+    val fontsDir = DocumentFile.fromFile(File("$cachePath/fonts"))
+    if (!fontsDir.exists()) DocumentFile.fromFile(File(cachePath)).createDirectory("fonts")
+    try {
+      if (fontsDir.findFile("subfont.ttf")?.exists() != true) {
+        applicationContext.resources.assets.open("subfont.ttf")
+          .copyTo(File("$cachePath/fonts/subfont.ttf").outputStream())
+      }
+      DocumentFile.fromTreeUri(this, Uri.parse(subtitlesPreferences.fontsFolder.get()))?.listFiles()?.forEach {
+        if (it.isDirectory || fontsDir.findFile(it.name!!)?.exists() == true) return
+        val input = contentResolver.openInputStream(it.uri)
+        input!!.copyTo(File("$cachePath/fonts/${it.name}").outputStream())
+        input.close()
+      }
+    } catch (e: Exception) {
+      Log.e("PlayerActivity", "Couldn't copy fonts to application directory: ${e.message}")
     }
   }
 

@@ -5,7 +5,6 @@ import android.net.Uri
 import android.os.Build
 import android.provider.Settings
 import android.util.DisplayMetrics
-import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import `is`.xyz.mpv.MPVLib
@@ -253,25 +252,12 @@ class PlayerViewModel(
   }
 
   fun showControls() {
+    if (sheetShown.value != Sheets.None) return
     _controlsShown.update { true }
   }
 
   fun hideControls() {
     _controlsShown.update { false }
-    activity.windowInsetsController.hide(WindowInsetsCompat.Type.systemBars())
-  }
-
-  fun toggleControls() {
-    if (controlsShown.value) hideControls()
-    if (seekBarShown.value) {
-      hideSeekBar()
-    } else {
-      showControls()
-    }
-  }
-
-  fun toggleSeekBar() {
-    _seekBarShown.update { !seekBarShown.value }
   }
 
   fun hideSeekBar() {
@@ -279,6 +265,7 @@ class PlayerViewModel(
   }
 
   fun showSeekBar() {
+    if (sheetShown.value != Sheets.None) return
     _seekBarShown.update { true }
   }
 
@@ -309,7 +296,7 @@ class PlayerViewModel(
   fun changeBrightnessTo(
     brightness: Float,
   ) {
-    isBrightnessSliderShown.update { true }
+    isBrightnessSliderShown.update { sheetShown.value == Sheets.None }
     currentBrightness.update { brightness.coerceIn(0f, 1f) }
     activity.window.attributes = activity.window.attributes.apply {
       screenBrightness = brightness.coerceIn(0f, 1f)
@@ -322,7 +309,7 @@ class PlayerViewModel(
 
   val maxVolume = activity.audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC)
   fun changeVolumeTo(volume: Int) {
-    isVolumeSliderShown.update { true }
+    isVolumeSliderShown.update { sheetShown.value == Sheets.None }
     val newVolume = volume.coerceIn(0..maxVolume)
     activity.audioManager.setStreamVolume(
       AudioManager.STREAM_MUSIC,

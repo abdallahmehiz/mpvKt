@@ -5,6 +5,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Modifier
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.flow.update
 import live.mehiz.mpvkt.ui.player.PlayerViewModel
@@ -13,18 +14,20 @@ import live.mehiz.mpvkt.ui.player.controls.components.sheets.AudioTracksSheet
 import live.mehiz.mpvkt.ui.player.controls.components.sheets.ChaptersSheet
 import live.mehiz.mpvkt.ui.player.controls.components.sheets.DecodersSheet
 import live.mehiz.mpvkt.ui.player.controls.components.sheets.MoreSheet
-import live.mehiz.mpvkt.ui.player.controls.components.sheets.SubtitlesSheet
+import live.mehiz.mpvkt.ui.player.controls.components.sheets.subtitles.SubtitleSettingsSheet
+import live.mehiz.mpvkt.ui.player.controls.components.sheets.subtitles.SubtitlesSheet
+import org.koin.compose.koinInject
 
 @Composable
-fun PlayerSheets(viewModel: PlayerViewModel) {
+fun PlayerSheets(modifier: Modifier = Modifier) {
+  val viewModel = koinInject<PlayerViewModel>()
   val subtitles by viewModel.subtitleTracks.collectAsState()
   val selectedSubs by viewModel.selectedSubtitles.collectAsState()
   val audioTracks by viewModel.audioTracks.collectAsState()
   val selectedAudio by viewModel.selectedAudio.collectAsState()
   val sheetShown by viewModel.sheetShown.collectAsState()
-  val onDismissRequest: () -> Unit = {
-    viewModel.sheetShown.update { Sheets.None }
-  }
+  val onDismissRequest: () -> Unit = { viewModel.sheetShown.update { Sheets.None } }
+
   when (sheetShown) {
     Sheets.None -> {}
     Sheets.SubtitlesSheet -> {
@@ -35,11 +38,12 @@ fun PlayerSheets(viewModel: PlayerViewModel) {
         viewModel.addSubtitle(it)
       }
       SubtitlesSheet(
-        subtitles.toImmutableList(),
-        selectedSubs.toImmutableList(),
-        { viewModel.selectSub(it) },
-        { subtitlesPicker.launch(arrayOf("*/*")) },
-        onDismissRequest
+        tracks = subtitles.toImmutableList(),
+        selectedTracks = selectedSubs.toImmutableList(),
+        onSelect = { viewModel.selectSub(it) },
+        onAddSubtitle = { subtitlesPicker.launch(arrayOf("*/*")) },
+        onOpenSubtitleSettings = { viewModel.sheetShown.update { Sheets.SubtitleSettings } },
+        onDismissRequest = onDismissRequest
       )
     }
 
@@ -83,6 +87,14 @@ fun PlayerSheets(viewModel: PlayerViewModel) {
 
     Sheets.More -> {
       MoreSheet(onDismissRequest)
+    }
+
+    Sheets.SubtitleSettings -> {
+      viewModel.hideControls()
+      SubtitleSettingsSheet(
+        onDismissRequest,
+        modifier = Modifier.then(modifier)
+      )
     }
   }
 }

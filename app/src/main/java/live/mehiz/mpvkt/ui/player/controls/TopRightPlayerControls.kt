@@ -18,10 +18,8 @@ import live.mehiz.mpvkt.ui.player.controls.components.ControlsButton
 import org.koin.compose.koinInject
 
 @Composable
-fun TopRightPlayerControls(
-  viewModel: PlayerViewModel,
-  modifier: Modifier = Modifier
-) {
+fun TopRightPlayerControls(modifier: Modifier = Modifier) {
+  val viewModel = koinInject<PlayerViewModel>()
   Row(modifier) {
     val currentDecoder by viewModel.currentDecoder.collectAsState()
     val playerPreferences = koinInject<PlayerPreferences>()

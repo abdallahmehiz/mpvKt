@@ -16,12 +16,11 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextOverflow
 import live.mehiz.mpvkt.ui.player.PlayerViewModel
 import live.mehiz.mpvkt.ui.player.controls.components.ControlsButton
+import org.koin.compose.koinInject
 
 @Composable
-fun TopLeftPlayerControls(
-  viewModel: PlayerViewModel,
-  modifier: Modifier = Modifier
-) {
+fun TopLeftPlayerControls(modifier: Modifier = Modifier) {
+  val viewModel = koinInject<PlayerViewModel>()
   Row(
     modifier = modifier,
     verticalAlignment = Alignment.CenterVertically

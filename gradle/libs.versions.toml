@@ -65,6 +65,8 @@ detekt-formatter = { module = "io.gitlab.arturbosch.detekt:detekt-formatting", v
 detekt-rules-compose = { module = "io.nlopez.compose.rules:detekt", version = "0.3.13" }
 
 kotlinx-immutable-collections = { module = "org.jetbrains.kotlinx:kotlinx-collections-immutable", version = "0.3.7" }
+
+truetype-parser = { module = "io.github.yubyf:truetypeparser-light", version = "2.1.4" }
 [bundles]
 koin = ["koin-core", "koin-android", "koin-compose"]
 voyager = ["voyager-navigator", "voyager-transitions"]

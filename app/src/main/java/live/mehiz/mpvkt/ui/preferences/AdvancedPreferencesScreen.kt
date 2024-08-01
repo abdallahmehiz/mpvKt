@@ -51,9 +51,6 @@ object AdvancedPreferencesScreen : Screen {
     val navigator = LocalNavigator.currentOrThrow
     val preferences = koinInject<AdvancedPreferences>()
 
-    val getMPVConfLocation: (String) -> String = {
-      Environment.getExternalStorageDirectory().canonicalPath + "/" + Uri.decode(it).substringAfterLast(":")
-    }
     Scaffold(
       topBar = {
         TopAppBar(
@@ -89,7 +86,7 @@ object AdvancedPreferencesScreen : Screen {
             title = { Text(stringResource(R.string.pref_advanced_mpv_conf_storage_location)) },
             summary = {
               if (mpvConfStorageLocation.isNotBlank()) {
-                Text(getMPVConfLocation(mpvConfStorageLocation))
+                Text(getSimplifiedPathFromUri(mpvConfStorageLocation))
               }
             },
             onClick = {
@@ -184,4 +181,8 @@ object AdvancedPreferencesScreen : Screen {
       }
     }
   }
+}
+
+fun getSimplifiedPathFromUri(uri: String): String {
+  return Environment.getExternalStorageDirectory().canonicalPath + "/" + Uri.decode(uri).substringAfterLast(":")
 }

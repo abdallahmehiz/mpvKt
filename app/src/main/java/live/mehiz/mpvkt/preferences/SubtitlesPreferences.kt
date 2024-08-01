@@ -1,7 +1,43 @@
 package live.mehiz.mpvkt.preferences
 
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.FormatAlignLeft
+import androidx.compose.material.icons.automirrored.filled.FormatAlignRight
+import androidx.compose.material.icons.filled.FormatAlignCenter
+import androidx.compose.material.icons.filled.FormatAlignJustify
+import androidx.compose.material.icons.filled.FormatAlignLeft
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.graphics.vector.ImageVector
 import live.mehiz.mpvkt.preferences.preference.PreferenceStore
+import live.mehiz.mpvkt.preferences.preference.getEnum
 
 class SubtitlesPreferences(preferenceStore: PreferenceStore) {
   val preferredLanguages = preferenceStore.getString("sub_preferred_languages")
+
+  val fontsFolder = preferenceStore.getString("sub_fonts_folder")
+  val font = preferenceStore.getString("sub_font", "Sans Serif")
+  val fontSize = preferenceStore.getInt("sub_font_size", 55)
+  val borderSize = preferenceStore.getInt("sub_border_size", 3)
+  val bold = preferenceStore.getBoolean("sub_bold")
+  val italic = preferenceStore.getBoolean("sub_italic")
+
+  val textColor = preferenceStore.getInt("sub_color_text", Color.White.toArgb())
+  val backgroundColor = preferenceStore.getInt("sub_color_bg", Color.Transparent.toArgb())
+  val borderColor = preferenceStore.getInt("sub_color_border", Color.Black.toArgb())
+
+  val position = preferenceStore.getInt("sub_pos", 100)
+  val justification = preferenceStore.getEnum("sub_justify", SubtitleJustification.Auto)
+
+  val overrideAssSubs = preferenceStore.getBoolean("sub_override_ass")
+}
+
+enum class SubtitleJustification(
+  val value: String,
+  val icon: ImageVector
+) {
+  Left("left", Icons.AutoMirrored.Default.FormatAlignLeft),
+  Center("center", Icons.Default.FormatAlignCenter),
+  Right("right", Icons.AutoMirrored.Default.FormatAlignRight),
+  Auto("auto", Icons.Default.FormatAlignJustify)
 }

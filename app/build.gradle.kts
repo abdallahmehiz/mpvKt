@@ -124,6 +124,7 @@ dependencies {
   detektPlugins(libs.detekt.formatter)
 
   implementation(libs.kotlinx.immutable.collections)
+  implementation(libs.truetype.parser)
 }
 
 detekt {

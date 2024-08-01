@@ -1,6 +1,8 @@
 <resources>
     <string name="app_name">mpvKt</string>
 
+    <string name="generic_reset">Reset</string>
+
     <string name="pref_appearance_title">Appearance</string>
     <string name="pref_appearance_category_theme">Theme</string>
     <string name="pref_appearance_darkmode_system">System</string>
@@ -48,6 +50,7 @@
 
     <string name="pref_subtitles">Subtitles</string>
     <string name="pref_preferred_languages">Preferred languages</string>
+    <string name="pref_subtitles_fonts_dir">Fonts directory</string>
 
     <string name="pref_audio">Audio</string>
 
@@ -63,6 +66,21 @@
     <string name="player_sheets_track_title_wo_lang">#%d: %s</string>
     <string name="player_sheets_track_lang_wo_title">#%d: %s</string>
     <string name="player_sheets_subtitles_footer_secondary_sid_no_styles">Secondary subtitles will have no ASS/SSA Styling.</string>
+    <string name="player_sheets_subtitles_color_text">Text</string>
+    <string name="player_sheets_subtitles_color_border">Border</string>
+    <string name="player_sheets_subtitles_color_background">Background</string>
+    <string name="player_sheets_sub_color_red">Red</string>
+    <string name="player_sheets_sub_color_green">Green</string>
+    <string name="player_sheets_sub_color_blue">Blue</string>
+    <string name="player_sheets_sub_color_alpha">Alpha</string>
+    <string name="player_sheets_sub_override_ass">Override ASS/SSA subtitles</string>
+    <string name="player_sheets_sub_position">Position</string>
+    <string name="player_sheets_sub_typography_card_title">Typography</string>
+    <string name="player_sheets_sub_typography_font">Font</string>
+    <string name="player_sheets_sub_typography_font_size">Font size</string>
+    <string name="player_sheets_sub_typography_border_size">Border size</string>
+    <string name="player_sheets_sub_colors_card_title">Colors</string>
+    <string name="player_sheets_sub_misc_card_title">Miscellaneous</string>
     <string name="player_sheets_stats_page_title">Default statistics page</string>
     <string name="player_sheets_stats_page_chip">Page %d</string>
     <string name="player_seek_n_seconds">%d seconds</string>

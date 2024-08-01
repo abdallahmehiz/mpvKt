@@ -19,8 +19,8 @@ import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.only
+import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.layout.systemBars
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.shape.ZeroCornerSize
 import androidx.compose.material3.MaterialTheme
@@ -68,6 +68,7 @@ fun PlayerSheet(
   } else {
     420.dp
   }
+  val maxHeight = LocalConfiguration.current.screenHeightDp.dp * .95f
 
   var backgroundAlpha by remember { mutableFloatStateOf(0f) }
   val alpha by animateFloatAsState(
@@ -112,7 +113,7 @@ fun PlayerSheet(
   ) {
     Surface(
       modifier = Modifier
-        .widthIn(max = maxWidth)
+        .sizeIn(maxWidth = maxWidth, maxHeight = maxHeight)
         .clickable(
           interactionSource = remember { MutableInteractionSource() },
           indication = null,

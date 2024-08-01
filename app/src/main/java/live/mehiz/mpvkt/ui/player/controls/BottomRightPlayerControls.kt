@@ -18,10 +18,8 @@ import live.mehiz.mpvkt.ui.player.controls.components.ControlsButton
 import org.koin.compose.koinInject
 
 @Composable
-fun BottomRightPlayerControls(
-  viewModel: PlayerViewModel,
-  modifier: Modifier = Modifier,
-) {
+fun BottomRightPlayerControls(modifier: Modifier = Modifier) {
+  val viewModel = koinInject<PlayerViewModel>()
   val playerPreferences = koinInject<PlayerPreferences>()
   val aspect by playerPreferences.videoAspect.collectAsState()
   Row(modifier) {
