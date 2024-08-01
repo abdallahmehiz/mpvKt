@@ -264,7 +264,8 @@ class PlayerActivity : AppCompatActivity() {
           .copyTo(File("$cachePath/fonts/subfont.ttf").outputStream())
       }
       DocumentFile.fromTreeUri(this, Uri.parse(subtitlesPreferences.fontsFolder.get()))?.listFiles()?.forEach {
-        if (it.isDirectory || fontsDir.findFile(it.name!!)?.exists() == true) return
+        if (it.isDirectory || fontsDir.findFile(it.name!!)?.exists() == true) return@forEach
+        if (!it.name!!.endsWith("ttf", true) || !it.name!!.endsWith("otf")) return@forEach
         val input = contentResolver.openInputStream(it.uri)
         input!!.copyTo(File("$cachePath/fonts/${it.name}").outputStream())
         input.close()

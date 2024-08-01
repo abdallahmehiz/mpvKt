@@ -67,9 +67,16 @@ fun SubtitleSettingsTypographyCard(
     mutableStateOf(indicator)
   }
   LaunchedEffect(Unit) {
+    if (!preferences.fontsFolder.isSet()) {
+      fontsLoadingIndicator = null
+      return@LaunchedEffect
+    }
     withContext(Dispatchers.IO) {
       fonts.addAll(
-        DocumentFile.fromTreeUri(context, Uri.parse(preferences.fontsFolder.get()))!!.listFiles().filter {
+        DocumentFile.fromTreeUri(
+          context,
+          Uri.parse(preferences.fontsFolder.get()),
+        )!!.listFiles().filter {
           it.isFile && (it.name!!.endsWith("ttf", true) || it.name!!.endsWith("otf", true))
         }.map { TTFFile.open(context.contentResolver.openInputStream(it.uri)!!).families.values.first() },
       )
