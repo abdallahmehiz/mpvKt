@@ -28,13 +28,6 @@ jobs:
       - name: Make gradlew executable
         run: chmod +x ./gradlew
 
-      - name: Decode Keystore
-        id: decode_keystore
-        uses: timheuer/base64-to-file@v1
-        with:
-          fileName: 'keystore.jks'
-          encodedString: ${{ secrets.SIGNING_KEYSTORE }}
-
       - name: Build with Gradle
         run: ./gradlew assemblePreview
 

@@ -36,8 +36,8 @@ android {
       "\"${LocalDateTime.now(ZoneOffset.UTC).format(dateTimeFormatter)}\"",
     )
 
-    buildConfigField("String", "GIT_SHA", getCommitSha())
-    buildConfigField("String", "GIT_COUNT", getCommitCount())
+    buildConfigField("String", "GIT_SHA", "\"${getCommitSha()}\"")
+    buildConfigField("int", "GIT_COUNT", getCommitCount())
   }
   splits {
     abi {
