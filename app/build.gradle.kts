@@ -1,4 +1,5 @@
 import io.gitlab.arturbosch.detekt.Detekt
+import org.apache.commons.io.output.ByteArrayOutputStream
 import java.time.LocalDateTime
 import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
@@ -21,7 +22,7 @@ android {
     minSdk = 21
     targetSdk = 34
     versionCode = 1
-    versionName = "1.0"
+    versionName = "0.1.0"
 
     testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     vectorDrawables {
@@ -34,6 +35,9 @@ android {
       "BUILD_TIME",
       "\"${LocalDateTime.now(ZoneOffset.UTC).format(dateTimeFormatter)}\"",
     )
+
+    buildConfigField("String", "GIT_SHA", getCommitSha())
+    buildConfigField("String", "GIT_COUNT", getCommitCount())
   }
   splits {
     abi {
@@ -58,9 +62,11 @@ android {
 
       signingConfig = signingConfigs["debug"]
       applicationIdSuffix = ".preview"
+      versionNameSuffix = "-${getCommitCount()}"
     }
     named("debug") {
       applicationIdSuffix = ".debug"
+      versionNameSuffix = "-${getCommitCount()}"
     }
   }
   compileOptions {
@@ -152,4 +158,15 @@ tasks.withType<Detekt>().configureEach {
     html.required.set(true)
     md.required.set(true)
   }
+}
+
+fun getCommitCount(): String = runCommand("git rev-list --count HEAD")
+fun getCommitSha(): String = runCommand("git rev-parse --short HEAD")
+fun runCommand(command: String): String {
+  val stdOut = ByteArrayOutputStream()
+  exec {
+    commandLine = command.split(' ')
+    standardOutput = stdOut
+  }
+  return String(stdOut.toByteArray()).trim()
 }

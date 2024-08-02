@@ -72,7 +72,7 @@ class CrashActivity : ComponentActivity() {
 
   private fun createLogs(): String {
     return """
-      App version: ${BuildConfig.VERSION_NAME} (${BuildConfig.BUILD_TIME})
+      App version: ${BuildConfig.VERSION_NAME} (${BuildConfig.GIT_SHA}/${BuildConfig.BUILD_TIME})
       Android version: ${Build.VERSION.RELEASE} (${Build.VERSION.SDK_INT})
       Device brand: ${Build.BRAND}
       Device manufacturer: ${Build.MANUFACTURER}

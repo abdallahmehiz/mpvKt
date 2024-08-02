@@ -1,6 +1,14 @@
-name: Preview
+name: Build preview
 
-on: [workflow_dispatch]
+permissions:
+  contents: write
+
+on:
+  workflow_dispatch:
+    inputs:
+      dry-run:
+        description: Creates a draft release
+        required: false
 
 jobs:
   build:
@@ -20,12 +28,68 @@ jobs:
       - name: Make gradlew executable
         run: chmod +x ./gradlew
 
+      - name: Decode Keystore
+        id: decode_keystore
+        uses: timheuer/base64-to-file@v1
+        with:
+          fileName: 'keystore.jks'
+          encodedString: ${{ secrets.SIGNING_KEYSTORE }}
+
       - name: Build with Gradle
         run: ./gradlew assemblePreview
 
-      - name: Upload the APK artifact
-        uses: actions/upload-artifact@v4
+      - name: Sign apk
+        uses: r0adkll/sign-android-release@v1
         with:
-          path: ./app/build/outputs/apk/preview/*.apk
-          name: packages
-          retention-days: 14
+          releaseDirectory: app/build/outputs/apk/preview
+          signingKeyBase64: ${{ secrets.SIGNING_KEYSTORE }}
+          alias: ${{ secrets.SIGNING_KEY_ALIAS }}
+          keyStorePassword: ${{ secrets.SINGING_STORE_PASSWORD }}
+          keyPassword: ${{ secrets.KEY_PASSWORD }}
+        env:
+          BUILD_TOOLS_VERSION: "34.0.0"
+
+      - name: Prepare release
+        run: |
+          set -e
+          
+          echo "COMMIT_COUNT=$(git rev-list --count HEAD)" >> $GITHUB_ENV
+          echo "COMMIT_SHA=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
+
+      - name: Copy build artifacts
+        run: |
+          set -e
+          
+          declare -a apks=("universal" "arm64-v8a" "armeabi-v7a" "x86" "x86_64)
+          
+          printf "%s\n" "${apks[@]}" | xargs -n 1 -I {} sh -c '
+          cp app/build/outputs/apk/preview/app-{}-preview-signed.apk mpvKt-{}-r${{ env.COMMIT_COUNT }}.apk
+          sha=$(sha256sum mpvKt-{}-r${{ env.COMMIT_COUNT }}.apk | awk '\''{ print $1 }'\'')
+          echo "apk-{}-sha256=$sha" >> $GITHUB_ENV'
+
+      - name: Create release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: r${{ env.COMMIT_COUNT }}
+          name: mpvKt Preview r${{ env.COMMIT_COUNT }}
+          body: |
+
+            ### Checksums
+
+            | Variant | SHA-256 |
+            | ------- | ------- |
+            | Universal | ${{ env.APK_UNIVERSAL_SHA }}
+            | arm64-v8a | ${{ env.APK_ARM64_V8A_SHA }}
+            | armeabi-v7a | ${{ env.APK_ARMEABI_V7A_SHA }}
+            | x86 | ${{ env.APK_X86_SHA }}
+            | x86_64 | ${{ env.APK_X86_64_SHA }} |
+          files: |
+            mpvKt-r${{ env.COMMIT_COUNT }}.apk
+            mpvKt-arm64-v8a-r${{ env.COMMIT_COUNT }}.apk
+            mpvKt-armeabi-v7a-r${{ env.COMMIT_COUNT }}.apk
+            mpvKt-x86-r${{ env.COMMIT_COUNT }}.apk
+            mpvKt-x86_64-r${{ env.COMMIT_COUNT }}.apk
+          draft: ${{ github.event.inputs.dry-run != '' }}
+          prerelease: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
