@@ -87,7 +87,7 @@ class CrashActivity : ComponentActivity() {
     exceptionString: String
   ) {
     withContext(NonCancellable) {
-      val file = File(applicationContext.cacheDir, "mptKt_logs.txt")
+      val file = File(applicationContext.cacheDir, "mpvKt_logs.txt")
       if (file.exists()) file.delete()
       file.createNewFile()
       file.appendText(createLogs())

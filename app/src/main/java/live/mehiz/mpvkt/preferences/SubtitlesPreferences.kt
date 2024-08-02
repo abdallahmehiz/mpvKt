@@ -32,7 +32,7 @@ class SubtitlesPreferences(preferenceStore: PreferenceStore) {
   val overrideAssSubs = preferenceStore.getBoolean("sub_override_ass")
 
   val defaultSubDelay = preferenceStore.getInt("sub_default_delay")
-  val defaultSubSpeed = preferenceStore.getFloat("sub_default_speed")
+  val defaultSubSpeed = preferenceStore.getFloat("sub_default_speed", 1f)
   val defaultSecondarySubDelay = preferenceStore.getInt("sub_default_secondary_delay")
 }
 
