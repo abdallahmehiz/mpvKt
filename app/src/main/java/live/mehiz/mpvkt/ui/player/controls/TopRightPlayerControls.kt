@@ -36,11 +36,11 @@ fun TopRightPlayerControls(modifier: Modifier = Modifier) {
     }
     ControlsButton(
       Icons.Default.Subtitles,
-      onClick = { viewModel.sheetShown.update { Sheets.SubtitlesSheet } },
+      onClick = { viewModel.sheetShown.update { Sheets.SubtitleTracks } },
     )
     ControlsButton(
       Icons.Default.Audiotrack,
-      onClick = { viewModel.sheetShown.update { Sheets.AudioSheet } },
+      onClick = { viewModel.sheetShown.update { Sheets.AudioTracks } },
     )
     ControlsButton(
       Icons.Default.MoreVert,

@@ -150,8 +150,8 @@ class CrashActivity : ComponentActivity() {
           }
           OutlinedButton(
             onClick = {
+              finish()
               startActivity(Intent(this@CrashActivity, MainActivity::class.java))
-              finishAndRemoveTask()
             },
             modifier = Modifier.fillMaxWidth(),
           ) {

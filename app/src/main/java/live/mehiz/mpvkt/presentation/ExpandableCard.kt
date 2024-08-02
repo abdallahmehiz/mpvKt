@@ -5,6 +5,7 @@ import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
@@ -65,8 +66,8 @@ fun ExpandableCard(
         Icon(Icons.Default.ArrowDropDown, null)
       }
     }
-    if (isExpanded) {
-      content()
+    Box(Modifier.animateContentSize()) {
+      if (isExpanded) content()
     }
   }
 }

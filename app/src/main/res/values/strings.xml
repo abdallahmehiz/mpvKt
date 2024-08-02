@@ -3,6 +3,7 @@
 
     <string name="generic_reset">Reset</string>
     <string name="generic_share">Share</string>
+    <string name="generic_unit_ms">ms</string>
 
     <string name="pref_appearance_title">Appearance</string>
     <string name="pref_appearance_category_theme">Theme</string>
@@ -54,6 +55,8 @@
     <string name="pref_subtitles_fonts_dir">Fonts directory</string>
 
     <string name="pref_audio">Audio</string>
+    <string name="pref_audio_pitch_correction_title">Enable audio pitch correction</string>
+    <string name="pref_audio_pitch_correction_summary">Prevents the audio from becoming high-pitched at faster speeds and low-pitched at slower speeds.</string>
 
     <string name="pref_advanced">Advanced</string>
     <string name="pref_advanced_mpv_conf_storage_location">pick mpv configuration storage location</string>
@@ -82,6 +85,19 @@
     <string name="player_sheets_sub_typography_border_size">Border size</string>
     <string name="player_sheets_sub_colors_card_title">Colors</string>
     <string name="player_sheets_sub_misc_card_title">Miscellaneous</string>
+    <string name="player_sheets_sub_delay_card_title">Subtitle delay</string>
+    <string name="player_sheets_sub_delay_card_delay">Delay</string>
+    <string name="player_sheets_sub_delay_card_speed">Speed</string>
+    <string name="player_sheets_sub_delay_affected_subtitle">Affected subtitle</string>
+    <string name="player_sheets_sub_delay_subtitle_type_primary">Primary</string>
+    <string name="player_sheets_sub_delay_subtitle_type_secondary">Secondary</string>
+    <string name="player_sheets_sub_delay_subtitle_type_primary_and_secondary">Both</string>
+    <string name="player_sheets_delay_set_as_default">Set as default</string>
+    <string name="player_sheets_audio_delay_card_title">Audio delay</string>
+
+    <string name="numeric_chooser_value_too_big">Value too big</string>
+    <string name="numeric_chooser_value_too_small">Value too small</string>
+
     <string name="player_sheets_stats_page_title">Default statistics page</string>
     <string name="player_sheets_stats_page_chip">Page %d</string>
     <string name="player_seek_n_seconds">%d seconds</string>

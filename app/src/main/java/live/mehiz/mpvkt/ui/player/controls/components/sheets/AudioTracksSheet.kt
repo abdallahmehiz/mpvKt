@@ -5,6 +5,10 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.MoreTime
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -24,13 +28,24 @@ fun AudioTracksSheet(
   selectedId: Int,
   onSelect: (Int) -> Unit,
   onAddAudioTrack: () -> Unit,
+  onOpenDelaySheet: () -> Unit,
   onDismissRequest: () -> Unit,
   modifier: Modifier = Modifier
 ) {
   GenericTracksSheet(
     tracks,
     onDismissRequest = onDismissRequest,
-    header = { AddTrackRow(stringResource(R.string.player_sheets_add_ext_audio), onAddAudioTrack) },
+    header = {
+      AddTrackRow(
+        stringResource(R.string.player_sheets_add_ext_audio),
+        onAddAudioTrack,
+        actions = {
+          IconButton(onClick = onOpenDelaySheet) {
+            Icon(Icons.Default.MoreTime, null)
+          }
+        }
+      )
+    },
     track = {
       AudioTrackRow(
         title = getTrackTitle(it),

@@ -23,6 +23,7 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 import live.mehiz.mpvkt.R
 import live.mehiz.mpvkt.preferences.AudioPreferences
 import me.zhanghai.compose.preference.ProvidePreferenceLocals
+import me.zhanghai.compose.preference.switchPreference
 import me.zhanghai.compose.preference.textFieldPreference
 import org.koin.compose.koinInject
 
@@ -68,6 +69,12 @@ object AudioPreferencesScreen : Screen {
                 )
               }
             },
+          )
+          switchPreference(
+            key = preferences.audioPitchCorrection.key(),
+            defaultValue = preferences.audioPitchCorrection.defaultValue(),
+            title = { Text(stringResource(R.string.pref_audio_pitch_correction_title)) },
+            summary = { Text(stringResource(R.string.pref_audio_pitch_correction_summary)) },
           )
         }
       }

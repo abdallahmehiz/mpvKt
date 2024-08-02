@@ -72,6 +72,55 @@ fun SliderItem(
 }
 
 @Composable
+fun SliderItem(
+  label: String,
+  value: Float,
+  valueText: String,
+  onChange: (Float) -> Unit,
+  max: Float,
+  steps: Int,
+  modifier: Modifier = Modifier,
+  min: Float = 0f,
+  icon: @Composable () -> Unit = {},
+) {
+  val haptic = LocalHapticFeedback.current
+
+  Row(
+    modifier = modifier
+      .fillMaxWidth()
+      .padding(
+        horizontal = 16.dp,
+        vertical = 8.dp,
+      ),
+    verticalAlignment = Alignment.CenterVertically,
+    horizontalArrangement = Arrangement.spacedBy(24.dp),
+  ) {
+    icon()
+    Column(modifier = Modifier.weight(0.5f)) {
+      Text(
+        text = label,
+        style = MaterialTheme.typography.bodyMedium,
+      )
+      Text(valueText)
+    }
+
+    Slider(
+      value = value,
+      onValueChange = {
+        val newValue = it
+        if (newValue != value) {
+          onChange(newValue)
+          haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+        }
+      },
+      modifier = Modifier.weight(1.5f),
+      valueRange = min..max,
+      steps = steps,
+    )
+  }
+}
+
+@Composable
 fun VerticalSliderItem(
   label: String,
   value: Int,

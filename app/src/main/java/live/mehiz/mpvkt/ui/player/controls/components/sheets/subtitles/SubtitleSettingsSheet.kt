@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.windowInsetsPadding
@@ -55,11 +56,11 @@ fun SubtitleSettingsSheet(
   ConstraintLayout(modifier = modifier.fillMaxSize()) {
     val vposSlider = createRef()
     val subSettingsCards = createRef()
-    val cards: @Composable (Int) -> Unit = {
-      when (it) {
-        0 -> SubtitleSettingsTypographyCard()
-        1 -> SubtitleSettingsColorsCard()
-        2 -> SubtitlesMiscellaneousCard()
+    val cards: @Composable (Int, Modifier) -> Unit = { value, cardsModifier ->
+      when (value) {
+        0 -> SubtitleSettingsTypographyCard(cardsModifier)
+        1 -> SubtitleSettingsColorsCard(cardsModifier)
+        2 -> SubtitlesMiscellaneousCard(cardsModifier)
         else -> {}
       }
     }
@@ -78,7 +79,7 @@ fun SubtitleSettingsSheet(
           start.linkTo(parent.start)
         },
       ) { page ->
-        cards(page)
+        cards(page, Modifier.fillMaxWidth())
       }
     } else {
       LazyColumn(
@@ -90,7 +91,7 @@ fun SubtitleSettingsSheet(
         },
       ) {
         item { Spacer(Modifier.height(16.dp)) }
-        items(3) { cards(it) }
+        items(3) { cards(it, Modifier) }
         item { Spacer(Modifier.height(16.dp)) }
       }
     }

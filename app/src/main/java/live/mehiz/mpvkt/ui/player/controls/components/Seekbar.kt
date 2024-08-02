@@ -15,6 +15,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -49,6 +50,7 @@ fun SeekbarWithTimers(
       value = position,
       timersInverted.first,
       onClick = positionTimerOnClick,
+      modifier = Modifier.weight(.1f)
     )
     Seeker(
       value = position,
@@ -57,7 +59,7 @@ fun SeekbarWithTimers(
       onValueChangeFinished = onValueChangeFinished,
       readAheadValue = readAheadValue,
       segments = chapters?.map { it.toSegment() } ?: emptyList(),
-      modifier = Modifier.weight(0.9f),
+      modifier = Modifier.weight(0.8f),
       colors = SeekerDefaults.seekerColors(
         progressColor = MaterialTheme.colorScheme.primary,
         thumbColor = MaterialTheme.colorScheme.primary,
@@ -69,6 +71,7 @@ fun SeekbarWithTimers(
       value = if (timersInverted.second) position - duration else duration,
       isInverted = timersInverted.second,
       onClick = durationTimerOnCLick,
+      modifier = Modifier.weight(.1f)
     )
   }
 }
@@ -92,6 +95,7 @@ fun VideoTimer(
       .wrapContentHeight(Alignment.CenterVertically),
     text = Utils.prettyTime(value.toInt(), isInverted),
     color = Color.White,
+    fontFamily = FontFamily.Monospace,
     textAlign = TextAlign.Center,
   )
 }

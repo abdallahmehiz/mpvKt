@@ -10,10 +10,12 @@ import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.flow.update
 import live.mehiz.mpvkt.ui.player.PlayerViewModel
 import live.mehiz.mpvkt.ui.player.Sheets
+import live.mehiz.mpvkt.ui.player.controls.components.sheets.AudioDelaySheet
 import live.mehiz.mpvkt.ui.player.controls.components.sheets.AudioTracksSheet
 import live.mehiz.mpvkt.ui.player.controls.components.sheets.ChaptersSheet
 import live.mehiz.mpvkt.ui.player.controls.components.sheets.DecodersSheet
 import live.mehiz.mpvkt.ui.player.controls.components.sheets.MoreSheet
+import live.mehiz.mpvkt.ui.player.controls.components.sheets.subtitles.SubtitleDelaySheet
 import live.mehiz.mpvkt.ui.player.controls.components.sheets.subtitles.SubtitleSettingsSheet
 import live.mehiz.mpvkt.ui.player.controls.components.sheets.subtitles.SubtitlesSheet
 import org.koin.compose.koinInject
@@ -30,7 +32,7 @@ fun PlayerSheets(modifier: Modifier = Modifier) {
 
   when (sheetShown) {
     Sheets.None -> {}
-    Sheets.SubtitlesSheet -> {
+    Sheets.SubtitleTracks -> {
       val subtitlesPicker = rememberLauncherForActivityResult(
         ActivityResultContracts.OpenDocument(),
       ) {
@@ -43,11 +45,12 @@ fun PlayerSheets(modifier: Modifier = Modifier) {
         onSelect = { viewModel.selectSub(it) },
         onAddSubtitle = { subtitlesPicker.launch(arrayOf("*/*")) },
         onOpenSubtitleSettings = { viewModel.sheetShown.update { Sheets.SubtitleSettings } },
+        onOpenSubtitleDelay = { viewModel.sheetShown.update { Sheets.SubtitleDelay } },
         onDismissRequest = onDismissRequest
       )
     }
 
-    Sheets.AudioSheet -> {
+    Sheets.AudioTracks -> {
       val audioPicker = rememberLauncherForActivityResult(
         ActivityResultContracts.OpenDocument(),
       ) {
@@ -59,6 +62,7 @@ fun PlayerSheets(modifier: Modifier = Modifier) {
         selectedAudio,
         { viewModel.selectAudio(it) },
         { audioPicker.launch(arrayOf("*/*")) },
+        onOpenDelaySheet = { viewModel.sheetShown.update { Sheets.AudioDelay } },
         onDismissRequest
       )
     }
@@ -95,6 +99,16 @@ fun PlayerSheets(modifier: Modifier = Modifier) {
         onDismissRequest,
         modifier = Modifier.then(modifier)
       )
+    }
+
+    Sheets.SubtitleDelay -> {
+      viewModel.hideControls()
+      SubtitleDelaySheet()
+    }
+
+    Sheets.AudioDelay -> {
+      viewModel.hideControls()
+      AudioDelaySheet()
     }
   }
 }

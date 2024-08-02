@@ -203,6 +203,8 @@ class PlayerActivity : AppCompatActivity() {
 
   private fun setupAudio() {
     MPVLib.setPropertyString("alang", audioPreferences.preferredLanguages.get())
+    MPVLib.setPropertyDouble("audio-delay", audioPreferences.defaultAudioDelay.get() / 1000.0)
+    MPVLib.setPropertyBoolean("audio-pitch-correction", audioPreferences.audioPitchCorrection.get())
 
     val request = AudioFocusRequestCompat
       .Builder(AudioManagerCompat.AUDIOFOCUS_GAIN)
@@ -236,6 +238,10 @@ class PlayerActivity : AppCompatActivity() {
     MPVLib.setPropertyString("sub-back-color", subtitlesPreferences.backgroundColor.get().toColorHexString())
 
     MPVLib.setPropertyInt("sub-pos", subtitlesPreferences.position.get())
+
+    MPVLib.setPropertyDouble("sub-delay", subtitlesPreferences.defaultSubDelay.get() / 1000.0)
+    MPVLib.setPropertyDouble("sub-speed", subtitlesPreferences.defaultSubSpeed.get().toDouble())
+    MPVLib.setPropertyDouble("secondary-sub-delay", subtitlesPreferences.defaultSecondarySubDelay.get() / 1000.0)
   }
 
   private fun copyMPVConfigFiles() {
@@ -443,21 +449,35 @@ class PlayerActivity : AppCompatActivity() {
       PlaybackStateEntity(
         fileName,
         if (playerPreferences.savePositionOnQuit.get()) player.timePos ?: 0 else 0,
-        player.sid,
-        player.secondarySid,
-        player.aid,
+        sid = player.sid,
+        subDelay = (MPVLib.getPropertyDouble("sub-delay") * 1000).toInt(),
+        subSpeed = MPVLib.getPropertyDouble("sub-speed"),
+        secondarySid = player.secondarySid,
+        secondarySubDelay = (MPVLib.getPropertyDouble("sub-delay") * 1000).toInt(),
+        aid = player.aid,
+        audioDelay = (MPVLib.getPropertyDouble("audio-delay") * 1000).toInt(),
       ),
     )
   }
 
   private suspend fun loadVideoPlaybackState(mediaTitle: String) {
     val state = mpvKtDatabase.videoDataDao().getVideoDataByTitle(mediaTitle)
+    val getDelay: (Int, Int?) -> Double = { preferenceDelay, stateDelay ->
+      (stateDelay ?: preferenceDelay) / 1000.0
+    }
+    val subDelay = getDelay(subtitlesPreferences.defaultSubDelay.get(), state?.subDelay)
+    val secondarySubDelay = getDelay(subtitlesPreferences.defaultSecondarySubDelay.get(), state?.secondarySubDelay)
+    val audioDelay = getDelay(audioPreferences.defaultAudioDelay.get(), state?.audioDelay)
     state?.let {
       player.timePos = if (playerPreferences.savePositionOnQuit.get()) it.lastPosition else 0
       player.sid = it.sid
       player.secondarySid = it.secondarySid
       player.aid = it.aid
+      player.subDelay = subDelay
+      player.secondarySubDelay = secondarySubDelay
+      MPVLib.setPropertyDouble("audio-delay", audioDelay)
     }
+    MPVLib.setPropertyDouble("sub-speed", state?.subSpeed ?: subtitlesPreferences.defaultSubSpeed.get().toDouble())
   }
 
   private fun endPlayback(reason: EndPlaybackReason) {
