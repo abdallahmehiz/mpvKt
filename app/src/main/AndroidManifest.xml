@@ -30,11 +30,11 @@
         <activity
             android:name=".ui.player.PlayerActivity"
             android:autoRemoveFromRecents="true"
+            android:configChanges="orientation|screenLayout|screenSize|smallestScreenSize|keyboardHidden|keyboard|uiMode"
             android:exported="true"
             android:launchMode="singleTask"
-            android:supportsPictureInPicture="true"
             android:resizeableActivity="true"
-            android:configChanges="orientation|screenLayout|screenSize|smallestScreenSize|keyboardHidden|keyboard|uiMode"
+            android:supportsPictureInPicture="true"
             android:theme="@style/Theme.MpvKt">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
@@ -70,5 +70,16 @@
                 <data android:scheme="udp" />
             </intent-filter>
         </activity>
+        <activity android:name=".presentation.crash.CrashActivity" />
+
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.provider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/provider_paths" />
+        </provider>
     </application>
 </manifest>

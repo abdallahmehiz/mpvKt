@@ -1,0 +1,206 @@
+package live.mehiz.mpvkt.presentation.crash
+
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
+import android.content.Intent
+import android.os.Build
+import android.os.Bundle
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.selection.SelectionContainer
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ContentCopy
+import androidx.compose.material.icons.outlined.BugReport
+import androidx.compose.material3.Button
+import androidx.compose.material3.FilledIconButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.NavigationBarDefaults
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
+import androidx.core.content.FileProvider
+import `is`.xyz.mpv.Utils
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import live.mehiz.mpvkt.BuildConfig
+import live.mehiz.mpvkt.MainActivity
+import live.mehiz.mpvkt.R
+import live.mehiz.mpvkt.ui.theme.MpvKtTheme
+import java.io.File
+
+class CrashActivity : ComponentActivity() {
+
+  private val clipboardManager by lazy { getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager }
+
+  override fun onCreate(savedInstanceState: Bundle?) {
+    enableEdgeToEdge()
+    super.onCreate(savedInstanceState)
+    setContent {
+      MpvKtTheme {
+        CrashScreen(intent.getStringExtra("exception") ?: "")
+      }
+    }
+  }
+
+  private fun createLogs(): String {
+    return """
+      App version: ${BuildConfig.VERSION_NAME} (${BuildConfig.BUILD_TIME})
+      Android version: ${Build.VERSION.RELEASE} (${Build.VERSION.SDK_INT})
+      Device brand: ${Build.BRAND}
+      Device manufacturer: ${Build.MANUFACTURER}
+      Device model: ${Build.MODEL} (${Build.DEVICE})
+      MPV version: ${Utils.VERSIONS.mpv}
+      ffmpeg version: ${Utils.VERSIONS.ffmpeg}
+      libplacebo version: ${Utils.VERSIONS.libPlacebo}
+    """.trimIndent()
+  }
+
+  private suspend fun dumpLogs(
+    exceptionString: String
+  ) {
+    withContext(NonCancellable) {
+      val file = File(applicationContext.cacheDir, "mptKt_logs.txt")
+      if (file.exists()) file.delete()
+      file.createNewFile()
+      file.appendText(createLogs())
+      file.appendText("\n\n")
+      file.appendText(exceptionString)
+      val uri = FileProvider.getUriForFile(applicationContext, BuildConfig.APPLICATION_ID + ".provider", file)
+      val intent = Intent(Intent.ACTION_SEND)
+      intent.putExtra(Intent.EXTRA_STREAM, uri)
+      intent.clipData = ClipData.newRawUri(null, uri)
+      intent.type = "text/plain"
+      intent.flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
+      this@CrashActivity.startActivity(
+        Intent.createChooser(intent, applicationContext.getString(R.string.crash_screen_share))
+      )
+    }
+  }
+
+  @Composable
+  fun CrashScreen(
+    exceptionString: String,
+    modifier: Modifier = Modifier,
+  ) {
+    val scope = rememberCoroutineScope()
+    Scaffold(
+      modifier = modifier.fillMaxSize(),
+      bottomBar = {
+        val borderColor = MaterialTheme.colorScheme.outline
+        Column(
+          Modifier
+            .windowInsetsPadding(NavigationBarDefaults.windowInsets)
+            .drawBehind {
+              drawLine(
+                borderColor,
+                Offset.Zero,
+                Offset(size.width, 0f),
+                strokeWidth = Dp.Hairline.value,
+              )
+            }
+            .padding(vertical = 8.dp, horizontal = 16.dp),
+          verticalArrangement = Arrangement.spacedBy(4.dp),
+        ) {
+          Row(
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+          ) {
+            Button(
+              onClick = {
+                scope.launch(Dispatchers.IO) {
+                  dumpLogs(exceptionString)
+                }
+              },
+              modifier = Modifier.weight(1f),
+            ) { Text(stringResource(R.string.crash_screen_share)) }
+            FilledIconButton(
+              onClick = {
+                clipboardManager.setPrimaryClip(ClipData.newPlainText(null, createLogs()))
+              },
+            ) {
+              Icon(Icons.Default.ContentCopy, null)
+            }
+          }
+          OutlinedButton(
+            onClick = {
+              startActivity(Intent(this@CrashActivity, MainActivity::class.java))
+              finishAndRemoveTask()
+            },
+            modifier = Modifier.fillMaxWidth(),
+          ) {
+            Text(stringResource(R.string.crash_screen_restart))
+          }
+        }
+      },
+    ) { paddingValues ->
+      Column(
+        modifier = Modifier
+          .padding(paddingValues)
+          .padding(horizontal = 16.dp)
+          .verticalScroll(rememberScrollState()),
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+      ) {
+        Spacer(Modifier.height(paddingValues.calculateTopPadding()))
+        Icon(
+          Icons.Outlined.BugReport,
+          null,
+          modifier = Modifier.size(48.dp),
+          tint = MaterialTheme.colorScheme.primary,
+        )
+        Text(
+          stringResource(R.string.crash_screen_title),
+          style = MaterialTheme.typography.headlineLarge,
+        )
+        Text(
+          stringResource(R.string.crash_screen_subtitle, stringResource(R.string.app_name)),
+          color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        Text(
+          stringResource(R.string.crash_screen_logs_title),
+          style = MaterialTheme.typography.headlineSmall,
+        )
+        Surface(
+          shape = RoundedCornerShape(16.dp),
+          color = MaterialTheme.colorScheme.surfaceVariant,
+        ) {
+          SelectionContainer {
+            Text(
+              text = exceptionString,
+              fontFamily = FontFamily.Monospace,
+              style = MaterialTheme.typography.labelMedium,
+              modifier = Modifier.padding(horizontal = 8.dp, vertical = 8.dp),
+            )
+          }
+        }
+        Spacer(Modifier.height(8.dp))
+      }
+    }
+  }
+}

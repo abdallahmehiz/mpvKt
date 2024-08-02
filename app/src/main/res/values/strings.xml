@@ -2,6 +2,7 @@
     <string name="app_name">mpvKt</string>
 
     <string name="generic_reset">Reset</string>
+    <string name="generic_share">Share</string>
 
     <string name="pref_appearance_title">Appearance</string>
     <string name="pref_appearance_category_theme">Theme</string>
@@ -89,4 +90,10 @@
     <string name="player_aspect_fit">Fit Screen</string>
     <string name="player_aspect_crop">Crop</string>
     <string name="player_aspect_stretch">Stretch</string>
+
+    <string name="crash_screen_title">Oops</string>
+    <string name="crash_screen_subtitle">Looks like %s experienced an unexpected error. Consider sharing the crash logs in a GitHub issue.</string>
+    <string name="crash_screen_logs_title">Crash logs:</string>
+    <string name="crash_screen_share">Share crash logs</string>
+    <string name="crash_screen_restart">Restart the app</string>
 </resources>

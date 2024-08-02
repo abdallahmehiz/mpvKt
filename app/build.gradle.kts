@@ -1,4 +1,7 @@
 import io.gitlab.arturbosch.detekt.Detekt
+import java.time.LocalDateTime
+import java.time.ZoneOffset
+import java.time.format.DateTimeFormatter
 
 plugins {
   alias(libs.plugins.ksp)
@@ -24,6 +27,13 @@ android {
     vectorDrawables {
       useSupportLibrary = true
     }
+
+    val dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss")
+    buildConfigField(
+      "String",
+      "BUILD_TIME",
+      "\"${LocalDateTime.now(ZoneOffset.UTC).format(dateTimeFormatter)}\"",
+    )
   }
   splits {
     abi {
@@ -63,6 +73,7 @@ android {
   buildFeatures {
     compose = true
     viewBinding = true
+    buildConfig = true
   }
   composeCompiler {
     includeSourceInformation = true
