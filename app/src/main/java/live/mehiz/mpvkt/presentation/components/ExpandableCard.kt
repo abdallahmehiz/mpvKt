@@ -1,4 +1,4 @@
-package live.mehiz.mpvkt.presentation
+package live.mehiz.mpvkt.presentation.components
 
 import android.annotation.SuppressLint
 import androidx.compose.animation.animateContentSize

@@ -1,4 +1,4 @@
-name: Build preview
+name: Make release
 
 permissions:
   contents: write
@@ -6,6 +6,8 @@ permissions:
 on:
   workflow_dispatch:
     inputs:
+      prerelease:
+        description: Creates a pre-release
       dry-run:
         description: Creates a draft release
         required: false
@@ -17,6 +19,8 @@ jobs:
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Setup JDK 17
         uses: actions/setup-java@v4
@@ -66,14 +70,13 @@ jobs:
           tag_name: r${{ env.COMMIT_COUNT }}
           name: mpvKt Preview r${{ env.COMMIT_COUNT }}
           body: |
-
             ### Checksums
 
             | Variant | SHA-256 |
             | ------- | ------- |
             | Universal | ${{ env.apk-universal-sha256 }}
             | arm64-v8a | ${{ env.apk-arm64-v8a-sha256 }}
-            | armeabi-v7a | ${{ env.apk-armabi-v7a-sha256 }}
+            | armeabi-v7a | ${{ env.apk-armeabi-v7a-sha256 }}
             | x86 | ${{ env.apk-x86-sha256 }}
             | x86_64 | ${{ env.apk-x86_64-sha256 }} |
           files: |
@@ -83,6 +86,6 @@ jobs:
             mpvKt-x86-r${{ env.COMMIT_COUNT }}.apk
             mpvKt-x86_64-r${{ env.COMMIT_COUNT }}.apk
           draft: ${{ github.event.inputs.dry-run != '' }}
-          prerelease: true
+          prerelease: ${{ github.event.inputs.prerelease != '' }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

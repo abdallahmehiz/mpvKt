@@ -6,11 +6,14 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -39,8 +42,10 @@ fun SeekbarWithTimers(
   durationTimerOnCLick: () -> Unit,
   modifier: Modifier = Modifier,
   chapters: ImmutableList<Chapter>? = null,
-
 ) {
+  val segments by remember {
+    derivedStateOf { chapters?.map { it.toSegment() } ?: emptyList() }
+  }
   Row(
     modifier = modifier.height(48.dp),
     verticalAlignment = Alignment.CenterVertically,
@@ -50,7 +55,7 @@ fun SeekbarWithTimers(
       value = position,
       timersInverted.first,
       onClick = positionTimerOnClick,
-      modifier = Modifier.weight(.1f)
+      modifier = Modifier.width(92.dp),
     )
     Seeker(
       value = position,
@@ -58,8 +63,8 @@ fun SeekbarWithTimers(
       onValueChange = onValueChange,
       onValueChangeFinished = onValueChangeFinished,
       readAheadValue = readAheadValue,
-      segments = chapters?.map { it.toSegment() } ?: emptyList(),
-      modifier = Modifier.weight(0.8f),
+      segments = segments,
+      modifier = Modifier.weight(1f),
       colors = SeekerDefaults.seekerColors(
         progressColor = MaterialTheme.colorScheme.primary,
         thumbColor = MaterialTheme.colorScheme.primary,
@@ -71,7 +76,7 @@ fun SeekbarWithTimers(
       value = if (timersInverted.second) position - duration else duration,
       isInverted = timersInverted.second,
       onClick = durationTimerOnCLick,
-      modifier = Modifier.weight(.1f)
+      modifier = Modifier.width(92.dp),
     )
   }
 }

@@ -20,7 +20,7 @@ import `is`.xyz.mpv.MPVLib
 import live.mehiz.mpvkt.R
 import live.mehiz.mpvkt.preferences.SubtitlesPreferences
 import live.mehiz.mpvkt.preferences.preference.collectAsState
-import live.mehiz.mpvkt.presentation.ExpandableCard
+import live.mehiz.mpvkt.presentation.components.ExpandableCard
 import me.zhanghai.compose.preference.ProvidePreferenceLocals
 import me.zhanghai.compose.preference.SwitchPreference
 import org.koin.compose.koinInject

@@ -1,4 +1,4 @@
-package live.mehiz.mpvkt.presentation
+package live.mehiz.mpvkt.presentation.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box

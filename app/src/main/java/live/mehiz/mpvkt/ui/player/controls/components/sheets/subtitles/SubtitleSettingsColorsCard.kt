@@ -42,8 +42,8 @@ import live.mehiz.mpvkt.preferences.SubtitlesPreferences
 import live.mehiz.mpvkt.preferences.preference.Preference
 import live.mehiz.mpvkt.preferences.preference.collectAsState
 import live.mehiz.mpvkt.preferences.preference.deleteAndGet
-import live.mehiz.mpvkt.presentation.ExpandableCard
-import live.mehiz.mpvkt.presentation.TintedSliderItem
+import live.mehiz.mpvkt.presentation.components.ExpandableCard
+import live.mehiz.mpvkt.presentation.components.TintedSliderItem
 import org.koin.compose.koinInject
 
 @Composable

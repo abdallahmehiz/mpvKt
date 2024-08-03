@@ -44,7 +44,7 @@ import `is`.xyz.mpv.MPVLib
 import kotlinx.coroutines.flow.update
 import live.mehiz.mpvkt.R
 import live.mehiz.mpvkt.preferences.SubtitlesPreferences
-import live.mehiz.mpvkt.presentation.OutlinedNumericChooser
+import live.mehiz.mpvkt.presentation.components.OutlinedNumericChooser
 import live.mehiz.mpvkt.ui.player.PlayerViewModel
 import live.mehiz.mpvkt.ui.player.Sheets
 import org.koin.compose.koinInject

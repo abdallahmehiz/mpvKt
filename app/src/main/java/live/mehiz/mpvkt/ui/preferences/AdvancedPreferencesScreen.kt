@@ -27,7 +27,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.util.fastJoinToString
 import androidx.documentfile.provider.DocumentFile
-import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import kotlinx.coroutines.Dispatchers
@@ -35,6 +34,7 @@ import kotlinx.coroutines.withContext
 import live.mehiz.mpvkt.R
 import live.mehiz.mpvkt.preferences.AdvancedPreferences
 import live.mehiz.mpvkt.preferences.preference.collectAsState
+import live.mehiz.mpvkt.presentation.Screen
 import me.zhanghai.compose.preference.ProvidePreferenceLocals
 import me.zhanghai.compose.preference.TextFieldPreference
 import me.zhanghai.compose.preference.preference
@@ -43,7 +43,7 @@ import kotlin.io.path.deleteIfExists
 import kotlin.io.path.outputStream
 import kotlin.io.path.readLines
 
-object AdvancedPreferencesScreen : Screen {
+object AdvancedPreferencesScreen : Screen() {
   @OptIn(ExperimentalMaterial3Api::class)
   @Composable
   override fun Content() {

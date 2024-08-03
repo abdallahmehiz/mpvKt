@@ -29,4 +29,5 @@ class PlayerPreferences(
   val savePositionOnQuit = preferenceStore.getBoolean("save_position", true)
 
   val automaticallyEnterPip = preferenceStore.getBoolean("automatic_pip")
+  val closeAfterReachingEndOfVideo = preferenceStore.getBoolean("close_after_eof")
 }

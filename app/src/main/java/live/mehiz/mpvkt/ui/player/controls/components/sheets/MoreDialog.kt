@@ -16,7 +16,7 @@ import `is`.xyz.mpv.MPVLib
 import live.mehiz.mpvkt.R
 import live.mehiz.mpvkt.preferences.AdvancedPreferences
 import live.mehiz.mpvkt.preferences.preference.collectAsState
-import live.mehiz.mpvkt.presentation.PlayerSheet
+import live.mehiz.mpvkt.presentation.components.PlayerSheet
 import org.koin.compose.koinInject
 
 @Composable

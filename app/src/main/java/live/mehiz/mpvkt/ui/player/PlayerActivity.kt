@@ -24,6 +24,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.toAndroidRect
 import androidx.compose.ui.layout.boundsInWindow
 import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.core.text.isDigitsOnly
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
@@ -34,6 +35,7 @@ import androidx.media.AudioFocusRequestCompat
 import androidx.media.AudioManagerCompat
 import `is`.xyz.mpv.MPVLib
 import `is`.xyz.mpv.Utils
+import `is`.xyz.mpv.Utils.PROTOCOLS
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.update
@@ -52,6 +54,7 @@ import live.mehiz.mpvkt.ui.theme.MpvKtTheme
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.core.context.loadKoinModules
+import org.koin.core.context.unloadKoinModules
 import org.koin.dsl.module
 import java.io.File
 
@@ -62,7 +65,7 @@ class PlayerActivity : AppCompatActivity() {
   private val binding by lazy { PlayerLayoutBinding.inflate(layoutInflater) }
   private val mpvKtDatabase: MpvKtDatabase by inject()
   val player by lazy { binding.player }
-  val windowInsetsController by lazy { WindowCompat.getInsetsController(window, window.decorView) }
+  private val windowInsetsController by lazy { WindowCompat.getInsetsController(window, window.decorView) }
   val audioManager by lazy { getSystemService(Context.AUDIO_SERVICE) as AudioManager }
   private val playerPreferences: PlayerPreferences by inject()
   private val decoderPreferences: DecoderPreferences by inject()
@@ -127,6 +130,7 @@ class PlayerActivity : AppCompatActivity() {
 
   override fun finish() {
     endPlayback(EndPlaybackReason.ExternalAction)
+    unloadKoinModules(module { viewModel })
     super.finish()
   }
 
@@ -188,15 +192,14 @@ class PlayerActivity : AppCompatActivity() {
     when (decoderPreferences.debanding.get()) {
       Debanding.None -> {}
       Debanding.CPU -> MPVLib.setPropertyString("vf", "gradfun=radius=12")
-      Debanding.GPU -> MPVLib.setPropertyString("deband", "yes")
+      Debanding.GPU -> MPVLib.setPropertyBoolean("deband", true)
     }
     if (decoderPreferences.useYUV420P.get()) {
       MPVLib.setPropertyString("vf", "format=yuv420p")
     }
     player.playbackSpeed = playerPreferences.defaultSpeed.get().toDouble()
-    MPVLib.setPropertyString("keep-open", "yes")
-
-    MPVLib.setPropertyString("input-default-bindings", "yes")
+    MPVLib.setPropertyBoolean("keep-open", true)
+    MPVLib.setPropertyBoolean("input-default-bindings", true)
 
     player.addObserver(PlayerObserver(this))
   }
@@ -338,12 +341,10 @@ class PlayerActivity : AppCompatActivity() {
   }
 
   private fun resolveUri(data: Uri): String? {
-    val filepath = when (data.scheme) {
-      "file" -> data.path
-      "content" -> openContentFd(data)
-      "http", "https", "rtmp", "rtmps", "rtp", "rtsp", "mms", "mmst", "mmsh", "tcp", "udp", "lavf",
-      -> data.toString()
-
+    val filepath = when {
+      data.scheme == "file" -> data.path
+      data.scheme == "content" -> openContentFd(data)
+      PROTOCOLS.contains(data.scheme) -> data.toString()
       else -> null
     }
 
@@ -404,6 +405,10 @@ class PlayerActivity : AppCompatActivity() {
       "seeking" -> {
         viewModel.isLoading.update { value }
       }
+
+      "eof-reached" -> {
+        if (value && playerPreferences.closeAfterReachingEndOfVideo.get()) finish()
+      }
     }
   }
 
@@ -416,7 +421,9 @@ class PlayerActivity : AppCompatActivity() {
       MPVLib.mpvEventId.MPV_EVENT_FILE_LOADED -> {
         fileName = intent.data!!.lastPathSegment!!.substringAfterLast('/')
         viewModel.mediaTitle.update {
-          MPVLib.getPropertyString("media-title").ifBlank { fileName }
+          val mediaTitle = MPVLib.getPropertyString("media-title")
+          if (mediaTitle.isBlank() || mediaTitle.isDigitsOnly()) fileName
+          else mediaTitle
         }
         CoroutineScope(Dispatchers.IO).launch {
           loadVideoPlaybackState(fileName)
@@ -433,10 +440,6 @@ class PlayerActivity : AppCompatActivity() {
       MPVLib.mpvEventId.MPV_EVENT_SEEK -> {
         viewModel.isLoading.update { true }
       }
-
-      MPVLib.mpvEventId.MPV_EVENT_END_FILE -> {
-        endPlayback(EndPlaybackReason.PlaybackCompleted)
-      }
     }
   }
 
@@ -445,6 +448,7 @@ class PlayerActivity : AppCompatActivity() {
   }
 
   private suspend fun saveVideoPlaybackState() {
+    if (!::fileName.isInitialized) return
     mpvKtDatabase.videoDataDao().upsert(
       PlaybackStateEntity(
         fileName,
@@ -469,7 +473,6 @@ class PlayerActivity : AppCompatActivity() {
     val secondarySubDelay = getDelay(subtitlesPreferences.defaultSecondarySubDelay.get(), state?.secondarySubDelay)
     val audioDelay = getDelay(audioPreferences.defaultAudioDelay.get(), state?.audioDelay)
     state?.let {
-      player.timePos = if (playerPreferences.savePositionOnQuit.get()) it.lastPosition else 0
       player.sid = it.sid
       player.secondarySid = it.secondarySid
       player.aid = it.aid
@@ -477,6 +480,7 @@ class PlayerActivity : AppCompatActivity() {
       player.secondarySubDelay = secondarySubDelay
       MPVLib.setPropertyDouble("audio-delay", audioDelay)
     }
+    player.timePos = if (playerPreferences.savePositionOnQuit.get()) state?.lastPosition ?: 0 else 0
     MPVLib.setPropertyDouble("sub-speed", state?.subSpeed ?: subtitlesPreferences.defaultSubSpeed.get().toDouble())
   }
 
@@ -492,6 +496,18 @@ class PlayerActivity : AppCompatActivity() {
     player.timePos?.let { returnIntent.putExtra("position", it * 1000) }
     player.duration?.let { returnIntent.putExtra("duration", it * 1000) }
     setResult(RESULT_OK, returnIntent)
+  }
+
+  override fun onNewIntent(intent: Intent) {
+    super.onNewIntent(intent)
+
+    val uri = parsePathFromIntent(intent)
+    val videoUri = if (uri?.startsWith("content://") == true) {
+      openContentFd(Uri.parse(uri))
+    } else {
+      uri
+    }
+    videoUri?.let { MPVLib.command(arrayOf("loadfile", it)) }
   }
 
   @RequiresApi(Build.VERSION_CODES.O)

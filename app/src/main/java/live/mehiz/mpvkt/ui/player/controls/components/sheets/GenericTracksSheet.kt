@@ -23,7 +23,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import kotlinx.collections.immutable.ImmutableList
 import live.mehiz.mpvkt.R
-import live.mehiz.mpvkt.presentation.PlayerSheet
+import live.mehiz.mpvkt.presentation.components.PlayerSheet
 import live.mehiz.mpvkt.ui.player.Track
 
 @Composable

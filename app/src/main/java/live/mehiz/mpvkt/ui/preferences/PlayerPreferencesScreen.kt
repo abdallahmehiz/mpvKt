@@ -18,12 +18,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
-import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import live.mehiz.mpvkt.R
 import live.mehiz.mpvkt.preferences.PlayerPreferences
 import live.mehiz.mpvkt.preferences.preference.collectAsState
+import live.mehiz.mpvkt.presentation.Screen
 import live.mehiz.mpvkt.ui.player.PlayerOrientation
 import me.zhanghai.compose.preference.ListPreference
 import me.zhanghai.compose.preference.ProvidePreferenceLocals
@@ -32,7 +32,7 @@ import me.zhanghai.compose.preference.preferenceCategory
 import me.zhanghai.compose.preference.switchPreference
 import org.koin.compose.koinInject
 
-object PlayerPreferencesScreen : Screen {
+object PlayerPreferencesScreen : Screen() {
   @OptIn(ExperimentalMaterial3Api::class)
   @Composable
   override fun Content() {
@@ -105,6 +105,11 @@ object PlayerPreferencesScreen : Screen {
               title = { Text(text = stringResource(id = R.string.pref_player_automatically_enter_pip)) },
             )
           }
+          switchPreference(
+            key = preferences.closeAfterReachingEndOfVideo.key(),
+            defaultValue = preferences.closeAfterReachingEndOfVideo.defaultValue(),
+            title = { Text(text = stringResource(id = R.string.pref_player_close_after_eof)) }
+          )
           preferenceCategory(
             "gestures",
             title = { Text(stringResource(R.string.pref_player_gestures)) },

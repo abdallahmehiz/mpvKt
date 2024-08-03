@@ -1,4 +1,4 @@
-package live.mehiz.mpvkt.presentation
+package live.mehiz.mpvkt.presentation.components
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -148,7 +148,7 @@ fun VerticalSliderItem(
       value = value,
       min = min,
       max = max,
-      onValueChanged = {
+      onValueChange = {
         haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
         onChange(it)
       },
@@ -169,7 +169,7 @@ fun VerticalSlider(
   value: Int,
   min: Int,
   max: Int,
-  onValueChanged: (Int) -> Unit,
+  onValueChange: (Int) -> Unit,
   modifier: Modifier = Modifier,
 ) {
   Slider(
@@ -195,7 +195,7 @@ fun VerticalSlider(
       .height(50.dp),
     value = value.toFloat(),
     valueRange = min.toFloat()..max.toFloat(),
-    onValueChange = { onValueChanged(it.toInt()) },
+    onValueChange = { onValueChange(it.toInt()) },
   )
 }
 

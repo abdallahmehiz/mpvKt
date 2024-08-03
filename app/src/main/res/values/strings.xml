@@ -5,6 +5,12 @@
     <string name="generic_share">Share</string>
     <string name="generic_unit_ms">ms</string>
 
+    <string name="home_pick_file">Pick a file</string>
+    <string name="home_open_url">Open url</string>
+    <string name="home_url_input_label">URL</string>
+    <string name="home_invalid_protocol">Invalid protocol</string>
+
+    <string name="pref_preferences">Preferences</string>
     <string name="pref_appearance_title">Appearance</string>
     <string name="pref_appearance_category_theme">Theme</string>
     <string name="pref_appearance_darkmode_system">System</string>
@@ -30,6 +36,7 @@
     <string name="pref_player_double_tap_to_seek">Double tap to seek</string>
     <string name="pref_player_double_tap_seek_duration">Double tap seek duration</string>
     <string name="pref_player_automatically_enter_pip">Automatically switch to PiP</string>
+    <string name="pref_player_close_after_eof">Close after the end of playback</string>
     
     <string name="pref_player_gestures">Gestures</string>
     <string name="pref_player_gestures_seek">Horizontal seek gestures</string>

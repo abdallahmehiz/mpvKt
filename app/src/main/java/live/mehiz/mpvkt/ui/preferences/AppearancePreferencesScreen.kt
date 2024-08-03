@@ -17,13 +17,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import kotlinx.collections.immutable.toImmutableList
 import live.mehiz.mpvkt.R
 import live.mehiz.mpvkt.preferences.AppearancePreferences
 import live.mehiz.mpvkt.preferences.preference.collectAsState
+import live.mehiz.mpvkt.presentation.Screen
 import live.mehiz.mpvkt.presentation.preferences.MultiChoiceSegmentedButton
 import live.mehiz.mpvkt.ui.theme.DarkMode
 import me.zhanghai.compose.preference.ProvidePreferenceLocals
@@ -31,7 +31,7 @@ import me.zhanghai.compose.preference.preferenceCategory
 import me.zhanghai.compose.preference.switchPreference
 import org.koin.compose.koinInject
 
-object AppearancePreferencesScreen : Screen {
+object AppearancePreferencesScreen : Screen() {
   @OptIn(ExperimentalMaterial3Api::class)
   @Composable
   override fun Content() {

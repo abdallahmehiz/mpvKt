@@ -1,4 +1,4 @@
-package live.mehiz.mpvkt.presentation
+package live.mehiz.mpvkt.presentation.components
 
 import android.view.MotionEvent
 import androidx.compose.foundation.interaction.MutableInteractionSource

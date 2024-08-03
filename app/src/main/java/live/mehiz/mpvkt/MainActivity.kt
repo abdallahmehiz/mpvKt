@@ -10,16 +10,17 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import cafe.adriel.voyager.navigator.Navigator
+import cafe.adriel.voyager.transitions.SlideTransition
 import live.mehiz.mpvkt.preferences.AppearancePreferences
 import live.mehiz.mpvkt.preferences.preference.collectAsState
 import live.mehiz.mpvkt.ui.home.HomeScreen
 import live.mehiz.mpvkt.ui.theme.DarkMode
 import live.mehiz.mpvkt.ui.theme.MpvKtTheme
 import org.koin.android.ext.android.inject
-import org.koin.java.KoinJavaComponent.inject
 
 class MainActivity : ComponentActivity() {
-  val appearancePreferences by inject<AppearancePreferences>()
+  private val appearancePreferences by inject<AppearancePreferences>()
+
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
     setContent {
@@ -32,10 +33,7 @@ class MainActivity : ComponentActivity() {
         ) { dark == DarkMode.Dark || (dark == DarkMode.System && isSystemInDarkTheme) },
       )
       MpvKtTheme {
-        // add transitions back once these two issues get fixed, thanks Google, very cool!
-        // https://github.com/adrielcafe/voyager/issues/410
-        // https://github.com/adrielcafe/voyager/issues/431
-        Navigator(HomeScreen)
+        Navigator(HomeScreen) { SlideTransition(it) }
       }
     }
   }

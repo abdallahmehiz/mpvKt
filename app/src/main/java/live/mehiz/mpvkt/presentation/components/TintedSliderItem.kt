@@ -1,4 +1,4 @@
-package live.mehiz.mpvkt.presentation
+package live.mehiz.mpvkt.presentation.components
 
 import androidx.annotation.IntRange
 import androidx.compose.foundation.interaction.MutableInteractionSource

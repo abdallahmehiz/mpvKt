@@ -44,8 +44,8 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.update
 import live.mehiz.mpvkt.preferences.PlayerPreferences
 import live.mehiz.mpvkt.preferences.preference.collectAsState
-import live.mehiz.mpvkt.presentation.LeftSideOvalShape
-import live.mehiz.mpvkt.presentation.RightSideOvalShape
+import live.mehiz.mpvkt.presentation.components.LeftSideOvalShape
+import live.mehiz.mpvkt.presentation.components.RightSideOvalShape
 import live.mehiz.mpvkt.ui.player.PlayerUpdates
 import live.mehiz.mpvkt.ui.player.PlayerViewModel
 import live.mehiz.mpvkt.ui.player.controls.components.DoubleTapSeekSecondsView

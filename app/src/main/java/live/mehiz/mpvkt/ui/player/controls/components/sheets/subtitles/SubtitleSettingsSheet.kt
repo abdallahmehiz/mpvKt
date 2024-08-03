@@ -38,8 +38,8 @@ import live.mehiz.mpvkt.R
 import live.mehiz.mpvkt.preferences.SubtitlesPreferences
 import live.mehiz.mpvkt.preferences.preference.collectAsState
 import live.mehiz.mpvkt.preferences.preference.deleteAndGet
-import live.mehiz.mpvkt.presentation.SliderItem
-import live.mehiz.mpvkt.presentation.VerticalSliderItem
+import live.mehiz.mpvkt.presentation.components.SliderItem
+import live.mehiz.mpvkt.presentation.components.VerticalSliderItem
 import org.koin.compose.koinInject
 
 @OptIn(ExperimentalFoundationApi::class)

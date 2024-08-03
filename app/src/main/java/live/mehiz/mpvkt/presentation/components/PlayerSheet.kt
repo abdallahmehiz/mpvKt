@@ -1,4 +1,4 @@
-package live.mehiz.mpvkt.presentation
+package live.mehiz.mpvkt.presentation.components
 
 import android.content.res.Configuration.ORIENTATION_LANDSCAPE
 import androidx.activity.compose.BackHandler
@@ -31,6 +31,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
@@ -63,6 +64,7 @@ fun PlayerSheet(
 ) {
   val scope = rememberCoroutineScope()
   val density = LocalDensity.current
+  val latestOnDismissRequest by rememberUpdatedState(onDismissRequest)
   val maxWidth = if (LocalConfiguration.current.orientation == ORIENTATION_LANDSCAPE) {
     640.dp
   } else {
@@ -162,7 +164,7 @@ fun PlayerSheet(
       snapshotFlow { anchoredDraggableState.currentValue }
         .drop(1)
         .filter { it == 1 }
-        .collectLatest { onDismissRequest() }
+        .collectLatest { latestOnDismissRequest() }
     }
   }
 }

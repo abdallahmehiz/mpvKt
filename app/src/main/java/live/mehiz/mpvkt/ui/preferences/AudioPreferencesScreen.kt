@@ -17,17 +17,17 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import live.mehiz.mpvkt.R
 import live.mehiz.mpvkt.preferences.AudioPreferences
+import live.mehiz.mpvkt.presentation.Screen
 import me.zhanghai.compose.preference.ProvidePreferenceLocals
 import me.zhanghai.compose.preference.switchPreference
 import me.zhanghai.compose.preference.textFieldPreference
 import org.koin.compose.koinInject
 
-object AudioPreferencesScreen : Screen {
+object AudioPreferencesScreen : Screen() {
   @OptIn(ExperimentalMaterial3Api::class)
   @Composable
   override fun Content() {

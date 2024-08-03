@@ -7,18 +7,22 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.FileOpen
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Link
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -29,14 +33,16 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import cafe.adriel.voyager.core.screen.Screen
+import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
+import `is`.xyz.mpv.Utils.PROTOCOLS
 import live.mehiz.mpvkt.R
+import live.mehiz.mpvkt.presentation.Screen
 import live.mehiz.mpvkt.ui.player.PlayerActivity
 import live.mehiz.mpvkt.ui.preferences.PreferencesScreen
 
-object HomeScreen : Screen {
+object HomeScreen : Screen() {
   @OptIn(ExperimentalMaterial3Api::class)
   @Composable
   override fun Content() {
@@ -62,28 +68,71 @@ object HomeScreen : Screen {
         verticalArrangement = Arrangement.Center,
       ) {
         var uri by remember { mutableStateOf("") }
-        TextField(value = uri, onValueChange = { uri = it })
-        Button(onClick = { context.playFile(uri) }) {
-          Text(text = "Start playing?")
+        var isUrlValid by remember { mutableStateOf(true) }
+        OutlinedTextField(
+          value = uri,
+          label = { Text(stringResource(R.string.home_url_input_label)) },
+          onValueChange = {
+            uri = it
+            isUrlValid = it.isBlank() || isURLValid(it)
+          },
+          supportingText = {
+            Text(if (isUrlValid) "" else stringResource(R.string.home_invalid_protocol))
+          },
+          trailingIcon = {
+            if (!isUrlValid) Icon(Icons.Filled.Info, null)
+          },
+          isError = !isUrlValid,
+        )
+        Button(
+          onClick = { playFile(uri, context) },
+          enabled = uri.isNotBlank() && isUrlValid,
+        ) {
+          Row(
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+          ) {
+            Icon(Icons.Default.Link, null)
+            Text(text = stringResource(R.string.home_open_url))
+          }
         }
         val documentPicker = rememberLauncherForActivityResult(
           ActivityResultContracts.OpenDocument(),
         ) {
           if (it == null) return@rememberLauncherForActivityResult
-          context.playFile(it.toString())
+          playFile(it.toString(), context)
         }
         OutlinedButton(
           onClick = { documentPicker.launch(arrayOf("*/*")) },
         ) {
-          Text(text = "Pick a file")
+          Row(
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalAlignment = Alignment.CenterVertically
+          ) {
+            Icon(Icons.Default.FileOpen, null)
+            Text(text = stringResource(R.string.home_pick_file))
+          }
         }
       }
     }
   }
 
-  private fun Context.playFile(filepath: String) {
+  // Basically a copy of:
+  // https://github.com/mpv-android/mpv-android/blob/32cbff3cedea73b4616b34542cb95bf1d00504cc/app/src/main/java/is/xyz/mpv/Utils.kt#L406
+  private fun isURLValid(url: String): Boolean {
+    val uri = Uri.parse(url)
+    return uri.isHierarchical && !uri.isRelative &&
+      !(uri.host.isNullOrBlank() && uri.path.isNullOrBlank()) &&
+      PROTOCOLS.contains(uri.scheme)
+  }
+
+  private fun playFile(
+    filepath: String,
+    context: Context
+  ) {
     val i = Intent(Intent.ACTION_VIEW, Uri.parse(filepath))
-    i.setClass(this, PlayerActivity::class.java)
-    startActivity(i)
+    i.setClass(context, PlayerActivity::class.java)
+    context.startActivity(i)
   }
 }
+
