@@ -37,7 +37,7 @@ jobs:
           releaseDirectory: app/build/outputs/apk/preview
           signingKeyBase64: ${{ secrets.SIGNING_KEYSTORE }}
           alias: ${{ secrets.SIGNING_KEY_ALIAS }}
-          keyStorePassword: ${{ secrets.SINGING_STORE_PASSWORD }}
+          keyStorePassword: ${{ secrets.SIGNING_STORE_PASSWORD }}
           keyPassword: ${{ secrets.KEY_PASSWORD }}
         env:
           BUILD_TOOLS_VERSION: "34.0.0"
@@ -53,7 +53,7 @@ jobs:
         run: |
           set -e
           
-          declare -a apks=("universal" "arm64-v8a" "armeabi-v7a" "x86" "x86_64)
+          declare -a apks=("universal" "arm64-v8a" "armeabi-v7a" "x86" "x86_64")
           
           printf "%s\n" "${apks[@]}" | xargs -n 1 -I {} sh -c '
           cp app/build/outputs/apk/preview/app-{}-preview-signed.apk mpvKt-{}-r${{ env.COMMIT_COUNT }}.apk
