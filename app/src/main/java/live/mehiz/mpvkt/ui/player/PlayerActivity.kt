@@ -422,8 +422,11 @@ class PlayerActivity : AppCompatActivity() {
         fileName = intent.data!!.lastPathSegment!!.substringAfterLast('/')
         viewModel.mediaTitle.update {
           val mediaTitle = MPVLib.getPropertyString("media-title")
-          if (mediaTitle.isBlank() || mediaTitle.isDigitsOnly()) fileName
-          else mediaTitle
+          if (mediaTitle.isBlank() || mediaTitle.isDigitsOnly()) {
+            fileName
+          } else {
+            mediaTitle
+          }
         }
         CoroutineScope(Dispatchers.IO).launch {
           loadVideoPlaybackState(fileName)
