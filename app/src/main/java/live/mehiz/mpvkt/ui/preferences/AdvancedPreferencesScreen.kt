@@ -21,6 +21,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -30,11 +31,15 @@ import androidx.documentfile.provider.DocumentFile
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import live.mehiz.mpvkt.R
+import live.mehiz.mpvkt.database.MpvKtDatabase
 import live.mehiz.mpvkt.preferences.AdvancedPreferences
 import live.mehiz.mpvkt.preferences.preference.collectAsState
 import live.mehiz.mpvkt.presentation.Screen
+import live.mehiz.mpvkt.presentation.components.ConfirmDialog
+import me.zhanghai.compose.preference.Preference
 import me.zhanghai.compose.preference.ProvidePreferenceLocals
 import me.zhanghai.compose.preference.TextFieldPreference
 import me.zhanghai.compose.preference.preference
@@ -176,6 +181,26 @@ object AdvancedPreferencesScreen : Screen() {
               },
               summary = { if (inputConf.isNotBlank()) Text(inputConf.lines()[0]) },
             )
+          }
+          item {
+            var isConfirmDialogShown by remember { mutableStateOf(false) }
+            val mpvKtDatabase = koinInject<MpvKtDatabase>()
+            val scope = rememberCoroutineScope()
+            Preference(
+              title = { Text(stringResource(R.string.pref_advanced_clear_playback_history)) },
+              onClick = { isConfirmDialogShown = true }
+            )
+            if (isConfirmDialogShown) {
+              ConfirmDialog(
+                stringResource(R.string.pref_advanced_clear_playback_history_confirm_title),
+                stringResource(R.string.pref_advanced_clear_playback_history_confirm_subtitle),
+                onConfirm = {
+                  scope.launch(Dispatchers.IO) { mpvKtDatabase.videoDataDao() }
+                  isConfirmDialogShown = false
+                },
+                onCancel = { isConfirmDialogShown = false }
+              )
+            }
           }
         }
       }

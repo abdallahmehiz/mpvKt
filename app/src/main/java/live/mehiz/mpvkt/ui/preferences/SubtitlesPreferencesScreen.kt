@@ -45,7 +45,7 @@ object SubtitlesPreferencesScreen : Screen() {
       topBar = {
         TopAppBar(
           title = {
-            Text(stringResource(R.string.pref_preferred_languages))
+            Text(stringResource(R.string.pref_subtitles))
           },
           navigationIcon = {
             IconButton(onClick = { navigator.pop() }) {

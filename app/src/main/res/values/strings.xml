@@ -3,6 +3,8 @@
 
     <string name="generic_reset">Reset</string>
     <string name="generic_share">Share</string>
+    <string name="generic_confirm">Confirm</string>
+    <string name="generic_cancel">Cancel</string>
     <string name="generic_unit_ms">ms</string>
 
     <string name="home_pick_file">Pick a file</string>
@@ -69,6 +71,9 @@
     <string name="pref_advanced_mpv_conf_storage_location">pick mpv configuration storage location</string>
     <string name="pref_advanced_mpv_conf">Edit mpv.conf</string>
     <string name="pref_advanced_input_conf">Edit input.conf</string>
+    <string name="pref_advanced_clear_playback_history">Clear playback history</string>
+    <string name="pref_advanced_clear_playback_history_confirm_title">Are you sure you want to clear your playback history?</string>
+    <string name="pref_advanced_clear_playback_history_confirm_subtitle">This will clear all your previous media&amp;s playback positions, selected subtitles and audio tracks along with their delays and speeds</string>
 
     <string name="player_sheets_add_ext_sub">Add external subtitles</string>
     <string name="player_sheets_add_ext_audio">Add external audio tracks</string>

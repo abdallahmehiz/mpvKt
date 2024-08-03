@@ -5,6 +5,7 @@ import android.content.res.Configuration.ORIENTATION_PORTRAIT
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
@@ -14,7 +15,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.windowInsetsPadding
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PageSize
 import androidx.compose.foundation.pager.rememberPagerState
@@ -82,7 +82,7 @@ fun SubtitleSettingsSheet(
         cards(page, Modifier.fillMaxWidth())
       }
     } else {
-      LazyColumn(
+      Column(
         horizontalAlignment = Alignment.Start,
         verticalArrangement = Arrangement.spacedBy(8.dp),
         modifier = Modifier.constrainAs(subSettingsCards) {
@@ -90,9 +90,9 @@ fun SubtitleSettingsSheet(
           end.linkTo(parent.end, 32.dp)
         },
       ) {
-        item { Spacer(Modifier.height(16.dp)) }
-        items(3) { cards(it, Modifier) }
-        item { Spacer(Modifier.height(16.dp)) }
+        Spacer(Modifier.height(16.dp))
+        repeat(3) { cards(it, Modifier) }
+        Spacer(Modifier.height(16.dp))
       }
     }
 
