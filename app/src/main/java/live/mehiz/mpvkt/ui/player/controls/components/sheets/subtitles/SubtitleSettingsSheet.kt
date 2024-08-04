@@ -18,6 +18,8 @@ import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PageSize
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.Card
@@ -85,10 +87,12 @@ fun SubtitleSettingsSheet(
       Column(
         horizontalAlignment = Alignment.Start,
         verticalArrangement = Arrangement.spacedBy(8.dp),
-        modifier = Modifier.constrainAs(subSettingsCards) {
-          top.linkTo(parent.top)
-          end.linkTo(parent.end, 32.dp)
-        },
+        modifier = Modifier
+          .constrainAs(subSettingsCards) {
+            top.linkTo(parent.top)
+            end.linkTo(parent.end, 32.dp)
+          }
+          .verticalScroll(rememberScrollState()),
       ) {
         Spacer(Modifier.height(16.dp))
         repeat(3) { cards(it, Modifier) }
