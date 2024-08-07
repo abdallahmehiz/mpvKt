@@ -105,6 +105,44 @@ fun GestureHandler(modifier: Modifier = Modifier) {
   val currentBrightness by viewModel.currentBrightness.collectAsState()
   val haptics = LocalHapticFeedback.current
   Box(
+    modifier = modifier.fillMaxSize(),
+    contentAlignment = if (isSeekingForwards) Alignment.CenterEnd else Alignment.CenterStart,
+  ) {
+    CompositionLocalProvider(
+      LocalRippleTheme provides PlayerRippleTheme,
+    ) {
+      if (seekAmount != 0) {
+        Box(
+          modifier = Modifier
+            .fillMaxHeight()
+            .fillMaxWidth(0.4f), // 2 fifths
+          contentAlignment = Alignment.Center,
+        ) {
+          Box(
+            modifier = Modifier
+              .fillMaxSize()
+              .clip(if (isSeekingForwards) RightSideOvalShape else LeftSideOvalShape)
+              .background(Color.White.copy(alpha))
+              .indication(interactionSource, rememberRipple()),
+          )
+          AndroidView(
+            factory = { DoubleTapSeekSecondsView(it, null) },
+            update = {
+              if (seekAmount != 0) {
+                it.isForward = isSeekingForwards
+                it.seconds = seekAmount
+                it.visibility = View.VISIBLE
+                it.start()
+              } else {
+                it.visibility = View.GONE
+              }
+            },
+          )
+        }
+      }
+    }
+  }
+  Box(
     modifier = Modifier
       .fillMaxSize()
       .windowInsetsPadding(WindowInsets.safeGestures)
@@ -222,42 +260,4 @@ fun GestureHandler(modifier: Modifier = Modifier) {
         }
       },
   )
-  Box(
-    modifier = modifier.fillMaxSize(),
-    contentAlignment = if (isSeekingForwards) Alignment.CenterEnd else Alignment.CenterStart,
-  ) {
-    CompositionLocalProvider(
-      LocalRippleTheme provides PlayerRippleTheme,
-    ) {
-      if (seekAmount != 0) {
-        Box(
-          modifier = Modifier
-            .fillMaxHeight()
-            .fillMaxWidth(0.4f), // 2 fifths
-          contentAlignment = Alignment.Center,
-        ) {
-          Box(
-            modifier = Modifier
-              .fillMaxSize()
-              .clip(if (isSeekingForwards) RightSideOvalShape else LeftSideOvalShape)
-              .background(Color.White.copy(alpha))
-              .indication(interactionSource, rememberRipple()),
-          )
-          AndroidView(
-            factory = { DoubleTapSeekSecondsView(it, null) },
-            update = {
-              if (seekAmount != 0) {
-                it.isForward = isSeekingForwards
-                it.seconds = seekAmount
-                it.visibility = View.VISIBLE
-                it.start()
-              } else {
-                it.visibility = View.GONE
-              }
-            },
-          )
-        }
-      }
-    }
-  }
 }
