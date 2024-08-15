@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
+import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -29,8 +30,8 @@ import live.mehiz.mpvkt.preferences.SubtitlesPreferences
 import live.mehiz.mpvkt.preferences.preference.collectAsState
 import live.mehiz.mpvkt.presentation.Screen
 import me.zhanghai.compose.preference.ProvidePreferenceLocals
-import me.zhanghai.compose.preference.preference
 import me.zhanghai.compose.preference.textFieldPreference
+import me.zhanghai.compose.preference.twoTargetIconButtonPreference
 import org.koin.compose.koinInject
 
 object SubtitlesPreferencesScreen : Screen() {
@@ -88,13 +89,19 @@ object SubtitlesPreferencesScreen : Screen() {
               }
             },
           )
-          preference(
+          twoTargetIconButtonPreference(
             preferences.fontsFolder.key(),
             title = { Text(stringResource(R.string.pref_subtitles_fonts_dir)) },
             onClick = { locationPicker.launch(null) },
             summary = {
-              if (fontsFolder.isBlank()) return@preference
+              if (fontsFolder.isBlank()) return@twoTargetIconButtonPreference
               Text(getSimplifiedPathFromUri(fontsFolder))
+            },
+            iconButtonIcon = {
+              Icon(Icons.Default.Clear, null)
+            },
+            onIconButtonClick = {
+              preferences.fontsFolder.delete()
             }
           )
         }

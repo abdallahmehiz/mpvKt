@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -45,6 +46,7 @@ import me.zhanghai.compose.preference.Preference
 import me.zhanghai.compose.preference.ProvidePreferenceLocals
 import me.zhanghai.compose.preference.TextFieldPreference
 import me.zhanghai.compose.preference.preference
+import me.zhanghai.compose.preference.twoTargetIconButtonPreference
 import org.koin.compose.koinInject
 import kotlin.io.path.deleteIfExists
 import kotlin.io.path.outputStream
@@ -89,7 +91,7 @@ object AdvancedPreferencesScreen : Screen() {
             .fillMaxSize()
             .padding(padding),
         ) {
-          preference(
+          twoTargetIconButtonPreference(
             "mpv_storage_location",
             title = { Text(stringResource(R.string.pref_advanced_mpv_conf_storage_location)) },
             summary = {
@@ -97,8 +99,12 @@ object AdvancedPreferencesScreen : Screen() {
                 Text(getSimplifiedPathFromUri(mpvConfStorageLocation))
               }
             },
-            onClick = {
-              locationPicker.launch(null)
+            onClick = { locationPicker.launch(null) },
+            iconButtonIcon = {
+              Icon(Icons.Default.Clear, null)
+            },
+            onIconButtonClick = {
+              preferences.mpvConfStorageUri.delete()
             },
           )
           item {
