@@ -21,7 +21,7 @@ android {
     applicationId = "live.mehiz.mpvkt"
     minSdk = 21
     targetSdk = 34
-    versionCode = 1
+    versionCode = 3
     versionName = "0.1.0"
 
     testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -96,20 +96,18 @@ room {
 }
 
 dependencies {
-
   implementation(libs.androidx.core.ktx)
   implementation(libs.androidx.lifecycle.runtime.ktx)
   implementation(libs.androidx.activity.compose)
   implementation(platform(libs.androidx.compose.bom))
   implementation(libs.androidx.ui)
   implementation(libs.androidx.ui.graphics)
-  implementation(libs.androidx.ui.tooling.preview)
   implementation(libs.androidx.material3.android)
+  implementation(libs.androidx.ui.tooling.preview)
   debugImplementation(libs.androidx.ui.tooling)
   implementation(libs.androidx.appcompat)
   implementation(libs.androidx.compose.constraintlayout)
   implementation(libs.androidx.material3.icons.extended)
-  implementation(libs.androidx.documentfile)
   implementation(libs.androidx.compose.animation.graphics)
   implementation(libs.material)
   implementation(libs.androidx.preferences.ktx)
@@ -134,6 +132,7 @@ dependencies {
 
   implementation(libs.kotlinx.immutable.collections)
   implementation(libs.truetype.parser)
+  implementation(libs.fsaf)
 }
 
 detekt {

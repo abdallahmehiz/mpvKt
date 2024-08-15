@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.FileOpen
+import androidx.compose.material.icons.filled.FolderOpen
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Link
 import androidx.compose.material.icons.filled.Settings
@@ -36,6 +37,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
+import com.github.k1rakishou.fsaf.FileManager
 import `is`.xyz.mpv.Utils.PROTOCOLS
 import live.mehiz.mpvkt.R
 import live.mehiz.mpvkt.presentation.Screen
@@ -107,10 +109,26 @@ object HomeScreen : Screen() {
         ) {
           Row(
             horizontalArrangement = Arrangement.spacedBy(8.dp),
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
           ) {
             Icon(Icons.Default.FileOpen, null)
             Text(text = stringResource(R.string.home_pick_file))
+          }
+        }
+        val fileManager = FileManager(context)
+        val directoryPicker = rememberLauncherForActivityResult(
+          ActivityResultContracts.OpenDocumentTree(),
+        ) {
+          if (it == null) return@rememberLauncherForActivityResult
+          navigator.push(FilePickerScreen(fileManager.fromUri(it)!!.getFullPath()))
+        }
+        OutlinedButton(onClick = { directoryPicker.launch(null) }) {
+          Row(
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+          ) {
+            Icon(Icons.Default.FolderOpen, null)
+            Text(text = stringResource(R.string.home_open_file_picker))
           }
         }
       }
@@ -126,9 +144,9 @@ object HomeScreen : Screen() {
       PROTOCOLS.contains(uri.scheme)
   }
 
-  private fun playFile(
+  fun playFile(
     filepath: String,
-    context: Context
+    context: Context,
   ) {
     val i = Intent(Intent.ACTION_VIEW, Uri.parse(filepath))
     i.setClass(context, PlayerActivity::class.java)

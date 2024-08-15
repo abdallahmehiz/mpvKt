@@ -28,11 +28,11 @@ import androidx.core.text.isDigitsOnly
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
-import androidx.documentfile.provider.DocumentFile
 import androidx.lifecycle.lifecycleScope
 import androidx.media.AudioAttributesCompat
 import androidx.media.AudioFocusRequestCompat
 import androidx.media.AudioManagerCompat
+import com.github.k1rakishou.fsaf.FileManager
 import `is`.xyz.mpv.MPVLib
 import `is`.xyz.mpv.Utils
 import `is`.xyz.mpv.Utils.PROTOCOLS
@@ -72,6 +72,7 @@ class PlayerActivity : AppCompatActivity() {
   private val audioPreferences: AudioPreferences by inject()
   private val subtitlesPreferences: SubtitlesPreferences by inject()
   private val advancedPreferences: AdvancedPreferences by inject()
+  private val fileManager: FileManager by inject()
 
   private lateinit var fileName: String
 
@@ -209,18 +210,13 @@ class PlayerActivity : AppCompatActivity() {
     MPVLib.setPropertyDouble("audio-delay", audioPreferences.defaultAudioDelay.get() / 1000.0)
     MPVLib.setPropertyBoolean("audio-pitch-correction", audioPreferences.audioPitchCorrection.get())
 
-    val request = AudioFocusRequestCompat
-      .Builder(AudioManagerCompat.AUDIOFOCUS_GAIN)
-      .also {
-        it.setAudioAttributes(
-          AudioAttributesCompat
-            .Builder()
-            .setUsage(AudioAttributesCompat.USAGE_MEDIA)
-            .setContentType(AudioAttributesCompat.CONTENT_TYPE_MUSIC)
-            .build(),
-        )
-        it.setOnAudioFocusChangeListener(audioFocusChangeListener)
-      }.build()
+    val request = AudioFocusRequestCompat.Builder(AudioManagerCompat.AUDIOFOCUS_GAIN).also {
+      it.setAudioAttributes(
+        AudioAttributesCompat.Builder().setUsage(AudioAttributesCompat.USAGE_MEDIA)
+          .setContentType(AudioAttributesCompat.CONTENT_TYPE_MUSIC).build(),
+      )
+      it.setOnAudioFocusChangeListener(audioFocusChangeListener)
+    }.build()
     AudioManagerCompat.requestAudioFocus(audioManager, request).let {
       if (it == AudioManager.AUDIOFOCUS_REQUEST_FAILED) return@let
       audioFocusRequest = request
@@ -250,15 +246,10 @@ class PlayerActivity : AppCompatActivity() {
   private fun copyMPVConfigFiles() {
     val applicationPath = applicationContext.filesDir.path
     try {
-      DocumentFile.fromTreeUri(this, Uri.parse(advancedPreferences.mpvConfStorageUri.get()))!!.listFiles().forEach {
-        if (it.isDirectory) {
-          DocumentFile.fromFile(File(applicationPath)).createDirectory(it.name!!)
-          return@forEach
-        }
-        val input = contentResolver.openInputStream(it.uri)
-        input!!.copyTo(File(applicationPath + "/" + it.name).outputStream())
-        input.close()
-      }
+      val mpvConf = fileManager.fromUri(Uri.parse(advancedPreferences.mpvConfStorageUri.get()))
+        ?: error("User hasn't set any mpvConfig directory")
+      if (!fileManager.exists(mpvConf)) error("Couldn't access mpv configuration directory")
+      fileManager.copyDirectoryWithContent(mpvConf, fileManager.fromPath(applicationPath), false)
     } catch (e: Exception) {
       File("$applicationPath/mpv.conf").writeText(advancedPreferences.mpvConf.get())
       File("$applicationPath/input.conf").writeText(advancedPreferences.inputConf.get())
@@ -267,21 +258,21 @@ class PlayerActivity : AppCompatActivity() {
   }
 
   private fun copyMPVFonts() {
-    val cachePath = applicationContext.cacheDir.path
-    val fontsDir = DocumentFile.fromFile(File("$cachePath/fonts"))
-    if (!fontsDir.exists()) DocumentFile.fromFile(File(cachePath)).createDirectory("fonts")
     try {
-      if (fontsDir.findFile("subfont.ttf")?.exists() != true) {
+      val cachePath = applicationContext.cacheDir.path
+      val fontsDir = fileManager.fromUri(Uri.parse(subtitlesPreferences.fontsFolder.get()))
+        ?: error("User hasn't set any fonts directory")
+      if (!fileManager.exists(fontsDir)) error("Couldn't access fonts directory")
+
+      val destDir = fileManager.fromPath("$cachePath/fonts")
+      if (!fileManager.exists(destDir)) fileManager.createDir(fileManager.fromPath(cachePath), "fonts")
+
+      if (fileManager.findFile(destDir, "subfont.ttf") == null) {
         applicationContext.resources.assets.open("subfont.ttf")
           .copyTo(File("$cachePath/fonts/subfont.ttf").outputStream())
       }
-      DocumentFile.fromTreeUri(this, Uri.parse(subtitlesPreferences.fontsFolder.get()))?.listFiles()?.forEach {
-        if (it.isDirectory || fontsDir.findFile(it.name!!)?.exists() == true) return@forEach
-        if (!".*\\.[ot]tf$".toRegex().matches(it.name!!.lowercase())) return@forEach
-        val input = contentResolver.openInputStream(it.uri)
-        input!!.copyTo(File("$cachePath/fonts/${it.name}").outputStream())
-        input.close()
-      }
+
+      fileManager.copyDirectoryWithContent(fontsDir, destDir, false)
     } catch (e: Exception) {
       Log.e("PlayerActivity", "Couldn't copy fonts to application directory: ${e.message}")
     }

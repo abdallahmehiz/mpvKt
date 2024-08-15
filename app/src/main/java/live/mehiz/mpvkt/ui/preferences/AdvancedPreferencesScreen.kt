@@ -3,6 +3,7 @@ package live.mehiz.mpvkt.ui.preferences
 import android.content.Intent
 import android.net.Uri
 import android.os.Environment
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.fillMaxSize
@@ -30,6 +31,7 @@ import androidx.compose.ui.util.fastJoinToString
 import androidx.documentfile.provider.DocumentFile
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
+import com.github.k1rakishou.fsaf.FileManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -55,6 +57,7 @@ object AdvancedPreferencesScreen : Screen() {
     val context = LocalContext.current
     val navigator = LocalNavigator.currentOrThrow
     val preferences = koinInject<AdvancedPreferences>()
+    val fileManager = koinInject<FileManager>()
 
     Scaffold(
       topBar = {
@@ -188,7 +191,7 @@ object AdvancedPreferencesScreen : Screen() {
             val scope = rememberCoroutineScope()
             Preference(
               title = { Text(stringResource(R.string.pref_advanced_clear_playback_history)) },
-              onClick = { isConfirmDialogShown = true }
+              onClick = { isConfirmDialogShown = true },
             )
             if (isConfirmDialogShown) {
               ConfirmDialog(
@@ -197,11 +200,40 @@ object AdvancedPreferencesScreen : Screen() {
                 onConfirm = {
                   scope.launch(Dispatchers.IO) { mpvKtDatabase.videoDataDao() }
                   isConfirmDialogShown = false
+                  Toast.makeText(
+                    context,
+                    context.getString(R.string.pref_advanced_cleared_playback_history),
+                    Toast.LENGTH_SHORT
+                  ).show()
                 },
-                onCancel = { isConfirmDialogShown = false }
+                onCancel = { isConfirmDialogShown = false },
               )
             }
           }
+          preference(
+            "clear_mpv_configurations",
+            title = { Text(text = stringResource(id = R.string.pref_advanced_clear_mpv_conf_cache)) },
+            onClick = {
+              fileManager.deleteContent(fileManager.fromPath(context.filesDir.path))
+              Toast.makeText(
+                context,
+                context.getString(R.string.pref_advanced_cleared_mpv_conf_cache),
+                Toast.LENGTH_SHORT,
+              ).show()
+            },
+          )
+          preference(
+            "clear_fonts_cache",
+            title = { Text(text = stringResource(id = R.string.pref_advanced_clear_fonts_cache)) },
+            onClick = {
+              fileManager.deleteContent(fileManager.fromPath(context.cacheDir.path + "/fonts"))
+              Toast.makeText(
+                context,
+                context.getString(R.string.pref_advanced_cleared_fonts_cache),
+                Toast.LENGTH_SHORT,
+              ).show()
+            },
+          )
         }
       }
     }

@@ -32,11 +32,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.documentfile.provider.DocumentFile
+import com.github.k1rakishou.fsaf.FileManager
 import com.yubyf.truetypeparser.TTFFile
 import `is`.xyz.mpv.MPVLib
 import kotlinx.collections.immutable.toImmutableList
@@ -58,8 +57,8 @@ fun SubtitleSettingsTypographyCard(
   modifier: Modifier = Modifier,
 ) {
   val preferences = koinInject<SubtitlesPreferences>()
+  val fileManager = koinInject<FileManager>()
   var isExpanded by remember { mutableStateOf(true) }
-  val context = LocalContext.current
   val fonts by remember { mutableStateOf(mutableListOf(preferences.font.defaultValue())) }
   var fontsLoadingIndicator: (@Composable () -> Unit)? by remember {
     val indicator: (@Composable () -> Unit) = {
@@ -74,12 +73,11 @@ fun SubtitleSettingsTypographyCard(
     }
     withContext(Dispatchers.IO) {
       fonts.addAll(
-        DocumentFile.fromTreeUri(
-          context,
-          Uri.parse(preferences.fontsFolder.get()),
-        )!!.listFiles().filter {
-          it.isFile && (it.name!!.endsWith("ttf", true) || it.name!!.endsWith("otf", true))
-        }.map { TTFFile.open(context.contentResolver.openInputStream(it.uri)!!).families.values.first() },
+        fileManager.listFiles(
+          fileManager.fromUri(Uri.parse(preferences.fontsFolder.get())) ?: return@withContext,
+        ).filter {
+          fileManager.isFile(it) && fileManager.getName(it).lowercase().matches(".*\\.[ot]tf$".toRegex())
+        }.map { TTFFile.open(fileManager.getInputStream(it)!!).families.values.first() },
       )
       fontsLoadingIndicator = null
     }

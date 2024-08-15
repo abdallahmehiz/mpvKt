@@ -8,6 +8,7 @@
     <string name="generic_unit_ms">ms</string>
 
     <string name="home_pick_file">Pick a file</string>
+    <string name="home_open_file_picker">Open file picker</string>
     <string name="home_open_url">Open url</string>
     <string name="home_url_input_label">URL</string>
     <string name="home_invalid_protocol">Invalid protocol</string>
@@ -74,6 +75,11 @@
     <string name="pref_advanced_clear_playback_history">Clear playback history</string>
     <string name="pref_advanced_clear_playback_history_confirm_title">Are you sure you want to clear your playback history?</string>
     <string name="pref_advanced_clear_playback_history_confirm_subtitle">This will clear all your previous media&amp;s playback positions, selected subtitles and audio tracks along with their delays and speeds</string>
+    <string name="pref_advanced_cleared_playback_history">Cleared playback history</string>
+    <string name="pref_advanced_clear_fonts_cache">Clear cached fonts</string>
+    <string name="pref_advanced_cleared_fonts_cache">Cleared cached fonts</string>
+    <string name="pref_advanced_clear_mpv_conf_cache">Clear cached mpv configurations</string>
+    <string name="pref_advanced_cleared_mpv_conf_cache">Cleared cached mpv configurations</string>
 
     <string name="player_sheets_add_ext_sub">Add external subtitles</string>
     <string name="player_sheets_add_ext_audio">Add external audio tracks</string>

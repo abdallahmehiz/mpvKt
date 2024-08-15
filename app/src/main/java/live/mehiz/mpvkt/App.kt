@@ -2,6 +2,7 @@ package live.mehiz.mpvkt
 
 import android.app.Application
 import live.mehiz.mpvkt.di.DatabaseModule
+import live.mehiz.mpvkt.di.FileManagerModule
 import live.mehiz.mpvkt.di.PreferencesModule
 import live.mehiz.mpvkt.presentation.crash.CrashActivity
 import live.mehiz.mpvkt.presentation.crash.GlobalExceptionHandler
@@ -16,7 +17,8 @@ class App : Application() {
       androidContext(this@App)
       modules(
         PreferencesModule,
-        DatabaseModule
+        DatabaseModule,
+        FileManagerModule,
       )
     }
   }

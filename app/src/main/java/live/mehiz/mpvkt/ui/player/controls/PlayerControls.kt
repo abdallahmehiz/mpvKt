@@ -235,25 +235,16 @@ fun PlayerControls(
       ) {
         val invertDuration by playerPreferences.invertDuration.collectAsState()
         val readAhead by viewModel.readAhead.collectAsState()
-        var wasPlayerPausedBySeekBar by remember { mutableStateOf(false) }
         SeekbarWithTimers(
           position = position,
           duration = duration,
           readAheadValue = readAhead,
           onValueChange = {
             isSeeking = true
-            if (!paused) {
-              wasPlayerPausedBySeekBar = true
-              viewModel.pause()
-            }
             viewModel.updatePlayBackPos(it)
             viewModel.seekTo(it.toInt())
           },
-          onValueChangeFinished = {
-            if (wasPlayerPausedBySeekBar) viewModel.unpause()
-            wasPlayerPausedBySeekBar = false
-            isSeeking = false
-          },
+          onValueChangeFinished = { isSeeking = false },
           timersInverted = Pair(false, invertDuration),
           durationTimerOnCLick = { playerPreferences.invertDuration.set(!invertDuration) },
           positionTimerOnClick = {},
