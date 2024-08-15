@@ -46,6 +46,7 @@ import com.github.k1rakishou.fsaf.file.AbstractFile
 import `is`.xyz.mpv.Utils
 import live.mehiz.mpvkt.R
 import live.mehiz.mpvkt.presentation.Screen
+import live.mehiz.mpvkt.ui.utils.FilesComparator
 import org.koin.compose.koinInject
 import java.lang.Long.signum
 import java.text.StringCharacterIterator
@@ -101,7 +102,8 @@ data class FilePickerScreen(val uri: String) : Screen() {
     val fileList = fileManager.listFiles(directory).filterNot {
       !Utils.MEDIA_EXTENSIONS.contains(fileManager.getName(it).substringAfterLast('.')) &&
         fileManager.isFile(it) || fileManager.getName(it).startsWith('.')
-    }
+    }.sortedWith(FilesComparator(fileManager))
+
     LazyColumn(modifier) {
       item {
         FileListing(
