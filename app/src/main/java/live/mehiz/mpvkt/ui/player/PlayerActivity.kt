@@ -209,6 +209,7 @@ class PlayerActivity : AppCompatActivity() {
     MPVLib.setPropertyString("alang", audioPreferences.preferredLanguages.get())
     MPVLib.setPropertyDouble("audio-delay", audioPreferences.defaultAudioDelay.get() / 1000.0)
     MPVLib.setPropertyBoolean("audio-pitch-correction", audioPreferences.audioPitchCorrection.get())
+    audioPreferences.audioChannels.get().let { MPVLib.setPropertyString(it.property, it.value) }
 
     val request = AudioFocusRequestCompat.Builder(AudioManagerCompat.AUDIOFOCUS_GAIN).also {
       it.setAudioAttributes(

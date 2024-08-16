@@ -15,14 +15,20 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.AnnotatedString
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import live.mehiz.mpvkt.R
+import live.mehiz.mpvkt.preferences.AudioChannels
 import live.mehiz.mpvkt.preferences.AudioPreferences
+import live.mehiz.mpvkt.preferences.preference.collectAsState
 import live.mehiz.mpvkt.presentation.Screen
 import me.zhanghai.compose.preference.ProvidePreferenceLocals
+import me.zhanghai.compose.preference.listPreference
 import me.zhanghai.compose.preference.switchPreference
 import me.zhanghai.compose.preference.textFieldPreference
 import org.koin.compose.koinInject
@@ -31,8 +37,11 @@ object AudioPreferencesScreen : Screen() {
   @OptIn(ExperimentalMaterial3Api::class)
   @Composable
   override fun Content() {
+    val context = LocalContext.current
     val navigator = LocalNavigator.currentOrThrow
     val preferences = koinInject<AudioPreferences>()
+    val audioChannels by preferences.audioChannels.collectAsState()
+
     Scaffold(
       topBar = {
         TopAppBar(
@@ -43,7 +52,7 @@ object AudioPreferencesScreen : Screen() {
             IconButton(onClick = { navigator.pop() }) {
               Icon(Icons.AutoMirrored.Default.ArrowBack, null)
             }
-          }
+          },
         )
       },
     ) { padding ->
@@ -51,7 +60,7 @@ object AudioPreferencesScreen : Screen() {
         LazyColumn(
           modifier = Modifier
             .fillMaxSize()
-            .padding(padding)
+            .padding(padding),
         ) {
           textFieldPreference(
             preferences.preferredLanguages.key(),
@@ -65,7 +74,7 @@ object AudioPreferencesScreen : Screen() {
                 TextField(
                   value,
                   onValueChange,
-                  modifier = Modifier.fillMaxWidth()
+                  modifier = Modifier.fillMaxWidth(),
                 )
               }
             },
@@ -75,6 +84,14 @@ object AudioPreferencesScreen : Screen() {
             defaultValue = preferences.audioPitchCorrection.defaultValue(),
             title = { Text(stringResource(R.string.pref_audio_pitch_correction_title)) },
             summary = { Text(stringResource(R.string.pref_audio_pitch_correction_summary)) },
+          )
+          listPreference(
+            preferences.audioChannels.key(),
+            defaultValue = preferences.audioChannels.defaultValue().name,
+            values = AudioChannels.entries.map { it.name },
+            valueToText = { AnnotatedString(context.getString(enumValueOf<AudioChannels>(it).title)) },
+            title = { Text(text = stringResource(id = R.string.pref_audio_channels)) },
+            summary = { Text(text = context.getString(enumValueOf<AudioChannels>(it).title)) },
           )
         }
       }

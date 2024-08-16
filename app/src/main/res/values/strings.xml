@@ -67,6 +67,12 @@
     <string name="pref_audio">Audio</string>
     <string name="pref_audio_pitch_correction_title">Enable audio pitch correction</string>
     <string name="pref_audio_pitch_correction_summary">Prevents the audio from becoming high-pitched at faster speeds and low-pitched at slower speeds.</string>
+    <string name="pref_audio_channels">Audio channels</string>
+    <string name="pref_audio_channels_auto">Auto</string>
+    <string name="pref_audio_channels_auto_safe">Auto Safe</string>
+    <string name="pref_audio_channels_mono">Mono</string>
+    <string name="pref_audio_channels_stereo">Stereo</string>
+    <string name="pref_audio_channels_stereo_reversed">Reversed Stereo</string>
 
     <string name="pref_advanced">Advanced</string>
     <string name="pref_advanced_mpv_conf_storage_location">pick mpv configuration storage location</string>

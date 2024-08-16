@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -15,6 +16,8 @@ import androidx.compose.ui.unit.dp
 import `is`.xyz.mpv.MPVLib
 import live.mehiz.mpvkt.R
 import live.mehiz.mpvkt.preferences.AdvancedPreferences
+import live.mehiz.mpvkt.preferences.AudioChannels
+import live.mehiz.mpvkt.preferences.AudioPreferences
 import live.mehiz.mpvkt.preferences.preference.collectAsState
 import live.mehiz.mpvkt.presentation.components.PlayerSheet
 import org.koin.compose.koinInject
@@ -25,6 +28,7 @@ fun MoreSheet(
   modifier: Modifier = Modifier
 ) {
   val advancedPreferences = koinInject<AdvancedPreferences>()
+  val audioPreferences = koinInject<AudioPreferences>()
   val statisticsPage by advancedPreferences.enabledStatisticsPage.collectAsState()
   PlayerSheet(
     onDismissRequest,
@@ -34,6 +38,7 @@ fun MoreSheet(
       modifier = Modifier
         .fillMaxWidth()
         .padding(16.dp),
+      verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
       Text(stringResource(R.string.player_sheets_stats_page_title))
       LazyRow(
@@ -44,11 +49,7 @@ fun MoreSheet(
             label = {
               Text(
                 stringResource(
-                  if (page == 0) {
-                    R.string.player_sheets_tracks_off
-                  } else {
-                    R.string.player_sheets_stats_page_chip
-                  },
+                  if (page == 0) R.string.player_sheets_tracks_off else R.string.player_sheets_stats_page_chip,
                   page,
                 ),
               )
@@ -63,6 +64,27 @@ fun MoreSheet(
               advancedPreferences.enabledStatisticsPage.set(page)
             },
             selected = statisticsPage == page,
+          )
+        }
+      }
+      Text(text = stringResource(id = R.string.pref_audio_channels))
+      val audioChannels by audioPreferences.audioChannels.collectAsState()
+      LazyRow(
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+      ) {
+        items(AudioChannels.entries) {
+          FilterChip(
+            selected = audioChannels == it,
+            onClick = {
+              audioPreferences.audioChannels.set(it)
+              if (it == AudioChannels.ReverseStereo) {
+                MPVLib.setPropertyString(AudioChannels.AutoSafe.property, AudioChannels.AutoSafe.value)
+              } else {
+                MPVLib.setPropertyString(AudioChannels.ReverseStereo.property, "")
+              }
+              MPVLib.setPropertyString(it.property, it.value)
+            },
+            label = { Text(text = stringResource(id = it.title)) },
           )
         }
       }
