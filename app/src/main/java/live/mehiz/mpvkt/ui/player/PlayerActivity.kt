@@ -351,16 +351,12 @@ class PlayerActivity : AppCompatActivity() {
   }
 
   private fun getFileName(intent: Intent): String? {
-    if (intent.hasExtra(Intent.EXTRA_STREAM)) {
-      val uri = intent.getParcelableExtra<Uri>(Intent.EXTRA_STREAM)!!
-      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-        val cursor = contentResolver.query(uri, arrayOf(MediaStore.MediaColumns.DISPLAY_NAME), null, null)
-        if (cursor!!.moveToFirst()) return cursor.getString(0).also { cursor.close() }
-      }
+    val uri = (intent.data ?: intent.getParcelableExtra(Intent.EXTRA_STREAM))
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && uri != null) {
+      val cursor = contentResolver.query(uri, arrayOf(MediaStore.MediaColumns.DISPLAY_NAME), null, null)
+      if (cursor?.moveToFirst() == true) return cursor.getString(0).also { cursor.close() }
     }
-    return (intent.data ?: intent.getParcelableExtra(Intent.EXTRA_STREAM))
-      ?.lastPathSegment
-      ?.substringAfterLast('/')
+    return uri?.lastPathSegment?.substringAfterLast("/")
   }
 
   private fun resolveUri(data: Uri): String? {
