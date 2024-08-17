@@ -9,12 +9,14 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -125,6 +127,14 @@ object AdvancedPreferencesScreen : Screen() {
               value = mpvConf,
               onValueChange = { mpvConf = it },
               title = { Text(stringResource(R.string.pref_advanced_mpv_conf)) },
+              textField = { value, onValueChange, onOk ->
+                OutlinedTextField(
+                  value = value,
+                  onValueChange = onValueChange,
+                  maxLines = Int.MAX_VALUE,
+                  keyboardActions = KeyboardActions(onDone = { onOk() })
+                )
+              },
               textToValue = {
                 preferences.mpvConf.set(it)
                 if (mpvConfStorageLocation.isNotBlank()) {
@@ -167,6 +177,14 @@ object AdvancedPreferencesScreen : Screen() {
               value = inputConf,
               onValueChange = { inputConf = it },
               title = { Text(stringResource(R.string.pref_advanced_input_conf)) },
+              textField = { value, onValueChange, onOk ->
+                OutlinedTextField(
+                  value = value,
+                  onValueChange = onValueChange,
+                  maxLines = Int.MAX_VALUE,
+                  keyboardActions = KeyboardActions(onDone = { onOk() })
+                )
+              },
               textToValue = {
                 preferences.inputConf.set(it)
                 if (mpvConfStorageLocation.isNotBlank()) {
