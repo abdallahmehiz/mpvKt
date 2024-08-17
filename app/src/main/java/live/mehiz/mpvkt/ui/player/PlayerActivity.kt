@@ -100,11 +100,7 @@ class PlayerActivity : AppCompatActivity() {
     setupAudio()
     setupSubtitles()
     val uri = parsePathFromIntent(intent)
-    val videoUri = if (uri?.startsWith("content://") == true) {
-      openContentFd(Uri.parse(uri))
-    } else {
-      uri
-    }
+    val videoUri = if (uri?.startsWith("content://") == true) openContentFd(Uri.parse(uri)) else uri
     player.playFile(videoUri!!)
     setOrientation()
     loadKoinModules(module { viewModel { viewModel } })
@@ -318,6 +314,17 @@ class PlayerActivity : AppCompatActivity() {
   }
 
   private fun parsePathFromIntent(intent: Intent): String? {
+    intent.getStringArrayExtra("headers")?.let { headers ->
+      if (headers[0].startsWith("User-Agent", true)) MPVLib.setPropertyString("user-agent", headers[1])
+      val headersString = headers
+        .asSequence()
+        .drop(2)
+        .chunked(2)
+        .associate { it[0] to it[1] }
+        .map { "${it.key}: ${it.value.replace(",", "\\,")}" }
+        .joinToString(",")
+      MPVLib.setPropertyString("http-header-fields", headersString)
+    }
     val filepath: String? = when (intent.action) {
       Intent.ACTION_VIEW -> intent.data?.let { resolveUri(it) }
       Intent.ACTION_SEND -> intent.getStringExtra(Intent.EXTRA_TEXT)?.let {

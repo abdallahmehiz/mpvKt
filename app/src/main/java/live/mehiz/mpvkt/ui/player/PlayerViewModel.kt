@@ -27,7 +27,7 @@ class PlayerViewModel(
   private val _currentDecoder = MutableStateFlow(getDecoderFromValue(MPVLib.getPropertyString("hwdec")))
   val currentDecoder = _currentDecoder.asStateFlow()
 
-  var mediaTitle = MutableStateFlow("")
+  val mediaTitle = MutableStateFlow("")
 
   val isLoading = MutableStateFlow(true)
 
