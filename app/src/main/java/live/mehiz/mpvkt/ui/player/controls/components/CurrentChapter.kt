@@ -66,7 +66,7 @@ fun CurrentChapter(
           imageVector = Icons.Default.Bookmarks,
           contentDescription = null,
           modifier = Modifier
-            .padding(end = 8.dp)
+            .padding(end = MaterialTheme.spacing.smaller)
             .size(16.dp),
           tint = MaterialTheme.colorScheme.onBackground
         )

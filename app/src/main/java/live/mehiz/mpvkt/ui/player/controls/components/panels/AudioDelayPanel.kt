@@ -26,6 +26,7 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import `is`.xyz.mpv.MPVLib
 import live.mehiz.mpvkt.R
 import live.mehiz.mpvkt.preferences.AudioPreferences
+import live.mehiz.mpvkt.ui.theme.spacing
 import org.koin.compose.koinInject
 
 @Composable
@@ -38,7 +39,7 @@ fun AudioDelayPanel(
   ConstraintLayout(
     modifier = modifier
       .fillMaxSize()
-      .padding(16.dp),
+      .padding(MaterialTheme.spacing.medium),
   ) {
     val delayControlCard = createRef()
 

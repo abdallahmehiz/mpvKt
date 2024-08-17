@@ -19,7 +19,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import live.mehiz.mpvkt.ui.player.controls.LocalPlayerButtonsClickEvent
 import live.mehiz.mpvkt.ui.theme.spacing
 
@@ -82,7 +81,7 @@ fun ControlsButton(
         interactionSource = interactionSource,
         indication = rememberRipple(),
       )
-      .padding(16.dp),
+      .padding(MaterialTheme.spacing.medium),
   ) {
     Text(
       text,

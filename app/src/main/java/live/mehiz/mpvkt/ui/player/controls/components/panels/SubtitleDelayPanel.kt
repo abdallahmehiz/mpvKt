@@ -43,6 +43,7 @@ import `is`.xyz.mpv.MPVLib
 import live.mehiz.mpvkt.R
 import live.mehiz.mpvkt.preferences.SubtitlesPreferences
 import live.mehiz.mpvkt.presentation.components.OutlinedNumericChooser
+import live.mehiz.mpvkt.ui.theme.spacing
 import org.koin.compose.koinInject
 import kotlin.math.round
 
@@ -172,8 +173,8 @@ fun DelayCard(
     colors = SubtitleSettingsCardColors(),
   ) {
     Column(
-      Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-      verticalArrangement = Arrangement.spacedBy(8.dp),
+      Modifier.padding(horizontal = MaterialTheme.spacing.medium, vertical = MaterialTheme.spacing.smaller),
+      verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.smaller),
     ) {
       title()
       OutlinedNumericChooser(
@@ -189,7 +190,7 @@ fun DelayCard(
         modifier = Modifier.animateContentSize()
       ) { extraSettings() }
       Row(
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.smaller),
       ) {
         Button(
           onClick = onApply,
@@ -214,7 +215,7 @@ fun SubtitleDelayTitle(
 ) {
   Row(
     verticalAlignment = Alignment.Bottom,
-    horizontalArrangement = Arrangement.spacedBy(4.dp),
+    horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.extraSmall),
     modifier = modifier.fillMaxWidth(),
   ) {
     Text(

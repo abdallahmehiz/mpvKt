@@ -1,5 +1,6 @@
 package live.mehiz.mpvkt.ui.player
 
+import android.content.pm.ActivityInfo
 import android.media.AudioManager
 import android.net.Uri
 import android.os.Build
@@ -67,7 +68,7 @@ class PlayerViewModel(
   val isVolumeSliderShown = MutableStateFlow(false)
   val currentBrightness = MutableStateFlow(
     Settings.System.getFloat(activity.contentResolver, Settings.System.SCREEN_BRIGHTNESS)
-      .normalize(0f, 255f, 0f, 1f)
+      .normalize(0f, 255f, 0f, 1f),
   )
   val currentVolume = MutableStateFlow(activity.audioManager.getStreamVolume(AudioManager.STREAM_MUSIC))
 
@@ -348,6 +349,23 @@ class PlayerViewModel(
     runCatching {
       if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
         activity.setPictureInPictureParams(activity.createPipParams())
+      }
+    }
+  }
+
+  fun cycleScreenRotations() {
+    activity.requestedOrientation = when (activity.requestedOrientation) {
+      ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE,
+      ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE,
+      ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE,
+      -> {
+        playerPreferences.orientation.set(PlayerOrientation.SensorPortrait)
+        ActivityInfo.SCREEN_ORIENTATION_SENSOR_PORTRAIT
+      }
+
+      else -> {
+        playerPreferences.orientation.set(PlayerOrientation.SensorLandscape)
+        ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
       }
     }
   }

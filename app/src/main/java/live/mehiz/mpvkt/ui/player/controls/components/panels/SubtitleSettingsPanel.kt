@@ -37,6 +37,7 @@ import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
+import live.mehiz.mpvkt.ui.theme.spacing
 
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable
@@ -65,7 +66,7 @@ fun SubtitleSettingsPanel(
           top.linkTo(parent.top, 32.dp)
           start.linkTo(parent.start)
         },
-        verticalArrangement = Arrangement.spacedBy(4.dp)
+        verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.extraSmall)
       ) {
         TopAppBar(
           title = {
@@ -95,7 +96,7 @@ fun SubtitleSettingsPanel(
     } else {
       Column(
         horizontalAlignment = Alignment.Start,
-        verticalArrangement = Arrangement.spacedBy(8.dp),
+        verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.smaller),
         modifier = Modifier
           .constrainAs(subSettingsCards) {
             top.linkTo(parent.top)

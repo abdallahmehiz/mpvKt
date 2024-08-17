@@ -22,6 +22,7 @@ import androidx.compose.material.icons.filled.FormatSize
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconToggleButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -49,6 +50,7 @@ import live.mehiz.mpvkt.preferences.preference.deleteAndGet
 import live.mehiz.mpvkt.presentation.components.ExpandableCard
 import live.mehiz.mpvkt.presentation.components.ExposedTextDropDownMenu
 import live.mehiz.mpvkt.presentation.components.SliderItem
+import live.mehiz.mpvkt.ui.theme.spacing
 import org.koin.compose.koinInject
 
 @SuppressLint("MutableCollectionMutableState")
@@ -88,7 +90,7 @@ fun SubtitleSettingsTypographyCard(
     onExpand = { isExpanded = !isExpanded },
     title = {
       Row(
-        horizontalArrangement = Arrangement.spacedBy(16.dp),
+        horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.medium),
       ) {
         Icon(Icons.Default.FormatColorText, null)
         Text(stringResource(R.string.player_sheets_sub_typography_card_title))
@@ -105,7 +107,7 @@ fun SubtitleSettingsTypographyCard(
         Modifier
           .fillMaxWidth()
           .horizontalScroll(rememberScrollState())
-          .padding(start = 4.dp, end = 16.dp),
+          .padding(start = MaterialTheme.spacing.extraSmall, end = MaterialTheme.spacing.medium),
         verticalAlignment = Alignment.CenterVertically,
       ) {
         IconToggleButton(
@@ -152,7 +154,7 @@ fun SubtitleSettingsTypographyCard(
         }
         Spacer(Modifier.weight(1f))
         TextButton(onClick = { resetTypography(preferences) }) {
-          Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+          Row(horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.extraSmall)) {
             Icon(Icons.Default.FormatClear, null)
             Text(stringResource(R.string.generic_reset))
           }
@@ -160,8 +162,8 @@ fun SubtitleSettingsTypographyCard(
       }
       val font by preferences.font.collectAsState()
       Row(
-        modifier = Modifier.padding(horizontal = 16.dp),
-        horizontalArrangement = Arrangement.spacedBy(16.dp),
+        modifier = Modifier.padding(horizontal = MaterialTheme.spacing.medium),
+        horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.medium),
         verticalAlignment = Alignment.CenterVertically,
       ) {
         Icon(

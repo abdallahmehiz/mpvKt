@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.ScreenRotation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -36,6 +37,10 @@ fun BottomLeftPlayerControls(modifier: Modifier = Modifier) {
     ControlsButton(
       Icons.Default.Lock,
       onClick = { viewModel.lockControls() },
+    )
+    ControlsButton(
+      icon = Icons.Default.ScreenRotation,
+      onClick = { viewModel.cycleScreenRotations() }
     )
     val defaultSpeed by playerPreferences.defaultSpeed.collectAsState()
     ControlsButton(

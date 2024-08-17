@@ -18,6 +18,7 @@ import androidx.compose.material.icons.filled.FormatColorText
 import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconToggleButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -31,7 +32,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
 import androidx.core.graphics.alpha
 import androidx.core.graphics.blue
 import androidx.core.graphics.green
@@ -44,6 +44,7 @@ import live.mehiz.mpvkt.preferences.preference.collectAsState
 import live.mehiz.mpvkt.preferences.preference.deleteAndGet
 import live.mehiz.mpvkt.presentation.components.ExpandableCard
 import live.mehiz.mpvkt.presentation.components.TintedSliderItem
+import live.mehiz.mpvkt.ui.theme.spacing
 import org.koin.compose.koinInject
 
 @Composable
@@ -57,7 +58,7 @@ fun SubtitleSettingsColorsCard(
     onExpand = { isExpanded = !isExpanded },
     title = {
       Row(
-        horizontalArrangement = Arrangement.spacedBy(16.dp),
+        horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.medium),
       ) {
         Icon(Icons.Default.Palette, null)
         Text(stringResource(R.string.player_sheets_sub_colors_card_title))
@@ -75,7 +76,7 @@ fun SubtitleSettingsColorsCard(
         modifier = Modifier
           .fillMaxWidth()
           .horizontalScroll(rememberScrollState())
-          .padding(start = 4.dp, end = 16.dp),
+          .padding(start = MaterialTheme.spacing.extraSmall, end = MaterialTheme.spacing.medium),
       ) {
         SubColorType.entries.forEach { type ->
           IconToggleButton(
@@ -102,7 +103,7 @@ fun SubtitleSettingsColorsCard(
         Text(stringResource(currentColorType.titleRes))
         Spacer(Modifier.weight(1f))
         TextButton(onClick = { resetColors(preferences) }) {
-          Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+          Row(horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.extraSmall)) {
             Icon(Icons.Default.FormatColorReset, null)
             Text(stringResource(R.string.generic_reset))
           }
