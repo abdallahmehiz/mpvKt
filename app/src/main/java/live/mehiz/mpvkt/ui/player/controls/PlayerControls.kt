@@ -296,5 +296,6 @@ fun PlayerControls(
       ) { BottomLeftPlayerControls() }
     }
     PlayerSheets()
+    PlayerPanels()
   }
 }

@@ -1,4 +1,4 @@
-package live.mehiz.mpvkt.ui.player.controls.components.sheets.subtitles
+package live.mehiz.mpvkt.ui.player.controls.components.sheets
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Row
@@ -22,9 +22,6 @@ import androidx.compose.ui.unit.dp
 import kotlinx.collections.immutable.ImmutableList
 import live.mehiz.mpvkt.R
 import live.mehiz.mpvkt.ui.player.Track
-import live.mehiz.mpvkt.ui.player.controls.components.sheets.AddTrackRow
-import live.mehiz.mpvkt.ui.player.controls.components.sheets.GenericTracksSheet
-import live.mehiz.mpvkt.ui.player.controls.components.sheets.getTrackTitle
 import me.zhanghai.compose.preference.FooterPreference
 import me.zhanghai.compose.preference.ProvidePreferenceLocals
 

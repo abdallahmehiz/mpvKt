@@ -20,12 +20,12 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
+import kotlinx.collections.immutable.toImmutableList
 import live.mehiz.mpvkt.R
 import live.mehiz.mpvkt.preferences.PlayerPreferences
 import live.mehiz.mpvkt.preferences.preference.collectAsState
 import live.mehiz.mpvkt.presentation.Screen
 import live.mehiz.mpvkt.ui.player.PlayerOrientation
-import me.zhanghai.compose.preference.ListPreference
 import me.zhanghai.compose.preference.ProvidePreferenceLocals
 import me.zhanghai.compose.preference.listPreference
 import me.zhanghai.compose.preference.preferenceCategory
@@ -58,17 +58,14 @@ object PlayerPreferencesScreen : Screen() {
             .fillMaxSize()
             .padding(padding),
         ) {
-          item {
-            val orientation by preferences.orientation.collectAsState()
-            ListPreference(
-              value = orientation,
-              onValueChange = { preferences.orientation.set(it) },
-              values = PlayerOrientation.entries,
-              valueToText = { AnnotatedString(context.getString(it.titleRes)) },
-              title = { Text(text = stringResource(id = R.string.pref_player_orientation)) },
-              summary = { Text(text = stringResource(id = orientation.titleRes)) },
-            )
-          }
+          listPreference(
+            preferences.orientation.key(),
+            defaultValue = preferences.orientation.defaultValue().name,
+            values = PlayerOrientation.entries.map { it.name }.toImmutableList(),
+            valueToText = { AnnotatedString(context.getString(enumValueOf<PlayerOrientation>(it).titleRes)) },
+            title = { Text(text = stringResource(id = R.string.pref_player_orientation)) },
+            summary = { Text(text = stringResource(id = enumValueOf<PlayerOrientation>(it).titleRes)) },
+          )
           switchPreference(
             key = preferences.drawOverDisplayCutout.key(),
             defaultValue = preferences.drawOverDisplayCutout.defaultValue(),
@@ -92,7 +89,7 @@ object PlayerPreferencesScreen : Screen() {
           listPreference(
             key = preferences.doubleTapToSeekDuration.key(),
             defaultValue = preferences.doubleTapToSeekDuration.defaultValue(),
-            values = listOf(5, 10, 15, 20, 25, 30),
+            values = listOf(3, 5, 10, 15, 20, 25, 30),
             valueToText = { AnnotatedString("${it}s") },
             title = { Text(text = stringResource(id = R.string.pref_player_double_tap_seek_duration)) },
             summary = { Text(text = "${it}s") },

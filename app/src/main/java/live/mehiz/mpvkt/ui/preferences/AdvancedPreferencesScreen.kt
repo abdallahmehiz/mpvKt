@@ -100,12 +100,9 @@ object AdvancedPreferencesScreen : Screen() {
               }
             },
             onClick = { locationPicker.launch(null) },
-            iconButtonIcon = {
-              Icon(Icons.Default.Clear, null)
-            },
-            onIconButtonClick = {
-              preferences.mpvConfStorageUri.delete()
-            },
+            iconButtonIcon = { Icon(Icons.Default.Clear, null) },
+            onIconButtonClick = { preferences.mpvConfStorageUri.delete() },
+            iconButtonEnabled = mpvConfStorageLocation.isNotBlank()
           )
           item {
             var mpvConf by remember { mutableStateOf(preferences.mpvConf.get()) }

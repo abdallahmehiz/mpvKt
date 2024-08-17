@@ -41,6 +41,7 @@ object SubtitlesPreferencesScreen : Screen() {
     val context = LocalContext.current
     val navigator = LocalNavigator.currentOrThrow
     val preferences = koinInject<SubtitlesPreferences>()
+    val fontsFolder by preferences.fontsFolder.collectAsState()
 
     Scaffold(
       topBar = {
@@ -97,12 +98,9 @@ object SubtitlesPreferencesScreen : Screen() {
               if (fontsFolder.isBlank()) return@twoTargetIconButtonPreference
               Text(getSimplifiedPathFromUri(fontsFolder))
             },
-            iconButtonIcon = {
-              Icon(Icons.Default.Clear, null)
-            },
-            onIconButtonClick = {
-              preferences.fontsFolder.delete()
-            }
+            iconButtonIcon = { Icon(Icons.Default.Clear, null) },
+            onIconButtonClick = { preferences.fontsFolder.delete() },
+            iconButtonEnabled = fontsFolder.isNotBlank()
           )
         }
       }

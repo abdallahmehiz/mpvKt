@@ -1,6 +1,5 @@
-package live.mehiz.mpvkt.ui.player.controls.components.sheets
+package live.mehiz.mpvkt.ui.player.controls.components.panels
 
-import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -25,23 +24,16 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import `is`.xyz.mpv.MPVLib
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.update
 import live.mehiz.mpvkt.R
 import live.mehiz.mpvkt.preferences.AudioPreferences
-import live.mehiz.mpvkt.ui.player.PlayerViewModel
-import live.mehiz.mpvkt.ui.player.Sheets
-import live.mehiz.mpvkt.ui.player.controls.components.sheets.subtitles.DelayCard
 import org.koin.compose.koinInject
 
 @Composable
-fun AudioDelaySheet(
+fun AudioDelayPanel(
+  onDismissRequest: () -> Unit,
   modifier: Modifier = Modifier,
 ) {
   val preferences = koinInject<AudioPreferences>()
-  val viewModel = koinInject<PlayerViewModel>()
-
-  BackHandler { viewModel.sheetShown.update { Sheets.None } }
 
   ConstraintLayout(
     modifier = modifier
@@ -59,7 +51,7 @@ fun AudioDelaySheet(
       onDelayChange = { delay = it },
       onApply = { preferences.defaultAudioDelay.set(delay) },
       onReset = { delay = 0 },
-      title = { AudioDelayCardTitle(onClose = { viewModel.sheetShown.update { Sheets.None } }) },
+      title = { AudioDelayCardTitle(onClose = onDismissRequest) },
       modifier = Modifier.constrainAs(delayControlCard) {
         linkTo(parent.top, parent.bottom, bias = 0.8f)
         end.linkTo(parent.end)
@@ -76,11 +68,11 @@ fun AudioDelayCardTitle(
   Row(
     modifier = modifier.fillMaxWidth(),
     horizontalArrangement = Arrangement.SpaceBetween,
-    verticalAlignment = Alignment.CenterVertically
+    verticalAlignment = Alignment.CenterVertically,
   ) {
     Text(
       stringResource(R.string.player_sheets_audio_delay_card_title),
-      style = MaterialTheme.typography.headlineMedium
+      style = MaterialTheme.typography.headlineMedium,
     )
     IconButton(onClose) {
       Icon(

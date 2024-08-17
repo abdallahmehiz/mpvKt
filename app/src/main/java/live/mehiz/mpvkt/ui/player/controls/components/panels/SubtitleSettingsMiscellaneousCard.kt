@@ -1,4 +1,4 @@
-package live.mehiz.mpvkt.ui.player.controls.components.sheets.subtitles
+package live.mehiz.mpvkt.ui.player.controls.components.panels
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column

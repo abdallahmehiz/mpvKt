@@ -41,13 +41,17 @@ enum class Debanding {
 enum class Sheets {
   None,
   SubtitleTracks,
-  SubtitleSettings,
-  SubtitleDelay,
   AudioTracks,
-  AudioDelay,
   Chapters,
   Decoders,
   More,
+}
+
+enum class Panels {
+  None,
+  SubtitleSettings,
+  SubtitleDelay,
+  AudioDelay,
 }
 
 enum class PlayerUpdates {

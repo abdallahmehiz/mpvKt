@@ -1,6 +1,5 @@
-package live.mehiz.mpvkt.ui.player.controls.components.sheets.subtitles
+package live.mehiz.mpvkt.ui.player.controls.components.panels
 
-import androidx.activity.compose.BackHandler
 import androidx.annotation.StringRes
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.clickable
@@ -41,23 +40,19 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import `is`.xyz.mpv.MPVLib
-import kotlinx.coroutines.flow.update
 import live.mehiz.mpvkt.R
 import live.mehiz.mpvkt.preferences.SubtitlesPreferences
 import live.mehiz.mpvkt.presentation.components.OutlinedNumericChooser
-import live.mehiz.mpvkt.ui.player.PlayerViewModel
-import live.mehiz.mpvkt.ui.player.Sheets
 import org.koin.compose.koinInject
 import kotlin.math.round
 
 @Composable
-fun SubtitleDelaySheet(
+fun SubtitleDelayPanel(
+  onDismissRequest: () -> Unit,
   modifier: Modifier = Modifier
 ) {
   val preferences = koinInject<SubtitlesPreferences>()
-  val viewModel = koinInject<PlayerViewModel>()
 
-  BackHandler { viewModel.sheetShown.update { Sheets.None } }
   ConstraintLayout(
     modifier = modifier
       .fillMaxSize()
@@ -97,7 +92,7 @@ fun SubtitleDelaySheet(
         delay = 0
         speed = 1f
       },
-      onClose = { viewModel.sheetShown.update { Sheets.None } },
+      onClose = onDismissRequest,
       modifier = Modifier.constrainAs(delayControlCard) {
         linkTo(parent.top, parent.bottom, bias = 0.8f)
         end.linkTo(parent.end)

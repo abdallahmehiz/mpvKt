@@ -5,30 +5,30 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Modifier
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.flow.update
+import live.mehiz.mpvkt.ui.player.Panels
 import live.mehiz.mpvkt.ui.player.PlayerViewModel
 import live.mehiz.mpvkt.ui.player.Sheets
-import live.mehiz.mpvkt.ui.player.controls.components.sheets.AudioDelaySheet
 import live.mehiz.mpvkt.ui.player.controls.components.sheets.AudioTracksSheet
 import live.mehiz.mpvkt.ui.player.controls.components.sheets.ChaptersSheet
 import live.mehiz.mpvkt.ui.player.controls.components.sheets.DecodersSheet
 import live.mehiz.mpvkt.ui.player.controls.components.sheets.MoreSheet
-import live.mehiz.mpvkt.ui.player.controls.components.sheets.subtitles.SubtitleDelaySheet
-import live.mehiz.mpvkt.ui.player.controls.components.sheets.subtitles.SubtitleSettingsSheet
-import live.mehiz.mpvkt.ui.player.controls.components.sheets.subtitles.SubtitlesSheet
+import live.mehiz.mpvkt.ui.player.controls.components.sheets.SubtitlesSheet
 import org.koin.compose.koinInject
 
 @Composable
-fun PlayerSheets(modifier: Modifier = Modifier) {
+fun PlayerSheets() {
   val viewModel = koinInject<PlayerViewModel>()
   val subtitles by viewModel.subtitleTracks.collectAsState()
   val selectedSubs by viewModel.selectedSubtitles.collectAsState()
   val audioTracks by viewModel.audioTracks.collectAsState()
   val selectedAudio by viewModel.selectedAudio.collectAsState()
   val sheetShown by viewModel.sheetShown.collectAsState()
-  val onDismissRequest: () -> Unit = { viewModel.sheetShown.update { Sheets.None } }
+  val onDismissRequest: () -> Unit = {
+    viewModel.sheetShown.update { Sheets.None }
+    viewModel.showControls()
+  }
 
   when (sheetShown) {
     Sheets.None -> {}
@@ -44,9 +44,15 @@ fun PlayerSheets(modifier: Modifier = Modifier) {
         selectedTracks = selectedSubs.toImmutableList(),
         onSelect = { viewModel.selectSub(it) },
         onAddSubtitle = { subtitlesPicker.launch(arrayOf("*/*")) },
-        onOpenSubtitleSettings = { viewModel.sheetShown.update { Sheets.SubtitleSettings } },
-        onOpenSubtitleDelay = { viewModel.sheetShown.update { Sheets.SubtitleDelay } },
-        onDismissRequest = onDismissRequest
+        onOpenSubtitleSettings = {
+          viewModel.panelShown.update { Panels.SubtitleSettings }
+          onDismissRequest()
+        },
+        onOpenSubtitleDelay = {
+          viewModel.panelShown.update { Panels.SubtitleDelay }
+          onDismissRequest()
+        },
+        onDismissRequest = onDismissRequest,
       )
     }
 
@@ -62,8 +68,13 @@ fun PlayerSheets(modifier: Modifier = Modifier) {
         selectedAudio,
         { viewModel.selectAudio(it) },
         { audioPicker.launch(arrayOf("*/*")) },
-        onOpenDelaySheet = { viewModel.sheetShown.update { Sheets.AudioDelay } },
-        onDismissRequest
+        onOpenDelayPanel = {
+          viewModel.panelShown.update {
+            Panels.AudioDelay
+          }
+          onDismissRequest()
+        },
+        onDismissRequest,
       )
     }
 
@@ -76,7 +87,7 @@ fun PlayerSheets(modifier: Modifier = Modifier) {
           onDismissRequest()
           viewModel.unpause()
         },
-        onDismissRequest
+        onDismissRequest,
       )
     }
 
@@ -85,30 +96,12 @@ fun PlayerSheets(modifier: Modifier = Modifier) {
       DecodersSheet(
         selectedDecoder = currentDecoder,
         onSelect = { viewModel.updateDecoder(it) },
-        onDismissRequest
+        onDismissRequest,
       )
     }
 
     Sheets.More -> {
       MoreSheet(onDismissRequest)
-    }
-
-    Sheets.SubtitleSettings -> {
-      viewModel.hideControls()
-      SubtitleSettingsSheet(
-        onDismissRequest,
-        modifier = Modifier.then(modifier)
-      )
-    }
-
-    Sheets.SubtitleDelay -> {
-      viewModel.hideControls()
-      SubtitleDelaySheet()
-    }
-
-    Sheets.AudioDelay -> {
-      viewModel.hideControls()
-      AudioDelaySheet()
     }
   }
 }

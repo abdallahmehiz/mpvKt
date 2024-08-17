@@ -26,7 +26,6 @@ class SubtitlesPreferences(preferenceStore: PreferenceStore) {
   val backgroundColor = preferenceStore.getInt("sub_color_bg", Color.Transparent.toArgb())
   val borderColor = preferenceStore.getInt("sub_color_border", Color.Black.toArgb())
 
-  val position = preferenceStore.getInt("sub_pos", 100)
   val justification = preferenceStore.getEnum("sub_justify", SubtitleJustification.Auto)
 
   val overrideAssSubs = preferenceStore.getBoolean("sub_override_ass")

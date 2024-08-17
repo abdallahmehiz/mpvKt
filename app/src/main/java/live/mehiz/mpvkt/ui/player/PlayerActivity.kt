@@ -49,7 +49,7 @@ import live.mehiz.mpvkt.preferences.DecoderPreferences
 import live.mehiz.mpvkt.preferences.PlayerPreferences
 import live.mehiz.mpvkt.preferences.SubtitlesPreferences
 import live.mehiz.mpvkt.ui.player.controls.PlayerControls
-import live.mehiz.mpvkt.ui.player.controls.components.sheets.subtitles.toColorHexString
+import live.mehiz.mpvkt.ui.player.controls.components.panels.toColorHexString
 import live.mehiz.mpvkt.ui.theme.MpvKtTheme
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.dsl.viewModel
@@ -236,8 +236,6 @@ class PlayerActivity : AppCompatActivity() {
     MPVLib.setPropertyString("sub-color", subtitlesPreferences.textColor.get().toColorHexString())
     MPVLib.setPropertyString("sub-border-color", subtitlesPreferences.borderColor.get().toColorHexString())
     MPVLib.setPropertyString("sub-back-color", subtitlesPreferences.backgroundColor.get().toColorHexString())
-
-    MPVLib.setPropertyInt("sub-pos", subtitlesPreferences.position.get())
 
     MPVLib.setPropertyDouble("sub-delay", subtitlesPreferences.defaultSubDelay.get() / 1000.0)
     MPVLib.setPropertyDouble("sub-speed", subtitlesPreferences.defaultSubSpeed.get().toDouble())

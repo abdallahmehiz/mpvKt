@@ -28,7 +28,7 @@ fun AudioTracksSheet(
   selectedId: Int,
   onSelect: (Int) -> Unit,
   onAddAudioTrack: () -> Unit,
-  onOpenDelaySheet: () -> Unit,
+  onOpenDelayPanel: () -> Unit,
   onDismissRequest: () -> Unit,
   modifier: Modifier = Modifier
 ) {
@@ -40,7 +40,7 @@ fun AudioTracksSheet(
         stringResource(R.string.player_sheets_add_ext_audio),
         onAddAudioTrack,
         actions = {
-          IconButton(onClick = onOpenDelaySheet) {
+          IconButton(onClick = onOpenDelayPanel) {
             Icon(Icons.Default.MoreTime, null)
           }
         }

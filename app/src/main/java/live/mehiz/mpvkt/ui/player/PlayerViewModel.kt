@@ -72,6 +72,7 @@ class PlayerViewModel(
   val currentVolume = MutableStateFlow(activity.audioManager.getStreamVolume(AudioManager.STREAM_MUSIC))
 
   val sheetShown = MutableStateFlow(Sheets.None)
+  val panelShown = MutableStateFlow(Panels.None)
   val gestureSeekAmount = MutableStateFlow(0)
 
   fun getDecoder() {
@@ -252,7 +253,7 @@ class PlayerViewModel(
   }
 
   fun showControls() {
-    if (sheetShown.value != Sheets.None) return
+    if (sheetShown.value != Sheets.None || panelShown.value != Panels.None) return
     _controlsShown.update { true }
   }
 
