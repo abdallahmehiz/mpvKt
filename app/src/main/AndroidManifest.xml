@@ -69,6 +69,14 @@
                 <data android:scheme="tcp" />
                 <data android:scheme="udp" />
             </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.SEND" />
+                <category android:name="android.intent.category.DEFAULT" />
+
+                <data android:mimeType="video/*" />
+                <data android:mimeType="audio/*" />
+                <data android:mimeType="image/*" />
+            </intent-filter>
         </activity>
         <activity android:name=".presentation.crash.CrashActivity" />
 

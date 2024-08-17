@@ -13,6 +13,7 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.ParcelFileDescriptor
+import android.provider.MediaStore
 import android.util.Log
 import android.util.Rational
 import android.view.KeyEvent
@@ -313,6 +314,7 @@ class PlayerActivity : AppCompatActivity() {
     player.timePos = intent.getIntExtra("position", 0) / 1000
   }
 
+  @Suppress("NestedBlockDepth")
   private fun parsePathFromIntent(intent: Intent): String? {
     intent.getStringArrayExtra("headers")?.let { headers ->
       if (headers[0].startsWith("User-Agent", true)) MPVLib.setPropertyString("user-agent", headers[1])
@@ -327,14 +329,33 @@ class PlayerActivity : AppCompatActivity() {
     }
     val filepath: String? = when (intent.action) {
       Intent.ACTION_VIEW -> intent.data?.let { resolveUri(it) }
-      Intent.ACTION_SEND -> intent.getStringExtra(Intent.EXTRA_TEXT)?.let {
-        val uri = Uri.parse(it.trim())
-        if (uri.isHierarchical && !uri.isRelative) resolveUri(uri) else null
+      Intent.ACTION_SEND -> {
+        if (intent.hasExtra(Intent.EXTRA_STREAM)) {
+          resolveUri(intent.getParcelableExtra(Intent.EXTRA_STREAM)!!)
+        } else {
+          intent.getStringExtra(Intent.EXTRA_TEXT)?.let {
+            val uri = Uri.parse(it.trim())
+            if (uri.isHierarchical && !uri.isRelative) resolveUri(uri) else null
+          }
+        }
       }
 
       else -> intent.getStringExtra("uri")
     }
     return filepath
+  }
+
+  private fun getFileName(intent: Intent): String? {
+    if (intent.hasExtra(Intent.EXTRA_STREAM)) {
+      val uri = intent.getParcelableExtra<Uri>(Intent.EXTRA_STREAM)!!
+      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+        val cursor = contentResolver.query(uri, arrayOf(MediaStore.MediaColumns.DISPLAY_NAME), null, null)
+        if (cursor!!.moveToFirst()) return cursor.getString(0).also { cursor.close() }
+      }
+    }
+    return (intent.data ?: intent.getParcelableExtra(Intent.EXTRA_STREAM))
+      ?.lastPathSegment
+      ?.substringAfterLast('/')
   }
 
   private fun resolveUri(data: Uri): String? {
@@ -416,7 +437,7 @@ class PlayerActivity : AppCompatActivity() {
   internal fun event(eventId: Int) {
     when (eventId) {
       MPVLib.mpvEventId.MPV_EVENT_FILE_LOADED -> {
-        fileName = intent.data!!.lastPathSegment!!.substringAfterLast('/')
+        getFileName(intent)?.let { fileName = it }
         viewModel.mediaTitle.update {
           val mediaTitle = MPVLib.getPropertyString("media-title")
           if (mediaTitle.isBlank() || mediaTitle.isDigitsOnly()) {
