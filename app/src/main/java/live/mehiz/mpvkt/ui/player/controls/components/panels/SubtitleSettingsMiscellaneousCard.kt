@@ -39,7 +39,7 @@ fun SubtitlesMiscellaneousCard(modifier: Modifier = Modifier) {
     },
     onExpand = { isExpanded = !isExpanded },
     modifier.widthIn(max = CARDS_MAX_WIDTH),
-    colors = SubtitleSettingsCardColors(),
+    colors = panelCardsColors(),
   ) {
     ProvidePreferenceLocals {
       Column {

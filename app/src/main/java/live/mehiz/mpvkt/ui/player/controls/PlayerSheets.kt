@@ -69,9 +69,7 @@ fun PlayerSheets() {
         { viewModel.selectAudio(it) },
         { audioPicker.launch(arrayOf("*/*")) },
         onOpenDelayPanel = {
-          viewModel.panelShown.update {
-            Panels.AudioDelay
-          }
+          viewModel.panelShown.update { Panels.AudioDelay }
           onDismissRequest()
         },
         onDismissRequest,
@@ -101,7 +99,13 @@ fun PlayerSheets() {
     }
 
     Sheets.More -> {
-      MoreSheet(onDismissRequest)
+      MoreSheet(
+        onDismissRequest,
+        onEnterFiltersPanel = {
+          viewModel.panelShown.update { Panels.VideoFilters }
+          onDismissRequest()
+        }
+      )
     }
   }
 }

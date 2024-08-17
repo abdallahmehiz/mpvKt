@@ -119,9 +119,18 @@
     <string name="player_sheets_delay_set_as_default">Set as default</string>
     <string name="player_sheets_audio_delay_card_title">Audio delay</string>
 
+    <string name="player_sheets_filters_title">Filters</string>
+    <string name="player_sheets_filters_brightness">Brightness</string>
+    <string name="player_sheets_filters_contrast">Contrast</string>
+    <string name="player_sheets_filters_gamma">Gamma</string>
+    <string name="player_sheets_filters_Saturation">Saturation</string>
+    <string name="player_sheets_filters_hue">Hue</string>
+    <string name="player_sheets_filters_warning">Some filters may not work your current video driver</string>
+
     <string name="numeric_chooser_value_too_big">Value too big</string>
     <string name="numeric_chooser_value_too_small">Value too small</string>
 
+    <string name="player_sheets_more_title">More</string>
     <string name="player_sheets_stats_page_title">Default statistics page</string>
     <string name="player_sheets_stats_page_chip">Page %d</string>
     <string name="player_seek_n_seconds">%d seconds</string>

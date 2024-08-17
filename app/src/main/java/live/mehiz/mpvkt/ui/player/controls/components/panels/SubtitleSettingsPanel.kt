@@ -128,7 +128,7 @@ fun SubtitleSettingsPanel(
 }
 
 val CARDS_MAX_WIDTH = 420.dp
-val SubtitleSettingsCardColors: @Composable () -> CardColors = {
+val panelCardsColors: @Composable () -> CardColors = {
   val colors = CardDefaults.cardColors()
   colors.copy(
     containerColor = colors.containerColor.copy(0.6f),

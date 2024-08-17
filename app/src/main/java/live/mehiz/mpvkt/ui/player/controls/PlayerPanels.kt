@@ -17,6 +17,7 @@ import live.mehiz.mpvkt.ui.player.PlayerViewModel
 import live.mehiz.mpvkt.ui.player.controls.components.panels.AudioDelayPanel
 import live.mehiz.mpvkt.ui.player.controls.components.panels.SubtitleDelayPanel
 import live.mehiz.mpvkt.ui.player.controls.components.panels.SubtitleSettingsPanel
+import live.mehiz.mpvkt.ui.player.controls.components.panels.VideoFiltersPanel
 import org.koin.compose.koinInject
 
 @Composable
@@ -49,6 +50,11 @@ fun PlayerPanels(modifier: Modifier = Modifier) {
       Panels.AudioDelay -> {
         viewModel.hideControls()
         AudioDelayPanel(onDismissRequest)
+      }
+
+      Panels.VideoFilters -> {
+        viewModel.hideControls()
+        VideoFiltersPanel(onDismissRequest)
       }
     }
   }

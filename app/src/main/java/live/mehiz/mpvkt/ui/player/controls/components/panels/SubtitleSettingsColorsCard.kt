@@ -65,7 +65,7 @@ fun SubtitleSettingsColorsCard(
       }
     },
     modifier = modifier.widthIn(max = CARDS_MAX_WIDTH),
-    colors = SubtitleSettingsCardColors(),
+    colors = panelCardsColors(),
   ) {
     Column {
       var currentColorType by remember { mutableStateOf(SubColorType.Text) }

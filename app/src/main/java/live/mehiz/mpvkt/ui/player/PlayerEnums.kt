@@ -2,6 +2,8 @@ package live.mehiz.mpvkt.ui.player
 
 import androidx.annotation.StringRes
 import live.mehiz.mpvkt.R
+import live.mehiz.mpvkt.preferences.DecoderPreferences
+import live.mehiz.mpvkt.preferences.preference.Preference
 
 enum class PlayerOrientation(@StringRes val titleRes: Int) {
   Free(R.string.pref_player_orientation_free),
@@ -52,6 +54,7 @@ enum class Panels {
   SubtitleSettings,
   SubtitleDelay,
   AudioDelay,
+  VideoFilters,
 }
 
 enum class PlayerUpdates {
@@ -64,4 +67,36 @@ enum class EndPlaybackReason(val value: String) {
   ExternalAction("external_action"),
   PlaybackCompleted("playback_completion"),
   Error("error"),
+}
+
+enum class VideoFilters(
+  @StringRes val titleRes: Int,
+  val preference: (DecoderPreferences) -> Preference<Int>,
+  val mpvProperty: String,
+) {
+  BRIGHTNESS(
+    R.string.player_sheets_filters_brightness,
+    { it.brightnessFilter },
+    "brightness",
+  ),
+  SATURATION(
+    R.string.player_sheets_filters_Saturation,
+    { it.saturationFilter },
+    "saturation",
+  ),
+  CONTRAST(
+    R.string.player_sheets_filters_contrast,
+    { it.contrastFilter },
+    "contrast",
+  ),
+  GAMMA(
+    R.string.player_sheets_filters_gamma,
+    { it.gammaFilter },
+    "gamma",
+  ),
+  HUE(
+    R.string.player_sheets_filters_hue,
+    { it.hueFilter },
+    "hue",
+  ),
 }

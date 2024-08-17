@@ -97,7 +97,7 @@ fun SubtitleSettingsTypographyCard(
       }
     },
     modifier = modifier.widthIn(max = CARDS_MAX_WIDTH),
-    colors = SubtitleSettingsCardColors(),
+    colors = panelCardsColors(),
   ) {
     Column {
       val isBold by preferences.bold.collectAsState()

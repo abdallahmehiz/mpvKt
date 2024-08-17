@@ -195,6 +195,11 @@ class PlayerActivity : AppCompatActivity() {
     if (decoderPreferences.useYUV420P.get()) {
       MPVLib.setPropertyString("vf", "format=yuv420p")
     }
+
+    VideoFilters.entries.forEach {
+      MPVLib.setPropertyInt(it.mpvProperty, it.preference(decoderPreferences).get())
+    }
+
     player.playbackSpeed = playerPreferences.defaultSpeed.get().toDouble()
     MPVLib.setPropertyBoolean("keep-open", true)
     MPVLib.setPropertyBoolean("input-default-bindings", true)

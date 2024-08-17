@@ -57,7 +57,7 @@ fun SubtitleDelayPanel(
   ConstraintLayout(
     modifier = modifier
       .fillMaxSize()
-      .padding(16.dp),
+      .padding(MaterialTheme.spacing.medium),
   ) {
     val delayControlCard = createRef()
 
@@ -170,10 +170,14 @@ fun DelayCard(
     modifier = modifier
       .widthIn(max = CARDS_MAX_WIDTH)
       .animateContentSize(),
-    colors = SubtitleSettingsCardColors(),
+    colors = panelCardsColors(),
   ) {
     Column(
-      Modifier.padding(horizontal = MaterialTheme.spacing.medium, vertical = MaterialTheme.spacing.smaller),
+      Modifier
+        .padding(
+          horizontal = MaterialTheme.spacing.medium,
+          vertical = MaterialTheme.spacing.smaller
+        ),
       verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.smaller),
     ) {
       title()
