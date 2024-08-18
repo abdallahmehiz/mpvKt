@@ -9,6 +9,7 @@ import androidx.compose.material.icons.filled.Subtitles
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import kotlinx.coroutines.flow.update
 import live.mehiz.mpvkt.preferences.PlayerPreferences
@@ -20,7 +21,10 @@ import org.koin.compose.koinInject
 @Composable
 fun TopRightPlayerControls(modifier: Modifier = Modifier) {
   val viewModel = koinInject<PlayerViewModel>()
-  Row(modifier) {
+  Row(
+    modifier,
+    verticalAlignment = Alignment.CenterVertically
+  ) {
     val currentDecoder by viewModel.currentDecoder.collectAsState()
     val playerPreferences = koinInject<PlayerPreferences>()
     ControlsButton(

@@ -220,7 +220,8 @@ fun PlayerControls(
               .clickable(
                 interaction,
                 rememberRipple(),
-              ) { viewModel.pauseUnpause() },
+              ) { viewModel.pauseUnpause() }
+              .padding(16.dp),
             contentDescription = null,
           )
         }

@@ -35,7 +35,7 @@ fun PlayerPanels(modifier: Modifier = Modifier) {
     contentAlignment = Alignment.CenterEnd,
     contentKey = { it.name },
     transitionSpec = { slideInHorizontally { it } togetherWith slideOutHorizontally { it } },
-    modifier = modifier.fillMaxHeight()
+    modifier = modifier
   ) { currentPanel ->
     when (currentPanel) {
       Panels.None -> { Box(Modifier.fillMaxHeight()) }

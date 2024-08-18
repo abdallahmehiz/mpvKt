@@ -5,6 +5,7 @@ import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CatchingPokemon
@@ -19,6 +20,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import live.mehiz.mpvkt.ui.player.controls.LocalPlayerButtonsClickEvent
 import live.mehiz.mpvkt.ui.theme.spacing
 
@@ -47,12 +49,13 @@ fun ControlsButton(
         interactionSource = interactionSource,
         indication = rememberRipple(),
       )
-      .padding(MaterialTheme.spacing.medium),
+      .padding(MaterialTheme.spacing.small),
   ) {
     Icon(
       icon,
       title,
       tint = color,
+      modifier = Modifier.size(20.dp),
     )
   }
 }
@@ -81,11 +84,12 @@ fun ControlsButton(
         interactionSource = interactionSource,
         indication = rememberRipple(),
       )
-      .padding(MaterialTheme.spacing.medium),
+      .padding(MaterialTheme.spacing.small),
   ) {
     Text(
       text,
       color = color,
+      style = MaterialTheme.typography.bodyMedium,
     )
   }
 }
@@ -95,6 +99,6 @@ fun ControlsButton(
 private fun PreviewControlsButton() {
   ControlsButton(
     Icons.Default.CatchingPokemon,
-    onClick = {}
+    onClick = {},
   )
 }
