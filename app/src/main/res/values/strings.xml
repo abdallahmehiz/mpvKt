@@ -80,7 +80,7 @@
     <string name="pref_advanced_input_conf">Edit input.conf</string>
     <string name="pref_advanced_clear_playback_history">Clear playback history</string>
     <string name="pref_advanced_clear_playback_history_confirm_title">Are you sure you want to clear your playback history?</string>
-    <string name="pref_advanced_clear_playback_history_confirm_subtitle">This will clear all your previous media&amp;s playback positions, selected subtitles and audio tracks along with their delays and speeds</string>
+    <string name="pref_advanced_clear_playback_history_confirm_subtitle">This will clear all your previous media&apos;s playback positions, selected subtitles and audio tracks along with their delays and speeds</string>
     <string name="pref_advanced_cleared_playback_history">Cleared playback history</string>
     <string name="pref_advanced_clear_fonts_cache">Clear cached fonts</string>
     <string name="pref_advanced_cleared_fonts_cache">Cleared cached fonts</string>
