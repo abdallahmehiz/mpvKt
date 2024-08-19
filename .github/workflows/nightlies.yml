@@ -48,7 +48,7 @@ jobs:
           declare -a apks=("universal" "arm64-v8a" "armeabi-v7a" "x86" "x86_64")
 
           printf "%s\n" "${apks[@]}" | xargs -n 1 -I {} sh -c '
-          cp app/build/outputs/apk/preview/app-{}-preview-signed.apk mpvKt-{}-r${{ env.COMMIT_COUNT }}.apk
+          cp app/build/outputs/apk/preview/app-{}-preview-signed.apk mpvKt-{}-r${{ env.COMMIT_COUNT }}.apk'
 
       - name: Upload the APK artifact
         uses: actions/upload-artifact@v4

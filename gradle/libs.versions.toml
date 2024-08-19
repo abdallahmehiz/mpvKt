@@ -1,5 +1,5 @@
 [versions]
-agp = "8.4.2"
+agp = "8.5.2"
 kotlin = "2.0.0"
 coreKtx = "1.13.1"
 lifecycleRuntimeKtx = "2.8.4"
@@ -51,7 +51,7 @@ room-ktx = { module = "androidx.room:room-ktx", version.ref = "room" }
 
 detekt-gradle-plugin = { module = "io.gitlab.arturbosch.detekt:detekt-gradle-plugin", version.ref = "detekt"}
 detekt-formatter = { module = "io.gitlab.arturbosch.detekt:detekt-formatting", version.ref = "detekt"}
-detekt-rules-compose = { module = "io.nlopez.compose.rules:detekt", version = "0.4.5" }
+detekt-rules-compose = { module = "io.nlopez.compose.rules:detekt", version = "0.4.10" }
 
 kotlinx-immutable-collections = { module = "org.jetbrains.kotlinx:kotlinx-collections-immutable", version = "0.3.7" }
 
