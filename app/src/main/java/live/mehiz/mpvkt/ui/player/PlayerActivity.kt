@@ -254,7 +254,7 @@ class PlayerActivity : AppCompatActivity() {
       val mpvConf = fileManager.fromUri(Uri.parse(advancedPreferences.mpvConfStorageUri.get()))
         ?: error("User hasn't set any mpvConfig directory")
       if (!fileManager.exists(mpvConf)) error("Couldn't access mpv configuration directory")
-      fileManager.copyDirectoryWithContent(mpvConf, fileManager.fromPath(applicationPath), false)
+      fileManager.copyDirectoryWithContent(mpvConf, fileManager.fromPath(applicationPath), true)
     } catch (e: Exception) {
       File("$applicationPath/mpv.conf").writeText(advancedPreferences.mpvConf.get())
       File("$applicationPath/input.conf").writeText(advancedPreferences.inputConf.get())
