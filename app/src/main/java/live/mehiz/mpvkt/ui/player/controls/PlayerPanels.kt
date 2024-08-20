@@ -37,7 +37,8 @@ fun PlayerPanels(modifier: Modifier = Modifier) {
     contentAlignment = Alignment.CenterEnd,
     contentKey = { it.name },
     transitionSpec = {
-      fadeIn() + slideInHorizontally { it / 3 } togetherWith fadeOut() + slideOutHorizontally { it / 2 } },
+      fadeIn() + slideInHorizontally { it / 3 } togetherWith fadeOut() + slideOutHorizontally { it / 2 }
+    },
     modifier = modifier
   ) { currentPanel ->
     when (currentPanel) {
