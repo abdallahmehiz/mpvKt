@@ -100,7 +100,6 @@ fun VideoTimer(
       .wrapContentHeight(Alignment.CenterVertically),
     text = Utils.prettyTime(value.toInt(), isInverted),
     color = Color.White,
-    fontFamily = FontFamily.Monospace,
     textAlign = TextAlign.Center,
   )
 }

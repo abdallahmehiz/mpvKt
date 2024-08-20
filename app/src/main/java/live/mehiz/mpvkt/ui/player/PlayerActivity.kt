@@ -418,7 +418,12 @@ class PlayerActivity : AppCompatActivity() {
   internal fun onObserverEvent(property: String, value: Boolean) {
     when (property) {
       "pause" -> {
-        if (value) viewModel.pause()
+        if (value) {
+          viewModel.pause()
+          window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        } else {
+          window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        }
       }
 
       "paused-for-cache" -> {

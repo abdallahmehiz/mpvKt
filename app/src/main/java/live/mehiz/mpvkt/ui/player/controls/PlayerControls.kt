@@ -2,6 +2,7 @@ package live.mehiz.mpvkt.ui.player.controls
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.graphics.ExperimentalAnimationGraphicsApi
@@ -94,7 +95,8 @@ fun PlayerControls(
     }
   }
   val transparentOverlay by animateColorAsState(
-    Color.Black.copy(if (controlsShown) 0.2f else 0f),
+    Color.Black.copy(if (controlsShown) 0.5f else 0f),
+    animationSpec = tween(500),
     label = "",
   )
   GestureHandler()

@@ -1,6 +1,8 @@
 package live.mehiz.mpvkt.ui.player.controls
 
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
@@ -34,7 +36,8 @@ fun PlayerPanels(modifier: Modifier = Modifier) {
     label = "panels",
     contentAlignment = Alignment.CenterEnd,
     contentKey = { it.name },
-    transitionSpec = { slideInHorizontally { it } togetherWith slideOutHorizontally { it } },
+    transitionSpec = {
+      fadeIn() + slideInHorizontally { it / 3 } togetherWith fadeOut() + slideOutHorizontally { it / 2 } },
     modifier = modifier
   ) { currentPanel ->
     when (currentPanel) {
