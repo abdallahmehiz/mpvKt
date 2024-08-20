@@ -48,31 +48,30 @@ jobs:
           declare -a apks=("universal" "arm64-v8a" "armeabi-v7a" "x86" "x86_64")
 
           printf "%s\n" "${apks[@]}" | xargs -n 1 -I {} sh -c '
-          cp app/build/outputs/apk/preview/app-{}-preview-signed.apk mpvKt-{}-r${{ env.COMMIT_COUNT }}.apk
-          echo "{}=mpv-{}-r$(echo ${{ env.COMMIT_COUNT }}).apk" >> $GITHUB_ENV'
+          cp app/build/outputs/apk/preview/app-{}-preview-signed.apk mpvKt-{}-r${{ env.COMMIT_COUNT }}.apk'
 
-      - name: Upload the ${{ env.universal }} APK artifact
+      - name: Upload the universal artifact
         uses: actions/upload-artifact@v4
         with:
-          path: ${{ env.universal }}
-          name: ${{ env.universal }}
-      - name: Upload the ${{ env.arm64-v8a }} artifact
+          path: ./mpvKt-universal*
+          name: universal
+      - name: Upload the arm64-v8a artifact
         uses: actions/upload-artifact@v4
         with:
-          path: ${{ env.arm64-v8a }}
-          name: ${{ env.arm64-v8a }}
-      - name: Upload the ${{ env.armeabi-v7a }} artifact
+          path: ./mpvKt-arm64-v8a*
+          name: arm64-v8a
+      - name: Upload the armeabi-v7a artifact
         uses: actions/upload-artifact@v4
         with:
-          path: ${{ env.armeabi-v7a }}
-          name: ${{ env.armeabi-v7a }}
-      - name: Upload the ${{ env.x86 }] artifact
+          path: ./mpvKt-armeabi-v7a*
+          name: armeabi-v7a
+      - name: Upload the x86 artifact
         uses: actions/upload-artifact@v4
         with:
-          path: ${{ env.x86 }}
-          name: ${{ env.x86 }}
-      - name: Upload the ${{ env.x86_64 }} artifact
+          path: ./mpvKt-x86*
+          name: x86
+      - name: Upload the x86_64 artifact
         uses: actions/upload-artifact@v4
         with:
-          path: ${{ env.x86_64 }}
-          name: ${{ env.x86_64 }}
+          path: ./mpvKt-x86_64*
+          name: x86_64
