@@ -22,6 +22,7 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.dp
+import live.mehiz.mpvkt.ui.theme.spacing
 
 @Composable
 fun SliderItem(
@@ -78,8 +79,8 @@ fun SliderItem(
   valueText: String,
   onChange: (Float) -> Unit,
   max: Float,
-  steps: Int,
   modifier: Modifier = Modifier,
+  steps: Int = 0,
   min: Float = 0f,
   icon: @Composable () -> Unit = {},
 ) {
@@ -89,11 +90,11 @@ fun SliderItem(
     modifier = modifier
       .fillMaxWidth()
       .padding(
-        horizontal = 16.dp,
-        vertical = 8.dp,
+        horizontal = MaterialTheme.spacing.medium,
+        vertical = MaterialTheme.spacing.smaller,
       ),
     verticalAlignment = Alignment.CenterVertically,
-    horizontalArrangement = Arrangement.spacedBy(24.dp),
+    horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.large),
   ) {
     icon()
     Column(modifier = Modifier.weight(0.5f)) {
@@ -137,10 +138,10 @@ fun VerticalSliderItem(
     modifier = modifier
       .fillMaxHeight()
       .padding(
-        horizontal = 16.dp,
-        vertical = 8.dp,
+        horizontal = MaterialTheme.spacing.medium,
+        vertical = MaterialTheme.spacing.smaller,
       ),
-    verticalArrangement = Arrangement.spacedBy(24.dp),
+    verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.larger),
     horizontalAlignment = Alignment.CenterHorizontally,
   ) {
     icon()

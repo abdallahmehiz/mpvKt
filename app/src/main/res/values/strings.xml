@@ -127,6 +127,9 @@
     <string name="player_sheets_filters_hue">Hue</string>
     <string name="player_sheets_filters_warning">Some filters may not work on your current video driver</string>
 
+    <string name="player_sheets_speed_slider_label">Speed</string>
+    <string name="player_sheets_speed_make_default">Make default speed</string>
+
     <string name="numeric_chooser_value_too_big">Value too big</string>
     <string name="numeric_chooser_value_too_small">Value too small</string>
 

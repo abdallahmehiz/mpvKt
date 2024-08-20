@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -12,11 +13,11 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.dp
 import `is`.xyz.mpv.MPVView
 import `is`.xyz.mpv.Utils
 import kotlinx.collections.immutable.ImmutableList
 import live.mehiz.mpvkt.R
+import live.mehiz.mpvkt.ui.theme.spacing
 
 @Composable
 fun ChaptersSheet(
@@ -24,6 +25,7 @@ fun ChaptersSheet(
   currentChapter: Int,
   onClick: (Int) -> Unit,
   onDismissRequest: () -> Unit,
+  modifier: Modifier = Modifier,
 ) {
   GenericTracksSheet(
     chapters,
@@ -37,6 +39,8 @@ fun ChaptersSheet(
       )
     },
     onDismissRequest = onDismissRequest,
+    modifier = modifier
+      .padding(vertical = MaterialTheme.spacing.medium)
   )
 }
 
@@ -53,7 +57,7 @@ fun ChapterTrack(
     modifier = modifier
       .fillMaxWidth()
       .clickable(onClick = onClick)
-      .padding(vertical = 8.dp, horizontal = 16.dp),
+      .padding(vertical = MaterialTheme.spacing.smaller, horizontal = MaterialTheme.spacing.medium),
     horizontalArrangement = Arrangement.SpaceBetween,
   ) {
     Text(

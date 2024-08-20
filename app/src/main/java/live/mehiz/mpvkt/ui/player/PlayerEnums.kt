@@ -42,6 +42,7 @@ enum class Debanding {
 
 enum class Sheets {
   None,
+  PlaybackSpeed,
   SubtitleTracks,
   AudioTracks,
   Chapters,

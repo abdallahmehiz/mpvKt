@@ -404,8 +404,8 @@ class PlayerActivity : AppCompatActivity() {
   internal fun onObserverEvent(property: String, value: Long) {
     when (property) {
       "time-pos" -> viewModel.updatePlayBackPos(value.toFloat())
-      "duration" -> viewModel.duration.update { value.toFloat() }
       "demuxer-cache-time" -> viewModel.updateReadAhead(value = value)
+      "duration" -> viewModel.duration.update { value.toFloat() }
     }
   }
 
@@ -440,8 +440,10 @@ class PlayerActivity : AppCompatActivity() {
     }
   }
 
-  @Suppress("EmptyFunctionBlock", "UnusedParameter")
   internal fun onObserverEvent(property: String, value: String) {
+    when (property) {
+      "speed" -> viewModel.playbackSpeed.update { value.toFloat() }
+    }
   }
 
   internal fun event(eventId: Int) {
@@ -450,11 +452,7 @@ class PlayerActivity : AppCompatActivity() {
         getFileName(intent)?.let { fileName = it }
         viewModel.mediaTitle.update {
           val mediaTitle = MPVLib.getPropertyString("media-title")
-          if (mediaTitle.isBlank() || mediaTitle.isDigitsOnly()) {
-            fileName
-          } else {
-            mediaTitle
-          }
+          if (mediaTitle.isBlank() || mediaTitle.isDigitsOnly()) fileName else mediaTitle
         }
         CoroutineScope(Dispatchers.IO).launch {
           loadVideoPlaybackState(fileName)
@@ -482,8 +480,9 @@ class PlayerActivity : AppCompatActivity() {
     if (!::fileName.isInitialized) return
     mpvKtDatabase.videoDataDao().upsert(
       PlaybackStateEntity(
-        fileName,
-        if (playerPreferences.savePositionOnQuit.get()) player.timePos ?: 0 else 0,
+        mediaTitle = fileName,
+        lastPosition = if (playerPreferences.savePositionOnQuit.get()) player.timePos ?: 0 else 0,
+        playbackSpeed = player.playbackSpeed ?: playerPreferences.defaultSpeed.get().toDouble(),
         sid = player.sid,
         subDelay = (MPVLib.getPropertyDouble("sub-delay") * 1000).toInt(),
         subSpeed = MPVLib.getPropertyDouble("sub-speed"),
@@ -509,6 +508,7 @@ class PlayerActivity : AppCompatActivity() {
       player.aid = it.aid
       player.subDelay = subDelay
       player.secondarySubDelay = secondarySubDelay
+      player.playbackSpeed = it.playbackSpeed
       MPVLib.setPropertyDouble("audio-delay", audioDelay)
     }
     player.timePos = if (playerPreferences.savePositionOnQuit.get()) state?.lastPosition ?: 0 else 0

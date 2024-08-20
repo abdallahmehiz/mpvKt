@@ -129,7 +129,7 @@ data class FilePickerScreen(val uri: String) : Screen() {
               MaterialTheme.colorScheme.surfaceContainerHigh
             },
           ),
-          items = if(fileManager.isDirectory(file)) fileManager.listFiles(file).size else null,
+          items = if (fileManager.isDirectory(file)) fileManager.listFiles(file).size else null,
           onClick = { onNavigate(file) },
         )
       }
@@ -142,9 +142,9 @@ data class FilePickerScreen(val uri: String) : Screen() {
     isDirectory: Boolean,
     lastModified: Long?,
     length: Long?,
-    items: Int? = null,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
+    items: Int? = null,
   ) {
     var size: String? by remember { mutableStateOf(null) }
     var time: String? by remember { mutableStateOf(null) }
@@ -187,9 +187,17 @@ data class FilePickerScreen(val uri: String) : Screen() {
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             style = MaterialTheme.typography.bodyMedium,
           )
-          if ((size != null && !isDirectory) || (items != null && isDirectory)) {
+          if (size != null || items != null) {
             Text(
-              text = if(isDirectory) pluralStringResource(id = R.plurals.plural_items, count = items!!, items) else size!!,
+              text = if (isDirectory) {
+                pluralStringResource(
+                  id = R.plurals.plural_items,
+                  count = items!!,
+                  items
+                )
+              } else {
+                size!!
+              },
               color = MaterialTheme.colorScheme.onSurfaceVariant,
               style = MaterialTheme.typography.bodyMedium,
             )

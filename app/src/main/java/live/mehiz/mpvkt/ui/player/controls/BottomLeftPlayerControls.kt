@@ -18,7 +18,6 @@ import `is`.xyz.mpv.MPVLib
 import kotlinx.coroutines.flow.update
 import live.mehiz.mpvkt.R
 import live.mehiz.mpvkt.preferences.PlayerPreferences
-import live.mehiz.mpvkt.preferences.preference.collectAsState
 import live.mehiz.mpvkt.ui.player.PlayerViewModel
 import live.mehiz.mpvkt.ui.player.Sheets
 import live.mehiz.mpvkt.ui.player.controls.components.ControlsButton
@@ -42,14 +41,16 @@ fun BottomLeftPlayerControls(modifier: Modifier = Modifier) {
       icon = Icons.Default.ScreenRotation,
       onClick = { viewModel.cycleScreenRotations() }
     )
-    val defaultSpeed by playerPreferences.defaultSpeed.collectAsState()
+    val currentSpeed by viewModel.playbackSpeed.collectAsState()
     ControlsButton(
-      text = stringResource(R.string.player_speed, defaultSpeed),
+      text = stringResource(R.string.player_speed, currentSpeed),
       onClick = {
-        val newSpeed = if (defaultSpeed >= 2) 0.25f else defaultSpeed + 0.25f
+        val newSpeed = if (currentSpeed >= 2) 0.25f else currentSpeed + 0.25f
+        viewModel.playbackSpeed.update { newSpeed }
         MPVLib.setPropertyDouble("speed", newSpeed.toDouble())
         playerPreferences.defaultSpeed.set(newSpeed)
-      }
+      },
+      onLongClick = { viewModel.sheetShown.update { Sheets.PlaybackSpeed } }
     )
     AnimatedVisibility(
       currentChapter != null && playerPreferences.currentChaptersIndicator.get(),
