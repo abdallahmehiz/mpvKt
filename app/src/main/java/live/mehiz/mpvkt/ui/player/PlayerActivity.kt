@@ -1,5 +1,6 @@
 package live.mehiz.mpvkt.ui.player
 
+import android.annotation.SuppressLint
 import android.app.PictureInPictureParams
 import android.content.BroadcastReceiver
 import android.content.Context
@@ -81,7 +82,7 @@ class PlayerActivity : AppCompatActivity() {
   private var restoreAudioFocus: () -> Unit = {}
 
   private var pipRect: android.graphics.Rect? = null
-  private val isPipSupported by lazy {
+  val isPipSupported by lazy {
     if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N) {
       false
     } else {
@@ -133,23 +134,26 @@ class PlayerActivity : AppCompatActivity() {
   }
 
   override fun onPause() {
-    super.onPause()
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N && !isInPictureInPictureMode) {
+      viewModel.pause()
+    }
     CoroutineScope(Dispatchers.IO).launch {
       saveVideoPlaybackState()
     }
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N && !isInPictureInPictureMode) {
-      viewModel.pause()
-    } else {
-      return
-    }
+    super.onPause()
   }
 
+  override fun onStop() {
+    viewModel.pause()
+    super.onStop()
+  }
+
+  @SuppressLint("NewApi")
   override fun onUserLeaveHint() {
-    if (!isPipSupported) {
-      super.onUserLeaveHint()
-      return
-    }
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N && player.paused == false) {
+    if (isPipSupported &&
+      player.paused == false &&
+      playerPreferences.automaticallyEnterPip.get()
+    ) {
       enterPictureInPictureMode()
     }
     super.onUserLeaveHint()

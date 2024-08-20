@@ -1,5 +1,6 @@
 package live.mehiz.mpvkt.ui.player.controls
 
+import android.annotation.SuppressLint
 import android.os.Build
 import androidx.compose.foundation.layout.Row
 import androidx.compose.material.icons.Icons
@@ -17,14 +18,15 @@ import live.mehiz.mpvkt.ui.player.VideoAspect
 import live.mehiz.mpvkt.ui.player.controls.components.ControlsButton
 import org.koin.compose.koinInject
 
+@SuppressLint("NewApi")
 @Composable
 fun BottomRightPlayerControls(modifier: Modifier = Modifier) {
   val viewModel = koinInject<PlayerViewModel>()
   val playerPreferences = koinInject<PlayerPreferences>()
   val aspect by playerPreferences.videoAspect.collectAsState()
   Row(modifier) {
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-      val activity = LocalContext.current as PlayerActivity
+    val activity = LocalContext.current as PlayerActivity
+    if (activity.isPipSupported) {
       ControlsButton(
         Icons.Default.PictureInPictureAlt,
         onClick = {

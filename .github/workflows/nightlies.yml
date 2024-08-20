@@ -48,11 +48,31 @@ jobs:
           declare -a apks=("universal" "arm64-v8a" "armeabi-v7a" "x86" "x86_64")
 
           printf "%s\n" "${apks[@]}" | xargs -n 1 -I {} sh -c '
-          cp app/build/outputs/apk/preview/app-{}-preview-signed.apk mpvKt-{}-r${{ env.COMMIT_COUNT }}.apk'
+          cp app/build/outputs/apk/preview/app-{}-preview-signed.apk mpvKt-{}-r${{ env.COMMIT_COUNT }}.apk
+          echo "{}=mpv-{}-r${{ env.COMMIT_COUNT}}.apk" >> $GITHUB_ENV'
 
       - name: Upload the APK artifact
         uses: actions/upload-artifact@v4
         with:
-          path: ./mpvKt-*.apk
-          name: packages
-          retention-days: 14
+          path: ${{ env.universal }}
+          name: ${{ env.universal }}
+      - name: Upload the APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          path: ${{ env.arm64-v8a }}
+          name: ${{ env.arm64-v8a }}
+      - name: Upload the APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          path: ${{ env.armeabi-v7a }}
+          name: ${{ env.armeabi-v7a }}
+      - name: Upload the APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          path: ${{ env.x86 }}
+          name: ${{ env.x86 }}
+      - name: Upload the APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          path: ${{ env.x86_64 }}
+          name: ${{ env.x86_64 }}
