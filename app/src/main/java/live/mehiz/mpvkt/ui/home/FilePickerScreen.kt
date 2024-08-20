@@ -37,6 +37,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.navigator.LocalNavigator
@@ -128,6 +129,7 @@ data class FilePickerScreen(val uri: String) : Screen() {
               MaterialTheme.colorScheme.surfaceContainerHigh
             },
           ),
+          items = if(fileManager.isDirectory(file)) fileManager.listFiles(file).size else null,
           onClick = { onNavigate(file) },
         )
       }
@@ -140,6 +142,7 @@ data class FilePickerScreen(val uri: String) : Screen() {
     isDirectory: Boolean,
     lastModified: Long?,
     length: Long?,
+    items: Int? = null,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
   ) {
@@ -184,9 +187,9 @@ data class FilePickerScreen(val uri: String) : Screen() {
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             style = MaterialTheme.typography.bodyMedium,
           )
-          if (size != null && !isDirectory) {
+          if ((size != null && !isDirectory) || (items != null && isDirectory)) {
             Text(
-              text = size!!,
+              text = if(isDirectory) pluralStringResource(id = R.plurals.plural_items, count = items!!, items) else size!!,
               color = MaterialTheme.colorScheme.onSurfaceVariant,
               style = MaterialTheme.typography.bodyMedium,
             )

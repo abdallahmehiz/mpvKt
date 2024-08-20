@@ -145,4 +145,9 @@
     <string name="crash_screen_logs_title">Crash logs:</string>
     <string name="crash_screen_share">Share crash logs</string>
     <string name="crash_screen_restart">Restart the app</string>
+
+    <plurals name="plural_items">
+        <item quantity="one">%1$d item</item>
+        <item quantity="other">%1$d items</item>
+    </plurals>
 </resources>
