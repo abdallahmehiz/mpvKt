@@ -155,10 +155,7 @@ class PlayerActivity : AppCompatActivity() {
 
   @SuppressLint("NewApi")
   override fun onUserLeaveHint() {
-    if (isPipSupported &&
-      player.paused == false &&
-      playerPreferences.automaticallyEnterPip.get()
-    ) {
+    if (isPipSupported && player.paused == false && playerPreferences.automaticallyEnterPip.get()) {
       enterPictureInPictureMode()
     } else {
       endPlayback(EndPlaybackReason.ExternalAction)
@@ -334,13 +331,8 @@ class PlayerActivity : AppCompatActivity() {
   private fun parsePathFromIntent(intent: Intent): String? {
     intent.getStringArrayExtra("headers")?.let { headers ->
       if (headers[0].startsWith("User-Agent", true)) MPVLib.setPropertyString("user-agent", headers[1])
-      val headersString = headers
-        .asSequence()
-        .drop(2)
-        .chunked(2)
-        .associate { it[0] to it[1] }
-        .map { "${it.key}: ${it.value.replace(",", "\\,")}" }
-        .joinToString(",")
+      val headersString = headers.asSequence().drop(2).chunked(2).associate { it[0] to it[1] }
+        .map { "${it.key}: ${it.value.replace(",", "\\,")}" }.joinToString(",")
       MPVLib.setPropertyString("http-header-fields", headersString)
     }
     return when (intent.action) {
@@ -428,6 +420,7 @@ class PlayerActivity : AppCompatActivity() {
           viewModel.pause()
           window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         } else {
+          viewModel.unpause()
           window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         }
       }
@@ -525,12 +518,7 @@ class PlayerActivity : AppCompatActivity() {
 
   private fun endPlayback(reason: EndPlaybackReason, cause: String? = null) {
     Log.d(TAG, "Ending playback")
-    CoroutineScope(Dispatchers.IO).launch {
-      saveVideoPlaybackState()
-    }
-    if (!intent.getBooleanExtra("return_result", false)) {
-      return
-    }
+    CoroutineScope(Dispatchers.IO).launch { saveVideoPlaybackState() }
     val returnIntent = Intent()
     returnIntent.putExtra("end_by", reason.value)
     cause?.let { returnIntent.putExtra("cause", cause) }
@@ -635,25 +623,16 @@ class PlayerActivity : AppCompatActivity() {
 
   override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
     when (keyCode) {
-      KeyEvent.KEYCODE_VOLUME_UP -> {
-        viewModel.changeVolumeBy(1)
-      }
+      KeyEvent.KEYCODE_VOLUME_UP -> viewModel.changeVolumeBy(1)
+      KeyEvent.KEYCODE_VOLUME_DOWN -> viewModel.changeVolumeBy(-1)
+      KeyEvent.KEYCODE_DPAD_RIGHT -> viewModel.seekBy(playerPreferences.doubleTapToSeekDuration.get())
+      KeyEvent.KEYCODE_DPAD_LEFT -> viewModel.seekBy(-playerPreferences.doubleTapToSeekDuration.get())
+      KeyEvent.KEYCODE_SPACE -> viewModel.pauseUnpause()
+      KeyEvent.KEYCODE_MEDIA_STOP -> endPlayback(EndPlaybackReason.ExternalAction)
 
-      KeyEvent.KEYCODE_VOLUME_DOWN -> {
-        viewModel.changeVolumeBy(-1)
-      }
-
-      KeyEvent.KEYCODE_DPAD_RIGHT -> {
-        viewModel.seekBy(playerPreferences.doubleTapToSeekDuration.get())
-      }
-
-      KeyEvent.KEYCODE_DPAD_LEFT -> {
-        viewModel.seekBy(-playerPreferences.doubleTapToSeekDuration.get())
-      }
-
-      KeyEvent.KEYCODE_SPACE -> {
-        viewModel.pauseUnpause()
-      }
+      // They don't have a seek animation cause that's in GestureHandler.kt :despair:
+      KeyEvent.KEYCODE_MEDIA_REWIND -> viewModel.seekBy(-playerPreferences.doubleTapToSeekDuration.get())
+      KeyEvent.KEYCODE_MEDIA_FAST_FORWARD -> viewModel.seekBy(playerPreferences.doubleTapToSeekDuration.get())
 
       // other keys should be bound by the user in input.conf ig
       else -> {

@@ -30,7 +30,7 @@ class PlayerViewModel(
   val mediaTitle = MutableStateFlow("")
 
   val isLoading = MutableStateFlow(true)
-  val playbackSpeed = MutableStateFlow(0f)
+  val playbackSpeed = MutableStateFlow(playerPreferences.defaultSpeed.get())
 
   private val _subtitleTracks = MutableStateFlow<List<Track>>(emptyList())
   val subtitleTracks = _subtitleTracks.asStateFlow()
