@@ -65,6 +65,7 @@ class PlayerActivity : AppCompatActivity() {
 
   private val viewModel: PlayerViewModel by lazy { PlayerViewModel(this) }
   private val binding by lazy { PlayerLayoutBinding.inflate(layoutInflater) }
+  private val playerObserver by lazy { PlayerObserver(this) }
   private val mpvKtDatabase: MpvKtDatabase by inject()
   val player by lazy { binding.player }
   private val windowInsetsController by lazy { WindowCompat.getInsetsController(window, window.decorView) }
@@ -119,17 +120,21 @@ class PlayerActivity : AppCompatActivity() {
   }
 
   override fun onDestroy() {
-    super.onDestroy()
+    Log.d(TAG, "Exiting")
     audioFocusRequest?.let {
       AudioManagerCompat.abandonAudioFocusRequest(audioManager, it)
     }
     audioFocusRequest = null
+
+    player.removeObserver(playerObserver)
     MPVLib.destroy()
+
+    super.onDestroy()
   }
 
   override fun finish() {
-    endPlayback(EndPlaybackReason.ExternalAction)
-    unloadKoinModules(module { viewModel })
+    Log.d(TAG, "Finishing")
+    unloadKoinModules(module { viewModel { viewModel } })
     super.finish()
   }
 
@@ -155,6 +160,8 @@ class PlayerActivity : AppCompatActivity() {
       playerPreferences.automaticallyEnterPip.get()
     ) {
       enterPictureInPictureMode()
+    } else {
+      endPlayback(EndPlaybackReason.ExternalAction)
     }
     super.onUserLeaveHint()
   }
@@ -208,7 +215,7 @@ class PlayerActivity : AppCompatActivity() {
     MPVLib.setPropertyBoolean("keep-open", true)
     MPVLib.setPropertyBoolean("input-default-bindings", true)
 
-    player.addObserver(PlayerObserver(this))
+    player.addObserver(playerObserver)
   }
 
   private fun setupAudio() {
@@ -336,7 +343,7 @@ class PlayerActivity : AppCompatActivity() {
         .joinToString(",")
       MPVLib.setPropertyString("http-header-fields", headersString)
     }
-    val filepath: String? = when (intent.action) {
+    return when (intent.action) {
       Intent.ACTION_VIEW -> intent.data?.let { resolveUri(it) }
       Intent.ACTION_SEND -> {
         if (intent.hasExtra(Intent.EXTRA_STREAM)) {
@@ -351,7 +358,6 @@ class PlayerActivity : AppCompatActivity() {
 
       else -> intent.getStringExtra("uri")
     }
-    return filepath
   }
 
   private fun getFileName(intent: Intent): String? {
@@ -379,18 +385,18 @@ class PlayerActivity : AppCompatActivity() {
   fun openContentFd(uri: Uri): String? {
     if (uri.scheme != "content") return null
     val resolver = applicationContext.contentResolver
-    Log.d("mpvKt", "Resolving content URI: $uri")
+    Log.d(TAG, "Resolving content URI: $uri")
     val fd = try {
       val desc = resolver.openFileDescriptor(uri, "r")
       desc!!.detachFd()
     } catch (e: Exception) {
-      Log.d("mpvKt", "Failed to open content fd: $e")
+      Log.d(TAG, "Failed to open content fd: $e")
       return null
     }
     try {
       val path = File("/proc/self/fd/$fd").canonicalPath
       if (!path.startsWith("/proc") && File(path).canRead()) {
-        Log.d("mpvKt", "Found real file path: $path")
+        Log.d(TAG, "Found real file path: $path")
         ParcelFileDescriptor.adoptFd(fd).close() // we don't need that anymore
         return path
       }
@@ -435,7 +441,9 @@ class PlayerActivity : AppCompatActivity() {
       }
 
       "eof-reached" -> {
-        if (value && playerPreferences.closeAfterReachingEndOfVideo.get()) finish()
+        if (value && playerPreferences.closeAfterReachingEndOfVideo.get()) {
+          endPlayback(EndPlaybackReason.PlaybackCompleted)
+        }
       }
     }
   }
@@ -472,8 +480,8 @@ class PlayerActivity : AppCompatActivity() {
     }
   }
 
-  @Suppress("EmptyFunctionBlock", "UnusedParameter")
   internal fun efEvent(err: String?) {
+    endPlayback(EndPlaybackReason.Error, err)
   }
 
   private suspend fun saveVideoPlaybackState() {
@@ -515,7 +523,8 @@ class PlayerActivity : AppCompatActivity() {
     MPVLib.setPropertyDouble("sub-speed", state?.subSpeed ?: subtitlesPreferences.defaultSubSpeed.get().toDouble())
   }
 
-  private fun endPlayback(reason: EndPlaybackReason) {
+  private fun endPlayback(reason: EndPlaybackReason, cause: String? = null) {
+    Log.d(TAG, "Ending playback")
     CoroutineScope(Dispatchers.IO).launch {
       saveVideoPlaybackState()
     }
@@ -524,9 +533,11 @@ class PlayerActivity : AppCompatActivity() {
     }
     val returnIntent = Intent()
     returnIntent.putExtra("end_by", reason.value)
+    cause?.let { returnIntent.putExtra("cause", cause) }
     player.timePos?.let { returnIntent.putExtra("position", it * 1000) }
     player.duration?.let { returnIntent.putExtra("duration", it * 1000) }
     setResult(RESULT_OK, returnIntent)
+    finishAndRemoveTask()
   }
 
   override fun onNewIntent(intent: Intent) {
@@ -656,5 +667,9 @@ class PlayerActivity : AppCompatActivity() {
   override fun onKeyUp(keyCode: Int, event: KeyEvent?): Boolean {
     if (player.onKey(event!!)) return true
     return super.onKeyUp(keyCode, event)
+  }
+
+  companion object {
+    const val TAG = "mpvKt"
   }
 }
