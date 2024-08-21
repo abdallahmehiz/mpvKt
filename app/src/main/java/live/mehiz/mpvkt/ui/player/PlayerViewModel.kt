@@ -6,10 +6,13 @@ import android.net.Uri
 import android.os.Build
 import android.provider.Settings
 import android.util.DisplayMetrics
+import android.widget.Toast
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import `is`.xyz.mpv.MPVLib
 import `is`.xyz.mpv.MPVView
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -76,6 +79,26 @@ class PlayerViewModel(
   val sheetShown = MutableStateFlow(Sheets.None)
   val panelShown = MutableStateFlow(Panels.None)
   val gestureSeekAmount = MutableStateFlow(0)
+
+  private var timerJob: Job? = null
+  private val _remainingTime = MutableStateFlow<Int?>(null)
+  val remainingTime = _remainingTime.asStateFlow()
+
+  fun startTimer(seconds: Int) {
+    timerJob?.cancel()
+    timerJob = viewModelScope.launch {
+      for (time in seconds downTo 0) {
+        _remainingTime.value = time
+        delay(1000)
+      }
+      pause()
+      Toast.makeText(activity, activity.getString(R.string.toast_sleep_timer_ended), Toast.LENGTH_SHORT).show()
+    }
+  }
+
+  fun cancelTimer() {
+    timerJob?.cancel()
+  }
 
   fun getDecoder() {
     _currentDecoder.update { getDecoderFromValue(activity.player.hwdecActive) }

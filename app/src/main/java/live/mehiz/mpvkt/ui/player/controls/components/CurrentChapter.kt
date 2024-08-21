@@ -9,6 +9,7 @@ import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
@@ -42,7 +43,7 @@ fun CurrentChapter(
       .clip(RoundedCornerShape(25))
       .background(MaterialTheme.colorScheme.background.copy(alpha = 0.6F))
       .clickable(onClick = onClick)
-      .padding(horizontal = MaterialTheme.spacing.medium, vertical = MaterialTheme.spacing.smaller),
+      .padding(horizontal = MaterialTheme.spacing.small, vertical = MaterialTheme.spacing.smaller),
   ) {
     AnimatedContent(
       targetState = chapter,
@@ -60,34 +61,38 @@ fun CurrentChapter(
       label = "Chapter",
     ) { currentChapter ->
       Row(
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(4.dp)
       ) {
         Icon(
           imageVector = Icons.Default.Bookmarks,
           contentDescription = null,
           modifier = Modifier
-            .padding(end = MaterialTheme.spacing.smaller)
+            .padding(end = MaterialTheme.spacing.extraSmall)
             .size(16.dp),
           tint = MaterialTheme.colorScheme.onBackground
         )
         Text(
           text = Utils.prettyTime(currentChapter.time.toInt()),
-          textAlign = TextAlign.Center,
           fontWeight = FontWeight.ExtraBold,
+          style = MaterialTheme.typography.bodyMedium,
           maxLines = 1,
           overflow = TextOverflow.Clip,
           color = MaterialTheme.colorScheme.tertiary,
         )
         currentChapter.title?.let {
           Text(
-            text = " • ",
+            text = Typography.bullet.toString(),
             textAlign = TextAlign.Center,
+            style = MaterialTheme.typography.bodyMedium,
             maxLines = 1,
+            color = MaterialTheme.colorScheme.onSurface,
             overflow = TextOverflow.Clip,
           )
           Text(
             text = it,
             textAlign = TextAlign.Center,
+            style = MaterialTheme.typography.bodyMedium,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
             fontWeight = FontWeight.Bold,
