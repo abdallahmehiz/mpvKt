@@ -157,8 +157,6 @@ class PlayerActivity : AppCompatActivity() {
   override fun onUserLeaveHint() {
     if (isPipSupported && player.paused == false && playerPreferences.automaticallyEnterPip.get()) {
       enterPictureInPictureMode()
-    } else {
-      endPlayback(EndPlaybackReason.ExternalAction)
     }
     super.onUserLeaveHint()
   }
