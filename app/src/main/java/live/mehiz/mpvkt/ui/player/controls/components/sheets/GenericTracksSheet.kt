@@ -15,6 +15,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -25,6 +26,7 @@ import kotlinx.collections.immutable.ImmutableList
 import live.mehiz.mpvkt.R
 import live.mehiz.mpvkt.presentation.components.PlayerSheet
 import live.mehiz.mpvkt.ui.player.Track
+import live.mehiz.mpvkt.ui.theme.spacing
 
 @Composable
 fun <T> GenericTracksSheet(
@@ -64,9 +66,9 @@ fun AddTrackRow(
       .fillMaxWidth()
       .clickable(onClick = onClick)
       .height(48.dp)
-      .padding(start = 16.dp),
+      .padding(start = MaterialTheme.spacing.medium),
     verticalAlignment = Alignment.CenterVertically,
-    horizontalArrangement = Arrangement.spacedBy(8.dp),
+    horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.smaller),
   ) {
     Icon(
       Icons.Default.Add,

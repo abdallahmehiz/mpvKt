@@ -86,7 +86,7 @@ fun MoreSheet(
         )
         Row(
           verticalAlignment = Alignment.CenterVertically,
-          horizontalArrangement = Arrangement.spacedBy(4.dp),
+          horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.extraSmall),
         ) {
           var isSleepTimerDialogShown by remember { mutableStateOf(false) }
           IconButton(onClick = { isSleepTimerDialogShown = true }) {
@@ -106,7 +106,7 @@ fun MoreSheet(
           TextButton(onClick = onEnterFiltersPanel) {
             Row(
               verticalAlignment = Alignment.CenterVertically,
-              horizontalArrangement = Arrangement.spacedBy(4.dp),
+              horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.extraSmall),
             ) {
               Icon(imageVector = Icons.Default.Tune, contentDescription = null)
               Text(text = stringResource(id = R.string.player_sheets_filters_title))

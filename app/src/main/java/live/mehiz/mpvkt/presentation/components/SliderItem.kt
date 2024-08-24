@@ -41,11 +41,11 @@ fun SliderItem(
     modifier = modifier
       .fillMaxWidth()
       .padding(
-        horizontal = 16.dp,
-        vertical = 8.dp,
+        horizontal = MaterialTheme.spacing.medium,
+        vertical = MaterialTheme.spacing.smaller,
       ),
     verticalAlignment = Alignment.CenterVertically,
-    horizontalArrangement = Arrangement.spacedBy(24.dp),
+    horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.large),
   ) {
     icon()
     Column(modifier = Modifier.weight(0.5f)) {

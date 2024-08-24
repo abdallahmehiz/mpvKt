@@ -11,6 +11,7 @@ import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -18,10 +19,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
 import kotlinx.collections.immutable.ImmutableList
 import live.mehiz.mpvkt.R
 import live.mehiz.mpvkt.ui.player.Track
+import live.mehiz.mpvkt.ui.theme.spacing
 import me.zhanghai.compose.preference.FooterPreference
 import me.zhanghai.compose.preference.ProvidePreferenceLocals
 
@@ -84,7 +85,7 @@ fun SubtitleTrackRow(
     modifier = modifier
       .fillMaxWidth()
       .clickable(onClick = onClick)
-      .padding(start = 8.dp, end = 16.dp),
+      .padding(start = MaterialTheme.spacing.smaller, end = MaterialTheme.spacing.medium),
     verticalAlignment = Alignment.CenterVertically,
   ) {
     Checkbox(
@@ -106,11 +107,3 @@ fun SubtitleTrackRow(
     }
   }
 }
-
-/*
-@Preview
-@Composable
-fun PreviewSubtitlesSheet() {
-  SubtitlesSheet(Tracks(mutableListOf(1), mutableListOf(Track(1, "hello", "en"))), {}) {}
-}
-*/

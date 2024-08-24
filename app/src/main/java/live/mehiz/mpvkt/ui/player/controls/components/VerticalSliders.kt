@@ -27,6 +27,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
+import live.mehiz.mpvkt.ui.theme.spacing
 
 val percentage: (Float, ClosedFloatingPointRange<Float>) -> Float = { value, range ->
   ((value - range.start) / (range.endInclusive - range.start)).coerceIn(0f, 1f)
@@ -95,7 +96,7 @@ fun BrightnessSlider(
   Column(
     modifier = modifier,
     horizontalAlignment = Alignment.CenterHorizontally,
-    verticalArrangement = Arrangement.spacedBy(8.dp)
+    verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.smaller)
   ) {
     Text(
       (brightness * 100).toInt().toString(),
@@ -126,7 +127,7 @@ fun VolumeSlider(
   Column(
     modifier = modifier,
     horizontalAlignment = Alignment.CenterHorizontally,
-    verticalArrangement = Arrangement.spacedBy(8.dp)
+    verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.smaller)
   ) {
     Text(
       volume.toString(),

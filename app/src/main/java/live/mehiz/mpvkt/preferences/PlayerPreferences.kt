@@ -30,4 +30,6 @@ class PlayerPreferences(
 
   val automaticallyEnterPip = preferenceStore.getBoolean("automatic_pip")
   val closeAfterReachingEndOfVideo = preferenceStore.getBoolean("close_after_eof")
+
+  val allowGesturesInPanels = preferenceStore.getBoolean("allow_gestures_in_panels")
 }

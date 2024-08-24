@@ -57,6 +57,7 @@ import live.mehiz.mpvkt.BuildConfig
 import live.mehiz.mpvkt.MainActivity
 import live.mehiz.mpvkt.R
 import live.mehiz.mpvkt.ui.theme.MpvKtTheme
+import live.mehiz.mpvkt.ui.theme.spacing
 import java.io.BufferedReader
 import java.io.File
 import java.io.InputStreamReader
@@ -83,7 +84,12 @@ class CrashActivity : ComponentActivity() {
     val process = Runtime.getRuntime()
     val reader = BufferedReader(InputStreamReader(process.exec("logcat -d").inputStream))
     val logcat = StringBuilder()
-    reader.lines().forEach(logcat::appendLine)
+    // reader.lines() looks much nicer so why not use it on devices that support it?
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+      reader.lines().forEach(logcat::append)
+    } else {
+      reader.readLines().forEach(logcat::appendLine)
+    }
     // clear logcat so it doesn't pollute subsequent crashes
     process.exec("logcat -c")
     return logcat.toString()
@@ -147,11 +153,11 @@ class CrashActivity : ComponentActivity() {
                 strokeWidth = Dp.Hairline.value,
               )
             }
-            .padding(vertical = 8.dp, horizontal = 16.dp),
-          verticalArrangement = Arrangement.spacedBy(4.dp),
+            .padding(vertical = MaterialTheme.spacing.smaller, horizontal = MaterialTheme.spacing.medium),
+          verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.extraSmall),
         ) {
           Row(
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.smaller),
           ) {
             Button(
               onClick = {
@@ -189,9 +195,9 @@ class CrashActivity : ComponentActivity() {
       Column(
         modifier = Modifier
           .padding(paddingValues)
-          .padding(horizontal = 16.dp)
+          .padding(horizontal = MaterialTheme.spacing.medium)
           .verticalScroll(rememberScrollState()),
-        verticalArrangement = Arrangement.spacedBy(16.dp),
+        verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.medium),
       ) {
         Spacer(Modifier.height(paddingValues.calculateTopPadding()))
         Icon(
@@ -239,7 +245,7 @@ class CrashActivity : ComponentActivity() {
             text = logs,
             fontFamily = FontFamily.Monospace,
             style = MaterialTheme.typography.labelMedium,
-            modifier = Modifier.padding(horizontal = 8.dp, vertical = 8.dp),
+            modifier = Modifier.padding(MaterialTheme.spacing.smaller),
           )
         }
       }

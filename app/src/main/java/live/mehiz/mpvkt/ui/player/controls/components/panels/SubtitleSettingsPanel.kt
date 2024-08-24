@@ -35,8 +35,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
+import live.mehiz.mpvkt.R
 import live.mehiz.mpvkt.ui.theme.spacing
 
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
@@ -86,8 +88,8 @@ fun SubtitleSettingsPanel(
           state = pagerState,
           pageSize = PageSize.Fixed(LocalConfiguration.current.screenWidthDp.dp * 0.9f),
           verticalAlignment = Alignment.Top,
-          pageSpacing = 8.dp,
-          contentPadding = PaddingValues(horizontal = 8.dp),
+          pageSpacing = MaterialTheme.spacing.smaller,
+          contentPadding = PaddingValues(horizontal = MaterialTheme.spacing.smaller),
           beyondBoundsPageCount = 1,
         ) { page ->
           cards(page, Modifier.fillMaxWidth())
@@ -111,7 +113,7 @@ fun SubtitleSettingsPanel(
           horizontalArrangement = Arrangement.SpaceBetween,
         ) {
           Text(
-            text = "Subtitle settings",
+            text = stringResource(id = R.string.player_sheets_subtitles_settings_title),
             style = MaterialTheme.typography.headlineMedium.copy(
               shadow = Shadow(blurRadius = 20f),
             ),

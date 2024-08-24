@@ -17,6 +17,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CardElevation
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -28,7 +29,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
+import live.mehiz.mpvkt.ui.theme.spacing
 
 @SuppressLint("UnrememberedMutableState")
 @Composable
@@ -54,7 +55,7 @@ fun ExpandableCard(
     Row(
       modifier = Modifier
         .clickable(onClick = { onExpand(!isExpanded) })
-        .padding(start = 16.dp),
+        .padding(start = MaterialTheme.spacing.medium),
       verticalAlignment = Alignment.CenterVertically,
     ) {
       title(isExpanded)

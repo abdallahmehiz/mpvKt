@@ -62,7 +62,7 @@ fun CurrentChapter(
     ) { currentChapter ->
       Row(
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(4.dp)
+        horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.extraSmall)
       ) {
         Icon(
           imageVector = Icons.Default.Bookmarks,

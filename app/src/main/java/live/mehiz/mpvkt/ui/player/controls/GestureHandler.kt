@@ -46,6 +46,7 @@ import live.mehiz.mpvkt.preferences.PlayerPreferences
 import live.mehiz.mpvkt.preferences.preference.collectAsState
 import live.mehiz.mpvkt.presentation.components.LeftSideOvalShape
 import live.mehiz.mpvkt.presentation.components.RightSideOvalShape
+import live.mehiz.mpvkt.ui.player.Panels
 import live.mehiz.mpvkt.ui.player.PlayerUpdates
 import live.mehiz.mpvkt.ui.player.PlayerViewModel
 import live.mehiz.mpvkt.ui.player.controls.components.DoubleTapSeekSecondsView
@@ -57,6 +58,8 @@ import org.koin.compose.koinInject
 fun GestureHandler(modifier: Modifier = Modifier) {
   val viewModel = koinInject<PlayerViewModel>()
   val playerPreferences = koinInject<PlayerPreferences>()
+  val panelShown by viewModel.panelShown.collectAsState()
+  val allowGesturesInPanels by playerPreferences.allowGesturesInPanels.collectAsState()
   val duration by viewModel.duration.collectAsState()
   val position by viewModel.pos.collectAsState()
   val controlsShown by viewModel.controlsShown.collectAsState()
@@ -169,6 +172,9 @@ fun GestureHandler(modifier: Modifier = Modifier) {
             }
           },
           onPress = {
+            if (panelShown != Panels.None && !allowGesturesInPanels) {
+              viewModel.panelShown.update { Panels.None }
+            }
             val press = PressInteraction.Press(
               it.copy(x = if (it.x > size.width * 3 / 5) it.x - size.width * 0.6f else it.x),
             )

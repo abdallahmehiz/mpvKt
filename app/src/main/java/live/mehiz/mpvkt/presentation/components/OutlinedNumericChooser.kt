@@ -7,6 +7,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddCircle
 import androidx.compose.material.icons.filled.RemoveCircle
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -21,6 +22,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import live.mehiz.mpvkt.R
+import live.mehiz.mpvkt.ui.theme.spacing
 
 @Composable
 fun OutlinedNumericChooser(
@@ -37,7 +39,7 @@ fun OutlinedNumericChooser(
   Row(
     modifier = modifier,
     verticalAlignment = Alignment.CenterVertically,
-    horizontalArrangement = Arrangement.spacedBy(8.dp),
+    horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.smaller),
   ) {
     RepeatingIconButton(onClick = { onChange(value - step) }) {
       Icon(Icons.Filled.RemoveCircle, null)

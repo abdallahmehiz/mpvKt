@@ -241,7 +241,6 @@ class PlayerViewModel(
     val trackCount = MPVLib.getPropertyInt("track-list/count")
     MPVLib.command(arrayOf("audio-add", path, "cached"))
     if (trackCount == MPVLib.getPropertyInt("track-list/count")) return
-    if (activity.player.aid != audioTracks.value.size) return
     _audioTracks.update { it.plus(Track(activity.player.aid, path, null)) }
     _selectedAudio.update { activity.player.aid }
   }

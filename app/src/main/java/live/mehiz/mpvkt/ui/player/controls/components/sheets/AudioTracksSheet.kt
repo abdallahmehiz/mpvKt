@@ -9,6 +9,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreTime
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -17,10 +18,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
 import kotlinx.collections.immutable.ImmutableList
 import live.mehiz.mpvkt.R
 import live.mehiz.mpvkt.ui.player.Track
+import live.mehiz.mpvkt.ui.theme.spacing
 
 @Composable
 fun AudioTracksSheet(
@@ -68,9 +69,9 @@ fun AudioTrackRow(
     modifier = modifier
       .fillMaxWidth()
       .clickable(onClick = onClick)
-      .padding(start = 8.dp, end = 16.dp),
+      .padding(start = MaterialTheme.spacing.smaller, end = MaterialTheme.spacing.medium),
     verticalAlignment = Alignment.CenterVertically,
-    horizontalArrangement = Arrangement.spacedBy(8.dp),
+    horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.smaller),
   ) {
     RadioButton(
       isSelected,
