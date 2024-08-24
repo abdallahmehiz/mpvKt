@@ -7,6 +7,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.outlined.Audiotrack
 import androidx.compose.material.icons.outlined.Code
+import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.Memory
 import androidx.compose.material.icons.outlined.Palette
 import androidx.compose.material.icons.outlined.PlayCircle
@@ -53,38 +54,51 @@ object PreferencesScreen : Screen() {
           preference(
             key = "appearance",
             title = { Text(text = stringResource(id = R.string.pref_appearance_title)) },
+            summary = { Text(text = stringResource(id = R.string.pref_appearance_summary)) },
             icon = { Icon(Icons.Outlined.Palette, null) },
             onClick = { navigator.push(AppearancePreferencesScreen) },
           )
           preference(
             key = "player",
             title = { Text(text = stringResource(id = R.string.pref_player)) },
+            summary = { Text(text = stringResource(id = R.string.pref_player_summary)) },
             icon = { Icon(Icons.Outlined.PlayCircle, null) },
             onClick = { navigator.push(PlayerPreferencesScreen) },
           )
           preference(
             key = "decoder",
             title = { Text(text = stringResource(id = R.string.pref_decoder)) },
+            summary = { Text(text = stringResource(id = R.string.pref_decoder_summary)) },
             icon = { Icon(Icons.Outlined.Memory, null) },
             onClick = { navigator.push(DecoderPreferencesScreen) },
           )
           preference(
             key = "subtitles",
             title = { Text(text = stringResource(id = R.string.pref_subtitles)) },
+            summary = { Text(text = stringResource(id = R.string.pref_subtitles_summary)) },
             icon = { Icon(Icons.Outlined.Subtitles, null) },
             onClick = { navigator.push(SubtitlesPreferencesScreen) },
           )
           preference(
             key = "audio",
             title = { Text(text = stringResource(id = R.string.pref_audio)) },
+            summary = { Text(text = stringResource(id = R.string.pref_audio_summary)) },
             icon = { Icon(Icons.Outlined.Audiotrack, null) },
             onClick = { navigator.push(AudioPreferencesScreen) },
           )
           preference(
             key = "advanced",
             title = { Text(text = stringResource(R.string.pref_advanced)) },
+            summary = { Text(text = stringResource(id = R.string.pref_advanced_summary)) },
             icon = { Icon(Icons.Outlined.Code, null) },
             onClick = { navigator.push(AdvancedPreferencesScreen) }
+          )
+          preference(
+            key = "about",
+            title = { Text(text = stringResource(id = R.string.pref_about_title)) },
+            summary = { Text(text = stringResource(id = R.string.pref_about_summary)) },
+            icon = { Icon(Icons.Outlined.Info, null) },
+            onClick = { navigator.push(AboutScreen) },
           )
         }
       }

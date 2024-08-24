@@ -96,8 +96,8 @@ class PlayerViewModel(
     }
   }
 
-  fun cancelTimer() {
-    timerJob?.cancel()
+  fun getDecoder() {
+    _currentDecoder.update { getDecoderFromValue(activity.player.hwdecActive) }
   }
 
   fun cycleDecoders() {

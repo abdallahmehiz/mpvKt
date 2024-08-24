@@ -11,6 +11,7 @@ plugins {
   alias(libs.plugins.kotlin.compose.compiler)
   alias(libs.plugins.room)
   alias(libs.plugins.detekt)
+  alias(libs.plugins.about.libraries)
 }
 
 android {
@@ -121,6 +122,8 @@ dependencies {
   implementation(libs.bundles.koin)
   implementation(libs.bundles.voyager)
   implementation(libs.compose.prefs)
+  implementation(libs.bundles.about.libs)
+  implementation(libs.simple.icons)
 
   implementation(libs.room.runtime)
   ksp(libs.room.compiler)

@@ -5,6 +5,7 @@ import android.content.Intent
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -33,6 +34,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.navigator.LocalNavigator
@@ -58,6 +60,12 @@ object HomeScreen : Screen() {
             IconButton(onClick = { navigator.push(PreferencesScreen) }) {
               Icon(Icons.Default.Settings, null)
             }
+          },
+          navigationIcon = {
+            Image(
+              painter = painterResource(id = R.drawable.ic_launcher_foreground),
+              contentDescription = "app_logo",
+            )
           },
         )
       },

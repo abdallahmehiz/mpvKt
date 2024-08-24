@@ -89,19 +89,6 @@ class CrashActivity : ComponentActivity() {
     return logcat.toString()
   }
 
-  private fun collectDeviceInfo(): String {
-    return """
-      App version: ${BuildConfig.VERSION_NAME} (${BuildConfig.GIT_SHA}/${BuildConfig.BUILD_TIME})
-      Android version: ${Build.VERSION.RELEASE} (${Build.VERSION.SDK_INT})
-      Device brand: ${Build.BRAND}
-      Device manufacturer: ${Build.MANUFACTURER}
-      Device model: ${Build.MODEL} (${Build.DEVICE})
-      MPV version: ${Utils.VERSIONS.mpv}
-      ffmpeg version: ${Utils.VERSIONS.ffmpeg}
-      libplacebo version: ${Utils.VERSIONS.libPlacebo}
-    """.trimIndent()
-  }
-
   private fun concatLogs(
     deviceInfo: String,
     crashLogs: String,
@@ -120,7 +107,7 @@ class CrashActivity : ComponentActivity() {
 
   private suspend fun dumpLogs(
     exceptionString: String,
-    logcat: String
+    logcat: String,
   ) {
     withContext(NonCancellable) {
       val file = File(applicationContext.cacheDir, "mpvKt_logs.txt")
@@ -179,8 +166,8 @@ class CrashActivity : ComponentActivity() {
                 clipboardManager.setPrimaryClip(
                   ClipData.newPlainText(
                     null,
-                    concatLogs(collectDeviceInfo(), exceptionString, logcat)
-                  )
+                    concatLogs(collectDeviceInfo(), exceptionString, logcat),
+                  ),
                 )
               },
             ) {
@@ -239,7 +226,7 @@ class CrashActivity : ComponentActivity() {
   @Composable
   fun LogsContainer(
     logs: String,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
   ) {
     LazyRow(
       modifier = modifier
@@ -258,4 +245,17 @@ class CrashActivity : ComponentActivity() {
       }
     }
   }
+}
+
+fun collectDeviceInfo(): String {
+  return """
+    App version: ${BuildConfig.VERSION_NAME} (${BuildConfig.GIT_SHA}/${BuildConfig.BUILD_TIME})
+    Android version: ${Build.VERSION.RELEASE} (${Build.VERSION.SDK_INT})
+    Device brand: ${Build.BRAND}
+    Device manufacturer: ${Build.MANUFACTURER}
+    Device model: ${Build.MODEL} (${Build.DEVICE})
+    MPV version: ${Utils.VERSIONS.mpv}
+    ffmpeg version: ${Utils.VERSIONS.ffmpeg}
+    libplacebo version: ${Utils.VERSIONS.libPlacebo}
+  """.trimIndent()
 }

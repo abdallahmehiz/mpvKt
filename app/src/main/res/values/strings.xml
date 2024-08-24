@@ -5,7 +5,7 @@
     <string name="generic_share">Share</string>
     <string name="generic_confirm">Confirm</string>
     <string name="generic_cancel">Cancel</string>
-    <string name="generic_ok">Ok</string>
+    <string name="generic_ok">OK</string>
     <string name="generic_unit_ms">ms</string>
 
     <string name="home_pick_file">Pick a file</string>
@@ -15,7 +15,9 @@
     <string name="home_invalid_protocol">Invalid protocol</string>
 
     <string name="pref_preferences">Preferences</string>
+
     <string name="pref_appearance_title">Appearance</string>
+    <string name="pref_appearance_summary">Dark mode, material you</string>
     <string name="pref_appearance_category_theme">Theme</string>
     <string name="pref_appearance_darkmode_system">System</string>
     <string name="pref_appearance_darkmode_light">Light</string>
@@ -25,6 +27,7 @@
     <string name="pref_appearance_material_you_summary_disabled">Only available for Android 12 and newer.</string>
 
     <string name="pref_player">Player</string>
+    <string name="pref_player_summary">Orientation, gestures and controls</string>
     <string name="pref_player_orientation">Orientation</string>
     <string name="pref_player_orientation_free">Free</string>
     <string name="pref_player_orientation_video">Video</string>
@@ -54,6 +57,7 @@
     <string name="pref_player_controls_show_chapters_summary">Only appears if the video has chapters.</string>
 
     <string name="pref_decoder">Decoder</string>
+    <string name="pref_decoder_summary">Hardware decoding, pixel format, debanding</string>
     <string name="pref_decoder_try_hw_dec_title">Try hardware decoding</string>
     <string name="pref_decoder_gpu_next_title">Use gpu-next</string>
     <string name="pref_decoder_gpu_next_summary">A new rendering backend.</string>
@@ -62,10 +66,12 @@
     <string name="pref_decoder_yuv420p_summary">May fix black screens on some video codecs, can also improve performance at the cost of quality.</string>
 
     <string name="pref_subtitles">Subtitles</string>
+    <string name="pref_subtitles_summary">Preferred languages, fonts</string>
     <string name="pref_preferred_languages">Preferred languages</string>
     <string name="pref_subtitles_fonts_dir">Fonts directory</string>
 
     <string name="pref_audio">Audio</string>
+    <string name="pref_audio_summary">Preferred languages, audio channels, pitch correction</string>
     <string name="pref_audio_pitch_correction_title">Enable audio pitch correction</string>
     <string name="pref_audio_pitch_correction_summary">Prevents the audio from becoming high-pitched at faster speeds and low-pitched at slower speeds.</string>
     <string name="pref_audio_channels">Audio channels</string>
@@ -76,6 +82,7 @@
     <string name="pref_audio_channels_stereo_reversed">Reversed Stereo</string>
 
     <string name="pref_advanced">Advanced</string>
+    <string name="pref_advanced_summary">Configuration location, mpv.conf, input.conf</string>
     <string name="pref_advanced_mpv_conf_storage_location">pick mpv configuration storage location</string>
     <string name="pref_advanced_mpv_conf">Edit mpv.conf</string>
     <string name="pref_advanced_input_conf">Edit input.conf</string>
@@ -87,6 +94,11 @@
     <string name="pref_advanced_cleared_fonts_cache">Cleared cached fonts</string>
     <string name="pref_advanced_clear_mpv_conf_cache">Clear cached mpv configurations</string>
     <string name="pref_advanced_cleared_mpv_conf_cache">Cleared cached mpv configurations</string>
+
+    <string name="pref_about_title">About</string>
+    <string name="pref_about_summary">Acknowledgments, licenses</string>
+    <string name="pref_about_app_version">App version</string>
+    <string name="pref_about_oss_libraries">Open source libraries</string>
 
     <string name="player_sheets_add_ext_sub">Add external subtitles</string>
     <string name="player_sheets_add_ext_audio">Add external audio tracks</string>
@@ -154,6 +166,8 @@
     <string name="timer_picker_pick_time">Pick time</string>
 
     <string name="toast_sleep_timer_ended">Sleep timer ended</string>
+
+    <string name="github_repo_url">https://github.com/abdallahmehiz/mpvKt</string>
 
     <plurals name="plural_items">
         <item quantity="one">%1$d item</item>

@@ -459,10 +459,10 @@ class PlayerActivity : AppCompatActivity() {
   internal fun onObserverEvent(property: String, value: String) {
     when (property) {
       "speed" -> viewModel.playbackSpeed.update { value.toFloat() }
-      "hwdec-current" -> Decoder.entries.find { it.value == value }?.let { viewModel.updateDecoder(it) }
       "aid" -> trackId(value)?.let { viewModel.selectAudio(it) }
       "sid" -> trackId(value)?.let { viewModel.setSubtitle(it, viewModel.selectedSubtitles.value.second) }
       "secondary-sid" -> trackId(value)?.let { viewModel.setSubtitle(viewModel.selectedSubtitles.value.first, it) }
+      "hwdec", "hwdec-current" -> viewModel.getDecoder()
     }
   }
 
@@ -674,6 +674,7 @@ class PlayerActivity : AppCompatActivity() {
     "sid" to MPVLib.mpvFormat.MPV_FORMAT_STRING,
     "secondary-sid" to MPVLib.mpvFormat.MPV_FORMAT_STRING,
     "aid" to MPVLib.mpvFormat.MPV_FORMAT_STRING,
-    "hwdec-current" to MPVLib.mpvFormat.MPV_FORMAT_STRING
+    "hwdec-current" to MPVLib.mpvFormat.MPV_FORMAT_STRING,
+    "hwdec" to MPVLib.mpvFormat.MPV_FORMAT_STRING
   )
 }
