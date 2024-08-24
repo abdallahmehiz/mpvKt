@@ -220,8 +220,9 @@ class PlayerViewModel(
     } else {
       url
     } ?: return
+    val trackCount = MPVLib.getPropertyInt("track-list/count")
     MPVLib.command(arrayOf("sub-add", path, "cached"))
-    if (activity.player.sid != subtitleTracks.value.size + 1) return
+    if (trackCount == MPVLib.getPropertyInt("track-list/count")) return
     _subtitleTracks.update { it.plus(Track(activity.player.sid, path, null)) }
     _selectedSubtitles.update { Pair(activity.player.sid, activity.player.secondarySid) }
   }
@@ -237,7 +238,9 @@ class PlayerViewModel(
     } else {
       url
     } ?: return
+    val trackCount = MPVLib.getPropertyInt("track-list/count")
     MPVLib.command(arrayOf("audio-add", path, "cached"))
+    if (trackCount == MPVLib.getPropertyInt("track-list/count")) return
     if (activity.player.aid != audioTracks.value.size) return
     _audioTracks.update { it.plus(Track(activity.player.aid, path, null)) }
     _selectedAudio.update { activity.player.aid }
