@@ -204,6 +204,7 @@ class PlayerViewModel(
   }
 
   fun updateChapter(index: Long) {
+    if (chapters.isEmpty()) return
     _currentChapter.update { chapters[index.toInt()] }
   }
 
