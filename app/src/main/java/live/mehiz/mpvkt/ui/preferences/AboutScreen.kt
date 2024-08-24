@@ -43,7 +43,6 @@ import live.mehiz.mpvkt.presentation.crash.collectDeviceInfo
 import live.mehiz.mpvkt.ui.theme.spacing
 import me.zhanghai.compose.preference.Preference
 import me.zhanghai.compose.preference.ProvidePreferenceLocals
-import java.util.Locale
 
 object AboutScreen : Screen() {
   @OptIn(ExperimentalMaterial3Api::class)
@@ -87,16 +86,15 @@ object AboutScreen : Screen() {
         HorizontalDivider()
         ProvidePreferenceLocals {
           Preference(
-            title = { Text(text = "App version") },
+            title = { Text(text = stringResource(id = R.string.pref_about_app_version)) },
             summary = {
               Text(
-                text = BuildConfig.BUILD_TYPE.replaceFirstChar {
-                  if (it.isLowerCase()) {
-                    it.titlecase(Locale.ROOT)
-                  } else {
-                    it.toString()
-                  }
-                } + " " + BuildConfig.VERSION_NAME + " " + "(${BuildConfig.BUILD_TIME})",
+                text = stringResource(
+                  id = R.string.pref_about_app_version_formatted,
+                  BuildConfig.BUILD_TYPE.replaceFirstChar { it.uppercaseChar() },
+                  BuildConfig.VERSION_NAME,
+                  BuildConfig.BUILD_TIME
+                )
               )
             },
             onClick = {

@@ -68,7 +68,7 @@ fun SeekbarWithTimers(
         progressColor = MaterialTheme.colorScheme.primary,
         thumbColor = MaterialTheme.colorScheme.primary,
         trackColor = MaterialTheme.colorScheme.background,
-        readAheadColor = MaterialTheme.colorScheme.secondary,
+        readAheadColor = MaterialTheme.colorScheme.inversePrimary,
       ),
     )
     VideoTimer(

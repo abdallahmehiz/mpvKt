@@ -138,7 +138,7 @@ object PlayerPreferencesScreen : Screen() {
           switchPreference(
             preferences.allowGesturesInPanels.key(),
             defaultValue = preferences.allowGesturesInPanels.defaultValue(),
-            title = { Text(text = "Allow gestures in panels") },
+            title = { Text(text = stringResource(id = R.string.pref_player_controls_allow_gestures_in_panels)) },
           )
           switchPreference(
             preferences.showChaptersButton.key(),

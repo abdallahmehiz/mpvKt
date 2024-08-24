@@ -41,7 +41,6 @@ object SubtitlesPreferencesScreen : Screen() {
     val context = LocalContext.current
     val navigator = LocalNavigator.currentOrThrow
     val preferences = koinInject<SubtitlesPreferences>()
-    val fontsFolder by preferences.fontsFolder.collectAsState()
 
     Scaffold(
       topBar = {

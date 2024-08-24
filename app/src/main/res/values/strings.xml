@@ -52,6 +52,7 @@
     <string name="pref_player_gestures_hold_for_double_speed">Hold for x2 speed</string>
 
     <string name="pref_player_controls">Controls</string>
+    <string name="pref_player_controls_allow_gestures_in_panels">Allow gestures in panels</string>
     <string name="pref_player_controls_show_chapter_indicator">Show current chapter indicator</string>
     <string name="pref_player_controls_show_chapters_button">Show chapters select button</string>
     <string name="pref_player_controls_show_chapters_summary">Only appears if the video has chapters.</string>
@@ -98,6 +99,7 @@
     <string name="pref_about_title">About</string>
     <string name="pref_about_summary">Acknowledgments, licenses</string>
     <string name="pref_about_app_version">App version</string>
+    <string name="pref_about_app_version_formatted">%s %s (%s)</string>
     <string name="pref_about_oss_libraries">Open source libraries</string>
 
     <string name="player_sheets_add_ext_sub">Add external subtitles</string>
