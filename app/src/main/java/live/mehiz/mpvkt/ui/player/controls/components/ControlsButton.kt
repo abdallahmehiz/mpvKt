@@ -49,7 +49,7 @@ fun ControlsButton(
         interactionSource = interactionSource,
         indication = rememberRipple(),
       )
-      .padding(MaterialTheme.spacing.small),
+      .padding(MaterialTheme.spacing.medium),
   ) {
     Icon(
       icon,
@@ -84,7 +84,7 @@ fun ControlsButton(
         interactionSource = interactionSource,
         indication = rememberRipple(),
       )
-      .padding(MaterialTheme.spacing.small),
+      .padding(MaterialTheme.spacing.medium),
   ) {
     Text(
       text,

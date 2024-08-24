@@ -97,7 +97,10 @@ fun MoreSheet(
             TimePickerDialog(
               remainingTime = remainingTime ?: 0,
               onDismissRequest = { isSleepTimerDialogShown = false },
-              onTimeSelect = { viewModel.startTimer(it) }
+              onTimeSelect = {
+                if (it < 1) return@TimePickerDialog
+                viewModel.startTimer(it)
+              }
             )
           }
           TextButton(onClick = onEnterFiltersPanel) {

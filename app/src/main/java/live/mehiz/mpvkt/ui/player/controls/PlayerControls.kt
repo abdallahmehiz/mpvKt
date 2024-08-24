@@ -2,6 +2,8 @@ package live.mehiz.mpvkt.ui.player.controls
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.FiniteAnimationSpec
+import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -134,8 +136,8 @@ fun PlayerControls(
       }
       AnimatedVisibility(
         isBrightnessSliderShown,
-        enter = slideInHorizontally { it } + fadeIn(),
-        exit = slideOutHorizontally { it } + fadeOut(),
+        enter = slideInHorizontally(playControlsAnimationSpec()) { it } + fadeIn(playControlsAnimationSpec()),
+        exit = slideOutHorizontally(playControlsAnimationSpec()) { it } + fadeOut(playControlsAnimationSpec()),
         modifier = Modifier.constrainAs(brightnessSlider) {
           end.linkTo(parent.end, spacing.medium)
           top.linkTo(parent.top)
@@ -145,8 +147,8 @@ fun PlayerControls(
 
       AnimatedVisibility(
         isVolumeSliderShown,
-        enter = slideInHorizontally { -it } + fadeIn(),
-        exit = slideOutHorizontally { -it } + fadeOut(),
+        enter = slideInHorizontally(playControlsAnimationSpec()) { -it } + fadeIn(playControlsAnimationSpec()),
+        exit = slideOutHorizontally(playControlsAnimationSpec()) { -it } + fadeOut(playControlsAnimationSpec()),
         modifier = Modifier.constrainAs(volumeSlider) {
           start.linkTo(parent.start, spacing.medium)
           top.linkTo(parent.top)
@@ -170,8 +172,8 @@ fun PlayerControls(
       }
       AnimatedVisibility(
         currentPlayerUpdate != PlayerUpdates.None,
-        enter = fadeIn(),
-        exit = fadeOut(),
+        enter = fadeIn(playControlsAnimationSpec()),
+        exit = fadeOut(playControlsAnimationSpec()),
         modifier = Modifier.constrainAs(playerUpdates) {
           linkTo(parent.start, parent.end)
           linkTo(parent.top, parent.bottom, bias = 0.2f)
@@ -200,8 +202,8 @@ fun PlayerControls(
       }
       AnimatedVisibility(
         visible = (controlsShown && !areControlsLocked) || isLoading,
-        enter = fadeIn(),
-        exit = fadeOut(),
+        enter = fadeIn(playControlsAnimationSpec()),
+        exit = fadeOut(playControlsAnimationSpec()),
         modifier = Modifier.constrainAs(playerPauseButton) {
           end.linkTo(parent.absoluteRight)
           start.linkTo(parent.absoluteLeft)
@@ -230,8 +232,8 @@ fun PlayerControls(
       }
       AnimatedVisibility(
         visible = (controlsShown || seekBarShown) && !areControlsLocked,
-        enter = slideInVertically(initialOffsetY = { it }) + fadeIn(),
-        exit = slideOutVertically(targetOffsetY = { it }) + fadeOut(),
+        enter = slideInVertically(playControlsAnimationSpec()) { it } + fadeIn(playControlsAnimationSpec()),
+        exit = slideOutVertically(playControlsAnimationSpec()) { it } + fadeOut(playControlsAnimationSpec()),
         modifier = Modifier.constrainAs(seekbar) {
           bottom.linkTo(parent.bottom, spacing.medium)
         },
@@ -256,8 +258,8 @@ fun PlayerControls(
       }
       AnimatedVisibility(
         controlsShown && !areControlsLocked,
-        enter = slideInHorizontally { -it } + fadeIn(),
-        exit = slideOutHorizontally { -it } + fadeOut(),
+        enter = slideInHorizontally(playControlsAnimationSpec()) { -it } + fadeIn(playControlsAnimationSpec()),
+        exit = slideOutHorizontally(playControlsAnimationSpec()) { -it } + fadeOut(playControlsAnimationSpec()),
         modifier = Modifier.constrainAs(topLeftControls) {
           top.linkTo(parent.top, spacing.medium)
           start.linkTo(parent.start)
@@ -268,8 +270,8 @@ fun PlayerControls(
       // Top right controls
       AnimatedVisibility(
         controlsShown && !areControlsLocked,
-        enter = slideInHorizontally(initialOffsetX = { it }) + fadeIn(),
-        exit = slideOutHorizontally(targetOffsetX = { it }) + fadeOut(),
+        enter = slideInHorizontally(playControlsAnimationSpec()) { it } + fadeIn(playControlsAnimationSpec()),
+        exit = slideOutHorizontally(playControlsAnimationSpec()) { it } + fadeOut(playControlsAnimationSpec()),
         modifier = Modifier.constrainAs(topRightControls) {
           top.linkTo(parent.top, spacing.medium)
           end.linkTo(parent.end)
@@ -278,8 +280,8 @@ fun PlayerControls(
       // Bottom right controls
       AnimatedVisibility(
         controlsShown && !areControlsLocked,
-        enter = slideInHorizontally(initialOffsetX = { it }) + fadeIn(),
-        exit = slideOutHorizontally(targetOffsetX = { it }) + fadeOut(),
+        enter = slideInHorizontally(playControlsAnimationSpec()) { it } + fadeIn(playControlsAnimationSpec()),
+        exit = slideOutHorizontally(playControlsAnimationSpec()) { it } + fadeOut(playControlsAnimationSpec()),
         modifier = Modifier.constrainAs(bottomRightControls) {
           bottom.linkTo(seekbar.top)
           end.linkTo(seekbar.end)
@@ -288,8 +290,8 @@ fun PlayerControls(
       // Bottom left controls
       AnimatedVisibility(
         controlsShown && !areControlsLocked,
-        enter = slideInHorizontally(initialOffsetX = { -it }) + fadeIn(),
-        exit = slideOutHorizontally(targetOffsetX = { -it }) + fadeOut(),
+        enter = slideInHorizontally(playControlsAnimationSpec()) { -it } + fadeIn(playControlsAnimationSpec()),
+        exit = slideOutHorizontally(playControlsAnimationSpec()) { -it } + fadeOut(playControlsAnimationSpec()),
         modifier = Modifier.constrainAs(bottomLeftControls) {
           bottom.linkTo(seekbar.top)
           start.linkTo(seekbar.start)
@@ -302,3 +304,8 @@ fun PlayerControls(
     PlayerPanels()
   }
 }
+
+fun <T> playControlsAnimationSpec(): FiniteAnimationSpec<T> = tween(
+  durationMillis = 300,
+  easing = LinearOutSlowInEasing
+)

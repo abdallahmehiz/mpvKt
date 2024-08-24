@@ -211,6 +211,9 @@ class PlayerActivity : AppCompatActivity() {
     MPVLib.setPropertyBoolean("input-default-bindings", true)
 
     player.addObserver(playerObserver)
+    additionalObservedProps.forEach {
+      MPVLib.observeProperty(it.key, it.value)
+    }
   }
 
   private fun setupAudio() {
@@ -371,6 +374,11 @@ class PlayerActivity : AppCompatActivity() {
     return filepath
   }
 
+  override fun onConfigurationChanged(newConfig: Configuration) {
+    viewModel.changeVideoAspect(playerPreferences.videoAspect.get())
+    super.onConfigurationChanged(newConfig)
+  }
+
   @Suppress("ReturnCount")
   fun openContentFd(uri: Uri): String? {
     if (uri.scheme != "content") return null
@@ -402,6 +410,7 @@ class PlayerActivity : AppCompatActivity() {
       "time-pos" -> viewModel.updatePlayBackPos(value.toFloat())
       "demuxer-cache-time" -> viewModel.updateReadAhead(value = value)
       "duration" -> viewModel.duration.update { value.toFloat() }
+      "chapter" -> viewModel.updateChapter(value)
     }
   }
 
@@ -439,9 +448,21 @@ class PlayerActivity : AppCompatActivity() {
     }
   }
 
+  val trackId: (String) -> Int? = {
+    when (it) {
+      "auto" -> null
+      "no" -> -1
+      else -> it.toInt()
+    }
+  }
+
   internal fun onObserverEvent(property: String, value: String) {
     when (property) {
       "speed" -> viewModel.playbackSpeed.update { value.toFloat() }
+      "hwdec-current" -> Decoder.entries.find { it.value == value }?.let { viewModel.updateDecoder(it) }
+      "aid" -> trackId(value)?.let { viewModel.selectAudio(it) }
+      "sid" -> trackId(value)?.let { viewModel.setSubtitle(it, viewModel.selectedSubtitles.value.second) }
+      "secondary-sid" -> trackId(value)?.let { viewModel.setSubtitle(viewModel.selectedSubtitles.value.first, it) }
     }
   }
 
@@ -459,10 +480,8 @@ class PlayerActivity : AppCompatActivity() {
         }
         setOrientation()
         viewModel.changeVideoAspect(playerPreferences.videoAspect.get())
-        viewModel.duration.value = player.duration!!.toFloat()
         viewModel.loadChapters()
         viewModel.loadTracks()
-        viewModel.getDecoder()
       }
 
       MPVLib.mpvEventId.MPV_EVENT_SEEK -> {
@@ -649,4 +668,12 @@ class PlayerActivity : AppCompatActivity() {
   companion object {
     const val TAG = "mpvKt"
   }
+
+  private val additionalObservedProps = mapOf(
+    "chapter" to MPVLib.mpvFormat.MPV_FORMAT_INT64,
+    "sid" to MPVLib.mpvFormat.MPV_FORMAT_STRING,
+    "secondary-sid" to MPVLib.mpvFormat.MPV_FORMAT_STRING,
+    "aid" to MPVLib.mpvFormat.MPV_FORMAT_STRING,
+    "hwdec-current" to MPVLib.mpvFormat.MPV_FORMAT_STRING
+  )
 }

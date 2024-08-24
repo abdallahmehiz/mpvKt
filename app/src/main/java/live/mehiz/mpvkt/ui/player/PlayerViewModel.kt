@@ -37,7 +37,7 @@ class PlayerViewModel(
 
   private val _subtitleTracks = MutableStateFlow<List<Track>>(emptyList())
   val subtitleTracks = _subtitleTracks.asStateFlow()
-  private val _selectedSubtitles = MutableStateFlow(listOf(-1, -1))
+  private val _selectedSubtitles = MutableStateFlow(Pair(-1, -1))
   val selectedSubtitles = _selectedSubtitles.asStateFlow()
 
   private val _audioTracks = MutableStateFlow<List<Track>>(emptyList())
@@ -98,10 +98,6 @@ class PlayerViewModel(
 
   fun cancelTimer() {
     timerJob?.cancel()
-  }
-
-  fun getDecoder() {
-    _currentDecoder.update { getDecoderFromValue(activity.player.hwdecActive) }
   }
 
   fun cycleDecoders() {
@@ -172,7 +168,7 @@ class PlayerViewModel(
         }
       }
       _subtitleTracks.update { subTracks }
-      _selectedSubtitles.update { listOf(activity.player.sid, activity.player.secondarySid) }
+      _selectedSubtitles.update { Pair(activity.player.sid, activity.player.secondarySid) }
       _audioTracks.update { audioTracks }
       _selectedAudio.update { activity.player.aid }
     }
@@ -182,19 +178,19 @@ class PlayerViewModel(
     val selectedSubs = selectedSubtitles.value
     _selectedSubtitles.update {
       when (id) {
-        selectedSubs[0] -> listOf(selectedSubs[1], -1)
-        selectedSubs[1] -> listOf(selectedSubs[0], -1)
+        selectedSubs.first -> Pair(selectedSubs.second, -1)
+        selectedSubs.second -> Pair(selectedSubs.first, -1)
         else -> {
-          if (selectedSubs[0] != -1) {
-            listOf(selectedSubs[0], id)
+          if (selectedSubs.first != -1) {
+            Pair(selectedSubs.first, id)
           } else {
-            listOf(id, -1)
+            Pair(id, -1)
           }
         }
       }
     }
-    activity.player.sid = _selectedSubtitles.value[0]
-    activity.player.secondarySid = _selectedSubtitles.value[1]
+    activity.player.sid = _selectedSubtitles.value.first
+    activity.player.secondarySid = _selectedSubtitles.value.second
   }
 
   fun loadChapters() {
@@ -205,13 +201,10 @@ class PlayerViewModel(
   fun selectChapter(index: Int) {
     val time = chapters[index].time
     seekTo(time.toInt())
-    updateChapter(time.toLong())
   }
 
-  fun updateChapter(time: Long) {
-    runCatching {
-      _currentChapter.update { chapters.last { it.time <= time } }
-    }
+  fun updateChapter(index: Long) {
+    _currentChapter.update { chapters[index.toInt()] }
   }
 
   fun selectAudio(id: Int) {
@@ -229,7 +222,11 @@ class PlayerViewModel(
     MPVLib.command(arrayOf("sub-add", path, "cached"))
     if (activity.player.sid != subtitleTracks.value.size + 1) return
     _subtitleTracks.update { it.plus(Track(activity.player.sid, path, null)) }
-    _selectedSubtitles.update { listOf(activity.player.sid, activity.player.secondarySid) }
+    _selectedSubtitles.update { Pair(activity.player.sid, activity.player.secondarySid) }
+  }
+
+  fun setSubtitle(sid: Int, secondarySid: Int) {
+    _selectedSubtitles.update { Pair(sid, secondarySid) }
   }
 
   fun addAudio(uri: Uri) {
@@ -247,7 +244,6 @@ class PlayerViewModel(
 
   fun updatePlayBackPos(pos: Float) {
     _pos.update { pos }
-    updateChapter(pos.toLong())
   }
 
   fun updateReadAhead(value: Long) {

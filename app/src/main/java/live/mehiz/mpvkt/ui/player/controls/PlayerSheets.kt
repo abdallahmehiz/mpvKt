@@ -42,7 +42,7 @@ fun PlayerSheets() {
       }
       SubtitlesSheet(
         tracks = subtitles.toImmutableList(),
-        selectedTracks = selectedSubs.toImmutableList(),
+        selectedTracks = selectedSubs.toList().toImmutableList(),
         onSelect = { viewModel.selectSub(it) },
         onAddSubtitle = { subtitlesPicker.launch(arrayOf("*/*")) },
         onOpenSubtitleSettings = {
