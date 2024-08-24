@@ -576,7 +576,7 @@ class PlayerActivity : AppCompatActivity() {
       val height = it
       val width = it * player.getVideoOutAspect()!!
       val rational = Rational(height, width.toInt()).toFloat()
-      if (rational in 0.41..2.40) builder.setAspectRatio(Rational(width.toInt(), height))
+      if (rational in 0.42..2.38) builder.setAspectRatio(Rational(width.toInt(), height))
     }
     return builder.build()
   }

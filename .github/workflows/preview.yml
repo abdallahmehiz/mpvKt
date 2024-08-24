@@ -30,6 +30,36 @@ jobs:
       - name: Make gradlew executable
         run: chmod +x ./gradlew
 
+      - name: Get previous preview
+        id: last_release
+        uses: InsonusK/get-latest-release@v1.1.0
+        with:
+          myToken: ${{ github.token }}
+          exclude_types: "draft"
+          view_top: 1
+
+      - name: Prepare build
+        run: |
+          set -e
+
+          commit_count=$(git rev-list --count HEAD)
+          echo "COMMIT_COUNT=$commit_count" >> $GITHUB_ENV
+          current_sha=$(git rev-parse HEAD)
+          echo "CURRENT_SHA=$current_sha" >> $GITHUB_ENV
+          prev_commit_count=$(echo "${{ steps.last_release.outputs.tag_name }}" | sed -e "s/^r//")
+          commit_count_diff=$(expr $commit_count - $prev_commit_count)
+          [ $commit_count_diff != 0 ] || exit 1
+          commit_count_diff_plus_one=$(expr $commit_count_diff + 1)
+          prev_release_sha=$(git log --topo-order -n $commit_count_diff_plus_one --skip $commit_count_diff --max-count 1 --pretty=format:"%H")
+          echo "PREV_RELEASE_SHA=$prev_release_sha" >> $GITHUB_ENV
+
+          echo "COMMIT_LOGS<<{delimiter}
+          $(curl -H "Accept: application/vnd.github.v3+json" \
+            "https://api.github.com/repos/abdallahmehiz/mpvKt/compare/$prev_release_sha...$current_sha" \
+            | jq '[.commits[]|{message:(.commit.message | split("\n")), username:.author.login}]' \
+            | jq -r '.[]|"- \(.message | first) (@\(.username))"')
+          {delimiter}" >> $GITHUB_ENV
+
       - name: Build with Gradle
         run: ./gradlew assemblePreview
 
@@ -43,13 +73,6 @@ jobs:
           keyPassword: ${{ secrets.KEY_PASSWORD }}
         env:
           BUILD_TOOLS_VERSION: "34.0.0"
-
-      - name: Prepare release
-        run: |
-          set -e
-          
-          echo "COMMIT_COUNT=$(git rev-list --count HEAD)" >> $GITHUB_ENV
-          echo "COMMIT_SHA=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
 
       - name: Copy build artifacts
         run: |
@@ -68,13 +91,21 @@ jobs:
           tag_name: r${{ env.COMMIT_COUNT }}
           name: mpvKt Preview r${{ env.COMMIT_COUNT }}
           body: |
+            ### Commits
+
+            https://github.com/abdallahmehiz/mpvKt/compare/${{ env.PREV_RELEASE_SHA }}...${{ env.CURRENT_SHA }}
+
+            ${{ env.COMMIT_LOGS }}
+            
+            ---
+
             ### Checksums
 
             | Variant | SHA-256 |
             | ------- | ------- |
-            | Universal | ${{ env.apk-universal-sha256 }}
             | arm64-v8a | ${{ env.apk-arm64-v8a-sha256 }}
             | armeabi-v7a | ${{ env.apk-armeabi-v7a-sha256 }}
+            | Universal | ${{ env.apk-universal-sha256 }}
             | x86 | ${{ env.apk-x86-sha256 }}
             | x86_64 | ${{ env.apk-x86_64-sha256 }} |
           files: |
