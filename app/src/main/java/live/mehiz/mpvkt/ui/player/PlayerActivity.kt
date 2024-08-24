@@ -375,7 +375,7 @@ class PlayerActivity : AppCompatActivity() {
   }
 
   override fun onConfigurationChanged(newConfig: Configuration) {
-    viewModel.changeVideoAspect(playerPreferences.videoAspect.get())
+    if (!isInPictureInPictureMode) viewModel.changeVideoAspect(playerPreferences.videoAspect.get())
     super.onConfigurationChanged(newConfig)
   }
 
