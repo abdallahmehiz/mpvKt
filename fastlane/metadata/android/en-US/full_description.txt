@@ -1,0 +1,8 @@
+mpvKt is a front-end for the versatile media player mpv, built on the libmpv library. It aims to combine the powerful features of mpv with an easier-to-use interface and additional functionality.
+
+ - Simpler and easier to use UI: Designed to make navigation and playback smoother, especially for those who want a straightforward media player experience.
+ - Advanced Configuration and Scripting: Offers the full capabilities of mpv's scripting and configuration for users who want to customize their playback 
+ - Picture-in-Picture (PiP): Continue watching videos while using other apps.
+ - Multi-Modal Controls: Includes customizable gestures for controlling volume, brightness, and playback, along with Keyboard input support.
+
+mpvKt aims to enhance the mpv experience by making it more accessible while retaining its flexibility and powerful playback capabilities.
