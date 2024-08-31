@@ -188,6 +188,7 @@ fun GestureHandler(modifier: Modifier = Modifier) {
             interactionSource.emit(PressInteraction.Release(press))
           },
           onLongPress = {
+            if (areControlsLocked) return@detectTapGestures
             if (!isLongPressing && !viewModel.paused.value) {
               haptics.performHapticFeedback(HapticFeedbackType.LongPress)
               isLongPressing = true
