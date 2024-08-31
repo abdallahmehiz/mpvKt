@@ -1,3 +1,4 @@
+import com.android.build.api.variant.FilterConfiguration
 import io.gitlab.arturbosch.detekt.Detekt
 import org.apache.commons.io.output.ByteArrayOutputStream
 import java.time.Instant
@@ -92,6 +93,20 @@ android {
   packaging {
     resources {
       excludes += "/META-INF/{AL2.0,LGPL2.1}"
+    }
+  }
+  val abiCodes = mapOf(
+    "armabi-v7a" to 1,
+    "arm64-v8a" to 2,
+    "x86" to 3,
+    "x86_64" to 4,
+  )
+  androidComponents {
+    onVariants { variant ->
+      variant.outputs.forEach { output ->
+        val abi = output.filters.find { it.filterType == FilterConfiguration.FilterType.ABI }?.identifier
+        output.versionCode.set((output.versionCode.orNull ?: 0) * 10 + (abiCodes[abi] ?: 0))
+      }
     }
   }
 }
