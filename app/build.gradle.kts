@@ -24,7 +24,7 @@ android {
     minSdk = 21
     targetSdk = 34
     versionCode = 6
-    versionName = "0.1.0"
+    versionName = "0.1.1"
 
     vectorDrawables {
       useSupportLibrary = true
@@ -182,4 +182,8 @@ fun runCommand(command: String): String {
     standardOutput = stdOut
   }
   return String(stdOut.toByteArray()).trim()
+}
+
+aboutLibraries {
+  excludeFields = arrayOf("generated")
 }
