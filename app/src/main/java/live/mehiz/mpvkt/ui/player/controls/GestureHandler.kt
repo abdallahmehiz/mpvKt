@@ -197,7 +197,7 @@ fun GestureHandler(modifier: Modifier = Modifier) {
           },
         )
       }
-      .pointerInput(Unit) {
+      .pointerInput(areControlsLocked) {
         if (!seekGesture || areControlsLocked) return@pointerInput
         var startingPosition = position
         var wasPlayerAlreadyPause = false
@@ -221,7 +221,7 @@ fun GestureHandler(modifier: Modifier = Modifier) {
           viewModel.gestureSeekAmount.update { (position - startingPosition).toInt() }
         }
       }
-      .pointerInput(Unit) {
+      .pointerInput(areControlsLocked) {
         if ((!brightnessGesture && !volumeGesture) || areControlsLocked) return@pointerInput
         var startingY = 0f
         var originalVolume = currentVolume
