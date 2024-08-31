@@ -96,7 +96,7 @@ android {
     }
   }
   val abiCodes = mapOf(
-    "armabi-v7a" to 1,
+    "armeabi-v7a" to 1,
     "arm64-v8a" to 2,
     "x86" to 3,
     "x86_64" to 4,
