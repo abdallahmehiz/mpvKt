@@ -1,6 +1,6 @@
 import io.gitlab.arturbosch.detekt.Detekt
 import org.apache.commons.io.output.ByteArrayOutputStream
-import java.time.LocalDateTime
+import java.time.Instant
 import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 
@@ -29,11 +29,16 @@ android {
       useSupportLibrary = true
     }
 
+    val timestamp: Long = if (project.hasProperty("timestamp")) {
+      project.properties["timestamp"].toString().toLong()
+    } else {
+      Instant.now().epochSecond
+    }
     val dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss")
     buildConfigField(
       "String",
       "BUILD_TIME",
-      "\"${LocalDateTime.now(ZoneOffset.UTC).format(dateTimeFormatter)}\"",
+      "\"${Instant.ofEpochSecond(timestamp).atOffset(ZoneOffset.UTC).format(dateTimeFormatter)}\"",
     )
 
     buildConfigField("String", "GIT_SHA", "\"${getCommitSha()}\"")

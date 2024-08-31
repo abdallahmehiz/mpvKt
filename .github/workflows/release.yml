@@ -23,8 +23,15 @@ jobs:
           distribution: 'adopt'
           java-version: 17
 
-      - name: Make gradlew executable
-        run: chmod +x ./gradlew
+      - name: Pre-build
+        run: |
+          set -e
+          
+          timestamp=`date +%s`
+          echo "timestamp=$timestamp" >> local.properties
+          echo "BUILD_TIMESTAMP=$timestamp" >> $GITHUB_ENV
+          
+          chmod +x ./gradlew
 
       - name: Build release with Gradle
         run: ./gradlew assembleRelease
@@ -56,6 +63,8 @@ jobs:
           cp app/build/outputs/apk/release/app-{}-release-unsigned-signed.apk mpvKt-{}-${{ env.VERSION_TAG }}.apk
           sha=$(sha256sum mpvKt-{}-${{ env.VERSION_TAG }}.apk | awk '\''{ print $1 }'\'')
           echo "apk-{}-sha256=$sha" >> $GITHUB_ENV'
+          
+          echo '{"timestamp": ${{ env.BUILD_TIMESTAMP }}}' | jq >> build-metadata.json
 
       - name: Create release
         uses: softprops/action-gh-release@v1
@@ -75,6 +84,7 @@ jobs:
             | x86 | ${{ env.apk-x86-sha256 }}
             | x86_64 | ${{ env.apk-x86_64-sha256 }} |
           files: |
+            build-metadata.json
             mpvKt-universal-${{ env.VERSION_TAG }}.apk
             mpvKt-arm64-v8a-${{ env.VERSION_TAG }}.apk
             mpvKt-armeabi-v7a-${{ env.VERSION_TAG }}.apk
