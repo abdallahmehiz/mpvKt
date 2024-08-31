@@ -28,7 +28,7 @@ jobs:
           set -e
           
           timestamp=`date +%s`
-          echo "timestamp=$timestamp" >> gradle.properties
+          echo -e "\ntimestamp=$timestamp" >> gradle.properties
           echo "BUILD_TIMESTAMP=$timestamp" >> $GITHUB_ENV
           
           chmod +x ./gradlew
