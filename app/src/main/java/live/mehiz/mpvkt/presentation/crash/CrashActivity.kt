@@ -86,7 +86,7 @@ class CrashActivity : ComponentActivity() {
     val logcat = StringBuilder()
     // reader.lines() looks much nicer so why not use it on devices that support it?
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-      reader.lines().forEach(logcat::append)
+      reader.lines().forEach(logcat::appendLine)
     } else {
       reader.readLines().forEach(logcat::appendLine)
     }
