@@ -239,11 +239,18 @@ class PlayerActivity : AppCompatActivity() {
     lifecycleScope.launch(Dispatchers.IO) { copyMPVFonts() }
 
     MPVLib.setPropertyString("slang", subtitlesPreferences.preferredLanguages.get())
-    MPVLib.setPropertyString("sub-ass-override", if (subtitlesPreferences.overrideAssSubs.get()) "force" else "no")
+    subtitlesPreferences.overrideAssSubs.get().let {
+      MPVLib.setPropertyString("sub-ass-override", if (it) "force" else "no")
+      MPVLib.setPropertyBoolean("sub-ass-justify", it)
+    }
 
     MPVLib.setPropertyString("sub-fonts-dir", applicationContext.cacheDir.path + "/fonts/")
     MPVLib.setPropertyString("sub-font", subtitlesPreferences.font.get())
 
+    MPVLib.setPropertyInt("sub-font-size", subtitlesPreferences.fontSize.get())
+    MPVLib.setPropertyBoolean("sub-bold", subtitlesPreferences.bold.get())
+    MPVLib.setPropertyBoolean("sub-italic", subtitlesPreferences.italic.get())
+    MPVLib.setPropertyString("sub-justify", subtitlesPreferences.justification.get().value)
     MPVLib.setPropertyString("sub-color", subtitlesPreferences.textColor.get().toColorHexString())
     MPVLib.setPropertyString("sub-border-color", subtitlesPreferences.borderColor.get().toColorHexString())
     MPVLib.setPropertyString("sub-back-color", subtitlesPreferences.backgroundColor.get().toColorHexString())
