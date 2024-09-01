@@ -97,7 +97,7 @@ fun PlayerControls(
     }
   }
   val transparentOverlay by animateColorAsState(
-    Color.Black.copy(if (controlsShown) 0.5f else 0f),
+    Color.Black.copy(if (controlsShown && !areControlsLocked) 0.5f else 0f),
     animationSpec = tween(500),
     label = "",
   )
