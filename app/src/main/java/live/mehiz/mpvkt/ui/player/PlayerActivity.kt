@@ -263,6 +263,7 @@ class PlayerActivity : AppCompatActivity() {
     MPVLib.setPropertyBoolean("sub-italic", subtitlesPreferences.italic.get())
     MPVLib.setPropertyString("sub-justify", subtitlesPreferences.justification.get().value)
     MPVLib.setPropertyString("sub-color", subtitlesPreferences.textColor.get().toColorHexString())
+    MPVLib.setPropertyInt("sub-border-size", subtitlesPreferences.borderSize.get())
     MPVLib.setPropertyString("sub-border-color", subtitlesPreferences.borderColor.get().toColorHexString())
     MPVLib.setPropertyString("sub-back-color", subtitlesPreferences.backgroundColor.get().toColorHexString())
 

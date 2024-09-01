@@ -93,7 +93,6 @@ object AboutScreen : Screen() {
                   id = R.string.pref_about_app_version_formatted,
                   BuildConfig.BUILD_TYPE.replaceFirstChar { it.uppercaseChar() },
                   BuildConfig.VERSION_NAME,
-                  BuildConfig.BUILD_TIME
                 )
               )
             },
