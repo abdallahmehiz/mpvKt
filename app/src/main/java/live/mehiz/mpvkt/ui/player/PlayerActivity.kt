@@ -161,6 +161,17 @@ class PlayerActivity : AppCompatActivity() {
     super.onUserLeaveHint()
   }
 
+  @SuppressLint("NewApi")
+  override fun onBackPressed() {
+    if (isPipSupported && player.paused == false && playerPreferences.automaticallyEnterPip.get()) {
+      if (viewModel.sheetShown.value == Sheets.None && viewModel.panelShown.value == Panels.None) {
+        enterPictureInPictureMode()
+      }
+    } else {
+      super.onBackPressed()
+    }
+  }
+
   override fun onStart() {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
       setPictureInPictureParams(createPipParams())
@@ -382,7 +393,9 @@ class PlayerActivity : AppCompatActivity() {
   }
 
   override fun onConfigurationChanged(newConfig: Configuration) {
-    if (!isInPictureInPictureMode) viewModel.changeVideoAspect(playerPreferences.videoAspect.get())
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+      if (!isInPictureInPictureMode) viewModel.changeVideoAspect(playerPreferences.videoAspect.get())
+    }
     super.onConfigurationChanged(newConfig)
   }
 
