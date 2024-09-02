@@ -38,7 +38,6 @@ import com.github.k1rakishou.fsaf.FileManager
 import `is`.xyz.mpv.MPVLib
 import `is`.xyz.mpv.Utils
 import `is`.xyz.mpv.Utils.PROTOCOLS
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -142,8 +141,8 @@ class PlayerActivity : AppCompatActivity() {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N && !isInPictureInPictureMode) {
       viewModel.pause()
     }
-    CoroutineScope(Dispatchers.IO).launch {
-      saveVideoPlaybackState()
+    lifecycleScope.launch(Dispatchers.IO) {
+      if ((player.timePos ?: 0) < (player.duration ?: 0)) saveVideoPlaybackState(false)
     }
     super.onPause()
   }
@@ -462,9 +461,7 @@ class PlayerActivity : AppCompatActivity() {
       }
 
       "eof-reached" -> {
-        if (value && playerPreferences.closeAfterReachingEndOfVideo.get()) {
-          endPlayback(EndPlaybackReason.PlaybackCompleted)
-        }
+        if (value) endPlayback(EndPlaybackReason.PlaybackCompleted)
       }
     }
   }
@@ -495,7 +492,7 @@ class PlayerActivity : AppCompatActivity() {
           val mediaTitle = MPVLib.getPropertyString("media-title")
           if (mediaTitle.isBlank() || mediaTitle.isDigitsOnly()) fileName else mediaTitle
         }
-        CoroutineScope(Dispatchers.IO).launch {
+        lifecycleScope.launch(Dispatchers.IO) {
           loadVideoPlaybackState(fileName)
           if (intent.hasExtra("position")) setupIntents(intent)
         }
@@ -515,20 +512,24 @@ class PlayerActivity : AppCompatActivity() {
     endPlayback(EndPlaybackReason.Error, err)
   }
 
-  private suspend fun saveVideoPlaybackState() {
+  private suspend fun saveVideoPlaybackState(finishedPlayback: Boolean) {
     if (!::fileName.isInitialized) return
     mpvKtDatabase.videoDataDao().upsert(
       PlaybackStateEntity(
         mediaTitle = fileName,
-        lastPosition = if (playerPreferences.savePositionOnQuit.get()) player.timePos ?: 0 else 0,
+        lastPosition = if (playerPreferences.savePositionOnQuit.get()) {
+          if (finishedPlayback) 0 else player.timePos ?: 0
+        } else {
+          0
+        },
         playbackSpeed = player.playbackSpeed ?: playerPreferences.defaultSpeed.get().toDouble(),
         sid = player.sid,
-        subDelay = (MPVLib.getPropertyDouble("sub-delay") * 1000).toInt(),
-        subSpeed = MPVLib.getPropertyDouble("sub-speed"),
+        subDelay = ((player.subDelay?: 0.0) * 1000).toInt(),
+        subSpeed = MPVLib.getPropertyDouble("sub-speed")?: 1.0,
         secondarySid = player.secondarySid,
-        secondarySubDelay = (MPVLib.getPropertyDouble("sub-delay") * 1000).toInt(),
+        secondarySubDelay = ((player.secondarySubDelay?: 0.0) * 1000).toInt(),
         aid = player.aid,
-        audioDelay = (MPVLib.getPropertyDouble("audio-delay") * 1000).toInt(),
+        audioDelay = ((MPVLib.getPropertyDouble("audio-delay")?: 0.0) * 1000).toInt(),
       ),
     )
   }
@@ -556,14 +557,18 @@ class PlayerActivity : AppCompatActivity() {
 
   private fun endPlayback(reason: EndPlaybackReason, cause: String? = null) {
     Log.d(TAG, "Ending playback")
-    CoroutineScope(Dispatchers.IO).launch { saveVideoPlaybackState() }
+    lifecycleScope.launch(Dispatchers.IO) {
+      saveVideoPlaybackState(true)
+    }
     val returnIntent = Intent()
     returnIntent.putExtra("end_by", reason.value)
     cause?.let { returnIntent.putExtra("cause", cause) }
     player.timePos?.let { returnIntent.putExtra("position", it * 1000) }
     player.duration?.let { returnIntent.putExtra("duration", it * 1000) }
     setResult(RESULT_OK, returnIntent)
-    finishAndRemoveTask()
+    if (playerPreferences.closeAfterReachingEndOfVideo.get()) {
+      finishAndRemoveTask()
+    }
   }
 
   override fun onNewIntent(intent: Intent) {
