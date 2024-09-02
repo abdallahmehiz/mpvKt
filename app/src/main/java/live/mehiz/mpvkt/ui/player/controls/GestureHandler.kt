@@ -85,9 +85,10 @@ fun GestureHandler(modifier: Modifier = Modifier) {
   val doubleTapToSeek by playerPreferences.doubleTapToSeek.collectAsState()
   val doubleTapToSeekDuration by playerPreferences.doubleTapToSeekDuration.collectAsState()
   val brightnessGesture = playerPreferences.brightnessGesture.get()
-  val volumeGesture = playerPreferences.volumeGesture.get()
-  val seekGesture = playerPreferences.horizontalSeekGesture.get()
+  val volumeGesture by playerPreferences.volumeGesture.collectAsState()
+  val seekGesture by playerPreferences.horizontalSeekGesture.collectAsState()
   val defaultSpeed by playerPreferences.defaultSpeed.collectAsState()
+  val showSeekbarWhenSeeking by playerPreferences.showSeekBarWhenSeeking.collectAsState()
   val doubleTapSeek: (Offset, IntSize) -> Unit = { offset, size ->
     targetAlpha = 0.2f
     val isForward = offset.x > 3 * size.width / 5
@@ -101,7 +102,7 @@ fun GestureHandler(modifier: Modifier = Modifier) {
       0
     }
     viewModel.seekBy(if (isSeekingForwards) doubleTapToSeekDuration else -doubleTapToSeekDuration)
-    viewModel.showSeekBar()
+    if (showSeekbarWhenSeeking) viewModel.showSeekBar()
   }
   var isLongPressing by remember { mutableStateOf(false) }
   val currentVolume by viewModel.currentVolume.collectAsState()
@@ -216,10 +217,10 @@ fun GestureHandler(modifier: Modifier = Modifier) {
         ) { change, dragAmount ->
           if (position >= duration && dragAmount > 0) return@detectHorizontalDragGestures
           if (position <= 0f && dragAmount < 0) return@detectHorizontalDragGestures
-          viewModel.showSeekBar()
           val seekBy = ((dragAmount * 150f / size.width).coerceIn(0f - position, duration - position)).toInt()
           viewModel.seekBy(seekBy)
           viewModel.gestureSeekAmount.update { (position - startingPosition).toInt() }
+          if (showSeekbarWhenSeeking) viewModel.showSeekBar()
         }
       }
       .pointerInput(areControlsLocked) {

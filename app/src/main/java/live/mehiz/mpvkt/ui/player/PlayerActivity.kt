@@ -524,12 +524,12 @@ class PlayerActivity : AppCompatActivity() {
         },
         playbackSpeed = player.playbackSpeed ?: playerPreferences.defaultSpeed.get().toDouble(),
         sid = player.sid,
-        subDelay = ((player.subDelay?: 0.0) * 1000).toInt(),
-        subSpeed = MPVLib.getPropertyDouble("sub-speed")?: 1.0,
+        subDelay = ((player.subDelay ?: 0.0) * 1000).toInt(),
+        subSpeed = MPVLib.getPropertyDouble("sub-speed") ?: 1.0,
         secondarySid = player.secondarySid,
-        secondarySubDelay = ((player.secondarySubDelay?: 0.0) * 1000).toInt(),
+        secondarySubDelay = ((player.secondarySubDelay ?: 0.0) * 1000).toInt(),
         aid = player.aid,
-        audioDelay = ((MPVLib.getPropertyDouble("audio-delay")?: 0.0) * 1000).toInt(),
+        audioDelay = ((MPVLib.getPropertyDouble("audio-delay") ?: 0.0) * 1000).toInt(),
       ),
     )
   }

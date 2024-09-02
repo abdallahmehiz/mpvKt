@@ -9,15 +9,16 @@ class PlayerPreferences(
   preferenceStore: PreferenceStore
 ) {
   val orientation = preferenceStore.getEnum("player_orientation", PlayerOrientation.SensorLandscape)
-  val invertDuration = preferenceStore.getBoolean("invert_duration", false)
+  val invertDuration = preferenceStore.getBoolean("invert_duration")
   val drawOverDisplayCutout = preferenceStore.getBoolean("draw_over_cutout", true)
 
   val doubleTapToPause = preferenceStore.getBoolean("double_tap_to_pause", true)
   val doubleTapToSeek = preferenceStore.getBoolean("double_tap_to_seek", true)
   val doubleTapToSeekDuration = preferenceStore.getInt("double_tap_to_seek_duration", 10)
   val holdForDoubleSpeed = preferenceStore.getBoolean("hold_for_double_speed", true)
-
   val horizontalSeekGesture = preferenceStore.getBoolean("horizontal_seek_gesture", true)
+  val showSeekBarWhenSeeking = preferenceStore.getBoolean("show_seekbar_when_seeking")
+
   val brightnessGesture = preferenceStore.getBoolean("gestures_brightness", true)
   val volumeGesture = preferenceStore.getBoolean("volume_brightness", true)
 

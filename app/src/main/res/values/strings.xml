@@ -42,9 +42,10 @@
     <string name="pref_player_double_tap_to_pause">Double tap to pause</string>
     <string name="pref_player_double_tap_to_seek">Double tap to seek</string>
     <string name="pref_player_double_tap_seek_duration">Double tap seek duration</string>
+    <string name="pref_player_show_seekbar_when_seeking">Show seekbar when seeking</string>
     <string name="pref_player_automatically_enter_pip">Automatically switch to PiP</string>
     <string name="pref_player_close_after_eof">Close after the end of playback</string>
-    
+
     <string name="pref_player_gestures">Gestures</string>
     <string name="pref_player_gestures_seek">Horizontal seek gestures</string>
     <string name="pref_player_gestures_brightness">Brightness gestures</string>

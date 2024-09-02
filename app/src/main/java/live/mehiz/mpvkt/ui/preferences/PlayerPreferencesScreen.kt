@@ -76,6 +76,22 @@ object PlayerPreferencesScreen : Screen() {
             defaultValue = preferences.savePositionOnQuit.defaultValue(),
             title = { Text(stringResource(R.string.pref_player_save_position_on_quit)) },
           )
+          if (context.packageManager.hasSystemFeature(PackageManager.FEATURE_PICTURE_IN_PICTURE)) {
+            switchPreference(
+              key = preferences.automaticallyEnterPip.key(),
+              defaultValue = preferences.automaticallyEnterPip.defaultValue(),
+              title = { Text(text = stringResource(id = R.string.pref_player_automatically_enter_pip)) },
+            )
+          }
+          switchPreference(
+            key = preferences.closeAfterReachingEndOfVideo.key(),
+            defaultValue = preferences.closeAfterReachingEndOfVideo.defaultValue(),
+            title = { Text(text = stringResource(id = R.string.pref_player_close_after_eof)) }
+          )
+          preferenceCategory(
+            "gestures",
+            title = { Text(stringResource(R.string.pref_player_gestures)) },
+          )
           switchPreference(
             key = preferences.doubleTapToPause.key(),
             defaultValue = preferences.doubleTapToPause.defaultValue(),
@@ -95,26 +111,15 @@ object PlayerPreferencesScreen : Screen() {
             summary = { Text(text = "${it}s") },
             enabled = { doubleTapToSeek },
           )
-          if (context.packageManager.hasSystemFeature(PackageManager.FEATURE_PICTURE_IN_PICTURE)) {
-            switchPreference(
-              key = preferences.automaticallyEnterPip.key(),
-              defaultValue = preferences.automaticallyEnterPip.defaultValue(),
-              title = { Text(text = stringResource(id = R.string.pref_player_automatically_enter_pip)) },
-            )
-          }
-          switchPreference(
-            key = preferences.closeAfterReachingEndOfVideo.key(),
-            defaultValue = preferences.closeAfterReachingEndOfVideo.defaultValue(),
-            title = { Text(text = stringResource(id = R.string.pref_player_close_after_eof)) }
-          )
-          preferenceCategory(
-            "gestures",
-            title = { Text(stringResource(R.string.pref_player_gestures)) },
-          )
           switchPreference(
             preferences.horizontalSeekGesture.key(),
             defaultValue = preferences.horizontalSeekGesture.get(),
             title = { Text(stringResource(R.string.pref_player_gestures_seek)) },
+          )
+          switchPreference(
+            preferences.showSeekBarWhenSeeking.key(),
+            defaultValue = preferences.showSeekBarWhenSeeking.defaultValue(),
+            title = { Text(stringResource(R.string.pref_player_show_seekbar_when_seeking)) }
           )
           switchPreference(
             preferences.brightnessGesture.key(),
