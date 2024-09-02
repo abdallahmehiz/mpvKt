@@ -6,6 +6,7 @@ import android.net.Uri
 import android.os.Build
 import android.provider.Settings
 import android.util.DisplayMetrics
+import android.util.Log
 import android.widget.Toast
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -150,22 +151,29 @@ class PlayerViewModel(
     MPVLib.getPropertyString("track-list/$it/type")
   }
 
+  private var trackLoadingJob: Job? = null
   fun loadTracks() {
-    viewModelScope.launch {
-      val tracksCount = MPVLib.getPropertyInt("track-list/count")!!
+    trackLoadingJob?.cancel()
+    trackLoadingJob = viewModelScope.launch {
       val possibleTrackTypes = listOf("video", "audio", "sub")
       val vidTracks = mutableListOf<Track>()
       val subTracks = mutableListOf<Track>()
       val audioTracks = mutableListOf(Track(-1, activity.getString(R.string.player_sheets_tracks_off), null))
-      for (i in 0..<tracksCount) {
-        val type = getTrackType(i)
-        if (!possibleTrackTypes.contains(type) || type == null) continue
-        when (type) {
-          "sub" -> subTracks.add(Track(getTrackMPVId(i), getTrackTitle(i), getTrackLanguage(i)))
-          "audio" -> audioTracks.add(Track(getTrackMPVId(i), getTrackTitle(i), getTrackLanguage(i)))
-          "video" -> vidTracks.add(Track(getTrackMPVId(i), getTrackTitle(i), getTrackLanguage(i)))
-          else -> error("Unrecognized track type")
+      try {
+        val tracksCount = MPVLib.getPropertyInt("track-list/count")!!
+        for (i in 0..<tracksCount) {
+          val type = getTrackType(i)
+          if (!possibleTrackTypes.contains(type) || type == null) continue
+          when (type) {
+            "sub" -> subTracks.add(Track(getTrackMPVId(i), getTrackTitle(i), getTrackLanguage(i)))
+            "audio" -> audioTracks.add(Track(getTrackMPVId(i), getTrackTitle(i), getTrackLanguage(i)))
+            "video" -> vidTracks.add(Track(getTrackMPVId(i), getTrackTitle(i), getTrackLanguage(i)))
+            else -> error("Unrecognized track type")
+          }
         }
+      } catch (e: NullPointerException) {
+        Log.e(TAG, "Couldn't load tracks, probably cause mpv was destroyed")
+        return@launch
       }
       _subtitleTracks.update { subTracks }
       _selectedSubtitles.update { Pair(activity.player.sid, activity.player.secondarySid) }
@@ -220,11 +228,7 @@ class PlayerViewModel(
     } else {
       url
     } ?: return
-    val trackCount = MPVLib.getPropertyInt("track-list/count")
     MPVLib.command(arrayOf("sub-add", path, "cached"))
-    if (trackCount == MPVLib.getPropertyInt("track-list/count")) return
-    _subtitleTracks.update { it.plus(Track(activity.player.sid, path, null)) }
-    _selectedSubtitles.update { Pair(activity.player.sid, activity.player.secondarySid) }
   }
 
   fun setSubtitle(sid: Int, secondarySid: Int) {

@@ -437,6 +437,7 @@ class PlayerActivity : AppCompatActivity() {
   internal fun onObserverEvent(property: String) {
     when (property) {
       "chapter-list" -> viewModel.loadChapters()
+      "track-list" -> viewModel.loadTracks()
     }
   }
 
@@ -498,8 +499,6 @@ class PlayerActivity : AppCompatActivity() {
         }
         setOrientation()
         viewModel.changeVideoAspect(playerPreferences.videoAspect.get())
-        viewModel.loadChapters()
-        viewModel.loadTracks()
       }
 
       MPVLib.mpvEventId.MPV_EVENT_SEEK -> {
@@ -691,10 +690,6 @@ class PlayerActivity : AppCompatActivity() {
     return super.onKeyUp(keyCode, event)
   }
 
-  companion object {
-    const val TAG = "mpvKt"
-  }
-
   private val additionalObservedProps = mapOf(
     "chapter" to MPVLib.mpvFormat.MPV_FORMAT_INT64,
     "sid" to MPVLib.mpvFormat.MPV_FORMAT_STRING,
@@ -704,3 +699,5 @@ class PlayerActivity : AppCompatActivity() {
     "hwdec" to MPVLib.mpvFormat.MPV_FORMAT_STRING
   )
 }
+
+const val TAG = "mpvKt"
