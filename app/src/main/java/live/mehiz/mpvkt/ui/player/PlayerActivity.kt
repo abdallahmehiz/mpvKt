@@ -696,7 +696,8 @@ class PlayerActivity : AppCompatActivity() {
     "secondary-sid" to MPVLib.mpvFormat.MPV_FORMAT_STRING,
     "aid" to MPVLib.mpvFormat.MPV_FORMAT_STRING,
     "hwdec-current" to MPVLib.mpvFormat.MPV_FORMAT_STRING,
-    "hwdec" to MPVLib.mpvFormat.MPV_FORMAT_STRING
+    "hwdec" to MPVLib.mpvFormat.MPV_FORMAT_STRING,
+    "chapter-list" to MPVLib.mpvFormat.MPV_FORMAT_NONE
   )
 }
 
