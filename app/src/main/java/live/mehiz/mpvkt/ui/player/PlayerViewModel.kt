@@ -189,8 +189,8 @@ class PlayerViewModel(
         }
       }
     }
-    activity.player.sid = _selectedSubtitles.value.first
     activity.player.secondarySid = _selectedSubtitles.value.second
+    activity.player.sid = _selectedSubtitles.value.first
   }
 
   fun loadChapters() {
