@@ -21,18 +21,18 @@ Steps to reproduce the behavior:
 A clear and concise description of what you expected to happen.
 
 **Actual behavior**
-A clear and concise description what has happened.
+A clear and concise description of what actually happened.
 
-**Crash logs (if applicable)**
-Provide a text file with the crash logs provided by the app in the crash screen.
+**Crash logs**
+If applicable, upload a the text file provided by the app's crash screen.
 
 **Screenshots**
 If applicable, add screenshots to help explain your problem.
 
-**Device Info (please complete the following information):**
- - Device Model: [e.g. iPhone6]
- - Android version: [e.g. iOS8.1]
- - Android Skin version (if applicable): [e.g. MIUI 12.5, OneUI 6.1]
+**Additional info (please complete the following information):**
+ - Device: [e.g. Google Pixel 6]
+ - Android version: [e.g. 13]
+ - App Version [e.g. Release v0.1.3, Nightly v0.1.3-r151]
 
 **Additional context**
 Add any other context about the problem here.
