@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">mpvKt</string>
+    <string name="app_name" translatable="false">mpvKt</string>
 
     <string name="generic_reset">Reset</string>
     <string name="generic_share">Share</string>
@@ -104,15 +104,15 @@
     <string name="pref_about_title">About</string>
     <string name="pref_about_summary">Acknowledgments, licenses</string>
     <string name="pref_about_app_version">App version</string>
-    <string name="pref_about_app_version_formatted">%s %s</string>
+    <string name="pref_about_app_version_formatted" translatable="false">%s %s</string>
     <string name="pref_about_oss_libraries">Open source libraries</string>
 
     <string name="player_sheets_add_ext_sub">Add external subtitles</string>
     <string name="player_sheets_add_ext_audio">Add external audio tracks</string>
     <string name="player_sheets_tracks_off">Off</string>
-    <string name="player_sheets_track_title_w_lang">#%d: %s (%s)</string>
-    <string name="player_sheets_track_title_wo_lang">#%d: %s</string>
-    <string name="player_sheets_track_lang_wo_title">#%d: %s</string>
+    <string name="player_sheets_track_title_w_lang" translatable="false">#%d: %s (%s)</string>
+    <string name="player_sheets_track_title_wo_lang" translatable="false">#%d: %s</string>
+    <string name="player_sheets_track_lang_wo_title" translatable="false">#%d: %s</string>
     <string name="player_sheets_subtitles_footer_secondary_sid_no_styles">Secondary subtitles will have no ASS/SSA Styling.</string>
     <string name="player_sheets_subtitles_settings_title">Subtitles settings</string>
     <string name="player_sheets_subtitles_color_text">Text</string>
@@ -158,7 +158,7 @@
     <string name="player_sheets_stats_page_title">Default statistics page</string>
     <string name="player_sheets_stats_page_chip">Page %d</string>
     <string name="player_seek_n_seconds">%d seconds</string>
-    <string name="player_speed">x%.2f</string>
+    <string name="player_speed" translatable="false">x%.2f</string>
 
     <string name="player_aspect_fit">Fit Screen</string>
     <string name="player_aspect_crop">Crop</string>
@@ -175,7 +175,7 @@
 
     <string name="toast_sleep_timer_ended">Sleep timer ended</string>
 
-    <string name="github_repo_url">https://github.com/abdallahmehiz/mpvKt</string>
+    <string name="github_repo_url" translatable="false">https://github.com/abdallahmehiz/mpvKt</string>
 
     <plurals name="plural_items">
         <item quantity="one">%1$d item</item>
