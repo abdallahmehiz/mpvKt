@@ -28,13 +28,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import `is`.xyz.mpv.MPVView
+import dev.vivvvek.seeker.Segment
 import `is`.xyz.mpv.Utils
 import live.mehiz.mpvkt.ui.theme.spacing
 
 @Composable
 fun CurrentChapter(
-  chapter: MPVView.Chapter,
+  chapter: Segment,
   modifier: Modifier = Modifier,
   onClick: () -> Unit = {},
 ) {
@@ -48,7 +48,7 @@ fun CurrentChapter(
     AnimatedContent(
       targetState = chapter,
       transitionSpec = {
-        if (targetState.time > initialState.time) {
+        if (targetState.start > initialState.start) {
           (slideInVertically { height -> height } + fadeIn())
             .togetherWith(slideOutVertically { height -> -height } + fadeOut())
         } else {
@@ -73,14 +73,14 @@ fun CurrentChapter(
           tint = MaterialTheme.colorScheme.onBackground
         )
         Text(
-          text = Utils.prettyTime(currentChapter.time.toInt()),
+          text = Utils.prettyTime(currentChapter.start.toInt()),
           fontWeight = FontWeight.ExtraBold,
           style = MaterialTheme.typography.bodyMedium,
           maxLines = 1,
           overflow = TextOverflow.Clip,
           color = MaterialTheme.colorScheme.tertiary,
         )
-        currentChapter.title?.let {
+        currentChapter.name.let {
           Text(
             text = Typography.bullet.toString(),
             textAlign = TextAlign.Center,

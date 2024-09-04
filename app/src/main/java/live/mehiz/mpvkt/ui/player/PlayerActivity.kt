@@ -37,7 +37,6 @@ import androidx.media.AudioManagerCompat
 import com.github.k1rakishou.fsaf.FileManager
 import `is`.xyz.mpv.MPVLib
 import `is`.xyz.mpv.Utils
-import `is`.xyz.mpv.Utils.PROTOCOLS
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -56,6 +55,7 @@ import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.core.context.loadKoinModules
 import org.koin.core.context.unloadKoinModules
+import org.koin.core.module.Module
 import org.koin.dsl.module
 import java.io.File
 
@@ -63,6 +63,7 @@ import java.io.File
 class PlayerActivity : AppCompatActivity() {
 
   private val viewModel: PlayerViewModel by lazy { PlayerViewModel(this) }
+  private val viewModelModule: Module by lazy { module { viewModel { viewModel } } }
   private val binding by lazy { PlayerLayoutBinding.inflate(layoutInflater) }
   private val playerObserver by lazy { PlayerObserver(this) }
   private val mpvKtDatabase: MpvKtDatabase by inject()
@@ -105,7 +106,7 @@ class PlayerActivity : AppCompatActivity() {
     val videoUri = if (uri?.startsWith("content://") == true) openContentFd(Uri.parse(uri)) else uri
     player.playFile(videoUri!!)
     setOrientation()
-    loadKoinModules(module { viewModel { viewModel } })
+    loadKoinModules(viewModelModule)
 
     binding.controls.setContent {
       MpvKtTheme {
@@ -125,16 +126,11 @@ class PlayerActivity : AppCompatActivity() {
     }
     audioFocusRequest = null
 
-    player.removeObserver(playerObserver)
+    unloadKoinModules(viewModelModule)
+    MPVLib.removeObserver(playerObserver)
     MPVLib.destroy()
 
     super.onDestroy()
-  }
-
-  override fun finish() {
-    Log.d(TAG, "Finishing")
-    unloadKoinModules(module { viewModel { viewModel } })
-    super.finish()
   }
 
   override fun onPause() {
@@ -149,6 +145,7 @@ class PlayerActivity : AppCompatActivity() {
 
   override fun onStop() {
     viewModel.pause()
+    player.isExiting = true
     super.onStop()
   }
 
@@ -185,12 +182,7 @@ class PlayerActivity : AppCompatActivity() {
     Utils.copyAssets(this)
     lifecycleScope.launch(Dispatchers.IO) { copyMPVConfigFiles() }
 
-    player.initialize(
-      applicationContext.filesDir.path,
-      applicationContext.cacheDir.path,
-      "v",
-      if (decoderPreferences.gpuNext.get()) "gpu-next" else "gpu",
-    )
+    player.initialize(applicationContext.filesDir.path, applicationContext.cacheDir.path)
 
     val statisticsPage = advancedPreferences.enabledStatisticsPage.get()
     if (statisticsPage != 0) {
@@ -199,31 +191,14 @@ class PlayerActivity : AppCompatActivity() {
         arrayOf("script-binding", "stats/display-page-$statisticsPage"),
       )
     }
-    MPVLib.setPropertyString(
-      "hwdec",
-      if (decoderPreferences.tryHWDecoding.get()) "auto" else "no",
-    )
-    when (decoderPreferences.debanding.get()) {
-      Debanding.None -> {}
-      Debanding.CPU -> MPVLib.setPropertyString("vf", "gradfun=radius=12")
-      Debanding.GPU -> MPVLib.setPropertyBoolean("deband", true)
-    }
-    if (decoderPreferences.useYUV420P.get()) {
-      MPVLib.setPropertyString("vf", "format=yuv420p")
-    }
 
     VideoFilters.entries.forEach {
       MPVLib.setPropertyInt(it.mpvProperty, it.preference(decoderPreferences).get())
     }
 
     player.playbackSpeed = playerPreferences.defaultSpeed.get().toDouble()
-    MPVLib.setPropertyBoolean("keep-open", true)
-    MPVLib.setPropertyBoolean("input-default-bindings", true)
 
-    player.addObserver(playerObserver)
-    additionalObservedProps.forEach {
-      MPVLib.observeProperty(it.key, it.value)
-    }
+    MPVLib.addObserver(playerObserver)
   }
 
   private fun setupAudio() {
@@ -384,7 +359,7 @@ class PlayerActivity : AppCompatActivity() {
     val filepath = when {
       data.scheme == "file" -> data.path
       data.scheme == "content" -> openContentFd(data)
-      PROTOCOLS.contains(data.scheme) -> data.toString()
+      Utils.PROTOCOLS.contains(data.scheme) -> data.toString()
       else -> null
     }
 
@@ -426,6 +401,7 @@ class PlayerActivity : AppCompatActivity() {
 
   // a bunch of observers
   internal fun onObserverEvent(property: String, value: Long) {
+    if (player.isExiting) return
     when (property) {
       "time-pos" -> viewModel.updatePlayBackPos(value.toFloat())
       "demuxer-cache-time" -> viewModel.updateReadAhead(value = value)
@@ -435,6 +411,7 @@ class PlayerActivity : AppCompatActivity() {
   }
 
   internal fun onObserverEvent(property: String) {
+    if (player.isExiting) return
     when (property) {
       "chapter-list" -> viewModel.loadChapters()
       "track-list" -> viewModel.loadTracks()
@@ -442,6 +419,7 @@ class PlayerActivity : AppCompatActivity() {
   }
 
   internal fun onObserverEvent(property: String, value: Boolean) {
+    if (player.isExiting) return
     when (property) {
       "pause" -> {
         if (value) {
@@ -476,12 +454,19 @@ class PlayerActivity : AppCompatActivity() {
   }
 
   internal fun onObserverEvent(property: String, value: String) {
+    if (player.isExiting) return
     when (property) {
-      "speed" -> viewModel.playbackSpeed.update { value.toFloat() }
       "aid" -> trackId(value)?.let { viewModel.selectAudio(it) }
       "sid" -> trackId(value)?.let { viewModel.setSubtitle(it, viewModel.selectedSubtitles.value.second) }
       "secondary-sid" -> trackId(value)?.let { viewModel.setSubtitle(viewModel.selectedSubtitles.value.first, it) }
       "hwdec", "hwdec-current" -> viewModel.getDecoder()
+    }
+  }
+
+  internal fun onObserverEvent(property: String, value: Double) {
+    if (player.isExiting) return
+    when (property) {
+      "speed" -> viewModel.playbackSpeed.update { value.toFloat() }
     }
   }
 
@@ -504,11 +489,11 @@ class PlayerActivity : AppCompatActivity() {
       MPVLib.mpvEventId.MPV_EVENT_SEEK -> {
         viewModel.isLoading.update { true }
       }
-    }
-  }
 
-  internal fun efEvent(err: String?) {
-    endPlayback(EndPlaybackReason.Error, err)
+      MPVLib.mpvEventId.MPV_EVENT_PLAYBACK_RESTART -> {
+        player.isExiting = false
+      }
+    }
   }
 
   private suspend fun saveVideoPlaybackState(finishedPlayback: Boolean) {
@@ -566,6 +551,7 @@ class PlayerActivity : AppCompatActivity() {
     player.duration?.let { returnIntent.putExtra("duration", it * 1000) }
     setResult(RESULT_OK, returnIntent)
     if (playerPreferences.closeAfterReachingEndOfVideo.get()) {
+      player.isExiting = true
       finishAndRemoveTask()
     }
   }
@@ -689,16 +675,6 @@ class PlayerActivity : AppCompatActivity() {
     if (player.onKey(event!!)) return true
     return super.onKeyUp(keyCode, event)
   }
-
-  private val additionalObservedProps = mapOf(
-    "chapter" to MPVLib.mpvFormat.MPV_FORMAT_INT64,
-    "sid" to MPVLib.mpvFormat.MPV_FORMAT_STRING,
-    "secondary-sid" to MPVLib.mpvFormat.MPV_FORMAT_STRING,
-    "aid" to MPVLib.mpvFormat.MPV_FORMAT_STRING,
-    "hwdec-current" to MPVLib.mpvFormat.MPV_FORMAT_STRING,
-    "hwdec" to MPVLib.mpvFormat.MPV_FORMAT_STRING,
-    "chapter-list" to MPVLib.mpvFormat.MPV_FORMAT_NONE
-  )
 }
 
 const val TAG = "mpvKt"

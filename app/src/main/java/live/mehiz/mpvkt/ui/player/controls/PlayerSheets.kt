@@ -78,11 +78,12 @@ fun PlayerSheets() {
     }
 
     Sheets.Chapters -> {
+      val chapter by viewModel.currentChapter.collectAsState()
       ChaptersSheet(
         viewModel.chapters.toImmutableList(),
-        currentChapter = viewModel.currentChapter.value?.index ?: 0,
+        currentChapter = chapter ?: viewModel.chapters[0],
         onClick = {
-          viewModel.selectChapter(it)
+          viewModel.selectChapter(viewModel.chapters.indexOf(it))
           onDismissRequest()
           viewModel.unpause()
         },

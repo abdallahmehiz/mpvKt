@@ -10,8 +10,8 @@ import android.util.Log
 import android.widget.Toast
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import dev.vivvvek.seeker.Segment
 import `is`.xyz.mpv.MPVLib
-import `is`.xyz.mpv.MPVView
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -46,8 +46,8 @@ class PlayerViewModel(
   private val _selectedAudio = MutableStateFlow(-1)
   val selectedAudio = _selectedAudio.asStateFlow()
 
-  var chapters: List<MPVView.Chapter> = listOf()
-  private val _currentChapter = MutableStateFlow<MPVView.Chapter?>(null)
+  var chapters: List<Segment> = listOf()
+  private val _currentChapter = MutableStateFlow<Segment?>(null)
   val currentChapter = _currentChapter.asStateFlow()
 
   private val _pos = MutableStateFlow(0f)
@@ -160,7 +160,7 @@ class PlayerViewModel(
       val subTracks = mutableListOf<Track>()
       val audioTracks = mutableListOf(Track(-1, activity.getString(R.string.player_sheets_tracks_off), null))
       try {
-        val tracksCount = MPVLib.getPropertyInt("track-list/count")!!
+        val tracksCount = MPVLib.getPropertyInt("track-list/count") ?: 0
         for (i in 0..<tracksCount) {
           val type = getTrackType(i)
           if (!possibleTrackTypes.contains(type) || type == null) continue
@@ -202,12 +202,24 @@ class PlayerViewModel(
   }
 
   fun loadChapters() {
-    chapters = activity.player.loadChapters()
+    val chapters = mutableListOf<Segment>()
+    val count = MPVLib.getPropertyInt("chapter-list/count")!!
+    for (i in 0 until count) {
+      val title = MPVLib.getPropertyString("chapter-list/$i/title")
+      val time = MPVLib.getPropertyDouble("chapter-list/$i/time")!!
+      chapters.add(
+        Segment(
+          name = title,
+          start = time.toFloat(),
+        ),
+      )
+    }
+    this.chapters = chapters
     updateChapter(pos.value.toLong())
   }
 
   fun selectChapter(index: Int) {
-    val time = chapters[index].time
+    val time = chapters[index].start
     seekTo(time.toInt())
   }
 

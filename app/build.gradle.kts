@@ -118,9 +118,7 @@ dependencies {
   implementation(libs.androidx.preferences.ktx)
   implementation(libs.mediasession)
 
-  implementation(libs.aniyomi.mpv.lib)
-  implementation(libs.aniyomi.ffmpeg.kit)
-  implementation(libs.arthentica.smartexceptions)
+  implementation(libs.mpv.lib)
 
   implementation(libs.seeker)
   implementation(libs.bundles.koin)

@@ -70,7 +70,7 @@ object AudioPreferencesScreen : Screen() {
             summary = { if (it.isNotBlank()) Text(it) },
             textField = { value, onValueChange, _ ->
               Column {
-                Text(stringResource(`is`.xyz.mpv.R.string.pref_default_audio_language_message))
+                Text(stringResource(R.string.pref_audio_preferred_language))
                 TextField(
                   value,
                   onValueChange,

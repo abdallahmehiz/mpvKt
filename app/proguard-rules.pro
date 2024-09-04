@@ -21,4 +21,3 @@
 #-renamesourcefileattribute SourceFile
 -dontobfuscate
 -keep,allowoptimization class is.xyz.mpv.** { public protected *; }
--keep,allowoptimization class com.arthenica.** { public protected *; }

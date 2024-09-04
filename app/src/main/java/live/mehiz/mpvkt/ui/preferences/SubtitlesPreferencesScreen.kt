@@ -80,7 +80,7 @@ object SubtitlesPreferencesScreen : Screen() {
             summary = { if (it.isNotBlank()) Text(it) },
             textField = { value, onValueChange, _ ->
               Column {
-                Text(stringResource(`is`.xyz.mpv.R.string.pref_default_subtitle_language_message))
+                Text(stringResource(R.string.pref_subtitles_preferred_language))
                 TextField(
                   value,
                   onValueChange,

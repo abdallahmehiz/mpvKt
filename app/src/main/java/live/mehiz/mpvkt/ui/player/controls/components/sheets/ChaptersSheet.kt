@@ -13,7 +13,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
-import `is`.xyz.mpv.MPVView
+import dev.vivvvek.seeker.Segment
 import `is`.xyz.mpv.Utils
 import kotlinx.collections.immutable.ImmutableList
 import live.mehiz.mpvkt.R
@@ -21,9 +21,9 @@ import live.mehiz.mpvkt.ui.theme.spacing
 
 @Composable
 fun ChaptersSheet(
-  chapters: ImmutableList<MPVView.Chapter>,
-  currentChapter: Int,
-  onClick: (Int) -> Unit,
+  chapters: ImmutableList<Segment>,
+  currentChapter: Segment,
+  onClick: (Segment) -> Unit,
   onDismissRequest: () -> Unit,
   modifier: Modifier = Modifier,
 ) {
@@ -31,11 +31,10 @@ fun ChaptersSheet(
     chapters,
     track = {
       ChapterTrack(
-        title = it.title,
-        time = it.time.toInt(),
-        index = it.index,
-        selected = currentChapter == it.index,
-        onClick = { onClick(it.index) },
+        it,
+        index = chapters.indexOf(it),
+        selected = currentChapter == it,
+        onClick = { onClick(it) },
       )
     },
     onDismissRequest = onDismissRequest,
@@ -46,8 +45,7 @@ fun ChaptersSheet(
 
 @Composable
 fun ChapterTrack(
-  title: String?,
-  time: Int,
+  chapter: Segment,
   index: Int,
   selected: Boolean,
   onClick: () -> Unit,
@@ -61,7 +59,7 @@ fun ChapterTrack(
     horizontalArrangement = Arrangement.SpaceBetween,
   ) {
     Text(
-      stringResource(R.string.player_sheets_track_title_wo_lang, index + 1, title ?: ""),
+      stringResource(R.string.player_sheets_track_title_wo_lang, index + 1, chapter.name),
       fontStyle = if (selected) FontStyle.Italic else FontStyle.Normal,
       fontWeight = if (selected) FontWeight.ExtraBold else FontWeight.Normal,
       maxLines = 1,
@@ -69,7 +67,7 @@ fun ChapterTrack(
       overflow = TextOverflow.Ellipsis
     )
     Text(
-      Utils.prettyTime(time),
+      Utils.prettyTime(chapter.start.toInt()),
       fontStyle = if (selected) FontStyle.Italic else FontStyle.Normal,
       fontWeight = if (selected) FontWeight.ExtraBold else FontWeight.Normal,
     )

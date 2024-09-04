@@ -5,7 +5,7 @@ coreKtx = "1.13.1"
 lifecycleRuntimeKtx = "2.8.4"
 activityCompose = "1.9.1"
 composeBom = "2024.06.00"
-koin = "3.6.0-wasm-alpha2"
+koin = "4.0.0-RC2"
 voyager = "1.0.0"
 material3Android = "1.2.1"
 room = "2.6.1"
@@ -29,9 +29,7 @@ androidx-compose-animation-graphics = { group = "androidx.compose.animation", na
 androidx-preferences-ktx = { group = "androidx.preference", name = "preference-ktx", version = "1.2.1" }
 mediasession = "androidx.media:media:1.7.0"
 
-aniyomi-mpv-lib = { module = "com.github.aniyomiorg:aniyomi-mpv-lib", version = "1.15.n" }
-aniyomi-ffmpeg-kit = { module = "com.github.jmir1:ffmpeg-kit", version = "1.15" }
-arthentica-smartexceptions = { module = "com.arthenica:smart-exception-java", version = "0.2.1" }
+mpv-lib = { module = "com.github.abdallahmehiz:mpv-android", version = "v0.1.3" }
 
 material = "com.google.android.material:material:1.12.0"
 

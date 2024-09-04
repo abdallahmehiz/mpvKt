@@ -71,6 +71,7 @@
     <string name="pref_subtitles_summary">Preferred languages, fonts</string>
     <string name="pref_preferred_languages">Preferred languages</string>
     <string name="pref_subtitles_fonts_dir">Fonts directory</string>
+    <string name="pref_subtitles_preferred_language">Subtitle language(s) to be selected by default on a video with multiple subtitles, Two- or three-letter languages codes work. Multiple values can be delimited by comma.</string>
 
     <string name="pref_audio">Audio</string>
     <string name="pref_audio_summary">Preferred languages, audio channels, pitch correction</string>
@@ -82,6 +83,7 @@
     <string name="pref_audio_channels_mono">Mono</string>
     <string name="pref_audio_channels_stereo">Stereo</string>
     <string name="pref_audio_channels_stereo_reversed">Reversed Stereo</string>
+    <string name="pref_audio_preferred_language">Audio language(s) to be selected by default on a video with multiple audio streams, Two- or three-letter languages codes work. Multiple values can be delimited by comma.</string>
 
     <string name="pref_advanced">Advanced</string>
     <string name="pref_advanced_summary">Configuration location, mpv.conf, input.conf</string>
