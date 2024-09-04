@@ -94,6 +94,9 @@ android {
       }
     }
   }
+  androidResources {
+    generateLocaleConfig = true
+  }
 }
 
 room {
