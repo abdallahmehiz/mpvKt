@@ -53,7 +53,7 @@ fun SeekbarWithTimers(
       modifier = Modifier.width(92.dp),
     )
     Seeker(
-      value = position,
+      value = position.coerceIn(0f, duration),
       range = 0f..duration,
       onValueChange = onValueChange,
       onValueChangeFinished = onValueChangeFinished,

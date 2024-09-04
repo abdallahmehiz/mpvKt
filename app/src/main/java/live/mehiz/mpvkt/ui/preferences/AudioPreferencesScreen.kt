@@ -25,7 +25,6 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 import live.mehiz.mpvkt.R
 import live.mehiz.mpvkt.preferences.AudioChannels
 import live.mehiz.mpvkt.preferences.AudioPreferences
-import live.mehiz.mpvkt.preferences.preference.collectAsState
 import live.mehiz.mpvkt.presentation.Screen
 import me.zhanghai.compose.preference.ProvidePreferenceLocals
 import me.zhanghai.compose.preference.listPreference
@@ -40,7 +39,6 @@ object AudioPreferencesScreen : Screen() {
     val context = LocalContext.current
     val navigator = LocalNavigator.currentOrThrow
     val preferences = koinInject<AudioPreferences>()
-    val audioChannels by preferences.audioChannels.collectAsState()
 
     Scaffold(
       topBar = {

@@ -72,6 +72,8 @@
     <string name="pref_preferred_languages">Preferred languages</string>
     <string name="pref_subtitles_fonts_dir">Fonts directory</string>
     <string name="pref_subtitles_preferred_language">Subtitle language(s) to be selected by default on a video with multiple subtitles, Two- or three-letter languages codes work. Multiple values can be delimited by comma.</string>
+    <string name="pref_subtitles_skip_applying_subtitles_styling">Skip applying subtitles styling</string>
+    <string name="pref_subtitles_skip_applying_subtitles_styling_summary">Enable if you wish to style the subtitles through mpv.conf</string>
 
     <string name="pref_audio">Audio</string>
     <string name="pref_audio_summary">Preferred languages, audio channels, pitch correction</string>

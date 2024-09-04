@@ -231,14 +231,18 @@ class PlayerActivity : AppCompatActivity() {
     lifecycleScope.launch(Dispatchers.IO) { copyMPVFonts() }
 
     MPVLib.setPropertyString("slang", subtitlesPreferences.preferredLanguages.get())
+
+    MPVLib.setPropertyString("sub-fonts-dir", cacheDir.path + "/fonts/")
+    MPVLib.setPropertyDouble("sub-delay", subtitlesPreferences.defaultSubDelay.get() / 1000.0)
+    MPVLib.setPropertyDouble("sub-speed", subtitlesPreferences.defaultSubSpeed.get().toDouble())
+    MPVLib.setPropertyDouble("secondary-sub-delay", subtitlesPreferences.defaultSecondarySubDelay.get() / 1000.0)
+
+    if (subtitlesPreferences.skipSubtitlesStyling.get()) return
+    MPVLib.setPropertyString("sub-font", subtitlesPreferences.font.get())
     subtitlesPreferences.overrideAssSubs.get().let {
       MPVLib.setPropertyString("sub-ass-override", if (it) "force" else "no")
       MPVLib.setPropertyBoolean("sub-ass-justify", it)
     }
-
-    MPVLib.setPropertyString("sub-fonts-dir", cacheDir.path + "/fonts/")
-    MPVLib.setPropertyString("sub-font", subtitlesPreferences.font.get())
-
     MPVLib.setPropertyInt("sub-font-size", subtitlesPreferences.fontSize.get())
     MPVLib.setPropertyBoolean("sub-bold", subtitlesPreferences.bold.get())
     MPVLib.setPropertyBoolean("sub-italic", subtitlesPreferences.italic.get())
@@ -247,10 +251,6 @@ class PlayerActivity : AppCompatActivity() {
     MPVLib.setPropertyInt("sub-border-size", subtitlesPreferences.borderSize.get())
     MPVLib.setPropertyString("sub-border-color", subtitlesPreferences.borderColor.get().toColorHexString())
     MPVLib.setPropertyString("sub-back-color", subtitlesPreferences.backgroundColor.get().toColorHexString())
-
-    MPVLib.setPropertyDouble("sub-delay", subtitlesPreferences.defaultSubDelay.get() / 1000.0)
-    MPVLib.setPropertyDouble("sub-speed", subtitlesPreferences.defaultSubSpeed.get().toDouble())
-    MPVLib.setPropertyDouble("secondary-sub-delay", subtitlesPreferences.defaultSecondarySubDelay.get() / 1000.0)
   }
 
   private fun copyMPVConfigFiles() {
