@@ -306,6 +306,6 @@ fun PlayerControls(
 }
 
 fun <T> playControlsAnimationSpec(): FiniteAnimationSpec<T> = tween(
-  durationMillis = 300,
+  durationMillis = 200,
   easing = LinearOutSlowInEasing
 )
