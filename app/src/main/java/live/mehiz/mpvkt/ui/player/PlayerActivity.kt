@@ -18,6 +18,7 @@ import android.provider.MediaStore
 import android.util.Log
 import android.util.Rational
 import android.view.KeyEvent
+import android.view.View
 import android.view.WindowManager
 import androidx.activity.enableEdgeToEdge
 import androidx.annotation.RequiresApi
@@ -95,8 +96,6 @@ class PlayerActivity : AppCompatActivity() {
   override fun onCreate(savedInstanceState: Bundle?) {
     if (playerPreferences.drawOverDisplayCutout.get()) enableEdgeToEdge()
     super.onCreate(savedInstanceState)
-    window.setFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS, WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS)
-    window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
     setContentView(binding.root)
 
     setupMPV()
@@ -172,9 +171,16 @@ class PlayerActivity : AppCompatActivity() {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
       setPictureInPictureParams(createPipParams())
     }
+    window.setFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS, WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS)
+    binding.root.systemUiVisibility =
+      View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY or
+      View.SYSTEM_UI_FLAG_LAYOUT_STABLE or
+      View.SYSTEM_UI_FLAG_HIDE_NAVIGATION or
+      View.SYSTEM_UI_FLAG_LOW_PROFILE
     windowInsetsController.hide(WindowInsetsCompat.Type.systemBars())
     windowInsetsController.hide(WindowInsetsCompat.Type.navigationBars())
     windowInsetsController.systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+    window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
     super.onStart()
   }
 
@@ -182,7 +188,7 @@ class PlayerActivity : AppCompatActivity() {
     Utils.copyAssets(this)
     lifecycleScope.launch(Dispatchers.IO) { copyMPVConfigFiles() }
 
-    player.initialize(applicationContext.filesDir.path, applicationContext.cacheDir.path)
+    player.initialize(filesDir.path, cacheDir.path)
 
     val statisticsPage = advancedPreferences.enabledStatisticsPage.get()
     if (statisticsPage != 0) {
@@ -229,7 +235,7 @@ class PlayerActivity : AppCompatActivity() {
       MPVLib.setPropertyBoolean("sub-ass-justify", it)
     }
 
-    MPVLib.setPropertyString("sub-fonts-dir", applicationContext.cacheDir.path + "/fonts/")
+    MPVLib.setPropertyString("sub-fonts-dir", cacheDir.path + "/fonts/")
     MPVLib.setPropertyString("sub-font", subtitlesPreferences.font.get())
 
     MPVLib.setPropertyInt("sub-font-size", subtitlesPreferences.fontSize.get())
@@ -247,7 +253,7 @@ class PlayerActivity : AppCompatActivity() {
   }
 
   private fun copyMPVConfigFiles() {
-    val applicationPath = applicationContext.filesDir.path
+    val applicationPath = filesDir.path
     try {
       val mpvConf = fileManager.fromUri(Uri.parse(advancedPreferences.mpvConfStorageUri.get()))
         ?: error("User hasn't set any mpvConfig directory")
@@ -262,7 +268,7 @@ class PlayerActivity : AppCompatActivity() {
 
   private fun copyMPVFonts() {
     try {
-      val cachePath = applicationContext.cacheDir.path
+      val cachePath = cacheDir.path
       val fontsDir = fileManager.fromUri(Uri.parse(subtitlesPreferences.fontsFolder.get()))
         ?: error("User hasn't set any fonts directory")
       if (!fileManager.exists(fontsDir)) error("Couldn't access fonts directory")
@@ -271,7 +277,7 @@ class PlayerActivity : AppCompatActivity() {
       if (!fileManager.exists(destDir)) fileManager.createDir(fileManager.fromPath(cachePath), "fonts")
 
       if (fileManager.findFile(destDir, "subfont.ttf") == null) {
-        applicationContext.resources.assets.open("subfont.ttf")
+        resources.assets.open("subfont.ttf")
           .copyTo(File("$cachePath/fonts/subfont.ttf").outputStream())
       }
 
@@ -377,7 +383,7 @@ class PlayerActivity : AppCompatActivity() {
   @Suppress("ReturnCount")
   fun openContentFd(uri: Uri): String? {
     if (uri.scheme != "content") return null
-    val resolver = applicationContext.contentResolver
+    val resolver = contentResolver
     Log.d(TAG, "Resolving content URI: $uri")
     val fd = try {
       val desc = resolver.openFileDescriptor(uri, "r")
@@ -632,7 +638,7 @@ class PlayerActivity : AppCompatActivity() {
   }
 
   private fun setOrientation() {
-    this.requestedOrientation = when (playerPreferences.orientation.get()) {
+    requestedOrientation = when (playerPreferences.orientation.get()) {
       PlayerOrientation.Free -> ActivityInfo.SCREEN_ORIENTATION_SENSOR
       PlayerOrientation.Video -> if ((player.videoAspect ?: 0.0) > 1.0) {
         ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
