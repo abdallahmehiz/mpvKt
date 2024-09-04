@@ -48,6 +48,7 @@ import me.zhanghai.compose.preference.Preference
 import me.zhanghai.compose.preference.ProvidePreferenceLocals
 import me.zhanghai.compose.preference.TextFieldPreference
 import me.zhanghai.compose.preference.preference
+import me.zhanghai.compose.preference.switchPreference
 import me.zhanghai.compose.preference.twoTargetIconButtonPreference
 import org.koin.compose.koinInject
 import kotlin.io.path.deleteIfExists
@@ -206,6 +207,12 @@ object AdvancedPreferencesScreen : Screen() {
               summary = { if (inputConf.isNotBlank()) Text(inputConf.lines()[0]) },
             )
           }
+          switchPreference(
+            preferences.verboseLogging.key(),
+            defaultValue = preferences.verboseLogging.defaultValue(),
+            title = { Text(stringResource(R.string.pref_advanced_verbose_logging_title)) },
+            summary = { Text(stringResource(R.string.pref_advanced_verbose_logging_summary)) }
+          )
           item {
             var isConfirmDialogShown by remember { mutableStateOf(false) }
             val mpvKtDatabase = koinInject<MpvKtDatabase>()

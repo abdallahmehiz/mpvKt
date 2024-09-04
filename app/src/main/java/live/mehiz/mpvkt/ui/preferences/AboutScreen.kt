@@ -134,7 +134,7 @@ object LibrariesScreen : Screen() {
       topBar = {
         TopAppBar(
           title = {
-            Text(text = "Open source libraries")
+            Text(text = stringResource(R.string.pref_about_oss_libraries))
           },
           navigationIcon = {
             IconButton(

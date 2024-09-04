@@ -90,6 +90,8 @@
     <string name="pref_advanced_mpv_conf_storage_location">pick mpv configuration storage location</string>
     <string name="pref_advanced_mpv_conf">Edit mpv.conf</string>
     <string name="pref_advanced_input_conf">Edit input.conf</string>
+    <string name="pref_advanced_verbose_logging_title">Verbose logging</string>
+    <string name="pref_advanced_verbose_logging_summary">Helps in debugging but may hinder performance</string>
     <string name="pref_advanced_clear_playback_history">Clear playback history</string>
     <string name="pref_advanced_clear_playback_history_confirm_title">Are you sure you want to clear your playback history?</string>
     <string name="pref_advanced_clear_playback_history_confirm_subtitle">This will clear all your previous media\'s playback positions, selected subtitles and audio tracks along with their delays and speeds</string>

@@ -10,6 +10,7 @@ import android.view.KeyEvent
 import `is`.xyz.mpv.BaseMPVView
 import `is`.xyz.mpv.KeyMapping
 import `is`.xyz.mpv.MPVLib
+import live.mehiz.mpvkt.preferences.AdvancedPreferences
 import live.mehiz.mpvkt.preferences.DecoderPreferences
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
@@ -18,6 +19,7 @@ import kotlin.reflect.KProperty
 class MPVView(context: Context, attributes: AttributeSet) : BaseMPVView(context, attributes), KoinComponent {
 
   private val decoderPreferences: DecoderPreferences by inject()
+  private val advancedPreferences: AdvancedPreferences by inject()
 
   var isExiting = false
 
@@ -93,6 +95,9 @@ class MPVView(context: Context, attributes: AttributeSet) : BaseMPVView(context,
 
     if (decoderPreferences.useYUV420P.get()) {
       MPVLib.setOptionString("vf", "format=yuv420p")
+    }
+    if (advancedPreferences.verboseLogging.get()) {
+      MPVLib.setOptionString("msg-level", "v")
     }
 
     MPVLib.setPropertyBoolean("keep-open", true)
