@@ -254,6 +254,8 @@ class PlayerActivity : AppCompatActivity() {
     MPVLib.setPropertyInt("sub-border-size", subtitlesPreferences.borderSize.get())
     MPVLib.setPropertyString("sub-border-color", subtitlesPreferences.borderColor.get().toColorHexString())
     MPVLib.setPropertyString("sub-back-color", subtitlesPreferences.backgroundColor.get().toColorHexString())
+    MPVLib.setPropertyString("sub-border-style", subtitlesPreferences.borderStyle.get().value)
+    MPVLib.setPropertyInt("sub-shadow-offset", subtitlesPreferences.shadowOffset.get())
   }
 
   private fun copyMPVConfigFiles() {

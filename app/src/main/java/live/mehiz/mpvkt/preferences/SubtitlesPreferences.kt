@@ -5,12 +5,12 @@ import androidx.compose.material.icons.automirrored.filled.FormatAlignLeft
 import androidx.compose.material.icons.automirrored.filled.FormatAlignRight
 import androidx.compose.material.icons.filled.FormatAlignCenter
 import androidx.compose.material.icons.filled.FormatAlignJustify
-import androidx.compose.material.icons.filled.FormatAlignLeft
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.graphics.vector.ImageVector
 import live.mehiz.mpvkt.preferences.preference.PreferenceStore
 import live.mehiz.mpvkt.preferences.preference.getEnum
+import live.mehiz.mpvkt.ui.player.controls.components.panels.SubtitlesBorderStyle
 
 class SubtitlesPreferences(preferenceStore: PreferenceStore) {
   val preferredLanguages = preferenceStore.getString("sub_preferred_languages")
@@ -23,8 +23,11 @@ class SubtitlesPreferences(preferenceStore: PreferenceStore) {
   val italic = preferenceStore.getBoolean("sub_italic")
 
   val textColor = preferenceStore.getInt("sub_color_text", Color.White.toArgb())
-  val backgroundColor = preferenceStore.getInt("sub_color_bg", Color.Transparent.toArgb())
+
   val borderColor = preferenceStore.getInt("sub_color_border", Color.Black.toArgb())
+  val borderStyle = preferenceStore.getEnum("sub_border_style", SubtitlesBorderStyle.OutlineAndShadow)
+  val shadowOffset = preferenceStore.getInt("sub_shadow_offset")
+  val backgroundColor = preferenceStore.getInt("sub_color_bg", Color.Transparent.toArgb())
 
   val justification = preferenceStore.getEnum("sub_justify", SubtitleJustification.Auto)
 

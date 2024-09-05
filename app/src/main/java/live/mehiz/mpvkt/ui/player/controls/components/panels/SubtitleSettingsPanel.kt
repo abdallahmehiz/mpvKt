@@ -73,8 +73,8 @@ fun SubtitleSettingsPanel(
         TopAppBar(
           title = {
             Text(
-              text = "SubtitleSettings",
-              style = MaterialTheme.typography.headlineMedium.copy(shadow = Shadow(blurRadius = 20f))
+              text = stringResource(R.string.player_sheets_subtitles_settings_title),
+              style = MaterialTheme.typography.headlineMedium.copy(shadow = Shadow(blurRadius = 20f)),
             )
           },
           navigationIcon = {

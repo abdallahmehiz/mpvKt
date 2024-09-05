@@ -2,6 +2,7 @@ package live.mehiz.mpvkt.ui.player.controls.components.panels
 
 import android.annotation.SuppressLint
 import android.net.Uri
+import androidx.annotation.StringRes
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -14,6 +15,7 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.BorderColor
+import androidx.compose.material.icons.filled.BorderStyle
 import androidx.compose.material.icons.filled.FormatBold
 import androidx.compose.material.icons.filled.FormatClear
 import androidx.compose.material.icons.filled.FormatColorText
@@ -33,8 +35,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.dp
 import com.github.k1rakishou.fsaf.FileManager
 import com.yubyf.truetypeparser.TTFFile
@@ -51,6 +55,10 @@ import live.mehiz.mpvkt.presentation.components.ExpandableCard
 import live.mehiz.mpvkt.presentation.components.ExposedTextDropDownMenu
 import live.mehiz.mpvkt.presentation.components.SliderItem
 import live.mehiz.mpvkt.ui.theme.spacing
+import me.zhanghai.compose.preference.ListPreference
+import me.zhanghai.compose.preference.ListPreferenceType
+import me.zhanghai.compose.preference.ProvidePreferenceLocals
+import me.zhanghai.compose.preference.preferenceTheme
 import org.koin.compose.koinInject
 
 @SuppressLint("MutableCollectionMutableState")
@@ -58,6 +66,7 @@ import org.koin.compose.koinInject
 fun SubtitleSettingsTypographyCard(
   modifier: Modifier = Modifier,
 ) {
+  val context = LocalContext.current
   val preferences = koinInject<SubtitlesPreferences>()
   val fileManager = koinInject<FileManager>()
   var isExpanded by remember { mutableStateOf(true) }
@@ -196,17 +205,48 @@ fun SubtitleSettingsTypographyCard(
       ) {
         Icon(Icons.Default.FormatSize, null)
       }
-      val border by preferences.borderSize.collectAsState()
+      val borderStyle by preferences.borderStyle.collectAsState()
+      ProvidePreferenceLocals(
+        theme = preferenceTheme(iconContainerMinWidth = 64.dp)
+      ) {
+        ListPreference(
+          borderStyle,
+          onValueChange = {
+            preferences.borderStyle.set(it)
+            MPVLib.setPropertyString("sub-border-style", it.value)
+          },
+          title = { Text(stringResource(R.string.player_sheets_subtitles_border_style)) },
+          valueToText = { AnnotatedString(context.getString(it.titleRes)) },
+          values = SubtitlesBorderStyle.entries,
+          type = ListPreferenceType.DROPDOWN_MENU,
+          summary = { Text(stringResource(borderStyle.titleRes)) },
+          icon = { Icon(Icons.Default.BorderStyle, null) }
+        )
+      }
+      val outlineSize by preferences.borderSize.collectAsState()
       SliderItem(
-        label = stringResource(R.string.player_sheets_sub_typography_border_size),
-        border,
-        valueText = border.toString(),
+        stringResource(R.string.player_sheets_sub_typography_border_size),
+        value = outlineSize,
+        valueText = outlineSize.toString(),
         onChange = {
           preferences.borderSize.set(it)
           MPVLib.setPropertyInt("sub-border-size", it)
         },
-        max = 30,
-      ) { Icon(Icons.Default.BorderColor, null) }
+        max = 100,
+        icon = { Icon(Icons.Default.BorderColor, null) },
+      )
+      val shadowOffset by preferences.shadowOffset.collectAsState()
+      SliderItem(
+        stringResource(R.string.player_sheets_subtitles_shadow_offset),
+        value = shadowOffset,
+        valueText = shadowOffset.toString(),
+        onChange = {
+          preferences.shadowOffset.set(it)
+          MPVLib.setPropertyInt("sub-shadow-offset", it)
+        },
+        max = 100,
+        icon = { Icon(painterResource(R.drawable.sharp_shadow_24), null) }
+      )
     }
   }
 }
@@ -217,4 +257,15 @@ fun resetTypography(preferences: SubtitlesPreferences) {
   MPVLib.setPropertyBoolean("sub-italic", preferences.italic.deleteAndGet())
   MPVLib.setPropertyInt("sub-font-size", preferences.fontSize.deleteAndGet())
   MPVLib.setPropertyInt("sub-border-size", preferences.borderSize.deleteAndGet())
+  MPVLib.setPropertyInt("sub-shadow-offset", preferences.shadowOffset.deleteAndGet())
+  MPVLib.setPropertyString("sub-border-style", preferences.borderStyle.deleteAndGet().value)
+}
+
+enum class SubtitlesBorderStyle(
+  val value: String,
+  @StringRes val titleRes: Int,
+) {
+  OutlineAndShadow("outline-and-shadow", R.string.player_sheets_subtitles_border_style_outline_and_shadow),
+  OpaqueBox("opaque-box", R.string.player_sheets_subtitles_border_style_opaque_box),
+  BackgroundBox("background-box", R.string.player_sheets_subtitles_border_style_background_box)
 }
