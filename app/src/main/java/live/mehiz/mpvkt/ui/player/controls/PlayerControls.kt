@@ -43,9 +43,11 @@ import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
@@ -112,6 +114,7 @@ fun PlayerControls(
     LocalRippleTheme provides PlayerRippleTheme,
     LocalPlayerButtonsClickEvent provides { resetControls = !resetControls },
     LocalContentColor provides Color.White,
+    LocalLayoutDirection provides LayoutDirection.Ltr
   ) {
     ConstraintLayout(
       modifier = modifier
@@ -320,9 +323,9 @@ fun PlayerControls(
         },
       ) { BottomLeftPlayerControls() }
     }
-    PlayerSheets()
-    PlayerPanels()
   }
+  PlayerSheets()
+  PlayerPanels()
 }
 
 fun <T> playControlsAnimationSpec(): FiniteAnimationSpec<T> = tween(
