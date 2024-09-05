@@ -573,6 +573,7 @@ class PlayerActivity : AppCompatActivity() {
       uri
     }
     videoUri?.let { MPVLib.command(arrayOf("loadfile", it)) }
+    setIntent(intent)
   }
 
   @RequiresApi(Build.VERSION_CODES.O)

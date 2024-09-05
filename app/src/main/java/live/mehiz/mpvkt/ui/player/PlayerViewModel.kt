@@ -215,7 +215,6 @@ class PlayerViewModel(
       )
     }
     this.chapters = chapters
-    updateChapter(pos.value.toLong())
   }
 
   fun selectChapter(index: Int) {
