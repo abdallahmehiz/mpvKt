@@ -214,11 +214,11 @@ class PlayerViewModel(
       chapters.add(
         Segment(
           name = title,
-          start = time.toFloat().coerceAtLeast(0f),
+          start = time.toFloat(),
         ),
       )
     }
-    this.chapters = chapters
+    this.chapters = chapters.sortedBy { it.start }.filter { it.start in 0f..duration.value }
   }
 
   fun selectChapter(index: Int) {
@@ -228,7 +228,7 @@ class PlayerViewModel(
 
   fun updateChapter(index: Long) {
     if (chapters.isEmpty() || index == -1L) return
-    _currentChapter.update { chapters[index.toInt()] }
+    _currentChapter.update { chapters.getOrNull(index.toInt())?: return }
   }
 
   fun selectAudio(id: Int) {
