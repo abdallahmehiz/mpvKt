@@ -51,6 +51,7 @@ import me.zhanghai.compose.preference.preference
 import me.zhanghai.compose.preference.switchPreference
 import me.zhanghai.compose.preference.twoTargetIconButtonPreference
 import org.koin.compose.koinInject
+import java.io.File
 import kotlin.io.path.deleteIfExists
 import kotlin.io.path.outputStream
 import kotlin.io.path.readLines
@@ -138,6 +139,7 @@ object AdvancedPreferencesScreen : Screen() {
               },
               textToValue = {
                 preferences.mpvConf.set(it)
+                File(context.filesDir.path, "mpv.conf").writeText(it)
                 if (mpvConfStorageLocation.isNotBlank()) {
                   val tree = DocumentFile.fromTreeUri(context, Uri.parse(mpvConfStorageLocation))!!
                   val uri = if (tree.findFile("mpv.conf") == null) {
@@ -188,6 +190,7 @@ object AdvancedPreferencesScreen : Screen() {
               },
               textToValue = {
                 preferences.inputConf.set(it)
+                File(context.filesDir.path, "input.conf").writeText(it)
                 if (mpvConfStorageLocation.isNotBlank()) {
                   val tree = DocumentFile.fromTreeUri(context, Uri.parse(mpvConfStorageLocation))!!
                   val uri = if (tree.findFile("input.conf") == null) {
