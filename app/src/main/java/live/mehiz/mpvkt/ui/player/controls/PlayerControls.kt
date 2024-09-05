@@ -245,7 +245,7 @@ fun PlayerControls(
                 interaction,
                 rememberRipple(),
               ) { viewModel.pauseUnpause() }
-              .padding(16.dp),
+              .padding(MaterialTheme.spacing.medium),
             contentDescription = null,
           )
         }

@@ -24,7 +24,7 @@ class PlayerPreferences(
 
   val videoAspect = preferenceStore.getEnum("video_aspect", VideoAspect.Fit)
   val currentChaptersIndicator = preferenceStore.getBoolean("show_video_chapter_indicator", true)
-  val showChaptersButton = preferenceStore.getBoolean("show_video_chapters_button", false)
+  val showChaptersButton = preferenceStore.getBoolean("show_video_chapters_button")
 
   val defaultSpeed = preferenceStore.getFloat("default_speed", 1f)
   val savePositionOnQuit = preferenceStore.getBoolean("save_position", true)

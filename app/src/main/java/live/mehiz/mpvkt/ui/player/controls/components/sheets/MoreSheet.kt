@@ -18,6 +18,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardAlt
 import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material.icons.outlined.Schedule
+import androidx.compose.material.icons.outlined.Timer
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
@@ -94,6 +95,7 @@ fun MoreSheet(
             checked = remainingTime > 0,
             onCheckedChange = { isSleepTimerDialogShown = true },
           ) {
+            Icon(Icons.Outlined.Timer, null)
             if (isSleepTimerDialogShown) {
               TimePickerDialog(
                 remainingTime = remainingTime,

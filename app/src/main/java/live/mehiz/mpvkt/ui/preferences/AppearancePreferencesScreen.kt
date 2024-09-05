@@ -42,7 +42,7 @@ object AppearancePreferencesScreen : Screen() {
     Scaffold(
       topBar = {
         TopAppBar(
-          title = { Text(text = "Appearance") },
+          title = { Text(text = stringResource(R.string.pref_appearance_title)) },
           navigationIcon = {
             IconButton(onClick = { navigator.pop() }) {
               Icon(Icons.AutoMirrored.Outlined.ArrowBack, null)
@@ -66,21 +66,23 @@ object AppearancePreferencesScreen : Screen() {
             MultiChoiceSegmentedButton(
               choices = DarkMode.entries.map { context.getString(it.titleRes) }.toImmutableList(),
               selectedIndices = persistentListOf(DarkMode.entries.indexOf(darkMode)),
-              onClick = { preferences.darkMode.set(DarkMode.entries[it]) }
+              onClick = { preferences.darkMode.set(DarkMode.entries[it]) },
             )
           }
           val isMaterialYouAvailable = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
           switchPreference(
             key = preferences.materialYou.key(),
-            defaultValue = true,
+            defaultValue = preferences.materialYou.defaultValue(),
             title = { Text(text = stringResource(id = R.string.pref_appearance_material_you_title)) },
             summary = {
               Text(
-                text = if (isMaterialYouAvailable) {
-                  stringResource(id = R.string.pref_appearance_material_you_summary)
-                } else {
-                  stringResource(id = R.string.pref_appearance_material_you_summary_disabled)
-                },
+                text = stringResource(
+                  if (isMaterialYouAvailable) {
+                    R.string.pref_appearance_material_you_summary
+                  } else {
+                    R.string.pref_appearance_material_you_summary_disabled
+                  },
+                ),
               )
             },
             enabled = { isMaterialYouAvailable },

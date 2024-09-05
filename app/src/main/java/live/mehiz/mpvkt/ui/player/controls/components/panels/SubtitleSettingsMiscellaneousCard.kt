@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -15,12 +16,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
 import `is`.xyz.mpv.MPVLib
 import live.mehiz.mpvkt.R
 import live.mehiz.mpvkt.preferences.SubtitlesPreferences
 import live.mehiz.mpvkt.preferences.preference.collectAsState
 import live.mehiz.mpvkt.presentation.components.ExpandableCard
+import live.mehiz.mpvkt.ui.theme.spacing
 import me.zhanghai.compose.preference.ProvidePreferenceLocals
 import me.zhanghai.compose.preference.SwitchPreference
 import org.koin.compose.koinInject
@@ -32,7 +33,7 @@ fun SubtitlesMiscellaneousCard(modifier: Modifier = Modifier) {
   ExpandableCard(
     isExpanded,
     title = {
-      Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+      Row(horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.medium)) {
         Icon(Icons.Default.Tune, null)
         Text(stringResource(R.string.player_sheets_sub_misc_card_title))
       }

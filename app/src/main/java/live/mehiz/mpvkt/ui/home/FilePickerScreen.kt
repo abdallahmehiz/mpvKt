@@ -47,6 +47,7 @@ import com.github.k1rakishou.fsaf.file.AbstractFile
 import `is`.xyz.mpv.Utils
 import live.mehiz.mpvkt.R
 import live.mehiz.mpvkt.presentation.Screen
+import live.mehiz.mpvkt.ui.theme.spacing
 import live.mehiz.mpvkt.ui.utils.FilesComparator
 import org.koin.compose.koinInject
 import java.lang.Long.signum
@@ -163,8 +164,8 @@ data class FilePickerScreen(val uri: String) : Screen() {
         .clickable(onClick = onClick)
         .fillMaxWidth()
         .heightIn(min = 64.dp)
-        .padding(vertical = 8.dp, horizontal = 16.dp),
-      horizontalArrangement = Arrangement.spacedBy(8.dp),
+        .padding(vertical = MaterialTheme.spacing.smaller, horizontal = MaterialTheme.spacing.medium),
+      horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.smaller),
       verticalAlignment = Alignment.CenterVertically,
     ) {
       Icon(
