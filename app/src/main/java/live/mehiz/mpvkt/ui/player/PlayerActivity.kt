@@ -101,9 +101,7 @@ class PlayerActivity : AppCompatActivity() {
     setupMPV()
     setupAudio()
     setupSubtitles()
-    val uri = parsePathFromIntent(intent)
-    val videoUri = if (uri?.startsWith("content://") == true) openContentFd(Uri.parse(uri)) else uri
-    player.playFile(videoUri!!)
+    getPlayableUri(intent)?.let { player.playFile(it) }
     setOrientation()
     loadKoinModules(viewModelModule)
 
@@ -116,6 +114,11 @@ class PlayerActivity : AppCompatActivity() {
         )
       }
     }
+  }
+
+  private fun getPlayableUri(intent: Intent): String? {
+    val uri = parsePathFromIntent(intent)
+    return if (uri?.startsWith("content://") == true) openContentFd(Uri.parse(uri)) else uri
   }
 
   override fun onDestroy() {
@@ -354,7 +357,11 @@ class PlayerActivity : AppCompatActivity() {
   }
 
   private fun getFileName(intent: Intent): String? {
-    val uri = (intent.data ?: intent.getParcelableExtra(Intent.EXTRA_STREAM))
+    val uri = if (intent.type == "text/plain") {
+      Uri.parse(intent.getStringExtra(Intent.EXTRA_TEXT))
+    } else {
+      (intent.data ?: intent.getParcelableExtra(Intent.EXTRA_STREAM))
+    }
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && uri != null) {
       val cursor = contentResolver.query(uri, arrayOf(MediaStore.MediaColumns.DISPLAY_NAME), null, null)
       if (cursor?.moveToFirst() == true) return cursor.getString(0).also { cursor.close() }
@@ -493,13 +500,8 @@ class PlayerActivity : AppCompatActivity() {
         viewModel.changeVideoAspect(playerPreferences.videoAspect.get())
       }
 
-      MPVLib.mpvEventId.MPV_EVENT_SEEK -> {
-        viewModel.isLoading.update { true }
-      }
-
-      MPVLib.mpvEventId.MPV_EVENT_PLAYBACK_RESTART -> {
-        player.isExiting = false
-      }
+      MPVLib.mpvEventId.MPV_EVENT_SEEK -> viewModel.isLoading.update { true }
+      MPVLib.mpvEventId.MPV_EVENT_PLAYBACK_RESTART -> player.isExiting = false
     }
   }
 
@@ -526,6 +528,7 @@ class PlayerActivity : AppCompatActivity() {
   }
 
   private suspend fun loadVideoPlaybackState(mediaTitle: String) {
+    if (mediaTitle.isBlank()) return
     val state = mpvKtDatabase.videoDataDao().getVideoDataByTitle(mediaTitle)
     val getDelay: (Int, Int?) -> Double = { preferenceDelay, stateDelay ->
       (stateDelay ?: preferenceDelay) / 1000.0
@@ -556,7 +559,7 @@ class PlayerActivity : AppCompatActivity() {
     cause?.let { returnIntent.putExtra("cause", cause) }
     player.timePos?.let { returnIntent.putExtra("position", it * 1000) }
     player.duration?.let { returnIntent.putExtra("duration", it * 1000) }
-    setResult(RESULT_OK, returnIntent)
+    setResult(if (reason == EndPlaybackReason.Error) RESULT_CANCELED else RESULT_OK, returnIntent)
     if (playerPreferences.closeAfterReachingEndOfVideo.get()) {
       player.isExiting = true
       finishAndRemoveTask()
@@ -566,13 +569,7 @@ class PlayerActivity : AppCompatActivity() {
   override fun onNewIntent(intent: Intent) {
     super.onNewIntent(intent)
 
-    val uri = parsePathFromIntent(intent)
-    val videoUri = if (uri?.startsWith("content://") == true) {
-      openContentFd(Uri.parse(uri))
-    } else {
-      uri
-    }
-    videoUri?.let { MPVLib.command(arrayOf("loadfile", it)) }
+    getPlayableUri(intent)?.let { MPVLib.command(arrayOf("loadfile", it)) }
     setIntent(intent)
   }
 
