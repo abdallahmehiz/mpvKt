@@ -30,6 +30,7 @@ import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -43,9 +44,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
+import `is`.xyz.mpv.Utils
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.update
@@ -63,6 +67,7 @@ import live.mehiz.mpvkt.ui.player.controls.components.VolumeSlider
 import live.mehiz.mpvkt.ui.theme.PlayerRippleTheme
 import live.mehiz.mpvkt.ui.theme.spacing
 import org.koin.compose.koinInject
+import kotlin.math.abs
 
 @Suppress("CompositionLocalAllowlist")
 val LocalPlayerButtonsClickEvent = staticCompositionLocalOf { {} }
@@ -83,6 +88,7 @@ fun PlayerControls(
   val duration by viewModel.duration.collectAsState()
   val position by viewModel.pos.collectAsState()
   val paused by viewModel.paused.collectAsState()
+  val gestureSeekAmount by viewModel.gestureSeekAmount.collectAsState()
   var isSeeking by remember { mutableStateOf(false) }
   var resetControls by remember { mutableStateOf(true) }
   LaunchedEffect(
@@ -171,7 +177,7 @@ fun PlayerControls(
         viewModel.playerUpdate.update { PlayerUpdates.None }
       }
       AnimatedVisibility(
-        currentPlayerUpdate != PlayerUpdates.None,
+        gestureSeekAmount != null || currentPlayerUpdate != PlayerUpdates.None,
         enter = fadeIn(playControlsAnimationSpec()),
         exit = fadeOut(playControlsAnimationSpec()),
         modifier = Modifier.constrainAs(playerUpdates) {
@@ -179,10 +185,24 @@ fun PlayerControls(
           linkTo(parent.top, parent.bottom, bias = 0.2f)
         },
       ) {
-        when (currentPlayerUpdate) {
-          PlayerUpdates.DoubleSpeed -> DoubleSpeedPlayerUpdate()
-          PlayerUpdates.AspectRatio -> TextPlayerUpdate(stringResource(aspectRatio.titleRes))
-          else -> {}
+        if (gestureSeekAmount != null) {
+          Text(
+            stringResource(
+              R.string.player_gesture_seek_indicator,
+              if (gestureSeekAmount!!.second >= 0) '+' else '-',
+              Utils.prettyTime(abs(gestureSeekAmount!!.second)),
+              Utils.prettyTime(gestureSeekAmount!!.first + gestureSeekAmount!!.second),
+            ),
+            style = MaterialTheme.typography.headlineMedium,
+            fontWeight = FontWeight.Bold,
+            textAlign = TextAlign.Center,
+          )
+        } else {
+          when (currentPlayerUpdate) {
+            PlayerUpdates.DoubleSpeed -> DoubleSpeedPlayerUpdate()
+            PlayerUpdates.AspectRatio -> TextPlayerUpdate(stringResource(aspectRatio.titleRes))
+            else -> {}
+          }
         }
       }
 

@@ -18,11 +18,11 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardAlt
 import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material.icons.outlined.Schedule
-import androidx.compose.material.icons.outlined.Timer
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconToggleButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -89,19 +89,18 @@ fun MoreSheet(
           horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.extraSmall),
         ) {
           var isSleepTimerDialogShown by remember { mutableStateOf(false) }
-          IconButton(onClick = { isSleepTimerDialogShown = true }) {
-            Icon(imageVector = Icons.Outlined.Timer, contentDescription = null)
-          }
-          if (isSleepTimerDialogShown) {
-            val remainingTime by viewModel.remainingTime.collectAsState()
-            TimePickerDialog(
-              remainingTime = remainingTime ?: 0,
-              onDismissRequest = { isSleepTimerDialogShown = false },
-              onTimeSelect = {
-                if (it < 1) return@TimePickerDialog
-                viewModel.startTimer(it)
-              }
-            )
+          val remainingTime by viewModel.remainingTime.collectAsState()
+          IconToggleButton(
+            checked = remainingTime > 0,
+            onCheckedChange = { isSleepTimerDialogShown = true },
+          ) {
+            if (isSleepTimerDialogShown) {
+              TimePickerDialog(
+                remainingTime = remainingTime,
+                onDismissRequest = { isSleepTimerDialogShown = false },
+                onTimeSelect = viewModel::startTimer
+              )
+            }
           }
           TextButton(onClick = onEnterFiltersPanel) {
             Row(

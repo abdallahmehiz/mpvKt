@@ -210,7 +210,7 @@ fun GestureHandler(modifier: Modifier = Modifier) {
             viewModel.pause()
           },
           onDragEnd = {
-            viewModel.gestureSeekAmount.update { 0 }
+            viewModel.gestureSeekAmount.update { null }
             viewModel.hideSeekBar()
             if (!wasPlayerAlreadyPause) viewModel.unpause()
           },
@@ -219,7 +219,9 @@ fun GestureHandler(modifier: Modifier = Modifier) {
           if (position <= 0f && dragAmount < 0) return@detectHorizontalDragGestures
           val seekBy = ((dragAmount * 150f / size.width).coerceIn(0f - position, duration - position)).toInt()
           viewModel.seekBy(seekBy)
-          viewModel.gestureSeekAmount.update { (position - startingPosition).toInt() }
+          viewModel.gestureSeekAmount.update {
+            Pair(startingPosition.toInt(), (position - startingPosition).toInt())
+          }
           if (showSeekbarWhenSeeking) viewModel.showSeekBar()
         }
       }

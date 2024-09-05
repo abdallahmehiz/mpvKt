@@ -79,14 +79,18 @@ class PlayerViewModel(
 
   val sheetShown = MutableStateFlow(Sheets.None)
   val panelShown = MutableStateFlow(Panels.None)
-  val gestureSeekAmount = MutableStateFlow(0)
+
+  // Pair(startingPosition, seekAmount)
+  val gestureSeekAmount = MutableStateFlow<Pair<Int, Int>?>(null)
 
   private var timerJob: Job? = null
-  private val _remainingTime = MutableStateFlow<Int?>(null)
+  private val _remainingTime = MutableStateFlow(0)
   val remainingTime = _remainingTime.asStateFlow()
 
   fun startTimer(seconds: Int) {
     timerJob?.cancel()
+    _remainingTime.value = seconds
+    if (seconds < 1) return
     timerJob = viewModelScope.launch {
       for (time in seconds downTo 0) {
         _remainingTime.value = time
@@ -210,7 +214,7 @@ class PlayerViewModel(
       chapters.add(
         Segment(
           name = title,
-          start = time.toFloat(),
+          start = time.toFloat().coerceAtLeast(0f),
         ),
       )
     }
