@@ -640,9 +640,9 @@ class PlayerActivity : AppCompatActivity() {
     requestedOrientation = when (playerPreferences.orientation.get()) {
       PlayerOrientation.Free -> ActivityInfo.SCREEN_ORIENTATION_SENSOR
       PlayerOrientation.Video -> if ((player.videoAspect ?: 0.0) > 1.0) {
-        ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
+        ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
       } else {
-        ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+        ActivityInfo.SCREEN_ORIENTATION_SENSOR_PORTRAIT
       }
 
       PlayerOrientation.Portrait -> ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
