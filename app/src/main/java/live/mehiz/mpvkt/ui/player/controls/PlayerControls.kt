@@ -24,6 +24,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.LockOpen
 import androidx.compose.material.ripple.LocalRippleTheme
 import androidx.compose.material.ripple.rememberRipple
@@ -221,7 +222,7 @@ fun PlayerControls(
           },
         ) {
           ControlsButton(
-            Icons.Filled.LockOpen,
+            Icons.Filled.Lock,
             onClick = { viewModel.unlockControls() },
           )
         }

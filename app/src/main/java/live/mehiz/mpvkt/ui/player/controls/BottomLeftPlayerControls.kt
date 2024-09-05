@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.LockOpen
 import androidx.compose.material.icons.filled.ScreenRotation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -34,7 +35,7 @@ fun BottomLeftPlayerControls(modifier: Modifier = Modifier) {
     verticalAlignment = Alignment.CenterVertically,
   ) {
     ControlsButton(
-      Icons.Default.Lock,
+      Icons.Default.LockOpen,
       onClick = { viewModel.lockControls() },
     )
     ControlsButton(
