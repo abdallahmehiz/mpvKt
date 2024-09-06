@@ -180,29 +180,8 @@ class PlayerViewModel(
         return@launch
       }
       _subtitleTracks.update { subTracks }
-      _selectedSubtitles.update { Pair(activity.player.sid, activity.player.secondarySid) }
       _audioTracks.update { audioTracks }
-      _selectedAudio.update { activity.player.aid }
     }
-  }
-
-  fun selectSub(id: Int) {
-    val selectedSubs = selectedSubtitles.value
-    _selectedSubtitles.update {
-      when (id) {
-        selectedSubs.first -> Pair(selectedSubs.second, -1)
-        selectedSubs.second -> Pair(selectedSubs.first, -1)
-        else -> {
-          if (selectedSubs.first != -1) {
-            Pair(selectedSubs.first, id)
-          } else {
-            Pair(id, -1)
-          }
-        }
-      }
-    }
-    activity.player.secondarySid = _selectedSubtitles.value.second
-    activity.player.sid = _selectedSubtitles.value.first
   }
 
   fun loadChapters() {
@@ -231,8 +210,21 @@ class PlayerViewModel(
     _currentChapter.update { chapters.getOrNull(index.toInt()) ?: return }
   }
 
+  fun addAudio(uri: Uri) {
+    val url = uri.toString()
+    val path = if (url.startsWith("content://")) {
+      activity.openContentFd(Uri.parse(url))
+    } else {
+      url
+    } ?: return
+    MPVLib.command(arrayOf("audio-add", path, "cached"))
+  }
+
   fun selectAudio(id: Int) {
     activity.player.aid = id
+  }
+
+  fun updateAudio(id: Int) {
     _selectedAudio.update { id }
   }
 
@@ -246,22 +238,27 @@ class PlayerViewModel(
     MPVLib.command(arrayOf("sub-add", path, "cached"))
   }
 
-  fun setSubtitle(sid: Int, secondarySid: Int) {
-    _selectedSubtitles.update { Pair(sid, secondarySid) }
+  fun selectSub(id: Int) {
+    val selectedSubs = selectedSubtitles.value
+    _selectedSubtitles.update {
+      when (id) {
+        selectedSubs.first -> Pair(selectedSubs.second, -1)
+        selectedSubs.second -> Pair(selectedSubs.first, -1)
+        else -> {
+          if (selectedSubs.first != -1) {
+            Pair(selectedSubs.first, id)
+          } else {
+            Pair(id, -1)
+          }
+        }
+      }
+    }
+    activity.player.secondarySid = _selectedSubtitles.value.second
+    activity.player.sid = _selectedSubtitles.value.first
   }
 
-  fun addAudio(uri: Uri) {
-    val url = uri.toString()
-    val path = if (url.startsWith("content://")) {
-      activity.openContentFd(Uri.parse(url))
-    } else {
-      url
-    } ?: return
-    val trackCount = MPVLib.getPropertyInt("track-list/count")
-    MPVLib.command(arrayOf("audio-add", path, "cached"))
-    if (trackCount == MPVLib.getPropertyInt("track-list/count")) return
-    _audioTracks.update { it.plus(Track(activity.player.aid, path, null)) }
-    _selectedAudio.update { activity.player.aid }
+  fun updateSubtitle(sid: Int, secondarySid: Int) {
+    _selectedSubtitles.update { Pair(sid, secondarySid) }
   }
 
   fun updatePlayBackPos(pos: Float) {

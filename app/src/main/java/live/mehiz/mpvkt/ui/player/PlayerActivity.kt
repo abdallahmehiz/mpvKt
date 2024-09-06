@@ -472,9 +472,9 @@ class PlayerActivity : AppCompatActivity() {
   internal fun onObserverEvent(property: String, value: String) {
     if (player.isExiting) return
     when (property) {
-      "aid" -> trackId(value)?.let { viewModel.selectAudio(it) }
-      "sid" -> trackId(value)?.let { viewModel.setSubtitle(it, viewModel.selectedSubtitles.value.second) }
-      "secondary-sid" -> trackId(value)?.let { viewModel.setSubtitle(viewModel.selectedSubtitles.value.first, it) }
+      "aid" -> trackId(value)?.let { viewModel.updateAudio(it) }
+      "sid" -> trackId(value)?.let { viewModel.updateSubtitle(it, viewModel.selectedSubtitles.value.second) }
+      "secondary-sid" -> trackId(value)?.let { viewModel.updateSubtitle(viewModel.selectedSubtitles.value.first, it) }
       "hwdec", "hwdec-current" -> viewModel.getDecoder()
     }
   }
