@@ -116,7 +116,7 @@ fun PlayerControls(
     LocalContentColor provides Color.White,
   ) {
     CompositionLocalProvider(
-      LocalLayoutDirection provides LayoutDirection.Ltr
+      LocalLayoutDirection provides LayoutDirection.Ltr,
     ) {
       ConstraintLayout(
         modifier = modifier
@@ -182,7 +182,7 @@ fun PlayerControls(
           viewModel.playerUpdate.update { PlayerUpdates.None }
         }
         AnimatedVisibility(
-          gestureSeekAmount != null || currentPlayerUpdate != PlayerUpdates.None,
+          currentPlayerUpdate != PlayerUpdates.None,
           enter = fadeIn(playControlsAnimationSpec()),
           exit = fadeOut(playControlsAnimationSpec()),
           modifier = Modifier.constrainAs(playerUpdates) {
@@ -190,24 +190,10 @@ fun PlayerControls(
             linkTo(parent.top, parent.bottom, bias = 0.2f)
           },
         ) {
-          if (gestureSeekAmount != null) {
-            Text(
-              stringResource(
-                R.string.player_gesture_seek_indicator,
-                if (gestureSeekAmount!!.second >= 0) '+' else '-',
-                Utils.prettyTime(abs(gestureSeekAmount!!.second)),
-                Utils.prettyTime(gestureSeekAmount!!.first + gestureSeekAmount!!.second),
-              ),
-              style = MaterialTheme.typography.headlineMedium,
-              fontWeight = FontWeight.Bold,
-              textAlign = TextAlign.Center,
-            )
-          } else {
-            when (currentPlayerUpdate) {
-              PlayerUpdates.DoubleSpeed -> DoubleSpeedPlayerUpdate()
-              PlayerUpdates.AspectRatio -> TextPlayerUpdate(stringResource(aspectRatio.titleRes))
-              else -> {}
-            }
+          when (currentPlayerUpdate) {
+            PlayerUpdates.DoubleSpeed -> DoubleSpeedPlayerUpdate()
+            PlayerUpdates.AspectRatio -> TextPlayerUpdate(stringResource(aspectRatio.titleRes))
+            else -> {}
           }
         }
 
@@ -226,7 +212,7 @@ fun PlayerControls(
           )
         }
         AnimatedVisibility(
-          visible = (controlsShown && !areControlsLocked) || isLoading,
+          visible = (controlsShown && !areControlsLocked || gestureSeekAmount != null) || isLoading,
           enter = fadeIn(playControlsAnimationSpec()),
           exit = fadeOut(playControlsAnimationSpec()),
           modifier = Modifier.constrainAs(playerPauseButton) {
@@ -238,10 +224,23 @@ fun PlayerControls(
         ) {
           val icon = AnimatedImageVector.animatedVectorResource(R.drawable.anim_play_to_pause)
           val interaction = remember { MutableInteractionSource() }
-          if (isLoading) {
-            CircularProgressIndicator(Modifier.size(96.dp))
-          } else if (controlsShown && !areControlsLocked) {
-            Image(
+          when {
+            gestureSeekAmount != null -> {
+              Text(
+                stringResource(
+                  R.string.player_gesture_seek_indicator,
+                  if (gestureSeekAmount!!.second >= 0) '+' else '-',
+                  Utils.prettyTime(abs(gestureSeekAmount!!.second)),
+                  Utils.prettyTime(gestureSeekAmount!!.first + gestureSeekAmount!!.second),
+                ),
+                style = MaterialTheme.typography.headlineMedium,
+                fontWeight = FontWeight.Bold,
+                textAlign = TextAlign.Center,
+              )
+            }
+
+            isLoading -> CircularProgressIndicator(Modifier.size(96.dp))
+            controlsShown && !areControlsLocked -> Image(
               painter = rememberAnimatedVectorPainter(icon, !paused),
               modifier = Modifier
                 .size(96.dp)
@@ -334,5 +333,5 @@ fun PlayerControls(
 
 fun <T> playControlsAnimationSpec(): FiniteAnimationSpec<T> = tween(
   durationMillis = 200,
-  easing = LinearOutSlowInEasing
+  easing = LinearOutSlowInEasing,
 )
