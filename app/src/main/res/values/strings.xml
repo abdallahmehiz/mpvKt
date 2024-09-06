@@ -144,8 +144,12 @@
     <string name="player_sheets_sub_delay_subtitle_type_primary">Primary</string>
     <string name="player_sheets_sub_delay_subtitle_type_secondary">Secondary</string>
     <string name="player_sheets_sub_delay_subtitle_type_primary_and_secondary">Both</string>
+    <string name="player_sheets_sub_delay_subtitle_voice_heard">Voice heard</string>
+    <string name="player_sheets_sub_delay_subtitle_text_seen">Text seen</string>
     <string name="player_sheets_delay_set_as_default">Set as default</string>
     <string name="player_sheets_audio_delay_card_title">Audio delay</string>
+    <string name="player_sheets_sub_delay_audio_sound_heard">Sound heard</string>
+    <string name="player_sheets_sub_delay_sound_sound_spotted">Sound spotted</string>
 
     <string name="player_sheets_filters_title">Filters</string>
     <string name="player_sheets_filters_brightness">Brightness</string>

@@ -53,6 +53,7 @@ fun AudioDelayPanel(
       onApply = { preferences.defaultAudioDelay.set(delay) },
       onReset = { delay = 0 },
       title = { AudioDelayCardTitle(onClose = onDismissRequest) },
+      delayType = DelayType.Audio,
       modifier = Modifier.constrainAs(delayControlCard) {
         linkTo(parent.top, parent.bottom, bias = 0.8f)
         end.linkTo(parent.end)

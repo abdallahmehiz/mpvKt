@@ -123,6 +123,7 @@ fun OutlinedNumericChooser(
         if (value < min) Text(stringResource(R.string.numeric_chooser_value_too_small))
       },
       modifier = Modifier.weight(1f),
+      maxLines = 1,
       suffix = suffix,
       keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
     )

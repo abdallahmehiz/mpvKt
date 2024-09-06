@@ -56,7 +56,7 @@ fun DoubleSpeedPlayerUpdate(
       verticalAlignment = Alignment.Bottom,
     ) {
       Text(
-        "2x",
+        "x2",
         fontWeight = FontWeight.Bold,
         fontSize = 20.sp,
       )
