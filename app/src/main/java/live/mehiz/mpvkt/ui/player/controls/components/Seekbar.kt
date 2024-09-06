@@ -58,7 +58,7 @@ fun SeekbarWithTimers(
       onValueChange = onValueChange,
       onValueChangeFinished = onValueChangeFinished,
       readAheadValue = readAheadValue,
-      segments = chapters ?: persistentListOf(),
+      segments = chapters?.filter { it.start in 0f..duration } ?: persistentListOf(),
       modifier = Modifier.weight(1f),
       colors = SeekerDefaults.seekerColors(
         progressColor = MaterialTheme.colorScheme.primary,

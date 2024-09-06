@@ -193,7 +193,7 @@ class PlayerViewModel(
         ),
       )
     }
-    this.chapters = chapters.sortedBy { it.start }.filter { it.start in 0f..duration.value }
+    this.chapters = chapters.sortedBy { it.start }
   }
 
   fun selectChapter(index: Int) {
