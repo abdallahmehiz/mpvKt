@@ -482,7 +482,10 @@ class PlayerActivity : AppCompatActivity() {
   internal fun onObserverEvent(property: String, value: Double) {
     if (player.isExiting) return
     when (property) {
-      "speed" -> viewModel.playbackSpeed.update { value.toFloat() }
+      "speed" -> {
+        if (viewModel.sheetShown.value == Sheets.PlaybackSpeed) return
+        viewModel.playbackSpeed.update { value.toFloat() }
+      }
     }
   }
 
