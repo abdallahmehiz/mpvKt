@@ -265,6 +265,7 @@ fun PlayerControls(
         ) {
           val invertDuration by playerPreferences.invertDuration.collectAsState()
           val readAhead by viewModel.readAhead.collectAsState()
+          val preciseSeeking by playerPreferences.preciseSeeking.collectAsState()
           SeekbarWithTimers(
             position = position,
             duration = duration,
@@ -272,7 +273,7 @@ fun PlayerControls(
             onValueChange = {
               isSeeking = true
               viewModel.updatePlayBackPos(it)
-              viewModel.seekTo(it.toInt())
+              viewModel.seekTo(it.toInt(), preciseSeeking)
             },
             onValueChangeFinished = { isSeeking = false },
             timersInverted = Pair(false, invertDuration),

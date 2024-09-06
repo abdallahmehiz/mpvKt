@@ -18,6 +18,7 @@ class PlayerPreferences(
   val holdForDoubleSpeed = preferenceStore.getBoolean("hold_for_double_speed", true)
   val horizontalSeekGesture = preferenceStore.getBoolean("horizontal_seek_gesture", true)
   val showSeekBarWhenSeeking = preferenceStore.getBoolean("show_seekbar_when_seeking")
+  val preciseSeeking = preferenceStore.getBoolean("precise_seeking")
 
   val brightnessGesture = preferenceStore.getBoolean("gestures_brightness", true)
   val volumeGesture = preferenceStore.getBoolean("volume_brightness", true)

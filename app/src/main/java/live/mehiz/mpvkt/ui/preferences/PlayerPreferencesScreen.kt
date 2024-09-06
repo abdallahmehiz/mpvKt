@@ -89,13 +89,8 @@ object PlayerPreferencesScreen : Screen() {
             title = { Text(text = stringResource(id = R.string.pref_player_close_after_eof)) }
           )
           preferenceCategory(
-            "gestures",
-            title = { Text(stringResource(R.string.pref_player_gestures)) },
-          )
-          switchPreference(
-            key = preferences.doubleTapToPause.key(),
-            defaultValue = preferences.doubleTapToPause.defaultValue(),
-            title = { Text(text = stringResource(id = R.string.pref_player_double_tap_to_pause)) },
+            key = "seeking",
+            title = { Text(stringResource(R.string.pref_player_seeking_title)) }
           )
           switchPreference(
             key = preferences.doubleTapToSeek.key(),
@@ -120,6 +115,21 @@ object PlayerPreferencesScreen : Screen() {
             preferences.showSeekBarWhenSeeking.key(),
             defaultValue = preferences.showSeekBarWhenSeeking.defaultValue(),
             title = { Text(stringResource(R.string.pref_player_show_seekbar_when_seeking)) }
+          )
+          switchPreference(
+            preferences.preciseSeeking.key(),
+            defaultValue = preferences.preciseSeeking.defaultValue(),
+            title = { Text(stringResource(R.string.pref_player_precise_seeking_title)) },
+            summary = { Text(stringResource(R.string.pref_player_precise_seeking_summary)) }
+          )
+          preferenceCategory(
+            "gestures",
+            title = { Text(stringResource(R.string.pref_player_gestures)) },
+          )
+          switchPreference(
+            key = preferences.doubleTapToPause.key(),
+            defaultValue = preferences.doubleTapToPause.defaultValue(),
+            title = { Text(text = stringResource(id = R.string.pref_player_double_tap_to_pause)) },
           )
           switchPreference(
             preferences.brightnessGesture.key(),

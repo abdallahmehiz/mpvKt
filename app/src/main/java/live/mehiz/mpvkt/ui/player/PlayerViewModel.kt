@@ -124,10 +124,6 @@ class PlayerViewModel(
 
   fun updateDecoder(decoder: Decoder) {
     MPVLib.setPropertyString("hwdec", decoder.value)
-    val newDecoder = activity.player.hwdecActive
-    if (newDecoder != currentDecoder.value.value) {
-      _currentDecoder.update { getDecoderFromValue(newDecoder) }
-    }
   }
 
   val getTrackLanguage: (Int) -> String = {
@@ -318,16 +314,13 @@ class PlayerViewModel(
     _areControlsLocked.update { false }
   }
 
-  fun seekBy(offset: Int) {
-    MPVLib.command(arrayOf("seek", offset.toString(), "relative"))
-    isLoading.update { true }
+  fun seekBy(offset: Int, precise: Boolean = false) {
+    MPVLib.command(arrayOf("seek", offset.toString(), if (precise) "relative+exact" else "relative"))
   }
 
-  fun seekTo(position: Int) {
-    if (position < 0) return
-    if (position > (activity.player.duration ?: 0)) return
-    activity.player.timePos = position
-    isLoading.update { true }
+  fun seekTo(position: Int, precise: Boolean = true) {
+    if (position !in 0..(activity.player.duration ?: 0)) return
+    MPVLib.command(arrayOf("seek", position.toString(), if (precise) "absolute" else "absolute+keyframes"))
   }
 
   fun changeBrightnessBy(change: Float) {
