@@ -87,7 +87,6 @@ fun GestureHandler(modifier: Modifier = Modifier) {
   val brightnessGesture = playerPreferences.brightnessGesture.get()
   val volumeGesture by playerPreferences.volumeGesture.collectAsState()
   val seekGesture by playerPreferences.horizontalSeekGesture.collectAsState()
-  val defaultSpeed by playerPreferences.defaultSpeed.collectAsState()
   val showSeekbarWhenSeeking by playerPreferences.showSeekBarWhenSeeking.collectAsState()
   val doubleTapSeek: (Offset, IntSize) -> Unit = { offset, size ->
     targetAlpha = 0.2f
@@ -151,6 +150,7 @@ fun GestureHandler(modifier: Modifier = Modifier) {
       .fillMaxSize()
       .windowInsetsPadding(WindowInsets.safeGestures)
       .pointerInput(Unit) {
+        var originalSpeed = viewModel.playbackSpeed.value
         detectTapGestures(
           onTap = {
             if (controlsShown) {
@@ -183,7 +183,7 @@ fun GestureHandler(modifier: Modifier = Modifier) {
             tryAwaitRelease()
             if (isLongPressing) {
               isLongPressing = false
-              MPVLib.setPropertyDouble("speed", defaultSpeed.toDouble())
+              MPVLib.setPropertyDouble("speed", originalSpeed.toDouble())
               viewModel.playerUpdate.update { PlayerUpdates.None }
             }
             interactionSource.emit(PressInteraction.Release(press))
@@ -191,6 +191,7 @@ fun GestureHandler(modifier: Modifier = Modifier) {
           onLongPress = {
             if (areControlsLocked) return@detectTapGestures
             if (!isLongPressing && !viewModel.paused.value) {
+              originalSpeed = viewModel.playbackSpeed.value
               haptics.performHapticFeedback(HapticFeedbackType.LongPress)
               isLongPressing = true
               MPVLib.setPropertyDouble("speed", 2.0)
