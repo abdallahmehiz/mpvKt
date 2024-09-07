@@ -11,15 +11,23 @@ import `is`.xyz.mpv.BaseMPVView
 import `is`.xyz.mpv.KeyMapping
 import `is`.xyz.mpv.MPVLib
 import live.mehiz.mpvkt.preferences.AdvancedPreferences
+import live.mehiz.mpvkt.preferences.AudioPreferences
 import live.mehiz.mpvkt.preferences.DecoderPreferences
+import live.mehiz.mpvkt.preferences.PlayerPreferences
+import live.mehiz.mpvkt.preferences.SubtitlesPreferences
+import live.mehiz.mpvkt.ui.player.controls.components.panels.toColorHexString
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
+import java.io.File
 import kotlin.reflect.KProperty
 
 class MPVView(context: Context, attributes: AttributeSet) : BaseMPVView(context, attributes), KoinComponent {
 
+  private val audioPreferences: AudioPreferences by inject()
+  private val playerPreferences: PlayerPreferences by inject()
   private val decoderPreferences: DecoderPreferences by inject()
   private val advancedPreferences: AdvancedPreferences by inject()
+  private val subtitlesPreferences: SubtitlesPreferences by inject()
 
   var isExiting = false
 
@@ -96,9 +104,7 @@ class MPVView(context: Context, attributes: AttributeSet) : BaseMPVView(context,
     if (decoderPreferences.useYUV420P.get()) {
       MPVLib.setOptionString("vf", "format=yuv420p")
     }
-    if (advancedPreferences.verboseLogging.get()) {
-      MPVLib.setOptionString("msg-level", "v")
-    }
+    MPVLib.setOptionString("msg-level", if (advancedPreferences.verboseLogging.get()) "v" else "warn")
 
     MPVLib.setPropertyBoolean("keep-open", true)
     MPVLib.setPropertyBoolean("input-default-bindings", true)
@@ -114,14 +120,29 @@ class MPVView(context: Context, attributes: AttributeSet) : BaseMPVView(context,
     val screenshotDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES)
     screenshotDir.mkdirs()
     MPVLib.setOptionString("screenshot-directory", screenshotDir.path)
+
+    VideoFilters.entries.forEach {
+      MPVLib.setOptionString(it.mpvProperty, it.preference(decoderPreferences).get().toString())
+    }
+
+    MPVLib.setOptionString("speed", playerPreferences.defaultSpeed.get().toString())
+
+    setupSubtitlesOptions()
+    setupAudioOptions()
+    File(context.filesDir.path, "mpv.conf").readLines().forEach(::println)
   }
 
   override fun observeProperties() {
     for ((name, format) in observedProps) MPVLib.observeProperty(name, format)
   }
 
-  @Suppress("EmptyFunctionBlock")
   override fun postInitOptions() {
+    advancedPreferences.enabledStatisticsPage.get().let {
+      if (it != 0) {
+        MPVLib.command(arrayOf("script-binding", "stats/display-stats-toggle"))
+        MPVLib.command(arrayOf("script-binding", "stats/display-page-$it"))
+      }
+    }
   }
 
   @Suppress("ReturnCount")
@@ -187,4 +208,39 @@ class MPVView(context: Context, attributes: AttributeSet) : BaseMPVView(context,
     "seeking" to MPVLib.mpvFormat.MPV_FORMAT_FLAG,
     "eof-reached" to MPVLib.mpvFormat.MPV_FORMAT_FLAG,
   )
+
+  private fun setupAudioOptions() {
+    MPVLib.setOptionString("alang", audioPreferences.preferredLanguages.get())
+    MPVLib.setOptionString("audio-delay", (audioPreferences.defaultAudioDelay.get() / 1000.0).toString())
+    MPVLib.setOptionString("audio-pitch-correction", audioPreferences.audioPitchCorrection.get().toString())
+  }
+
+  // Setup
+  private fun setupSubtitlesOptions() {
+    MPVLib.setOptionString("slang", subtitlesPreferences.preferredLanguages.get())
+
+    MPVLib.setOptionString("sub-fonts-dir", context.cacheDir.path + "/fonts/")
+    MPVLib.setOptionString("sub-delay", (subtitlesPreferences.defaultSubDelay.get() / 1000.0).toString())
+    MPVLib.setOptionString("sub-speed", subtitlesPreferences.defaultSubSpeed.get().toString())
+    MPVLib.setOptionString(
+      "secondary-sub-delay",
+      (subtitlesPreferences.defaultSecondarySubDelay.get() / 1000.0).toString()
+    )
+
+    MPVLib.setOptionString("sub-font", subtitlesPreferences.font.get())
+    subtitlesPreferences.overrideAssSubs.get().let {
+      MPVLib.setOptionString("sub-ass-override", if (it) "force" else "no")
+      MPVLib.setOptionString("sub-ass-justify", if (it) "yes" else "no")
+    }
+    MPVLib.setOptionString("sub-font-size", subtitlesPreferences.fontSize.get().toString())
+    MPVLib.setOptionString("sub-bold", if (subtitlesPreferences.bold.get()) "yes" else "no")
+    MPVLib.setOptionString("sub-italic", if (subtitlesPreferences.italic.get()) "yes" else "no")
+    MPVLib.setOptionString("sub-justify", subtitlesPreferences.justification.get().value)
+    MPVLib.setOptionString("sub-color", subtitlesPreferences.textColor.get().toColorHexString())
+    MPVLib.setOptionString("sub-back-color", subtitlesPreferences.backgroundColor.get().toColorHexString())
+    MPVLib.setOptionString("sub-border-color", subtitlesPreferences.borderColor.get().toColorHexString())
+    MPVLib.setOptionString("sub-border-size", subtitlesPreferences.borderSize.get().toString())
+    MPVLib.setOptionString("sub-border-style", subtitlesPreferences.borderStyle.get().value)
+    MPVLib.setOptionString("sub-shadow-offset", subtitlesPreferences.shadowOffset.get().toString())
+  }
 }

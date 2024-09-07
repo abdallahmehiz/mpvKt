@@ -19,7 +19,6 @@ import androidx.compose.ui.res.stringResource
 import `is`.xyz.mpv.MPVLib
 import live.mehiz.mpvkt.R
 import live.mehiz.mpvkt.preferences.SubtitlesPreferences
-import live.mehiz.mpvkt.preferences.preference.collectAsState
 import live.mehiz.mpvkt.presentation.components.ExpandableCard
 import live.mehiz.mpvkt.ui.theme.spacing
 import me.zhanghai.compose.preference.ProvidePreferenceLocals
@@ -44,10 +43,13 @@ fun SubtitlesMiscellaneousCard(modifier: Modifier = Modifier) {
   ) {
     ProvidePreferenceLocals {
       Column {
-        val overrideAssSubs by preferences.overrideAssSubs.collectAsState()
+        var overrideAssSubs by remember {
+          mutableStateOf(MPVLib.getPropertyString("sub-ass-override") == "force")
+        }
         SwitchPreference(
           overrideAssSubs,
           onValueChange = {
+            overrideAssSubs = it
             preferences.overrideAssSubs.set(it)
             MPVLib.setPropertyString("sub-ass-override", if (it) "force" else "no")
           },

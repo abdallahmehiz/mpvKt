@@ -30,7 +30,6 @@ import live.mehiz.mpvkt.preferences.SubtitlesPreferences
 import live.mehiz.mpvkt.preferences.preference.collectAsState
 import live.mehiz.mpvkt.presentation.Screen
 import me.zhanghai.compose.preference.ProvidePreferenceLocals
-import me.zhanghai.compose.preference.switchPreference
 import me.zhanghai.compose.preference.textFieldPreference
 import me.zhanghai.compose.preference.twoTargetIconButtonPreference
 import org.koin.compose.koinInject
@@ -101,12 +100,6 @@ object SubtitlesPreferencesScreen : Screen() {
             iconButtonIcon = { Icon(Icons.Default.Clear, null) },
             onIconButtonClick = { preferences.fontsFolder.delete() },
             iconButtonEnabled = fontsFolder.isNotBlank()
-          )
-          switchPreference(
-            preferences.skipSubtitlesStyling.key(),
-            defaultValue = preferences.skipSubtitlesStyling.defaultValue(),
-            title = { Text(stringResource(R.string.pref_subtitles_skip_applying_subtitles_styling)) },
-            summary = { Text(stringResource(R.string.pref_subtitles_skip_applying_subtitles_styling_summary)) }
           )
         }
       }

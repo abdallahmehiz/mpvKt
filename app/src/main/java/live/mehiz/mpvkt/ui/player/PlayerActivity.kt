@@ -46,11 +46,9 @@ import live.mehiz.mpvkt.database.entities.PlaybackStateEntity
 import live.mehiz.mpvkt.databinding.PlayerLayoutBinding
 import live.mehiz.mpvkt.preferences.AdvancedPreferences
 import live.mehiz.mpvkt.preferences.AudioPreferences
-import live.mehiz.mpvkt.preferences.DecoderPreferences
 import live.mehiz.mpvkt.preferences.PlayerPreferences
 import live.mehiz.mpvkt.preferences.SubtitlesPreferences
 import live.mehiz.mpvkt.ui.player.controls.PlayerControls
-import live.mehiz.mpvkt.ui.player.controls.components.panels.toColorHexString
 import live.mehiz.mpvkt.ui.theme.MpvKtTheme
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.dsl.viewModel
@@ -72,7 +70,6 @@ class PlayerActivity : AppCompatActivity() {
   private val windowInsetsController by lazy { WindowCompat.getInsetsController(window, window.decorView) }
   val audioManager by lazy { getSystemService(Context.AUDIO_SERVICE) as AudioManager }
   private val playerPreferences: PlayerPreferences by inject()
-  private val decoderPreferences: DecoderPreferences by inject()
   private val audioPreferences: AudioPreferences by inject()
   private val subtitlesPreferences: SubtitlesPreferences by inject()
   private val advancedPreferences: AdvancedPreferences by inject()
@@ -100,7 +97,6 @@ class PlayerActivity : AppCompatActivity() {
 
     setupMPV()
     setupAudio()
-    setupSubtitles()
     getPlayableUri(intent)?.let { player.playFile(it) }
     setOrientation()
     loadKoinModules(viewModelModule)
@@ -188,33 +184,22 @@ class PlayerActivity : AppCompatActivity() {
     super.onStart()
   }
 
+  private fun copyMPVAssets() {
+    Utils.copyAssets(this@PlayerActivity)
+    copyMPVConfigFiles()
+    // fonts can be lazily loaded
+    lifecycleScope.launch(Dispatchers.IO) {
+      copyMPVFonts()
+    }
+  }
+
   private fun setupMPV() {
-    Utils.copyAssets(this)
-    lifecycleScope.launch(Dispatchers.IO) { copyMPVConfigFiles() }
-
+    copyMPVAssets()
     player.initialize(filesDir.path, cacheDir.path)
-
-    val statisticsPage = advancedPreferences.enabledStatisticsPage.get()
-    if (statisticsPage != 0) {
-      MPVLib.command(arrayOf("script-binding", "stats/display-stats-toggle"))
-      MPVLib.command(
-        arrayOf("script-binding", "stats/display-page-$statisticsPage"),
-      )
-    }
-
-    VideoFilters.entries.forEach {
-      MPVLib.setPropertyInt(it.mpvProperty, it.preference(decoderPreferences).get())
-    }
-
-    player.playbackSpeed = playerPreferences.defaultSpeed.get().toDouble()
-
     MPVLib.addObserver(playerObserver)
   }
 
   private fun setupAudio() {
-    MPVLib.setPropertyString("alang", audioPreferences.preferredLanguages.get())
-    MPVLib.setPropertyDouble("audio-delay", audioPreferences.defaultAudioDelay.get() / 1000.0)
-    MPVLib.setPropertyBoolean("audio-pitch-correction", audioPreferences.audioPitchCorrection.get())
     audioPreferences.audioChannels.get().let { MPVLib.setPropertyString(it.property, it.value) }
 
     val request = AudioFocusRequestCompat.Builder(AudioManagerCompat.AUDIOFOCUS_GAIN).also {
@@ -228,34 +213,6 @@ class PlayerActivity : AppCompatActivity() {
       if (it == AudioManager.AUDIOFOCUS_REQUEST_FAILED) return@let
       audioFocusRequest = request
     }
-  }
-
-  private fun setupSubtitles() {
-    lifecycleScope.launch(Dispatchers.IO) { copyMPVFonts() }
-
-    MPVLib.setPropertyString("slang", subtitlesPreferences.preferredLanguages.get())
-
-    MPVLib.setPropertyString("sub-fonts-dir", cacheDir.path + "/fonts/")
-    MPVLib.setPropertyDouble("sub-delay", subtitlesPreferences.defaultSubDelay.get() / 1000.0)
-    MPVLib.setPropertyDouble("sub-speed", subtitlesPreferences.defaultSubSpeed.get().toDouble())
-    MPVLib.setPropertyDouble("secondary-sub-delay", subtitlesPreferences.defaultSecondarySubDelay.get() / 1000.0)
-
-    if (subtitlesPreferences.skipSubtitlesStyling.get()) return
-    MPVLib.setPropertyString("sub-font", subtitlesPreferences.font.get())
-    subtitlesPreferences.overrideAssSubs.get().let {
-      MPVLib.setPropertyString("sub-ass-override", if (it) "force" else "no")
-      MPVLib.setPropertyBoolean("sub-ass-justify", it)
-    }
-    MPVLib.setPropertyInt("sub-font-size", subtitlesPreferences.fontSize.get())
-    MPVLib.setPropertyBoolean("sub-bold", subtitlesPreferences.bold.get())
-    MPVLib.setPropertyBoolean("sub-italic", subtitlesPreferences.italic.get())
-    MPVLib.setPropertyString("sub-justify", subtitlesPreferences.justification.get().value)
-    MPVLib.setPropertyString("sub-color", subtitlesPreferences.textColor.get().toColorHexString())
-    MPVLib.setPropertyInt("sub-border-size", subtitlesPreferences.borderSize.get())
-    MPVLib.setPropertyString("sub-border-color", subtitlesPreferences.borderColor.get().toColorHexString())
-    MPVLib.setPropertyString("sub-back-color", subtitlesPreferences.backgroundColor.get().toColorHexString())
-    MPVLib.setPropertyString("sub-border-style", subtitlesPreferences.borderStyle.get().value)
-    MPVLib.setPropertyInt("sub-shadow-offset", subtitlesPreferences.shadowOffset.get())
   }
 
   private fun copyMPVConfigFiles() {
@@ -385,7 +342,11 @@ class PlayerActivity : AppCompatActivity() {
 
   override fun onConfigurationChanged(newConfig: Configuration) {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-      if (!isInPictureInPictureMode) viewModel.changeVideoAspect(playerPreferences.videoAspect.get())
+      if (!isInPictureInPictureMode) {
+        viewModel.changeVideoAspect(playerPreferences.videoAspect.get())
+      } else {
+        viewModel.hideControls()
+      }
     }
     super.onConfigurationChanged(newConfig)
   }
