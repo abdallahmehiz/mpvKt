@@ -185,7 +185,7 @@ class PlayerViewModel(
     val count = MPVLib.getPropertyInt("chapter-list/count")!!
     for (i in 0 until count) {
       val title = MPVLib.getPropertyString("chapter-list/$i/title")
-      val time = MPVLib.getPropertyDouble("chapter-list/$i/time")!!
+      val time = MPVLib.getPropertyInt("chapter-list/$i/time")!!
       chapters.add(
         Segment(
           name = title,
