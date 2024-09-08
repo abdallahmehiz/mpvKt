@@ -37,19 +37,17 @@ fun <T> GenericTracksSheet(
   track: @Composable (T) -> Unit = {},
   footer: @Composable () -> Unit = {},
 ) {
-  PlayerSheet(
-    onDismissRequest,
-  ) {
+  PlayerSheet(onDismissRequest) {
     Column(modifier) {
       header()
-      LazyColumn(
-        modifier = Modifier.weight(1f, fill = false),
-      ) {
+      LazyColumn {
         items(tracks) {
           track(it)
         }
+        item {
+          footer()
+        }
       }
-      footer()
     }
   }
 }
