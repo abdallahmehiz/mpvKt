@@ -94,6 +94,7 @@ object HomeScreen : Screen() {
             if (!isUrlValid) Icon(Icons.Filled.Info, null)
           },
           isError = !isUrlValid,
+          maxLines = 5,
         )
         Button(
           onClick = { playFile(uri, context) },

@@ -104,7 +104,7 @@ class MPVView(context: Context, attributes: AttributeSet) : BaseMPVView(context,
     if (decoderPreferences.useYUV420P.get()) {
       MPVLib.setOptionString("vf", "format=yuv420p")
     }
-    MPVLib.setOptionString("msg-level", if (advancedPreferences.verboseLogging.get()) "v" else "warn")
+    MPVLib.setOptionString("msg-level", "all=" + if (advancedPreferences.verboseLogging.get()) "v" else "warn")
 
     MPVLib.setPropertyBoolean("keep-open", true)
     MPVLib.setPropertyBoolean("input-default-bindings", true)
