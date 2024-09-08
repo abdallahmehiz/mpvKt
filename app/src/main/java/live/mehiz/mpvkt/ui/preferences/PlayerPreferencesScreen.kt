@@ -172,7 +172,13 @@ object PlayerPreferencesScreen : Screen() {
           SwitchPreference(
             value = displayVolumeAsPercentage,
             onValueChange = preferences.displayVolumeAsPercentage::set,
-            title = { Text(stringResource(R.string.pref_player_display_volume_as_percentage)) },
+            title = { Text(stringResource(R.string.pref_player_controls_display_volume_as_percentage)) },
+          )
+          val showLoadingCircle by preferences.showLoadingCircle.collectAsState()
+          SwitchPreference(
+            value = showLoadingCircle,
+            onValueChange = preferences.showLoadingCircle::set,
+            title = { Text(stringResource(R.string.pref_player_controls_show_loading_circle)) }
           )
           val showChaptersButton by preferences.showChaptersButton.collectAsState()
           SwitchPreference(

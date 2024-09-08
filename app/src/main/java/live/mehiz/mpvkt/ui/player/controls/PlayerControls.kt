@@ -230,6 +230,7 @@ fun PlayerControls(
             bottom.linkTo(parent.bottom)
           },
         ) {
+          val showLoadingCircle by playerPreferences.showLoadingCircle.collectAsState()
           val icon = AnimatedImageVector.animatedVectorResource(R.drawable.anim_play_to_pause)
           val interaction = remember { MutableInteractionSource() }
           when {
@@ -247,7 +248,7 @@ fun PlayerControls(
               )
             }
 
-            isLoading -> CircularProgressIndicator(Modifier.size(96.dp))
+            isLoading && showLoadingCircle -> CircularProgressIndicator(Modifier.size(96.dp))
             controlsShown && !areControlsLocked -> Image(
               painter = rememberAnimatedVectorPainter(icon, !paused),
               modifier = Modifier

@@ -49,7 +49,6 @@
     <string name="pref_player_precise_seeking_summary">Seek to exact positions instead of keyframes (slow)</string>
     <string name="pref_player_automatically_enter_pip">Automatically switch to PiP</string>
     <string name="pref_player_close_after_eof">Close after the end of playback</string>
-    <string name="pref_player_display_volume_as_percentage">Display volume as percentage</string>
 
     <string name="pref_player_gestures">Gestures</string>
     <string name="pref_player_gestures_seek">Horizontal seek gestures</string>
@@ -59,6 +58,8 @@
 
     <string name="pref_player_controls">Controls</string>
     <string name="pref_player_controls_allow_gestures_in_panels">Allow gestures in panels</string>
+    <string name="pref_player_controls_display_volume_as_percentage">Display volume as percentage</string>
+    <string name="pref_player_controls_show_loading_circle">Show loading circle</string>
     <string name="pref_player_controls_show_chapter_indicator">Show current chapter indicator</string>
     <string name="pref_player_controls_show_chapters_button">Show chapters select button</string>
     <string name="pref_player_controls_show_chapters_summary">Only appears if the video has chapters.</string>
