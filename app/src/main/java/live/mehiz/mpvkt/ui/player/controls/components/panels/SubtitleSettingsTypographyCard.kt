@@ -201,7 +201,10 @@ fun SubtitleSettingsTypographyCard(
           borderSize = MPVLib.getPropertyInt("sub-border-size")
           shadowOffset = MPVLib.getPropertyInt("sub-shadow-offset")
         }) {
-          Row(horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.extraSmall)) {
+          Row(
+            horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.extraSmall),
+            verticalAlignment = Alignment.CenterVertically
+          ) {
             Icon(Icons.Default.FormatClear, null)
             Text(stringResource(R.string.generic_reset))
           }

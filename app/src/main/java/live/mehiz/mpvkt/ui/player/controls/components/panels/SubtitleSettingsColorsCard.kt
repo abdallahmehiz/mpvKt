@@ -103,7 +103,10 @@ fun SubtitleSettingsColorsCard(
             currentColor = getCurrentMPVColor(currentColorType)
           },
         ) {
-          Row(horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.extraSmall)) {
+          Row(
+            horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.extraSmall),
+            verticalAlignment = Alignment.CenterVertically
+          ) {
             Icon(Icons.Default.FormatColorReset, null)
             Text(stringResource(R.string.generic_reset))
           }

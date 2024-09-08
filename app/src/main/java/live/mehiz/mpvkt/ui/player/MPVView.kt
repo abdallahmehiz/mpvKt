@@ -228,9 +228,9 @@ class MPVView(context: Context, attributes: AttributeSet) : BaseMPVView(context,
     )
 
     MPVLib.setOptionString("sub-font", subtitlesPreferences.font.get())
-    subtitlesPreferences.overrideAssSubs.get().let {
-      MPVLib.setOptionString("sub-ass-override", if (it) "force" else "no")
-      MPVLib.setOptionString("sub-ass-justify", if (it) "yes" else "no")
+    if (subtitlesPreferences.overrideAssSubs.get()) {
+      MPVLib.setOptionString("sub-ass-override", "force")
+      MPVLib.setOptionString("sub-ass-justify", "yes")
     }
     MPVLib.setOptionString("sub-font-size", subtitlesPreferences.fontSize.get().toString())
     MPVLib.setOptionString("sub-bold", if (subtitlesPreferences.bold.get()) "yes" else "no")
@@ -242,5 +242,6 @@ class MPVView(context: Context, attributes: AttributeSet) : BaseMPVView(context,
     MPVLib.setOptionString("sub-border-size", subtitlesPreferences.borderSize.get().toString())
     MPVLib.setOptionString("sub-border-style", subtitlesPreferences.borderStyle.get().value)
     MPVLib.setOptionString("sub-shadow-offset", subtitlesPreferences.shadowOffset.get().toString())
+    MPVLib.setOptionString("sub-pos", subtitlesPreferences.subPos.get().toString())
   }
 }
