@@ -224,8 +224,12 @@ class PlayerActivity : AppCompatActivity() {
       if (!fileManager.exists(mpvConf)) error("Couldn't access mpv configuration directory")
       fileManager.copyDirectoryWithContent(mpvConf, fileManager.fromPath(applicationPath), true)
     } catch (e: Exception) {
-      File("$applicationPath/mpv.conf").writeText(advancedPreferences.mpvConf.get())
-      File("$applicationPath/input.conf").writeText(advancedPreferences.inputConf.get())
+      File("$applicationPath/mpv.conf")
+        .also { if (!it.exists()) it.createNewFile() }
+        .writeText(advancedPreferences.mpvConf.get())
+      File("$applicationPath/input.conf")
+        .also { if (!it.exists()) it.createNewFile() }
+        .writeText(advancedPreferences.inputConf.get())
       Log.e("PlayerActivity", "Couldn't copy mpv configuration files: ${e.message}")
     }
   }
