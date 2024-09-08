@@ -1,9 +1,11 @@
 package live.mehiz.mpvkt.ui.preferences
 
 import android.os.Build
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -27,9 +29,9 @@ import live.mehiz.mpvkt.preferences.preference.collectAsState
 import live.mehiz.mpvkt.presentation.Screen
 import live.mehiz.mpvkt.presentation.preferences.MultiChoiceSegmentedButton
 import live.mehiz.mpvkt.ui.theme.DarkMode
+import me.zhanghai.compose.preference.PreferenceCategory
 import me.zhanghai.compose.preference.ProvidePreferenceLocals
-import me.zhanghai.compose.preference.preferenceCategory
-import me.zhanghai.compose.preference.switchPreference
+import me.zhanghai.compose.preference.SwitchPreference
 import org.koin.compose.koinInject
 
 object AppearancePreferencesScreen : Screen() {
@@ -52,27 +54,26 @@ object AppearancePreferencesScreen : Screen() {
       },
     ) { padding ->
       ProvidePreferenceLocals {
-        LazyColumn(
+        Column(
           modifier = Modifier
             .fillMaxSize()
+            .verticalScroll(rememberScrollState())
             .padding(padding),
         ) {
-          preferenceCategory(
-            key = "theme_category",
+          PreferenceCategory(
             title = { Text(text = stringResource(id = R.string.pref_appearance_category_theme)) },
           )
-          item {
-            val darkMode by preferences.darkMode.collectAsState()
-            MultiChoiceSegmentedButton(
-              choices = DarkMode.entries.map { context.getString(it.titleRes) }.toImmutableList(),
-              selectedIndices = persistentListOf(DarkMode.entries.indexOf(darkMode)),
-              onClick = { preferences.darkMode.set(DarkMode.entries[it]) },
-            )
-          }
+          val darkMode by preferences.darkMode.collectAsState()
+          MultiChoiceSegmentedButton(
+            choices = DarkMode.entries.map { context.getString(it.titleRes) }.toImmutableList(),
+            selectedIndices = persistentListOf(DarkMode.entries.indexOf(darkMode)),
+            onClick = { preferences.darkMode.set(DarkMode.entries[it]) },
+          )
+          val materialYou by preferences.materialYou.collectAsState()
           val isMaterialYouAvailable = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
-          switchPreference(
-            key = preferences.materialYou.key(),
-            defaultValue = preferences.materialYou.defaultValue(),
+          SwitchPreference(
+            value = materialYou,
+            onValueChange = { preferences.materialYou.set(it) },
             title = { Text(text = stringResource(id = R.string.pref_appearance_material_you_title)) },
             summary = {
               Text(
@@ -85,7 +86,7 @@ object AppearancePreferencesScreen : Screen() {
                 ),
               )
             },
-            enabled = { isMaterialYouAvailable },
+            enabled = isMaterialYouAvailable,
           )
         }
       }

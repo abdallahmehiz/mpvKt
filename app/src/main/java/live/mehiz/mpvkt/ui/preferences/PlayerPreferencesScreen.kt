@@ -1,9 +1,11 @@
 package live.mehiz.mpvkt.ui.preferences
 
 import android.content.pm.PackageManager
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -20,16 +22,15 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
-import kotlinx.collections.immutable.toImmutableList
 import live.mehiz.mpvkt.R
 import live.mehiz.mpvkt.preferences.PlayerPreferences
 import live.mehiz.mpvkt.preferences.preference.collectAsState
 import live.mehiz.mpvkt.presentation.Screen
 import live.mehiz.mpvkt.ui.player.PlayerOrientation
+import me.zhanghai.compose.preference.ListPreference
+import me.zhanghai.compose.preference.PreferenceCategory
 import me.zhanghai.compose.preference.ProvidePreferenceLocals
-import me.zhanghai.compose.preference.listPreference
-import me.zhanghai.compose.preference.preferenceCategory
-import me.zhanghai.compose.preference.switchPreference
+import me.zhanghai.compose.preference.SwitchPreference
 import org.koin.compose.koinInject
 
 object PlayerPreferencesScreen : Screen() {
@@ -39,7 +40,6 @@ object PlayerPreferencesScreen : Screen() {
     val navigator = LocalNavigator.currentOrThrow
     val context = LocalContext.current
     val preferences = koinInject<PlayerPreferences>()
-    val doubleTapToSeek by preferences.doubleTapToSeek.collectAsState()
     Scaffold(
       topBar = {
         TopAppBar(
@@ -53,117 +53,138 @@ object PlayerPreferencesScreen : Screen() {
       },
     ) { padding ->
       ProvidePreferenceLocals {
-        LazyColumn(
+        Column(
           modifier = Modifier
             .fillMaxSize()
+            .verticalScroll(rememberScrollState())
             .padding(padding),
         ) {
-          listPreference(
-            preferences.orientation.key(),
-            defaultValue = preferences.orientation.defaultValue().name,
-            values = PlayerOrientation.entries.map { it.name }.toImmutableList(),
-            valueToText = { AnnotatedString(context.getString(enumValueOf<PlayerOrientation>(it).titleRes)) },
+          val orientation by preferences.orientation.collectAsState()
+          ListPreference(
+            value = orientation,
+            onValueChange = preferences.orientation::set,
+            values = PlayerOrientation.entries,
+            valueToText = { AnnotatedString(context.getString(it.titleRes)) },
             title = { Text(text = stringResource(id = R.string.pref_player_orientation)) },
-            summary = { Text(text = stringResource(id = enumValueOf<PlayerOrientation>(it).titleRes)) },
+            summary = { Text(text = stringResource(id = orientation.titleRes)) },
           )
-          switchPreference(
-            key = preferences.drawOverDisplayCutout.key(),
-            defaultValue = preferences.drawOverDisplayCutout.defaultValue(),
+          val drawOverDisplayCutout by preferences.drawOverDisplayCutout.collectAsState()
+          SwitchPreference(
+            value = drawOverDisplayCutout,
+            onValueChange = preferences.drawOverDisplayCutout::set,
             title = { Text(stringResource(R.string.pref_player_draw_over_cutout)) },
           )
-          switchPreference(
-            key = preferences.savePositionOnQuit.key(),
-            defaultValue = preferences.savePositionOnQuit.defaultValue(),
+          val savePositionOnQuit by preferences.savePositionOnQuit.collectAsState()
+          SwitchPreference(
+            value = savePositionOnQuit,
+            onValueChange = preferences.savePositionOnQuit::set,
             title = { Text(stringResource(R.string.pref_player_save_position_on_quit)) },
           )
           if (context.packageManager.hasSystemFeature(PackageManager.FEATURE_PICTURE_IN_PICTURE)) {
-            switchPreference(
-              key = preferences.automaticallyEnterPip.key(),
-              defaultValue = preferences.automaticallyEnterPip.defaultValue(),
+            val enterPiPAutomatically by preferences.automaticallyEnterPip.collectAsState()
+            SwitchPreference(
+              value = enterPiPAutomatically,
+              onValueChange = preferences.automaticallyEnterPip::set,
               title = { Text(text = stringResource(id = R.string.pref_player_automatically_enter_pip)) },
             )
           }
-          switchPreference(
-            key = preferences.closeAfterReachingEndOfVideo.key(),
-            defaultValue = preferences.closeAfterReachingEndOfVideo.defaultValue(),
+          val closeAtEOF by preferences.closeAfterReachingEndOfVideo.collectAsState()
+          SwitchPreference(
+            value = closeAtEOF,
+            onValueChange = preferences.closeAfterReachingEndOfVideo::set,
             title = { Text(text = stringResource(id = R.string.pref_player_close_after_eof)) }
           )
-          preferenceCategory(
-            key = "seeking",
+          PreferenceCategory(
             title = { Text(stringResource(R.string.pref_player_seeking_title)) }
           )
-          switchPreference(
-            key = preferences.doubleTapToSeek.key(),
-            defaultValue = preferences.doubleTapToSeek.defaultValue(),
+          val doubleTapToSeek by preferences.doubleTapToSeek.collectAsState()
+          SwitchPreference(
+            value = doubleTapToSeek,
+            onValueChange = preferences.doubleTapToSeek::set,
             title = { Text(text = stringResource(id = R.string.pref_player_double_tap_to_seek)) },
           )
-          listPreference(
-            key = preferences.doubleTapToSeekDuration.key(),
-            defaultValue = preferences.doubleTapToSeekDuration.defaultValue(),
+          val doubleTapSeekDuration by preferences.doubleTapToSeekDuration.collectAsState()
+          ListPreference(
+            value = doubleTapSeekDuration,
+            onValueChange = preferences.doubleTapToSeekDuration::set,
             values = listOf(3, 5, 10, 15, 20, 25, 30),
             valueToText = { AnnotatedString("${it}s") },
             title = { Text(text = stringResource(id = R.string.pref_player_double_tap_seek_duration)) },
-            summary = { Text(text = "${it}s") },
-            enabled = { doubleTapToSeek },
+            summary = { Text(text = "${doubleTapSeekDuration}s") },
+            enabled = doubleTapToSeek,
           )
-          switchPreference(
-            preferences.horizontalSeekGesture.key(),
-            defaultValue = preferences.horizontalSeekGesture.get(),
+          val horizontalSeekGesture by preferences.horizontalSeekGesture.collectAsState()
+          SwitchPreference(
+            value = horizontalSeekGesture,
+            onValueChange = preferences.horizontalSeekGesture::set,
             title = { Text(stringResource(R.string.pref_player_gestures_seek)) },
           )
-          switchPreference(
-            preferences.showSeekBarWhenSeeking.key(),
-            defaultValue = preferences.showSeekBarWhenSeeking.defaultValue(),
+          val showSeekbarWhenSeeking by preferences.showSeekBarWhenSeeking.collectAsState()
+          SwitchPreference(
+            value = showSeekbarWhenSeeking,
+            onValueChange = preferences.showSeekBarWhenSeeking::set,
             title = { Text(stringResource(R.string.pref_player_show_seekbar_when_seeking)) }
           )
-          switchPreference(
-            preferences.preciseSeeking.key(),
-            defaultValue = preferences.preciseSeeking.defaultValue(),
+          val preciseSeeking by preferences.preciseSeeking.collectAsState()
+          SwitchPreference(
+            value = preciseSeeking,
+            onValueChange = preferences.preciseSeeking::set,
             title = { Text(stringResource(R.string.pref_player_precise_seeking_title)) },
             summary = { Text(stringResource(R.string.pref_player_precise_seeking_summary)) }
           )
-          preferenceCategory(
-            "gestures",
+          PreferenceCategory(
             title = { Text(stringResource(R.string.pref_player_gestures)) },
           )
-          switchPreference(
-            key = preferences.doubleTapToPause.key(),
-            defaultValue = preferences.doubleTapToPause.defaultValue(),
+          val doubleTapToPause by preferences.doubleTapToPause.collectAsState()
+          SwitchPreference(
+            value = doubleTapToPause,
+            onValueChange = preferences.doubleTapToPause::set,
             title = { Text(text = stringResource(id = R.string.pref_player_double_tap_to_pause)) },
           )
-          switchPreference(
-            preferences.brightnessGesture.key(),
-            defaultValue = preferences.brightnessGesture.get(),
+          val brightnessGesture by preferences.brightnessGesture.collectAsState()
+          SwitchPreference(
+            value = brightnessGesture,
+            onValueChange = preferences.brightnessGesture::set,
             title = { Text(stringResource(R.string.pref_player_gestures_brightness)) },
           )
-          switchPreference(
-            preferences.volumeGesture.key(),
-            defaultValue = preferences.volumeGesture.get(),
+          val volumeGesture by preferences.volumeGesture.collectAsState()
+          SwitchPreference(
+            value = volumeGesture,
+            onValueChange = preferences.volumeGesture::set,
             title = { Text(stringResource(R.string.pref_player_gestures_volume)) },
           )
-          switchPreference(
-            preferences.holdForDoubleSpeed.key(),
-            defaultValue = preferences.holdForDoubleSpeed.defaultValue(),
+          val holdForDoubleSpeed by preferences.holdForDoubleSpeed.collectAsState()
+          SwitchPreference(
+            value = holdForDoubleSpeed,
+            onValueChange = preferences.holdForDoubleSpeed::set,
             title = { Text(stringResource(R.string.pref_player_gestures_hold_for_double_speed)) },
           )
-          preferenceCategory(
-            "controls",
+          PreferenceCategory(
             title = { Text(stringResource(R.string.pref_player_controls)) },
           )
-          switchPreference(
-            preferences.allowGesturesInPanels.key(),
-            defaultValue = preferences.allowGesturesInPanels.defaultValue(),
+          val allowGesturesInPanels by preferences.allowGesturesInPanels.collectAsState()
+          SwitchPreference(
+            value = allowGesturesInPanels,
+            onValueChange = preferences.allowGesturesInPanels::set,
             title = { Text(text = stringResource(id = R.string.pref_player_controls_allow_gestures_in_panels)) },
           )
-          switchPreference(
-            preferences.showChaptersButton.key(),
-            defaultValue = preferences.showChaptersButton.defaultValue(),
+          val displayVolumeAsPercentage by preferences.displayVolumeAsPercentage.collectAsState()
+          SwitchPreference(
+            value = displayVolumeAsPercentage,
+            onValueChange = preferences.displayVolumeAsPercentage::set,
+            title = { Text(stringResource(R.string.pref_player_display_volume_as_percentage)) },
+          )
+          val showChaptersButton by preferences.showChaptersButton.collectAsState()
+          SwitchPreference(
+            value = showChaptersButton,
+            onValueChange = preferences.showChaptersButton::set,
             title = { Text(stringResource(R.string.pref_player_controls_show_chapters_button)) },
             summary = { Text(stringResource(R.string.pref_player_controls_show_chapters_summary)) },
           )
-          switchPreference(
-            preferences.currentChaptersIndicator.key(),
-            defaultValue = preferences.currentChaptersIndicator.defaultValue(),
+          val showChapterIndicator by preferences.currentChaptersIndicator.collectAsState()
+          SwitchPreference(
+            value = showChapterIndicator,
+            onValueChange = preferences.currentChaptersIndicator::set,
             title = { Text(stringResource(R.string.pref_player_controls_show_chapter_indicator)) },
             summary = { Text(stringResource(R.string.pref_player_controls_show_chapters_summary)) },
           )

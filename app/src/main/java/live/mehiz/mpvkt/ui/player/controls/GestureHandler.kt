@@ -42,6 +42,7 @@ import androidx.compose.ui.viewinterop.AndroidView
 import `is`.xyz.mpv.MPVLib
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.update
+import live.mehiz.mpvkt.preferences.AudioPreferences
 import live.mehiz.mpvkt.preferences.PlayerPreferences
 import live.mehiz.mpvkt.preferences.preference.collectAsState
 import live.mehiz.mpvkt.presentation.components.LeftSideOvalShape
@@ -58,6 +59,7 @@ import org.koin.compose.koinInject
 fun GestureHandler(modifier: Modifier = Modifier) {
   val viewModel = koinInject<PlayerViewModel>()
   val playerPreferences = koinInject<PlayerPreferences>()
+  val audioPreferences = koinInject<AudioPreferences>()
   val panelShown by viewModel.panelShown.collectAsState()
   val allowGesturesInPanels by playerPreferences.allowGesturesInPanels.collectAsState()
   val duration by viewModel.duration.collectAsState()
@@ -105,7 +107,9 @@ fun GestureHandler(modifier: Modifier = Modifier) {
   }
   var isLongPressing by remember { mutableStateOf(false) }
   val currentVolume by viewModel.currentVolume.collectAsState()
+  val currentMPVVolume by viewModel.currentMPVVolume.collectAsState()
   val currentBrightness by viewModel.currentBrightness.collectAsState()
+  val volumeBoostingCap = audioPreferences.volumeBoostCap.get()
   val haptics = LocalHapticFeedback.current
   Box(
     modifier = modifier.fillMaxSize(),
@@ -229,46 +233,78 @@ fun GestureHandler(modifier: Modifier = Modifier) {
       .pointerInput(areControlsLocked) {
         if ((!brightnessGesture && !volumeGesture) || areControlsLocked) return@pointerInput
         var startingY = 0f
+        var mpvVolumeStartingY = 0f
         var originalVolume = currentVolume
+        var originalMPVVolume = currentMPVVolume
         var originalBrightness = currentBrightness
         val brightnessGestureSens = 0.001f
         val volumeGestureSens = 0.03f
+        val mpvVolumeGestureSens = 0.02f
+        val isIncreasingVolumeBoost: (Float) -> Boolean = {
+          volumeBoostingCap > 0 && currentVolume == viewModel.maxVolume &&
+            currentMPVVolume - 100 < volumeBoostingCap && it < 0
+        }
+        val isDecreasingVolumeBoost: (Float) -> Boolean = {
+          volumeBoostingCap > 0 && currentVolume == viewModel.maxVolume &&
+            currentMPVVolume - 100 in 1..volumeBoostingCap && it > 0
+        }
         detectVerticalDragGestures(
           onDragEnd = { startingY = 0f },
           onDragStart = {
-            startingY = it.y
+            startingY = 0f
+            mpvVolumeStartingY = 0f
             originalVolume = currentVolume
+            originalMPVVolume = currentMPVVolume
             originalBrightness = currentBrightness
           },
         ) { change, amount ->
+          val changeVolume: () -> Unit = {
+            if (isIncreasingVolumeBoost(amount) || isDecreasingVolumeBoost(amount)) {
+              if (mpvVolumeStartingY == 0f) {
+                startingY = 0f
+                originalVolume = currentVolume
+                mpvVolumeStartingY = change.position.y
+              }
+              viewModel.changeMPVVolumeTo(
+                calculateNewValue(originalMPVVolume, mpvVolumeStartingY, change.position.y, mpvVolumeGestureSens)
+                  .coerceIn(100..volumeBoostingCap + 100),
+              )
+            } else {
+              if (startingY == 0f) {
+                mpvVolumeStartingY = 0f
+                originalMPVVolume = currentMPVVolume
+                startingY = change.position.y
+              }
+              viewModel.changeVolumeTo(
+                calculateNewValue(originalVolume, startingY, change.position.y, volumeGestureSens),
+              )
+            }
+          }
+          val changeBrightness: () -> Unit = {
+            if (startingY == 0f) startingY = change.position.y
+            viewModel.changeBrightnessTo(
+              calculateNewValue(originalBrightness, startingY, change.position.y, brightnessGestureSens)
+            )
+          }
           when {
             volumeGesture && brightnessGesture -> {
-              if (change.position.x < size.width / 2) {
-                viewModel.changeBrightnessTo(
-                  originalBrightness + ((startingY - change.position.y) * brightnessGestureSens),
-                )
-              } else {
-                viewModel.changeVolumeTo(
-                  originalVolume + ((startingY - change.position.y) * volumeGestureSens).toInt(),
-                )
-              }
+              if (change.position.x < size.width / 2) changeBrightness() else changeVolume()
             }
 
-            brightnessGesture -> {
-              viewModel.changeBrightnessTo(
-                originalBrightness + ((startingY - change.position.y) * brightnessGestureSens),
-              )
-            }
+            brightnessGesture -> changeBrightness()
             // it's not always true, AS is drunk
-            volumeGesture -> {
-              viewModel.changeVolumeTo(
-                originalVolume + ((startingY - change.position.y) * volumeGestureSens).toInt(),
-              )
-            }
-
+            volumeGesture -> changeVolume()
             else -> {}
           }
         }
       },
   )
+}
+
+fun calculateNewValue(originalValue: Int, startingY: Float, newY: Float, sensitivity: Float): Int {
+  return originalValue + ((startingY - newY) * sensitivity).toInt()
+}
+
+fun calculateNewValue(originalValue: Float, startingY: Float, newY: Float, sensitivity: Float): Float {
+  return originalValue + ((startingY - newY) * sensitivity)
 }

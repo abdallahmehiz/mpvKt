@@ -193,6 +193,8 @@ class MPVView(context: Context, attributes: AttributeSet) : BaseMPVView(context,
     "time-pos" to MPVLib.mpvFormat.MPV_FORMAT_INT64,
     "demuxer-cache-time" to MPVLib.mpvFormat.MPV_FORMAT_INT64,
     "duration" to MPVLib.mpvFormat.MPV_FORMAT_INT64,
+    "volume" to MPVLib.mpvFormat.MPV_FORMAT_INT64,
+    "volume-max" to MPVLib.mpvFormat.MPV_FORMAT_INT64,
 
     "sid" to MPVLib.mpvFormat.MPV_FORMAT_STRING,
     "secondary-sid" to MPVLib.mpvFormat.MPV_FORMAT_STRING,
@@ -213,6 +215,7 @@ class MPVView(context: Context, attributes: AttributeSet) : BaseMPVView(context,
     MPVLib.setOptionString("alang", audioPreferences.preferredLanguages.get())
     MPVLib.setOptionString("audio-delay", (audioPreferences.defaultAudioDelay.get() / 1000.0).toString())
     MPVLib.setOptionString("audio-pitch-correction", audioPreferences.audioPitchCorrection.get().toString())
+    MPVLib.setOptionString("volume-max", (audioPreferences.volumeBoostCap.get() + 100).toString())
   }
 
   // Setup

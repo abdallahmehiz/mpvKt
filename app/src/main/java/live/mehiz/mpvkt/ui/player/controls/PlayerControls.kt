@@ -56,6 +56,7 @@ import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.update
 import live.mehiz.mpvkt.R
+import live.mehiz.mpvkt.preferences.AudioPreferences
 import live.mehiz.mpvkt.preferences.PlayerPreferences
 import live.mehiz.mpvkt.preferences.preference.collectAsState
 import live.mehiz.mpvkt.ui.player.PlayerUpdates
@@ -83,6 +84,7 @@ fun PlayerControls(
   val viewModel = koinInject<PlayerViewModel>()
   val spacing = MaterialTheme.spacing
   val playerPreferences = koinInject<PlayerPreferences>()
+  val audioPreferences = koinInject<AudioPreferences>()
   val controlsShown by viewModel.controlsShown.collectAsState()
   val areControlsLocked by viewModel.areControlsLocked.collectAsState()
   val seekBarShown by viewModel.seekBarShown.collectAsState()
@@ -136,13 +138,14 @@ fun PlayerControls(
         val isVolumeSliderShown by viewModel.isVolumeSliderShown.collectAsState()
         val brightness by viewModel.currentBrightness.collectAsState()
         val volume by viewModel.currentVolume.collectAsState()
+        val mpvVolume by viewModel.currentMPVVolume.collectAsState()
 
-        LaunchedEffect(volume, isVolumeSliderShown) {
-          delay(1000)
+        LaunchedEffect(volume, mpvVolume, isVolumeSliderShown) {
+          delay(2000)
           if (isVolumeSliderShown) viewModel.isVolumeSliderShown.update { false }
         }
         LaunchedEffect(brightness, isBrightnessSliderShown) {
-          delay(1000)
+          delay(2000)
           if (isBrightnessSliderShown) viewModel.isBrightnessSliderShown.update { false }
         }
         AnimatedVisibility(
@@ -166,9 +169,14 @@ fun PlayerControls(
             bottom.linkTo(parent.bottom)
           },
         ) {
+          val boostCap by audioPreferences.volumeBoostCap.collectAsState()
+          val displayVolumeAsPercentage by playerPreferences.displayVolumeAsPercentage.collectAsState()
           VolumeSlider(
             volume,
-            0..viewModel.maxVolume,
+            mpvVolume = mpvVolume,
+            range = 0..viewModel.maxVolume,
+            boostRange = if (boostCap > 0) 0..audioPreferences.volumeBoostCap.get() else null,
+            displayAsPercentage = displayVolumeAsPercentage
           )
         }
 

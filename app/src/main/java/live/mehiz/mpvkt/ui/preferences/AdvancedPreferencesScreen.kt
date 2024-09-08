@@ -6,10 +6,12 @@ import android.os.Environment
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Clear
@@ -46,10 +48,9 @@ import live.mehiz.mpvkt.presentation.Screen
 import live.mehiz.mpvkt.presentation.components.ConfirmDialog
 import me.zhanghai.compose.preference.Preference
 import me.zhanghai.compose.preference.ProvidePreferenceLocals
+import me.zhanghai.compose.preference.SwitchPreference
 import me.zhanghai.compose.preference.TextFieldPreference
-import me.zhanghai.compose.preference.preference
-import me.zhanghai.compose.preference.switchPreference
-import me.zhanghai.compose.preference.twoTargetIconButtonPreference
+import me.zhanghai.compose.preference.TwoTargetIconButtonPreference
 import org.koin.compose.koinInject
 import java.io.File
 import kotlin.io.path.deleteIfExists
@@ -90,13 +91,13 @@ object AdvancedPreferencesScreen : Screen() {
           preferences.mpvConfStorageUri.set(uri.toString())
         }
         val mpvConfStorageLocation by preferences.mpvConfStorageUri.collectAsState()
-        LazyColumn(
+        Column(
           Modifier
             .fillMaxSize()
+            .verticalScroll(rememberScrollState())
             .padding(padding),
         ) {
-          twoTargetIconButtonPreference(
-            "mpv_storage_location",
+          TwoTargetIconButtonPreference(
             title = { Text(stringResource(R.string.pref_advanced_mpv_conf_storage_location)) },
             summary = {
               if (mpvConfStorageLocation.isNotBlank()) {
@@ -106,143 +107,137 @@ object AdvancedPreferencesScreen : Screen() {
             onClick = { locationPicker.launch(null) },
             iconButtonIcon = { Icon(Icons.Default.Clear, null) },
             onIconButtonClick = { preferences.mpvConfStorageUri.delete() },
-            iconButtonEnabled = mpvConfStorageLocation.isNotBlank()
+            iconButtonEnabled = mpvConfStorageLocation.isNotBlank(),
           )
-          item {
-            var mpvConf by remember { mutableStateOf(preferences.mpvConf.get()) }
-            LaunchedEffect(true) {
-              if (mpvConfStorageLocation.isBlank()) return@LaunchedEffect
-              withContext(Dispatchers.IO) {
-                val tempFile = kotlin.io.path.createTempFile()
-                runCatching {
-                  val uri = DocumentFile.fromTreeUri(
-                    context,
-                    Uri.parse(mpvConfStorageLocation),
-                  )!!.findFile("mpv.conf")!!.uri
-                  context.contentResolver.openInputStream(uri)?.copyTo(tempFile.outputStream())
-                  preferences.mpvConf.set(tempFile.readLines().fastJoinToString("\n"))
-                }
-                tempFile.deleteIfExists()
+          var mpvConf by remember { mutableStateOf(preferences.mpvConf.get()) }
+          LaunchedEffect(true) {
+            if (mpvConfStorageLocation.isBlank()) return@LaunchedEffect
+            withContext(Dispatchers.IO) {
+              val tempFile = kotlin.io.path.createTempFile()
+              runCatching {
+                val uri = DocumentFile.fromTreeUri(
+                  context,
+                  Uri.parse(mpvConfStorageLocation),
+                )!!.findFile("mpv.conf")!!.uri
+                context.contentResolver.openInputStream(uri)?.copyTo(tempFile.outputStream())
+                preferences.mpvConf.set(tempFile.readLines().fastJoinToString("\n"))
               }
+              tempFile.deleteIfExists()
             }
-            TextFieldPreference(
-              value = mpvConf,
-              onValueChange = { mpvConf = it },
-              title = { Text(stringResource(R.string.pref_advanced_mpv_conf)) },
-              textField = { value, onValueChange, onOk ->
-                OutlinedTextField(
-                  value = value,
-                  onValueChange = onValueChange,
-                  maxLines = Int.MAX_VALUE,
-                  keyboardActions = KeyboardActions(onDone = { onOk() })
-                )
-              },
-              textToValue = {
-                preferences.mpvConf.set(it)
-                File(context.filesDir.path, "mpv.conf").writeText(it)
-                if (mpvConfStorageLocation.isNotBlank()) {
-                  val tree = DocumentFile.fromTreeUri(context, Uri.parse(mpvConfStorageLocation))!!
-                  val uri = if (tree.findFile("mpv.conf") == null) {
-                    val conf = tree.createFile("text/plain", "mpv.conf")!!
-                    conf.renameTo("mpv.conf")
-                    conf.uri
-                  } else {
-                    tree.findFile("mpv.conf")!!.uri
-                  }
-                  val out = context.contentResolver.openOutputStream(uri)
-                  out!!.write(it.toByteArray())
-                  out.flush()
-                  out.close()
-                }
-                it
-              },
-              summary = { if (mpvConf.isNotBlank()) Text(mpvConf.lines()[0]) },
-            )
           }
-          item {
-            var inputConf by remember { mutableStateOf(preferences.inputConf.get()) }
-            LaunchedEffect(true) {
-              if (mpvConfStorageLocation.isBlank()) return@LaunchedEffect
-              withContext(Dispatchers.IO) {
-                val tempFile = kotlin.io.path.createTempFile()
-                runCatching {
-                  val uri = DocumentFile.fromTreeUri(
-                    context,
-                    Uri.parse(mpvConfStorageLocation),
-                  )!!.findFile("input.conf")!!.uri
-                  context.contentResolver.openInputStream(uri)?.copyTo(tempFile.outputStream())
-                  preferences.inputConf.set(tempFile.readLines().fastJoinToString("\n"))
-                }
-                tempFile.deleteIfExists()
-              }
-            }
-            TextFieldPreference(
-              value = inputConf,
-              onValueChange = { inputConf = it },
-              title = { Text(stringResource(R.string.pref_advanced_input_conf)) },
-              textField = { value, onValueChange, onOk ->
-                OutlinedTextField(
-                  value = value,
-                  onValueChange = onValueChange,
-                  maxLines = Int.MAX_VALUE,
-                  keyboardActions = KeyboardActions(onDone = { onOk() })
-                )
-              },
-              textToValue = {
-                preferences.inputConf.set(it)
-                File(context.filesDir.path, "input.conf").writeText(it)
-                if (mpvConfStorageLocation.isNotBlank()) {
-                  val tree = DocumentFile.fromTreeUri(context, Uri.parse(mpvConfStorageLocation))!!
-                  val uri = if (tree.findFile("input.conf") == null) {
-                    val conf = tree.createFile("text/plain", "input.conf")!!
-                    conf.renameTo("input.conf")
-                    conf.uri
-                  } else {
-                    tree.findFile("input.conf")!!.uri
-                  }
-                  val out = context.contentResolver.openOutputStream(uri)
-                  out!!.write(it.toByteArray())
-                  out.flush()
-                  out.close()
-                }
-                it
-              },
-              summary = { if (inputConf.isNotBlank()) Text(inputConf.lines()[0]) },
-            )
-          }
-          switchPreference(
-            preferences.verboseLogging.key(),
-            defaultValue = preferences.verboseLogging.defaultValue(),
-            title = { Text(stringResource(R.string.pref_advanced_verbose_logging_title)) },
-            summary = { Text(stringResource(R.string.pref_advanced_verbose_logging_summary)) }
-          )
-          item {
-            var isConfirmDialogShown by remember { mutableStateOf(false) }
-            val mpvKtDatabase = koinInject<MpvKtDatabase>()
-            val scope = rememberCoroutineScope()
-            Preference(
-              title = { Text(stringResource(R.string.pref_advanced_clear_playback_history)) },
-              onClick = { isConfirmDialogShown = true },
-            )
-            if (isConfirmDialogShown) {
-              ConfirmDialog(
-                stringResource(R.string.pref_advanced_clear_playback_history_confirm_title),
-                stringResource(R.string.pref_advanced_clear_playback_history_confirm_subtitle),
-                onConfirm = {
-                  scope.launch(Dispatchers.IO) { mpvKtDatabase.videoDataDao() }
-                  isConfirmDialogShown = false
-                  Toast.makeText(
-                    context,
-                    context.getString(R.string.pref_advanced_cleared_playback_history),
-                    Toast.LENGTH_SHORT
-                  ).show()
-                },
-                onCancel = { isConfirmDialogShown = false },
+          TextFieldPreference(
+            value = mpvConf,
+            onValueChange = { mpvConf = it },
+            title = { Text(stringResource(R.string.pref_advanced_mpv_conf)) },
+            textField = { value, onValueChange, onOk ->
+              OutlinedTextField(
+                value = value,
+                onValueChange = onValueChange,
+                maxLines = Int.MAX_VALUE,
+                keyboardActions = KeyboardActions(onDone = { onOk() }),
               )
+            },
+            textToValue = {
+              preferences.mpvConf.set(it)
+              File(context.filesDir.path, "mpv.conf").writeText(it)
+              if (mpvConfStorageLocation.isNotBlank()) {
+                val tree = DocumentFile.fromTreeUri(context, Uri.parse(mpvConfStorageLocation))!!
+                val uri = if (tree.findFile("mpv.conf") == null) {
+                  val conf = tree.createFile("text/plain", "mpv.conf")!!
+                  conf.renameTo("mpv.conf")
+                  conf.uri
+                } else {
+                  tree.findFile("mpv.conf")!!.uri
+                }
+                val out = context.contentResolver.openOutputStream(uri)
+                out!!.write(it.toByteArray())
+                out.flush()
+                out.close()
+              }
+              it
+            },
+            summary = { if (mpvConf.isNotBlank()) Text(mpvConf.lines()[0]) },
+          )
+          var inputConf by remember { mutableStateOf(preferences.inputConf.get()) }
+          LaunchedEffect(true) {
+            if (mpvConfStorageLocation.isBlank()) return@LaunchedEffect
+            withContext(Dispatchers.IO) {
+              val tempFile = kotlin.io.path.createTempFile()
+              runCatching {
+                val uri = DocumentFile.fromTreeUri(
+                  context,
+                  Uri.parse(mpvConfStorageLocation),
+                )!!.findFile("input.conf")!!.uri
+                context.contentResolver.openInputStream(uri)?.copyTo(tempFile.outputStream())
+                preferences.inputConf.set(tempFile.readLines().fastJoinToString("\n"))
+              }
+              tempFile.deleteIfExists()
             }
           }
-          preference(
-            "clear_mpv_configurations",
+          TextFieldPreference(
+            value = inputConf,
+            onValueChange = { inputConf = it },
+            title = { Text(stringResource(R.string.pref_advanced_input_conf)) },
+            textField = { value, onValueChange, onOk ->
+              OutlinedTextField(
+                value = value,
+                onValueChange = onValueChange,
+                maxLines = Int.MAX_VALUE,
+                keyboardActions = KeyboardActions(onDone = { onOk() }),
+              )
+            },
+            textToValue = {
+              preferences.inputConf.set(it)
+              File(context.filesDir.path, "input.conf").writeText(it)
+              if (mpvConfStorageLocation.isNotBlank()) {
+                val tree = DocumentFile.fromTreeUri(context, Uri.parse(mpvConfStorageLocation))!!
+                val uri = if (tree.findFile("input.conf") == null) {
+                  val conf = tree.createFile("text/plain", "input.conf")!!
+                  conf.renameTo("input.conf")
+                  conf.uri
+                } else {
+                  tree.findFile("input.conf")!!.uri
+                }
+                val out = context.contentResolver.openOutputStream(uri)
+                out!!.write(it.toByteArray())
+                out.flush()
+                out.close()
+              }
+              it
+            },
+            summary = { if (inputConf.isNotBlank()) Text(inputConf.lines()[0]) },
+          )
+          val verboseLogging by preferences.verboseLogging.collectAsState()
+          SwitchPreference(
+            value = verboseLogging,
+            onValueChange = preferences.verboseLogging::set,
+            title = { Text(stringResource(R.string.pref_advanced_verbose_logging_title)) },
+            summary = { Text(stringResource(R.string.pref_advanced_verbose_logging_summary)) },
+          )
+          var isConfirmDialogShown by remember { mutableStateOf(false) }
+          val mpvKtDatabase = koinInject<MpvKtDatabase>()
+          val scope = rememberCoroutineScope()
+          Preference(
+            title = { Text(stringResource(R.string.pref_advanced_clear_playback_history)) },
+            onClick = { isConfirmDialogShown = true },
+          )
+          if (isConfirmDialogShown) {
+            ConfirmDialog(
+              stringResource(R.string.pref_advanced_clear_playback_history_confirm_title),
+              stringResource(R.string.pref_advanced_clear_playback_history_confirm_subtitle),
+              onConfirm = {
+                scope.launch(Dispatchers.IO) { mpvKtDatabase.videoDataDao() }
+                isConfirmDialogShown = false
+                Toast.makeText(
+                  context,
+                  context.getString(R.string.pref_advanced_cleared_playback_history),
+                  Toast.LENGTH_SHORT,
+                ).show()
+              },
+              onCancel = { isConfirmDialogShown = false },
+            )
+          }
+          Preference(
             title = { Text(text = stringResource(id = R.string.pref_advanced_clear_mpv_conf_cache)) },
             onClick = {
               fileManager.deleteContent(fileManager.fromPath(context.filesDir.path))
@@ -253,8 +248,7 @@ object AdvancedPreferencesScreen : Screen() {
               ).show()
             },
           )
-          preference(
-            "clear_fonts_cache",
+          Preference(
             title = { Text(text = stringResource(id = R.string.pref_advanced_clear_fonts_cache)) },
             onClick = {
               fileManager.deleteContent(fileManager.fromPath(context.cacheDir.path + "/fonts"))
