@@ -7,6 +7,7 @@
     <string name="generic_cancel">Cancel</string>
     <string name="generic_ok">OK</string>
     <string name="generic_unit_ms">ms</string>
+    <string name="generic_disabled">Disabled</string>
 
     <string name="home_pick_file">Pick a file</string>
     <string name="home_open_file_picker">Open file picker</string>
@@ -87,6 +88,7 @@
     <string name="pref_audio_channels_stereo">Stereo</string>
     <string name="pref_audio_channels_stereo_reversed">Reversed Stereo</string>
     <string name="pref_audio_preferred_language">Audio language(s) to be selected by default on a video with multiple audio streams, Two- or three-letter languages codes work. Multiple values can be delimited by comma.</string>
+    <string name="pref_audio_volume_boost_cap">Volume boost cap</string>
 
     <string name="pref_advanced">Advanced</string>
     <string name="pref_advanced_summary">Configuration location, mpv.conf, input.conf</string>

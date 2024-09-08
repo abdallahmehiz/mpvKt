@@ -15,6 +15,7 @@ import android.os.Build
 import android.os.Bundle
 import android.os.ParcelFileDescriptor
 import android.provider.MediaStore
+import android.provider.Settings
 import android.util.Log
 import android.util.Rational
 import android.view.KeyEvent
@@ -282,6 +283,20 @@ class PlayerActivity : AppCompatActivity() {
     }
   }
 
+  override fun onResume() {
+    super.onResume()
+
+    viewModel.currentVolume.update {
+      audioManager.getStreamVolume(AudioManager.STREAM_MUSIC).also {
+        if (it < viewModel.maxVolume) viewModel.changeMPVVolumeTo(100)
+      }
+    }
+    viewModel.changeBrightnessTo(
+      Settings.System.getFloat(contentResolver, Settings.System.SCREEN_BRIGHTNESS)
+        .normalize(0f, 255f, 0f, 1f),
+    )
+  }
+
   private fun setupIntents(intent: Intent) {
     intent.getStringExtra("title")?.let {
       viewModel.mediaTitle.update { _ -> it }
@@ -382,8 +397,10 @@ class PlayerActivity : AppCompatActivity() {
     when (property) {
       "time-pos" -> viewModel.updatePlayBackPos(value.toFloat())
       "demuxer-cache-time" -> viewModel.updateReadAhead(value = value)
-      "duration" -> viewModel.duration.update { value.toFloat() }
+      "volume" -> viewModel.setMPVVolume(value.toInt())
+      "volume-max" -> viewModel.volumeBoostCap = value.toInt() - 100
       "chapter" -> viewModel.updateChapter(value)
+      "duration" -> viewModel.duration.update { value.toFloat() }
     }
   }
 

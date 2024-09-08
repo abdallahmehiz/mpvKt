@@ -10,6 +10,7 @@ class AudioPreferences(preferenceStore: PreferenceStore) {
   val defaultAudioDelay = preferenceStore.getInt("audio_delay_default")
   val audioPitchCorrection = preferenceStore.getBoolean("audio_pitch_correction", true)
   val audioChannels = preferenceStore.getEnum("audio_channels", AudioChannels.AutoSafe)
+  val volumeBoostCap = preferenceStore.getInt("audio_volume_boost_cap", 30)
 }
 
 enum class AudioChannels(@StringRes val title: Int, val property: String, val value: String) {

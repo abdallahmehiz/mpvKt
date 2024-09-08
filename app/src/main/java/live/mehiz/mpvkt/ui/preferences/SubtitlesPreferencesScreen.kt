@@ -7,7 +7,8 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.filled.Clear
@@ -30,8 +31,8 @@ import live.mehiz.mpvkt.preferences.SubtitlesPreferences
 import live.mehiz.mpvkt.preferences.preference.collectAsState
 import live.mehiz.mpvkt.presentation.Screen
 import me.zhanghai.compose.preference.ProvidePreferenceLocals
-import me.zhanghai.compose.preference.textFieldPreference
-import me.zhanghai.compose.preference.twoTargetIconButtonPreference
+import me.zhanghai.compose.preference.TextFieldPreference
+import me.zhanghai.compose.preference.TwoTargetIconButtonPreference
 import org.koin.compose.koinInject
 
 object SubtitlesPreferencesScreen : Screen() {
@@ -67,17 +68,19 @@ object SubtitlesPreferencesScreen : Screen() {
           preferences.fontsFolder.set(uri.toString())
         }
         val fontsFolder by preferences.fontsFolder.collectAsState()
-        LazyColumn(
+        Column(
           modifier = Modifier
             .fillMaxSize()
+            .verticalScroll(rememberScrollState())
             .padding(padding),
         ) {
-          textFieldPreference(
-            preferences.preferredLanguages.key(),
-            defaultValue = preferences.preferredLanguages.defaultValue(),
+          val preferredLanguages by preferences.preferredLanguages.collectAsState()
+          TextFieldPreference(
+            value = preferredLanguages,
+            onValueChange = preferences.preferredLanguages::set,
             textToValue = { it },
             title = { Text(stringResource(R.string.pref_preferred_languages)) },
-            summary = { if (it.isNotBlank()) Text(it) },
+            summary = { if (preferredLanguages.isNotBlank()) Text(preferredLanguages) },
             textField = { value, onValueChange, _ ->
               Column {
                 Text(stringResource(R.string.pref_subtitles_preferred_language))
@@ -89,12 +92,11 @@ object SubtitlesPreferencesScreen : Screen() {
               }
             },
           )
-          twoTargetIconButtonPreference(
-            preferences.fontsFolder.key(),
+          TwoTargetIconButtonPreference(
             title = { Text(stringResource(R.string.pref_subtitles_fonts_dir)) },
             onClick = { locationPicker.launch(null) },
             summary = {
-              if (fontsFolder.isBlank()) return@twoTargetIconButtonPreference
+              if (fontsFolder.isBlank()) return@TwoTargetIconButtonPreference
               Text(getSimplifiedPathFromUri(fontsFolder))
             },
             iconButtonIcon = { Icon(Icons.Default.Clear, null) },
