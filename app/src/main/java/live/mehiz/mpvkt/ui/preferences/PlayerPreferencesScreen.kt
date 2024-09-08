@@ -168,6 +168,12 @@ object PlayerPreferencesScreen : Screen() {
             onValueChange = preferences.allowGesturesInPanels::set,
             title = { Text(text = stringResource(id = R.string.pref_player_controls_allow_gestures_in_panels)) },
           )
+          val displayVolumeAsPercentage by preferences.displayVolumeAsPercentage.collectAsState()
+          SwitchPreference(
+            value = displayVolumeAsPercentage,
+            onValueChange = preferences.displayVolumeAsPercentage::set,
+            title = { Text(stringResource(R.string.pref_player_display_volume_as_percentage)) },
+          )
           val showChaptersButton by preferences.showChaptersButton.collectAsState()
           SwitchPreference(
             value = showChaptersButton,

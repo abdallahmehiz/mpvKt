@@ -291,10 +291,10 @@ class PlayerActivity : AppCompatActivity() {
         if (it < viewModel.maxVolume) viewModel.changeMPVVolumeTo(100)
       }
     }
-    viewModel.changeBrightnessTo(
+    viewModel.currentBrightness.update {
       Settings.System.getFloat(contentResolver, Settings.System.SCREEN_BRIGHTNESS)
-        .normalize(0f, 255f, 0f, 1f),
-    )
+        .normalize(0f, 255f, 0f, 1f)
+    }
   }
 
   private fun setupIntents(intent: Intent) {

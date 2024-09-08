@@ -26,9 +26,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import live.mehiz.mpvkt.R
 import live.mehiz.mpvkt.ui.theme.spacing
 import kotlin.math.abs
+import kotlin.math.roundToInt
 
 fun percentage(value: Float, range: ClosedFloatingPointRange<Float>): Float {
   return ((value - range.start) / (range.endInclusive - range.start)).coerceIn(0f, 1f)
@@ -154,7 +157,9 @@ fun VolumeSlider(
   range: ClosedRange<Int>,
   boostRange: ClosedRange<Int>?,
   modifier: Modifier = Modifier,
+  displayAsPercentage: Boolean = false,
 ) {
+  val percentage = (percentage(volume, range) * 100).roundToInt()
   Column(
     modifier = modifier,
     horizontalAlignment = Alignment.CenterHorizontally,
@@ -162,29 +167,59 @@ fun VolumeSlider(
   ) {
     val boostVolume = mpvVolume - 100
     Text(
-      when (mpvVolume - 100) {
-        0 -> "$volume"
-        in 0..1000 -> "$volume + $boostVolume"
-        in -100..-1 -> "$volume - ${abs(boostVolume)}"
-        else -> "$volume ($mpvVolume)"
-      },
+      getVolumeSliderText(volume, mpvVolume, boostVolume, percentage, displayAsPercentage),
       style = MaterialTheme.typography.bodySmall,
     )
     VerticalSlider(
-      volume,
-      range,
+      if (displayAsPercentage) percentage else volume,
+      if (displayAsPercentage) 0..100 else range,
       overflowValue = boostVolume,
       overflowRange = boostRange,
     )
     Icon(
-      when (percentage(volume, range)) {
-        0f -> Icons.AutoMirrored.Default.VolumeOff
-        in 0f..0.3f -> Icons.AutoMirrored.Default.VolumeMute
-        in 0.3f..0.6f -> Icons.AutoMirrored.Default.VolumeDown
-        in 0.6f..1f -> Icons.AutoMirrored.Default.VolumeUp
+      when (percentage) {
+        0 -> Icons.AutoMirrored.Default.VolumeOff
+        in 0..30 -> Icons.AutoMirrored.Default.VolumeMute
+        in 30..60 -> Icons.AutoMirrored.Default.VolumeDown
+        in 60..100 -> Icons.AutoMirrored.Default.VolumeUp
         else -> Icons.AutoMirrored.Default.VolumeOff
       },
       null,
     )
   }
 }
+
+val getVolumeSliderText: @Composable (Int, Int, Int, Int, Boolean) -> String =
+  { volume, mpvVolume, boostVolume, percentage, displayAsPercentage ->
+    when (mpvVolume - 100) {
+      0 -> if (displayAsPercentage) {
+        stringResource(R.string.value_percentage_int, percentage)
+      } else {
+        "$volume"
+      }
+
+      in 0..1000 -> {
+        if (displayAsPercentage) {
+          stringResource(R.string.volume_slider_percentage_positive_boost, percentage, boostVolume)
+        } else {
+          stringResource(R.string.volume_slider_steps_positive_boost, volume, boostVolume)
+        }
+      }
+
+      in -100..-1 -> {
+        if (displayAsPercentage) {
+          stringResource(R.string.volume_slider_percentage_negative_boost, percentage, abs(boostVolume))
+        } else {
+          stringResource(R.string.volume_slider_steps_negative_boost, volume, abs(boostVolume))
+        }
+      }
+
+      else -> {
+        if (displayAsPercentage) {
+          stringResource(R.string.volume_slider_percentage_other, percentage, boostVolume)
+        } else {
+          stringResource(R.string.volume_slider_steps_other, volume, boostVolume)
+        }
+      }
+    }
+  }

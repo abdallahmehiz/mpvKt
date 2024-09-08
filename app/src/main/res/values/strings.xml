@@ -49,6 +49,7 @@
     <string name="pref_player_precise_seeking_summary">Seek to exact positions instead of keyframes (slow)</string>
     <string name="pref_player_automatically_enter_pip">Automatically switch to PiP</string>
     <string name="pref_player_close_after_eof">Close after the end of playback</string>
+    <string name="pref_player_display_volume_as_percentage">Display volume as percentage</string>
 
     <string name="pref_player_gestures">Gestures</string>
     <string name="pref_player_gestures_seek">Horizontal seek gestures</string>
@@ -189,6 +190,16 @@
     <string name="timer_picker_pick_time">Pick time</string>
 
     <string name="toast_sleep_timer_ended">Sleep timer ended</string>
+
+    <string name="volume_slider_percentage_positive_boost" translatable="false">%d%% + %d</string>
+    <string name="volume_slider_percentage_negative_boost" translatable="false">%d%% - %d</string>
+    <string name="volume_slider_percentage_other" translatable="false">%d%% (%d)</string>
+    <string name="volume_slider_steps_positive_boost" translatable="false">%d + %d</string>
+    <string name="volume_slider_steps_negative_boost" translatable="false">%d - %d</string>
+    <string name="volume_slider_steps_other" translatable="false">%d (%d)</string>
+
+    <string name="value_percentage_int" translatable="false">%d%%</string>
+    <string name="value_percentage_float" translatable="false">%.2f\%%</string>
 
     <string name="github_repo_url" translatable="false">https://github.com/abdallahmehiz/mpvKt</string>
 

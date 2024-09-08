@@ -170,11 +170,13 @@ fun PlayerControls(
           },
         ) {
           val boostCap by audioPreferences.volumeBoostCap.collectAsState()
+          val displayVolumeAsPercentage by playerPreferences.displayVolumeAsPercentage.collectAsState()
           VolumeSlider(
             volume,
             mpvVolume = mpvVolume,
             range = 0..viewModel.maxVolume,
-            boostRange = if (boostCap > 0) 0..audioPreferences.volumeBoostCap.get() else null
+            boostRange = if (boostCap > 0) 0..audioPreferences.volumeBoostCap.get() else null,
+            displayAsPercentage = displayVolumeAsPercentage
           )
         }
 

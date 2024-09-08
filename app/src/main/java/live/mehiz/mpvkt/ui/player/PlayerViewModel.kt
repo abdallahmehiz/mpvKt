@@ -332,6 +332,7 @@ class PlayerViewModel(
   fun changeBrightnessTo(
     brightness: Float,
   ) {
+    isBrightnessSliderShown.update { true }
     currentBrightness.update { brightness.coerceIn(0f, 1f) }
     activity.window.attributes = activity.window.attributes.apply {
       screenBrightness = brightness.coerceIn(0f, 1f)

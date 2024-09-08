@@ -282,7 +282,9 @@ fun GestureHandler(modifier: Modifier = Modifier) {
           }
           val changeBrightness: () -> Unit = {
             if (startingY == 0f) startingY = change.position.y
-            calculateNewValue(originalBrightness, startingY, change.position.y, brightnessGestureSens)
+            viewModel.changeBrightnessTo(
+              calculateNewValue(originalBrightness, startingY, change.position.y, brightnessGestureSens)
+            )
           }
           when {
             volumeGesture && brightnessGesture -> {
