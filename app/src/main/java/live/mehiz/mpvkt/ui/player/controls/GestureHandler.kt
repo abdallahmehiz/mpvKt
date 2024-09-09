@@ -89,6 +89,7 @@ fun GestureHandler(modifier: Modifier = Modifier) {
   val brightnessGesture = playerPreferences.brightnessGesture.get()
   val volumeGesture by playerPreferences.volumeGesture.collectAsState()
   val seekGesture by playerPreferences.horizontalSeekGesture.collectAsState()
+  val preciseSeeking by playerPreferences.preciseSeeking.collectAsState()
   val showSeekbarWhenSeeking by playerPreferences.showSeekBarWhenSeeking.collectAsState()
   val doubleTapSeek: (Offset, IntSize) -> Unit = { offset, size ->
     targetAlpha = 0.2f
@@ -228,7 +229,7 @@ fun GestureHandler(modifier: Modifier = Modifier) {
             viewModel.gestureSeekAmount.update { _ ->
               Pair(startingPosition, it - startingPosition)
             }
-            viewModel.seekTo(it)
+            viewModel.seekTo(it, preciseSeeking)
           }
 
           if (showSeekbarWhenSeeking) viewModel.showSeekBar()
