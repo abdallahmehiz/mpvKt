@@ -206,11 +206,13 @@ fun GestureHandler(modifier: Modifier = Modifier) {
       }
       .pointerInput(areControlsLocked) {
         if (!seekGesture || areControlsLocked) return@pointerInput
-        var startingPosition = position
+        var startingPosition = position.toInt()
+        var startingX = 0f
         var wasPlayerAlreadyPause = false
         detectHorizontalDragGestures(
           onDragStart = {
-            startingPosition = position
+            startingPosition = position.toInt()
+            startingX = it.x
             wasPlayerAlreadyPause = viewModel.paused.value
             viewModel.pause()
           },
@@ -220,13 +222,15 @@ fun GestureHandler(modifier: Modifier = Modifier) {
             if (!wasPlayerAlreadyPause) viewModel.unpause()
           },
         ) { change, dragAmount ->
-          if (position >= duration && dragAmount > 0) return@detectHorizontalDragGestures
           if (position <= 0f && dragAmount < 0) return@detectHorizontalDragGestures
-          val seekBy = ((dragAmount * 150f / size.width).coerceIn(0f - position, duration - position)).toInt()
-          viewModel.seekBy(seekBy)
-          viewModel.gestureSeekAmount.update {
-            Pair(startingPosition.toInt(), (position - startingPosition).toInt())
+          if (position >= duration && dragAmount > 0) return@detectHorizontalDragGestures
+          calculateNewHorizontalGestureValue(startingPosition, startingX, change.position.x, 0.15f).let {
+            viewModel.gestureSeekAmount.update { _ ->
+              Pair(startingPosition, it - startingPosition)
+            }
+            viewModel.seekTo(it)
           }
+
           if (showSeekbarWhenSeeking) viewModel.showSeekBar()
         }
       }
@@ -266,7 +270,12 @@ fun GestureHandler(modifier: Modifier = Modifier) {
                 mpvVolumeStartingY = change.position.y
               }
               viewModel.changeMPVVolumeTo(
-                calculateNewValue(originalMPVVolume, mpvVolumeStartingY, change.position.y, mpvVolumeGestureSens)
+                calculateNewVerticalGestureValue(
+                  originalMPVVolume,
+                  mpvVolumeStartingY,
+                  change.position.y,
+                  mpvVolumeGestureSens
+                )
                   .coerceIn(100..volumeBoostingCap + 100),
               )
             } else {
@@ -276,7 +285,7 @@ fun GestureHandler(modifier: Modifier = Modifier) {
                 startingY = change.position.y
               }
               viewModel.changeVolumeTo(
-                calculateNewValue(originalVolume, startingY, change.position.y, volumeGestureSens),
+                calculateNewVerticalGestureValue(originalVolume, startingY, change.position.y, volumeGestureSens),
               )
             }
             viewModel.displayVolumeSlider()
@@ -284,7 +293,7 @@ fun GestureHandler(modifier: Modifier = Modifier) {
           val changeBrightness: () -> Unit = {
             if (startingY == 0f) startingY = change.position.y
             viewModel.changeBrightnessTo(
-              calculateNewValue(originalBrightness, startingY, change.position.y, brightnessGestureSens)
+              calculateNewVerticalGestureValue(originalBrightness, startingY, change.position.y, brightnessGestureSens)
             )
             viewModel.displayBrightnessSlider()
           }
@@ -303,10 +312,18 @@ fun GestureHandler(modifier: Modifier = Modifier) {
   )
 }
 
-fun calculateNewValue(originalValue: Int, startingY: Float, newY: Float, sensitivity: Float): Int {
+fun calculateNewVerticalGestureValue(originalValue: Int, startingY: Float, newY: Float, sensitivity: Float): Int {
   return originalValue + ((startingY - newY) * sensitivity).toInt()
 }
 
-fun calculateNewValue(originalValue: Float, startingY: Float, newY: Float, sensitivity: Float): Float {
+fun calculateNewVerticalGestureValue(originalValue: Float, startingY: Float, newY: Float, sensitivity: Float): Float {
   return originalValue + ((startingY - newY) * sensitivity)
+}
+
+fun calculateNewHorizontalGestureValue(originalValue: Int, startingX: Float, newX: Float, sensitivity: Float): Int {
+  return originalValue + ((newX - startingX) * sensitivity).toInt()
+}
+
+fun calculateNewHorizontalGestureValue(originalValue: Float, startingX: Float, newX: Float, sensitivity: Float): Float {
+  return originalValue + ((newX - startingX) * sensitivity)
 }
