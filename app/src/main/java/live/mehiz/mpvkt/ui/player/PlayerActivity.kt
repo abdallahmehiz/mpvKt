@@ -135,7 +135,7 @@ class PlayerActivity : AppCompatActivity() {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N && !isInPictureInPictureMode) {
       viewModel.pause()
     }
-    saveVideoPlaybackState()
+    saveVideoPlaybackState(fileName)
     super.onPause()
   }
 
@@ -146,7 +146,7 @@ class PlayerActivity : AppCompatActivity() {
 
   override fun onStop() {
     viewModel.pause()
-    saveVideoPlaybackState()
+    saveVideoPlaybackState(fileName)
     player.isExiting = true
     window.attributes.screenBrightness.let {
       if (playerPreferences.rememberBrightness.get() && it != -1f) {
@@ -345,7 +345,7 @@ class PlayerActivity : AppCompatActivity() {
     }
   }
 
-  private fun getFileName(intent: Intent): String? {
+  private fun getFileName(intent: Intent): String {
     val uri = if (intent.type == "text/plain") {
       Uri.parse(intent.getStringExtra(Intent.EXTRA_TEXT))
     } else {
@@ -355,7 +355,7 @@ class PlayerActivity : AppCompatActivity() {
       val cursor = contentResolver.query(uri, arrayOf(MediaStore.MediaColumns.DISPLAY_NAME), null, null)
       if (cursor?.moveToFirst() == true) return cursor.getString(0).also { cursor.close() }
     }
-    return uri?.lastPathSegment?.substringAfterLast("/")
+    return uri?.lastPathSegment?.substringAfterLast("/") ?: uri?.path ?: ""
   }
 
   private fun resolveUri(data: Uri): String? {
@@ -487,7 +487,7 @@ class PlayerActivity : AppCompatActivity() {
   internal fun event(eventId: Int) {
     when (eventId) {
       MPVLib.mpvEventId.MPV_EVENT_FILE_LOADED -> {
-        getFileName(intent)?.let { fileName = it }
+        fileName = getFileName(intent)
         viewModel.mediaTitle.update {
           val mediaTitle = MPVLib.getPropertyString("media-title")
           if (mediaTitle.isBlank() || mediaTitle.isDigitsOnly()) fileName else mediaTitle
@@ -505,14 +505,14 @@ class PlayerActivity : AppCompatActivity() {
     }
   }
 
-  private fun saveVideoPlaybackState() {
-    if (!::fileName.isInitialized) return
+  private fun saveVideoPlaybackState(mediaTitle: String) {
+    if (mediaTitle.isBlank()) return
     lifecycleScope.launch(Dispatchers.IO) {
       val oldState = mpvKtDatabase.videoDataDao().getVideoDataByTitle(fileName)
       Log.d(TAG, "Saving playback state")
       mpvKtDatabase.videoDataDao().upsert(
         PlaybackStateEntity(
-          mediaTitle = fileName,
+          mediaTitle = mediaTitle,
           lastPosition = if (playerPreferences.savePositionOnQuit.get()) {
             if ((player.timePos ?: 0) < (player.duration ?: 0) - 1) player.timePos ?: 0 else 0
           } else {
