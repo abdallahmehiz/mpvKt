@@ -136,14 +136,18 @@ class PlayerActivity : AppCompatActivity() {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N && !isInPictureInPictureMode) {
       viewModel.pause()
     }
-    lifecycleScope.launch(Dispatchers.IO) {
-      if ((player.timePos ?: 0) < (player.duration ?: 0)) saveVideoPlaybackState(false)
-    }
+    saveVideoPlaybackState()
     super.onPause()
+  }
+
+  override fun finish() {
+    setReturnIntent()
+    super.finish()
   }
 
   override fun onStop() {
     viewModel.pause()
+    saveVideoPlaybackState()
     player.isExiting = true
     super.onStop()
   }
@@ -438,7 +442,9 @@ class PlayerActivity : AppCompatActivity() {
       }
 
       "eof-reached" -> {
-        if (value) endPlayback(EndPlaybackReason.PlaybackCompleted)
+        if (value && playerPreferences.closeAfterReachingEndOfVideo.get()) {
+          finishAndRemoveTask()
+        }
       }
     }
   }
@@ -492,26 +498,30 @@ class PlayerActivity : AppCompatActivity() {
     }
   }
 
-  private suspend fun saveVideoPlaybackState(finishedPlayback: Boolean) {
+  private fun saveVideoPlaybackState() {
     if (!::fileName.isInitialized) return
-    mpvKtDatabase.videoDataDao().upsert(
-      PlaybackStateEntity(
-        mediaTitle = fileName,
-        lastPosition = if (playerPreferences.savePositionOnQuit.get()) {
-          if (finishedPlayback) 0 else player.timePos ?: 0
-        } else {
-          0
-        },
-        playbackSpeed = player.playbackSpeed ?: playerPreferences.defaultSpeed.get().toDouble(),
-        sid = player.sid,
-        subDelay = ((player.subDelay ?: 0.0) * 1000).toInt(),
-        subSpeed = MPVLib.getPropertyDouble("sub-speed") ?: 1.0,
-        secondarySid = player.secondarySid,
-        secondarySubDelay = ((player.secondarySubDelay ?: 0.0) * 1000).toInt(),
-        aid = player.aid,
-        audioDelay = ((MPVLib.getPropertyDouble("audio-delay") ?: 0.0) * 1000).toInt(),
-      ),
-    )
+    lifecycleScope.launch(Dispatchers.IO) {
+      val oldState = mpvKtDatabase.videoDataDao().getVideoDataByTitle(fileName)
+      Log.d(TAG, "Saving playback state")
+      mpvKtDatabase.videoDataDao().upsert(
+        PlaybackStateEntity(
+          mediaTitle = fileName,
+          lastPosition = if (playerPreferences.savePositionOnQuit.get()) {
+            if ((player.timePos ?: 0) < (player.duration ?: 0) - 1) player.timePos ?: 0 else 0
+          } else {
+            oldState?.lastPosition ?: 0
+          },
+          playbackSpeed = player.playbackSpeed ?: playerPreferences.defaultSpeed.get().toDouble(),
+          sid = player.sid,
+          subDelay = ((player.subDelay ?: 0.0) * 1000).toInt(),
+          subSpeed = MPVLib.getPropertyDouble("sub-speed") ?: 1.0,
+          secondarySid = player.secondarySid,
+          secondarySubDelay = ((player.secondarySubDelay ?: 0.0) * 1000).toInt(),
+          aid = player.aid,
+          audioDelay = ((MPVLib.getPropertyDouble("audio-delay") ?: 0.0) * 1000).toInt(),
+        ),
+      )
+    }
   }
 
   private suspend fun loadVideoPlaybackState(mediaTitle: String) {
@@ -536,21 +546,15 @@ class PlayerActivity : AppCompatActivity() {
     MPVLib.setPropertyDouble("sub-speed", state?.subSpeed ?: subtitlesPreferences.defaultSubSpeed.get().toDouble())
   }
 
-  private fun endPlayback(reason: EndPlaybackReason, cause: String? = null) {
-    Log.d(TAG, "Ending playback")
-    lifecycleScope.launch(Dispatchers.IO) {
-      saveVideoPlaybackState(true)
-    }
-    val returnIntent = Intent()
-    returnIntent.putExtra("end_by", reason.value)
-    cause?.let { returnIntent.putExtra("cause", cause) }
-    player.timePos?.let { returnIntent.putExtra("position", it * 1000) }
-    player.duration?.let { returnIntent.putExtra("duration", it * 1000) }
-    setResult(if (reason == EndPlaybackReason.Error) RESULT_CANCELED else RESULT_OK, returnIntent)
-    if (playerPreferences.closeAfterReachingEndOfVideo.get()) {
-      player.isExiting = true
-      finishAndRemoveTask()
-    }
+  private fun setReturnIntent() {
+    Log.d(TAG, "setting return intent")
+    setResult(
+      RESULT_OK,
+      Intent().apply {
+        player.timePos?.let { putExtra("position", it * 1000) }
+        player.duration?.let { putExtra("duration", it * 1000) }
+      },
+    )
   }
 
   override fun onNewIntent(intent: Intent) {
@@ -648,7 +652,7 @@ class PlayerActivity : AppCompatActivity() {
       KeyEvent.KEYCODE_DPAD_RIGHT -> viewModel.seekBy(playerPreferences.doubleTapToSeekDuration.get())
       KeyEvent.KEYCODE_DPAD_LEFT -> viewModel.seekBy(-playerPreferences.doubleTapToSeekDuration.get())
       KeyEvent.KEYCODE_SPACE -> viewModel.pauseUnpause()
-      KeyEvent.KEYCODE_MEDIA_STOP -> endPlayback(EndPlaybackReason.ExternalAction)
+      KeyEvent.KEYCODE_MEDIA_STOP -> finishAndRemoveTask()
 
       // They don't have a seek animation cause that's in GestureHandler.kt :despair:
       KeyEvent.KEYCODE_MEDIA_REWIND -> viewModel.seekBy(-playerPreferences.doubleTapToSeekDuration.get())

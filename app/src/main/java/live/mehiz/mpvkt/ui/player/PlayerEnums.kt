@@ -64,12 +64,6 @@ enum class PlayerUpdates {
   AspectRatio,
 }
 
-enum class EndPlaybackReason(val value: String) {
-  ExternalAction("external_action"),
-  PlaybackCompleted("playback_completion"),
-  Error("error"),
-}
-
 enum class VideoFilters(
   @StringRes val titleRes: Int,
   val preference: (DecoderPreferences) -> Preference<Int>,
