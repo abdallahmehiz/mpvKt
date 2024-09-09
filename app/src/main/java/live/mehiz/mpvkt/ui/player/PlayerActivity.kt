@@ -75,7 +75,7 @@ class PlayerActivity : AppCompatActivity() {
   private val advancedPreferences: AdvancedPreferences by inject()
   private val fileManager: FileManager by inject()
 
-  private lateinit var fileName: String
+  private var fileName = ""
 
   private var audioFocusRequest: AudioFocusRequestCompat? = null
   private var restoreAudioFocus: () -> Unit = {}
@@ -91,7 +91,7 @@ class PlayerActivity : AppCompatActivity() {
   private var pipReceiver: BroadcastReceiver? = null
 
   override fun onCreate(savedInstanceState: Bundle?) {
-    if (playerPreferences.drawOverDisplayCutout.get()) enableEdgeToEdge()
+    enableEdgeToEdge()
     super.onCreate(savedInstanceState)
     setContentView(binding.root)
 
@@ -180,6 +180,7 @@ class PlayerActivity : AppCompatActivity() {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
       setPictureInPictureParams(createPipParams())
     }
+    WindowCompat.setDecorFitsSystemWindows(window, false)
     window.setFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS, WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS)
     window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
     binding.root.systemUiVisibility =
@@ -191,6 +192,13 @@ class PlayerActivity : AppCompatActivity() {
     windowInsetsController.hide(WindowInsetsCompat.Type.navigationBars())
     windowInsetsController.systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
     window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+      window.attributes.layoutInDisplayCutoutMode = if (playerPreferences.drawOverDisplayCutout.get()) {
+        WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES
+      } else {
+        WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_NEVER
+      }
+    }
 
     if (playerPreferences.rememberBrightness.get()) {
       playerPreferences.defaultBrightness.get().let {
