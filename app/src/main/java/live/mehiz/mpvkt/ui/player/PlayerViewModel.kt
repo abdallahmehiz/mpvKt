@@ -424,6 +424,11 @@ class PlayerViewModel(
       }
     }
   }
+
+  fun takeScreenshot(withSubtitles: Boolean) {
+    MPVLib.command(arrayOf("screenshot", if (withSubtitles) "subtitles" else "video"))
+    playerUpdate.update { PlayerUpdates.TookAScreenshot }
+  }
 }
 
 data class Track(

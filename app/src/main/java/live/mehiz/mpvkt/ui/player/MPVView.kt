@@ -78,6 +78,7 @@ class MPVView(context: Context, attributes: AttributeSet) : BaseMPVView(context,
       // we can get null here for "no" or other invalid value
       return v?.toIntOrNull() ?: -1
     }
+
     operator fun setValue(thisRef: Any?, property: KProperty<*>, value: Int) {
       if (value == -1) {
         MPVLib.setPropertyString(name, "no")
@@ -117,9 +118,10 @@ class MPVView(context: Context, attributes: AttributeSet) : BaseMPVView(context,
     MPVLib.setOptionString("demuxer-max-bytes", "${cacheMegs * 1024 * 1024}")
     MPVLib.setOptionString("demuxer-max-back-bytes", "${cacheMegs * 1024 * 1024}")
     //
-    val screenshotDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES)
+    val screenshotDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES + "/mpvKt")
     screenshotDir.mkdirs()
     MPVLib.setOptionString("screenshot-directory", screenshotDir.path)
+    MPVLib.setOptionString("screenshot-format", playerPreferences.screenshotsFileFormat.get().propertyValue)
 
     VideoFilters.entries.forEach {
       MPVLib.setOptionString(it.mpvProperty, it.preference(decoderPreferences).get().toString())
@@ -227,7 +229,7 @@ class MPVView(context: Context, attributes: AttributeSet) : BaseMPVView(context,
     MPVLib.setOptionString("sub-speed", subtitlesPreferences.defaultSubSpeed.get().toString())
     MPVLib.setOptionString(
       "secondary-sub-delay",
-      (subtitlesPreferences.defaultSecondarySubDelay.get() / 1000.0).toString()
+      (subtitlesPreferences.defaultSecondarySubDelay.get() / 1000.0).toString(),
     )
 
     MPVLib.setOptionString("sub-font", subtitlesPreferences.font.get())

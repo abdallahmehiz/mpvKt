@@ -18,6 +18,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -45,7 +46,10 @@ fun ControlsButton(
           clickEvent()
           onClick()
         },
-        onLongClick = onLongClick,
+        onLongClick = {
+          clickEvent()
+          onLongClick()
+        },
         interactionSource = interactionSource,
         indication = rememberRipple(),
       )
@@ -80,7 +84,10 @@ fun ControlsButton(
           clickEvent()
           onClick()
         },
-        onLongClick = onLongClick,
+        onLongClick = {
+          clickEvent()
+          onLongClick()
+        },
         interactionSource = interactionSource,
         indication = rememberRipple(),
       )
@@ -90,6 +97,45 @@ fun ControlsButton(
       text,
       color = color,
       style = MaterialTheme.typography.bodyMedium,
+    )
+  }
+}
+
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+fun ControlsButton(
+  icon: Painter,
+  onClick: () -> Unit,
+  modifier: Modifier = Modifier,
+  onLongClick: () -> Unit = {},
+  title: String? = null,
+  color: Color = Color.White,
+) {
+  val interactionSource = remember { MutableInteractionSource() }
+
+  val clickEvent = LocalPlayerButtonsClickEvent.current
+  Box(
+    modifier = modifier
+      .clip(CircleShape)
+      .combinedClickable(
+        onClick = {
+          clickEvent()
+          onClick()
+        },
+        onLongClick = {
+          clickEvent()
+          onLongClick()
+        },
+        interactionSource = interactionSource,
+        indication = rememberRipple(),
+      )
+      .padding(MaterialTheme.spacing.medium),
+  ) {
+    Icon(
+      icon,
+      title,
+      tint = color,
+      modifier = Modifier.size(20.dp),
     )
   }
 }

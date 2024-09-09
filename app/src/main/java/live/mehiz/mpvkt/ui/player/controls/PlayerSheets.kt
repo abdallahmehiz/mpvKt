@@ -15,6 +15,7 @@ import live.mehiz.mpvkt.ui.player.controls.components.sheets.ChaptersSheet
 import live.mehiz.mpvkt.ui.player.controls.components.sheets.DecodersSheet
 import live.mehiz.mpvkt.ui.player.controls.components.sheets.MoreSheet
 import live.mehiz.mpvkt.ui.player.controls.components.sheets.PlaybackSpeedSheet
+import live.mehiz.mpvkt.ui.player.controls.components.sheets.ScreenshotSheet
 import live.mehiz.mpvkt.ui.player.controls.components.sheets.SubtitlesSheet
 import org.koin.compose.koinInject
 
@@ -112,6 +113,10 @@ fun PlayerSheets() {
 
     Sheets.PlaybackSpeed -> {
       PlaybackSpeedSheet(onDismissRequest = onDismissRequest)
+    }
+
+    Sheets.ScreenshotsSheet -> {
+      ScreenshotSheet(onDismissRequest)
     }
   }
 }

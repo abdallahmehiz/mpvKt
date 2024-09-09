@@ -199,9 +199,10 @@ fun PlayerControls(
           },
         ) {
           when (currentPlayerUpdate) {
+            PlayerUpdates.None -> {}
             PlayerUpdates.DoubleSpeed -> DoubleSpeedPlayerUpdate()
             PlayerUpdates.AspectRatio -> TextPlayerUpdate(stringResource(aspectRatio.titleRes))
-            else -> {}
+            PlayerUpdates.TookAScreenshot -> TextPlayerUpdate(stringResource(R.string.player_updates_screenshot))
           }
         }
 

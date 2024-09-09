@@ -61,6 +61,7 @@
     <string name="pref_player_controls_allow_gestures_in_panels">Allow gestures in panels</string>
     <string name="pref_player_controls_display_volume_as_percentage">Display volume as percentage</string>
     <string name="pref_player_controls_show_loading_circle">Show loading circle</string>
+    <string name="pref_player_controls_show_screenshot_button">Show screenshot button</string>
     <string name="pref_player_controls_show_chapter_indicator">Show current chapter indicator</string>
     <string name="pref_player_controls_show_chapters_button">Show chapters select button</string>
     <string name="pref_player_controls_show_chapters_summary">Only appears if the video has chapters.</string>
@@ -170,6 +171,9 @@
 
     <string name="player_sheets_decoder_formatted">%s (%s)</string>
 
+    <string name="player_sheets_screenshot_include_subs">Include subtitles</string>
+    <string name="player_sheets_screenshot_file_format">File format</string>
+
     <string name="numeric_chooser_value_too_big">Value too big</string>
     <string name="numeric_chooser_value_too_small">Value too small</string>
 
@@ -183,6 +187,8 @@
     <string name="player_aspect_fit">Fit Screen</string>
     <string name="player_aspect_crop">Crop</string>
     <string name="player_aspect_stretch">Stretch</string>
+
+    <string name="player_updates_screenshot">Took a screenshot!</string>
 
     <string name="crash_screen_title">Oops</string>
     <string name="crash_screen_subtitle">Looks like %s experienced an unexpected error. Consider sharing the crash logs in a GitHub issue.</string>
@@ -204,6 +210,7 @@
 
     <string name="value_percentage_int" translatable="false">%d%%</string>
     <string name="value_percentage_float" translatable="false">%.2f\%%</string>
+    <string name="value_rate_s">%d/sec</string>
 
     <string name="github_repo_url" translatable="false">https://github.com/abdallahmehiz/mpvKt</string>
 

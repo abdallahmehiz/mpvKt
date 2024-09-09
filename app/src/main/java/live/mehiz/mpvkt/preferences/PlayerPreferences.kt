@@ -3,6 +3,7 @@ package live.mehiz.mpvkt.preferences
 import live.mehiz.mpvkt.preferences.preference.PreferenceStore
 import live.mehiz.mpvkt.preferences.preference.getEnum
 import live.mehiz.mpvkt.ui.player.PlayerOrientation
+import live.mehiz.mpvkt.ui.player.ScreenshotFormat
 import live.mehiz.mpvkt.ui.player.VideoAspect
 
 class PlayerPreferences(
@@ -43,4 +44,8 @@ class PlayerPreferences(
   val defaultBrightness = preferenceStore.getFloat("default_brightness", -1f)
 
   val allowGesturesInPanels = preferenceStore.getBoolean("allow_gestures_in_panels")
+
+  val showScreenshotButton = preferenceStore.getBoolean("ss_button")
+  val takeScreenshotsWithSubtitles = preferenceStore.getBoolean("ss_with_subs", true)
+  val screenshotsFileFormat = preferenceStore.getEnum("ss_format", ScreenshotFormat.JPG)
 }

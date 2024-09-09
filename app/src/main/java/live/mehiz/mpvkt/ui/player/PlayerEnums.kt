@@ -47,6 +47,7 @@ enum class Sheets {
   AudioTracks,
   Chapters,
   Decoders,
+  ScreenshotsSheet,
   More,
 }
 
@@ -62,6 +63,7 @@ enum class PlayerUpdates {
   None,
   DoubleSpeed,
   AspectRatio,
+  TookAScreenshot,
 }
 
 enum class VideoFilters(
@@ -94,4 +96,16 @@ enum class VideoFilters(
     { it.hueFilter },
     "hue",
   ),
+}
+
+enum class ScreenshotFormat(val propertyValue: String, val displayName: String) {
+  PNG("png", "PNG"),
+  JPG("jpg", "JPG"),
+
+  // Missing codec
+  // WEBP("webp", "WebP"),
+  // AVIF("avif", "AVIF")
+
+  // Not enough permissions
+  // JXL("jxl", "JPEG XL"),
 }

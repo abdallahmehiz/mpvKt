@@ -193,6 +193,12 @@ object PlayerPreferencesScreen : Screen() {
             title = { Text(stringResource(R.string.pref_player_controls_show_chapters_button)) },
             summary = { Text(stringResource(R.string.pref_player_controls_show_chapters_summary)) },
           )
+          val showScreenshotButton by preferences.showScreenshotButton.collectAsState()
+          SwitchPreference(
+            value = showScreenshotButton,
+            onValueChange = preferences.showScreenshotButton::set,
+            title = { Text(stringResource(R.string.pref_player_controls_show_screenshot_button)) }
+          )
           val showChapterIndicator by preferences.currentChaptersIndicator.collectAsState()
           SwitchPreference(
             value = showChapterIndicator,

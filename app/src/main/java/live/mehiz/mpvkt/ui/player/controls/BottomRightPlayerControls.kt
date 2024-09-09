@@ -10,10 +10,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
+import kotlinx.coroutines.flow.update
+import live.mehiz.mpvkt.R
 import live.mehiz.mpvkt.preferences.PlayerPreferences
 import live.mehiz.mpvkt.preferences.preference.collectAsState
 import live.mehiz.mpvkt.ui.player.PlayerActivity
 import live.mehiz.mpvkt.ui.player.PlayerViewModel
+import live.mehiz.mpvkt.ui.player.Sheets
 import live.mehiz.mpvkt.ui.player.VideoAspect
 import live.mehiz.mpvkt.ui.player.controls.components.ControlsButton
 import org.koin.compose.koinInject
@@ -25,6 +29,12 @@ fun BottomRightPlayerControls(modifier: Modifier = Modifier) {
   val playerPreferences = koinInject<PlayerPreferences>()
   val aspect by playerPreferences.videoAspect.collectAsState()
   Row(modifier) {
+    val withSubtitles by playerPreferences.takeScreenshotsWithSubtitles.collectAsState()
+    ControlsButton(
+      painterResource(R.drawable.outline_screenshot_tablet_24),
+      onClick = { viewModel.takeScreenshot(withSubtitles) },
+      onLongClick = { viewModel.sheetShown.update { Sheets.ScreenshotsSheet } },
+    )
     val activity = LocalContext.current as PlayerActivity
     if (activity.isPipSupported) {
       ControlsButton(
