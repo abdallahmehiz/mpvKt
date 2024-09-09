@@ -49,6 +49,7 @@
     <string name="pref_player_precise_seeking_summary">Seek to exact positions instead of keyframes (slow)</string>
     <string name="pref_player_automatically_enter_pip">Automatically switch to PiP</string>
     <string name="pref_player_close_after_eof">Close after the end of playback</string>
+    <string name="pref_player_remember_brightness">Remember display brightness</string>
 
     <string name="pref_player_gestures">Gestures</string>
     <string name="pref_player_gestures_seek">Horizontal seek gestures</string>

@@ -15,7 +15,6 @@ import android.os.Build
 import android.os.Bundle
 import android.os.ParcelFileDescriptor
 import android.provider.MediaStore
-import android.provider.Settings
 import android.util.Log
 import android.util.Rational
 import android.view.KeyEvent
@@ -149,6 +148,11 @@ class PlayerActivity : AppCompatActivity() {
     viewModel.pause()
     saveVideoPlaybackState()
     player.isExiting = true
+    window.attributes.screenBrightness.let {
+      if (playerPreferences.rememberBrightness.get() && it != -1f) {
+        playerPreferences.defaultBrightness.set(it)
+      }
+    }
     super.onStop()
   }
 
@@ -172,6 +176,7 @@ class PlayerActivity : AppCompatActivity() {
   }
 
   override fun onStart() {
+    super.onStart()
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
       setPictureInPictureParams(createPipParams())
     }
@@ -186,7 +191,12 @@ class PlayerActivity : AppCompatActivity() {
     windowInsetsController.hide(WindowInsetsCompat.Type.navigationBars())
     windowInsetsController.systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
     window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
-    super.onStart()
+
+    if (playerPreferences.rememberBrightness.get()) {
+      playerPreferences.defaultBrightness.get().let {
+        if (it != -1f) viewModel.changeBrightnessTo(it)
+      }
+    }
   }
 
   private fun copyMPVAssets() {
@@ -299,10 +309,7 @@ class PlayerActivity : AppCompatActivity() {
         if (it < viewModel.maxVolume) viewModel.changeMPVVolumeTo(100)
       }
     }
-    viewModel.currentBrightness.update {
-      Settings.System.getFloat(contentResolver, Settings.System.SCREEN_BRIGHTNESS)
-        .normalize(0f, 255f, 0f, 1f)
-    }
+    viewModel.currentBrightness.update { window.attributes.screenBrightness }
   }
 
   private fun setupIntents(intent: Intent) {
@@ -647,8 +654,14 @@ class PlayerActivity : AppCompatActivity() {
 
   override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
     when (keyCode) {
-      KeyEvent.KEYCODE_VOLUME_UP -> viewModel.changeVolumeBy(1)
-      KeyEvent.KEYCODE_VOLUME_DOWN -> viewModel.changeVolumeBy(-1)
+      KeyEvent.KEYCODE_VOLUME_UP -> {
+        viewModel.changeVolumeBy(1)
+        viewModel.displayVolumeSlider()
+      }
+      KeyEvent.KEYCODE_VOLUME_DOWN -> {
+        viewModel.changeVolumeBy(-1)
+        viewModel.displayVolumeSlider()
+      }
       KeyEvent.KEYCODE_DPAD_RIGHT -> viewModel.seekBy(playerPreferences.doubleTapToSeekDuration.get())
       KeyEvent.KEYCODE_DPAD_LEFT -> viewModel.seekBy(-playerPreferences.doubleTapToSeekDuration.get())
       KeyEvent.KEYCODE_SPACE -> viewModel.pauseUnpause()

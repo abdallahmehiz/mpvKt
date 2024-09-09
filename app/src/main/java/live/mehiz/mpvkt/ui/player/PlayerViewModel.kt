@@ -4,7 +4,6 @@ import android.content.pm.ActivityInfo
 import android.media.AudioManager
 import android.net.Uri
 import android.os.Build
-import android.provider.Settings
 import android.util.DisplayMetrics
 import android.util.Log
 import android.widget.Toast
@@ -71,10 +70,7 @@ class PlayerViewModel(
   val playerUpdate = MutableStateFlow(PlayerUpdates.None)
   val isBrightnessSliderShown = MutableStateFlow(false)
   val isVolumeSliderShown = MutableStateFlow(false)
-  val currentBrightness = MutableStateFlow(
-    Settings.System.getFloat(activity.contentResolver, Settings.System.SCREEN_BRIGHTNESS)
-      .normalize(0f, 255f, 0f, 1f),
-  )
+  val currentBrightness = MutableStateFlow(activity.window.attributes.screenBrightness)
   val currentVolume = MutableStateFlow(activity.audioManager.getStreamVolume(AudioManager.STREAM_MUSIC))
   val currentMPVVolume = MutableStateFlow(MPVLib.getPropertyInt("volume"))
   var volumeBoostCap: Int = MPVLib.getPropertyInt("volume-max")
@@ -332,11 +328,15 @@ class PlayerViewModel(
   fun changeBrightnessTo(
     brightness: Float,
   ) {
-    isBrightnessSliderShown.update { true }
-    currentBrightness.update { brightness.coerceIn(0f, 1f) }
     activity.window.attributes = activity.window.attributes.apply {
-      screenBrightness = brightness.coerceIn(0f, 1f)
+      screenBrightness = brightness.coerceIn(0f, 1f).also {
+        currentBrightness.update { _ -> it }
+      }
     }
+  }
+
+  fun displayBrightnessSlider() {
+    isBrightnessSliderShown.update { true }
   }
 
   val maxVolume = activity.audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC)
@@ -354,7 +354,6 @@ class PlayerViewModel(
   }
 
   fun changeVolumeTo(volume: Int) {
-    isVolumeSliderShown.update { true }
     val newVolume = volume.coerceIn(0..maxVolume)
     activity.audioManager.setStreamVolume(
       AudioManager.STREAM_MUSIC,
@@ -369,8 +368,12 @@ class PlayerViewModel(
   }
 
   fun setMPVVolume(volume: Int) {
-    if (volume != currentMPVVolume.value) isVolumeSliderShown.update { true }
+    if (volume != currentMPVVolume.value) displayVolumeSlider()
     currentMPVVolume.update { volume }
+  }
+
+  fun displayVolumeSlider() {
+    isVolumeSliderShown.update { true }
   }
 
   fun changeVideoAspect(aspect: VideoAspect) {
@@ -428,7 +431,3 @@ data class Track(
   val name: String,
   val language: String?,
 )
-
-fun Float.normalize(inMin: Float, inMax: Float, outMin: Float, outMax: Float): Float {
-  return (this - inMin) * (outMax - outMin) / (inMax - inMin) + outMin
-}

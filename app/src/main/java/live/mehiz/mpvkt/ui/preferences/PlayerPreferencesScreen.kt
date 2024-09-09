@@ -94,6 +94,12 @@ object PlayerPreferencesScreen : Screen() {
             onValueChange = preferences.closeAfterReachingEndOfVideo::set,
             title = { Text(text = stringResource(id = R.string.pref_player_close_after_eof)) }
           )
+          val rememberBrightness by preferences.rememberBrightness.collectAsState()
+          SwitchPreference(
+            value = rememberBrightness,
+            onValueChange = preferences.rememberBrightness::set,
+            title = { Text(text = stringResource(R.string.pref_player_remember_brightness)) }
+          )
           PreferenceCategory(
             title = { Text(stringResource(R.string.pref_player_seeking_title)) }
           )
