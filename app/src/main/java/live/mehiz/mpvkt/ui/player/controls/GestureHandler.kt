@@ -86,6 +86,7 @@ fun GestureHandler(modifier: Modifier = Modifier) {
   val doubleTapToPause by playerPreferences.doubleTapToPause.collectAsState()
   val doubleTapToSeek by playerPreferences.doubleTapToSeek.collectAsState()
   val doubleTapToSeekDuration by playerPreferences.doubleTapToSeekDuration.collectAsState()
+  val doubleSpeedGesture by playerPreferences.holdForDoubleSpeed.collectAsState()
   val brightnessGesture = playerPreferences.brightnessGesture.get()
   val volumeGesture by playerPreferences.volumeGesture.collectAsState()
   val seekGesture by playerPreferences.horizontalSeekGesture.collectAsState()
@@ -194,7 +195,7 @@ fun GestureHandler(modifier: Modifier = Modifier) {
             interactionSource.emit(PressInteraction.Release(press))
           },
           onLongPress = {
-            if (areControlsLocked) return@detectTapGestures
+            if (!doubleSpeedGesture || areControlsLocked) return@detectTapGestures
             if (!isLongPressing && !viewModel.paused.value) {
               originalSpeed = viewModel.playbackSpeed.value
               haptics.performHapticFeedback(HapticFeedbackType.LongPress)
@@ -227,7 +228,7 @@ fun GestureHandler(modifier: Modifier = Modifier) {
           if (position >= duration && dragAmount > 0) return@detectHorizontalDragGestures
           calculateNewHorizontalGestureValue(startingPosition, startingX, change.position.x, 0.15f).let {
             viewModel.gestureSeekAmount.update { _ ->
-              Pair(startingPosition, it - startingPosition)
+              Pair(startingPosition, (it - startingPosition).coerceIn(0, (duration - startingPosition).toInt()))
             }
             viewModel.seekTo(it, preciseSeeking)
           }
