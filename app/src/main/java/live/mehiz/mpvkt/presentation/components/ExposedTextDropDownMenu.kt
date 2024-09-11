@@ -5,6 +5,7 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
+import androidx.compose.material3.MenuAnchorType
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
@@ -44,7 +45,7 @@ fun ExposedTextDropDownMenu(
       leadingIcon = leadingIcon,
       colors = OutlinedTextFieldDefaults.colors(),
       modifier = Modifier
-        .menuAnchor()
+        .menuAnchor(MenuAnchorType.PrimaryEditable)
         .fillMaxWidth()
     )
 

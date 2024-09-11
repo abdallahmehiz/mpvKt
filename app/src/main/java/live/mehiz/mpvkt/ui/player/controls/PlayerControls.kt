@@ -25,12 +25,13 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Lock
-import androidx.compose.material.ripple.LocalRippleTheme
-import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.LocalContentColor
+import androidx.compose.material3.LocalRippleConfiguration
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -67,7 +68,7 @@ import live.mehiz.mpvkt.ui.player.controls.components.DoubleSpeedPlayerUpdate
 import live.mehiz.mpvkt.ui.player.controls.components.SeekbarWithTimers
 import live.mehiz.mpvkt.ui.player.controls.components.TextPlayerUpdate
 import live.mehiz.mpvkt.ui.player.controls.components.VolumeSlider
-import live.mehiz.mpvkt.ui.theme.PlayerRippleTheme
+import live.mehiz.mpvkt.ui.theme.playerRippleConfiguration
 import live.mehiz.mpvkt.ui.theme.spacing
 import org.koin.compose.koinInject
 import kotlin.math.abs
@@ -75,7 +76,7 @@ import kotlin.math.abs
 @Suppress("CompositionLocalAllowlist")
 val LocalPlayerButtonsClickEvent = staticCompositionLocalOf { {} }
 
-@OptIn(ExperimentalAnimationGraphicsApi::class)
+@OptIn(ExperimentalAnimationGraphicsApi::class, ExperimentalMaterial3Api::class)
 @Composable
 @Suppress("CyclomaticComplexMethod")
 fun PlayerControls(
@@ -113,7 +114,7 @@ fun PlayerControls(
   )
   GestureHandler()
   CompositionLocalProvider(
-    LocalRippleTheme provides PlayerRippleTheme,
+    LocalRippleConfiguration provides playerRippleConfiguration,
     LocalPlayerButtonsClickEvent provides { resetControls = !resetControls },
     LocalContentColor provides Color.White,
   ) {
@@ -256,7 +257,7 @@ fun PlayerControls(
                 .clip(CircleShape)
                 .clickable(
                   interaction,
-                  rememberRipple(),
+                  ripple(),
                 ) { viewModel.pauseUnpause() }
                 .padding(MaterialTheme.spacing.medium),
               contentDescription = null,

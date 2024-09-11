@@ -90,7 +90,7 @@ fun SubtitleSettingsPanel(
           verticalAlignment = Alignment.Top,
           pageSpacing = MaterialTheme.spacing.smaller,
           contentPadding = PaddingValues(horizontal = MaterialTheme.spacing.smaller),
-          beyondBoundsPageCount = 1,
+          beyondViewportPageCount = 1,
         ) { page ->
           cards(page, Modifier.fillMaxWidth())
         }

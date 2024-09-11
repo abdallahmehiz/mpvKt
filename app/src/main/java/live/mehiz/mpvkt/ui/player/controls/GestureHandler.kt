@@ -17,8 +17,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.safeGestures
 import androidx.compose.foundation.layout.windowInsetsPadding
-import androidx.compose.material.ripple.LocalRippleTheme
-import androidx.compose.material.ripple.rememberRipple
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.LocalRippleConfiguration
+import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -51,9 +52,10 @@ import live.mehiz.mpvkt.ui.player.Panels
 import live.mehiz.mpvkt.ui.player.PlayerUpdates
 import live.mehiz.mpvkt.ui.player.PlayerViewModel
 import live.mehiz.mpvkt.ui.player.controls.components.DoubleTapSeekSecondsView
-import live.mehiz.mpvkt.ui.theme.PlayerRippleTheme
+import live.mehiz.mpvkt.ui.theme.playerRippleConfiguration
 import org.koin.compose.koinInject
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Suppress("CyclomaticComplexMethod", "MultipleEmitters")
 @Composable
 fun GestureHandler(modifier: Modifier = Modifier) {
@@ -118,7 +120,7 @@ fun GestureHandler(modifier: Modifier = Modifier) {
     contentAlignment = if (isSeekingForwards) Alignment.CenterEnd else Alignment.CenterStart,
   ) {
     CompositionLocalProvider(
-      LocalRippleTheme provides PlayerRippleTheme,
+      LocalRippleConfiguration provides playerRippleConfiguration,
     ) {
       if (seekAmount != 0) {
         Box(
@@ -132,7 +134,7 @@ fun GestureHandler(modifier: Modifier = Modifier) {
               .fillMaxSize()
               .clip(if (isSeekingForwards) RightSideOvalShape else LeftSideOvalShape)
               .background(Color.White.copy(alpha))
-              .indication(interactionSource, rememberRipple()),
+              .indication(interactionSource, ripple()),
           )
           AndroidView(
             factory = { DoubleTapSeekSecondsView(it, null) },

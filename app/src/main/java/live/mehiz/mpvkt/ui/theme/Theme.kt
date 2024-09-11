@@ -4,8 +4,9 @@ import android.os.Build
 import androidx.annotation.StringRes
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material.ripple.RippleAlpha
-import androidx.compose.material.ripple.RippleTheme
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.RippleConfiguration
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
@@ -118,7 +119,7 @@ fun MpvKtTheme(content: @Composable () -> Unit) {
   }
 
   CompositionLocalProvider(
-    LocalSpacing provides Spacing()
+    LocalSpacing provides Spacing(),
   ) {
     MaterialTheme(
       colorScheme = colorScheme,
@@ -134,23 +135,19 @@ enum class DarkMode(@StringRes val titleRes: Int) {
   System(R.string.pref_appearance_darkmode_system),
 }
 
-object PlayerRippleTheme : RippleTheme {
+private const val RIPPLE_DRAGGED_ALPHA = .5f
+private const val RIPPLE_FOCUSED_ALPHA = .6f
+private const val RIPPLE_HOVERED_ALPHA = .4f
+private const val RIPPLE_PRESSED_ALPHA = .6f
 
-  private const val draggedAlpha = .3f
-  private const val focusedAlpha = .4f
-  private const val hoveredAlpha = .2f
-  private const val pressedAlpha = .4f
-
-  private val alpha = RippleAlpha(
-    draggedAlpha = draggedAlpha,
-    focusedAlpha = focusedAlpha,
-    hoveredAlpha = hoveredAlpha,
-    pressedAlpha = pressedAlpha,
+@OptIn(ExperimentalMaterial3Api::class)
+val playerRippleConfiguration
+  @Composable get() = RippleConfiguration(
+    color = MaterialTheme.colorScheme.primaryContainer,
+    rippleAlpha = RippleAlpha(
+      draggedAlpha = RIPPLE_DRAGGED_ALPHA,
+      focusedAlpha = RIPPLE_FOCUSED_ALPHA,
+      hoveredAlpha = RIPPLE_HOVERED_ALPHA,
+      pressedAlpha = RIPPLE_PRESSED_ALPHA,
+    ),
   )
-
-  @Composable
-  override fun defaultColor() = MaterialTheme.colorScheme.primaryContainer
-
-  @Composable
-  override fun rippleAlpha() = alpha
-}

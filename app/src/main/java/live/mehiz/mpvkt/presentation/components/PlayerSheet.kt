@@ -4,6 +4,7 @@ import android.content.res.Configuration.ORIENTATION_LANDSCAPE
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.rememberSplineBasedDecay
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -54,6 +55,8 @@ import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
 
+private val sheetAnimationSpec = tween<Float>(350)
+
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun PlayerSheet(
@@ -75,14 +78,16 @@ fun PlayerSheet(
   var backgroundAlpha by remember { mutableFloatStateOf(0f) }
   val alpha by animateFloatAsState(
     backgroundAlpha,
-    animationSpec = tween(350),
+    animationSpec = sheetAnimationSpec,
     label = "alpha"
   )
 
+  val decayAnimationSpec = rememberSplineBasedDecay<Float>()
   val anchoredDraggableState = remember {
     AnchoredDraggableState(
       initialValue = 1,
-      animationSpec = tween(350),
+      snapAnimationSpec = sheetAnimationSpec,
+      decayAnimationSpec = decayAnimationSpec,
       positionalThreshold = { with(density) { 56.dp.toPx() } },
       velocityThreshold = { with(density) { 125.dp.toPx() } },
     )
@@ -173,7 +178,7 @@ fun PlayerSheet(
 private fun <T> AnchoredDraggableState<T>.preUpPostDownNestedScrollConnection() = object : NestedScrollConnection {
   override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
     val delta = available.toFloat()
-    return if (delta < 0 && source == NestedScrollSource.Drag) {
+    return if (delta < 0 && source == NestedScrollSource.UserInput) {
       dispatchRawDelta(delta).toOffset()
     } else {
       Offset.Zero
@@ -185,7 +190,7 @@ private fun <T> AnchoredDraggableState<T>.preUpPostDownNestedScrollConnection() 
     available: Offset,
     source: NestedScrollSource,
   ): Offset {
-    return if (source == NestedScrollSource.Drag) {
+    return if (source == NestedScrollSource.UserInput) {
       dispatchRawDelta(available.toFloat()).toOffset()
     } else {
       Offset.Zero

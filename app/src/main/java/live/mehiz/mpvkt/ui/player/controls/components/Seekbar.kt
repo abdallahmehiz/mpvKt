@@ -8,11 +8,10 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -26,6 +25,7 @@ import dev.vivvvek.seeker.Segment
 import `is`.xyz.mpv.Utils
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
+import live.mehiz.mpvkt.ui.player.controls.LocalPlayerButtonsClickEvent
 import live.mehiz.mpvkt.ui.theme.spacing
 
 @Composable
@@ -41,6 +41,7 @@ fun SeekbarWithTimers(
   modifier: Modifier = Modifier,
   chapters: ImmutableList<Segment>? = null,
 ) {
+  val clickEvent = LocalPlayerButtonsClickEvent.current
   Row(
     modifier = modifier.height(48.dp),
     verticalAlignment = Alignment.CenterVertically,
@@ -49,7 +50,10 @@ fun SeekbarWithTimers(
     VideoTimer(
       value = position,
       timersInverted.first,
-      onClick = positionTimerOnClick,
+      onClick = {
+        clickEvent()
+        positionTimerOnClick()
+      },
       modifier = Modifier.width(92.dp),
     )
     Seeker(
@@ -70,7 +74,10 @@ fun SeekbarWithTimers(
     VideoTimer(
       value = if (timersInverted.second) position - duration else duration,
       isInverted = timersInverted.second,
-      onClick = durationTimerOnCLick,
+      onClick = {
+        clickEvent()
+        durationTimerOnCLick()
+      },
       modifier = Modifier.width(92.dp),
     )
   }
@@ -89,7 +96,7 @@ fun VideoTimer(
       .fillMaxHeight()
       .clickable(
         interactionSource = interactionSource,
-        indication = rememberRipple(),
+        indication = ripple(),
         onClick = onClick,
       )
       .wrapContentHeight(Alignment.CenterVertically),
