@@ -45,7 +45,7 @@ fun OutlinedNumericChooser(
     }
     var valueString by remember { mutableStateOf("$value") }
     LaunchedEffect(value) {
-      if (valueString.isBlank()) return@LaunchedEffect
+      if (valueString.isBlank() && value == 0) return@LaunchedEffect
       valueString = value.toString()
     }
     OutlinedTextField(
@@ -57,7 +57,7 @@ fun OutlinedNumericChooser(
           onChange(0)
         }
         runCatching {
-          val intValue = newValue.toInt()
+          val intValue = if (newValue.trimStart() == "-") -0 else newValue.toInt()
           onChange(intValue)
           valueString = newValue
         }
@@ -99,7 +99,7 @@ fun OutlinedNumericChooser(
     }
     var valueString by remember { mutableStateOf("$value") }
     LaunchedEffect(value) {
-      if (valueString.isBlank()) return@LaunchedEffect
+      if (valueString.isBlank() && value == 0f) return@LaunchedEffect
       valueString = value.toString().dropLastWhile { it == '0' }.dropLastWhile { it == '.' }
     }
     OutlinedTextField(
@@ -112,7 +112,7 @@ fun OutlinedNumericChooser(
         }
         runCatching {
           if (newValue.startsWith('.')) return@runCatching
-          val floatValue = newValue.toFloat()
+          val floatValue = if (newValue.trimStart() == "-") -0f else newValue.toFloat()
           onChange(floatValue)
           valueString = newValue
         }

@@ -49,6 +49,7 @@ import live.mehiz.mpvkt.presentation.components.OutlinedNumericChooser
 import live.mehiz.mpvkt.ui.theme.spacing
 import org.koin.compose.koinInject
 import kotlin.math.round
+import kotlin.math.roundToInt
 
 @Composable
 fun SubtitleDelayPanel(
@@ -65,13 +66,16 @@ fun SubtitleDelayPanel(
     val delayControlCard = createRef()
 
     var affectedSubtitle by remember { mutableStateOf(SubtitleDelayType.Primary) }
-    var delay by remember { mutableIntStateOf((MPVLib.getPropertyDouble("sub-delay") * 1000).toInt()) }
+    var delay by remember { mutableIntStateOf((MPVLib.getPropertyDouble("sub-delay") * 1000).roundToInt()) }
+    var secondaryDelay by remember {
+      mutableIntStateOf((MPVLib.getPropertyDouble("secondary-sub-delay") * 1000).roundToInt())
+    }
     var speed by remember { mutableFloatStateOf(MPVLib.getPropertyDouble("sub-speed").toFloat()) }
     LaunchedEffect(speed) {
-      MPVLib.setPropertyDouble("sub-speed", speed.toDouble())
+      if (speed in 0.1f..1f) MPVLib.setPropertyDouble("sub-speed", speed.toDouble())
     }
-    LaunchedEffect(delay) {
-      val finalDelay = delay / 1000.0
+    LaunchedEffect(delay, secondaryDelay) {
+      val finalDelay = (if (affectedSubtitle == SubtitleDelayType.Secondary) secondaryDelay else delay) / 1000.0
       when (affectedSubtitle) {
         SubtitleDelayType.Primary -> MPVLib.setPropertyDouble("sub-delay", finalDelay)
         SubtitleDelayType.Secondary -> MPVLib.setPropertyDouble("secondary-sub-delay", finalDelay)
@@ -81,19 +85,34 @@ fun SubtitleDelayPanel(
         }
       }
     }
+    LaunchedEffect(affectedSubtitle) {
+      secondaryDelay = (
+        MPVLib.getPropertyDouble(
+          if (affectedSubtitle == SubtitleDelayType.Both) "sub-delay" else "secondary-sub-delay"
+        ) * 1000
+        ).toInt()
+      delay = (MPVLib.getPropertyDouble("sub-delay") * 1000).toInt()
+    }
     SubtitleDelayCard(
-      delay = delay,
-      onDelayChange = { delay = it },
+      delay = if (affectedSubtitle == SubtitleDelayType.Secondary) secondaryDelay else delay,
+      onDelayChange = {
+        if (affectedSubtitle == SubtitleDelayType.Secondary) {
+          secondaryDelay = it
+        } else {
+          delay = it
+        }
+      },
       speed = speed,
       onSpeedChange = { speed = round(it * 1000) / 1000f },
       affectedSubtitle = affectedSubtitle,
       onTypeChange = { affectedSubtitle = it },
       onApply = {
         preferences.defaultSubDelay.set(delay)
-        preferences.defaultSubSpeed.set(speed)
+        if (speed in 0.1f..10f) preferences.defaultSubSpeed.set(speed)
       },
       onReset = {
         delay = 0
+        secondaryDelay = 0
         speed = 1f
       },
       onClose = onDismissRequest,
@@ -154,12 +173,9 @@ fun SubtitleDelayCard(
 enum class SubtitleDelayType(
   @StringRes val title: Int,
 ) {
-  Primary(
-    R.string.player_sheets_sub_delay_subtitle_type_primary,
-  ),
-  Secondary(R.string.player_sheets_sub_delay_subtitle_type_secondary), Both(
-    R.string.player_sheets_sub_delay_subtitle_type_primary_and_secondary,
-  ),
+  Primary(R.string.player_sheets_sub_delay_subtitle_type_primary),
+  Secondary(R.string.player_sheets_sub_delay_subtitle_type_secondary),
+  Both(R.string.player_sheets_sub_delay_subtitle_type_primary_and_secondary),
 }
 
 @Suppress("LambdaParameterInRestartableEffect") // Intentional
