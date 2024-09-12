@@ -230,7 +230,8 @@ fun GestureHandler(modifier: Modifier = Modifier) {
           if (position >= duration && dragAmount > 0) return@detectHorizontalDragGestures
           calculateNewHorizontalGestureValue(startingPosition, startingX, change.position.x, 0.15f).let {
             viewModel.gestureSeekAmount.update { _ ->
-              Pair(startingPosition, (it - startingPosition).coerceIn(0, (duration - startingPosition).toInt()))
+              Pair(startingPosition, (it - startingPosition)
+                .coerceIn(0 - startingPosition, (duration - startingPosition).toInt()))
             }
             viewModel.seekTo(it, preciseSeeking)
           }
