@@ -136,6 +136,7 @@
     <string name="player_sheets_sub_color_blue">Blue</string>
     <string name="player_sheets_sub_color_alpha">Alpha</string>
     <string name="player_sheets_sub_override_ass">Override ASS/SSA subtitles</string>
+    <string name="player_sheets_sub_scale">Scale</string>
     <string name="player_sheets_sub_position">Position</string>
     <string name="player_sheets_sub_typography_card_title">Typography</string>
     <string name="player_sheets_sub_typography_font">Font</string>

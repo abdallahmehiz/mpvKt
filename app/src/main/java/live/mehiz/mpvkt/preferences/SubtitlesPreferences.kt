@@ -18,6 +18,7 @@ class SubtitlesPreferences(preferenceStore: PreferenceStore) {
   val fontsFolder = preferenceStore.getString("sub_fonts_folder")
   val font = preferenceStore.getString("sub_font", "Sans Serif")
   val fontSize = preferenceStore.getInt("sub_font_size", 55)
+  val subScale = preferenceStore.getFloat("sub_scale", 1f)
   val borderSize = preferenceStore.getInt("sub_border_size", 3)
   val bold = preferenceStore.getBoolean("sub_bold")
   val italic = preferenceStore.getBoolean("sub_italic")

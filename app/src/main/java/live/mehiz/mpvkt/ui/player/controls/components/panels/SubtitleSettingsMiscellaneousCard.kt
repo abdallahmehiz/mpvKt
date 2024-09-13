@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AlignVerticalCenter
 import androidx.compose.material.icons.filled.EditOff
+import androidx.compose.material.icons.filled.FormatSize
 import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -27,6 +28,7 @@ import live.mehiz.mpvkt.preferences.SubtitlesPreferences
 import live.mehiz.mpvkt.preferences.preference.deleteAndGet
 import live.mehiz.mpvkt.presentation.components.ExpandableCard
 import live.mehiz.mpvkt.presentation.components.SliderItem
+import live.mehiz.mpvkt.ui.player.controls.components.sheets.toFixed
 import live.mehiz.mpvkt.ui.theme.spacing
 import me.zhanghai.compose.preference.ProvidePreferenceLocals
 import me.zhanghai.compose.preference.SwitchPreference
@@ -62,9 +64,29 @@ fun SubtitlesMiscellaneousCard(modifier: Modifier = Modifier) {
           },
           { Text(stringResource(R.string.player_sheets_sub_override_ass)) },
         )
+        var subScale by remember {
+          mutableStateOf(MPVLib.getPropertyDouble("sub-scale").toFloat())
+        }
         var subPos by remember {
           mutableStateOf(MPVLib.getPropertyInt("sub-pos"))
         }
+        SliderItem(
+          label = stringResource(R.string.player_sheets_sub_scale),
+          value = subScale,
+          valueText = subScale.toFixed(2).toString(),
+          onChange = {
+            subScale = it
+            preferences.subScale.set(it)
+            MPVLib.setPropertyDouble("sub-scale", it.toDouble())
+          },
+          max = 5f,
+          icon = {
+            Icon(
+              Icons.Default.FormatSize,
+              null,
+            )
+          },
+        )
         SliderItem(
           label = stringResource(R.string.player_sheets_sub_position),
           value = subPos,
@@ -80,19 +102,23 @@ fun SubtitlesMiscellaneousCard(modifier: Modifier = Modifier) {
               Icons.Default.AlignVerticalCenter,
               null,
             )
-          }
+          },
         )
         Row(
           modifier = Modifier
             .fillMaxWidth()
             .padding(end = MaterialTheme.spacing.medium, bottom = MaterialTheme.spacing.medium),
-          horizontalArrangement = Arrangement.End
+          horizontalArrangement = Arrangement.End,
         ) {
           TextButton(
             onClick = {
               preferences.subPos.deleteAndGet().let {
                 subPos = it
                 MPVLib.setPropertyInt("sub-pos", it)
+              }
+              preferences.subScale.deleteAndGet().let {
+                subScale = it
+                MPVLib.setPropertyDouble("sub-scale", it.toDouble())
               }
               preferences.overrideAssSubs.deleteAndGet().let { overrideAssSubs = it }
               MPVLib.setPropertyString("sub-ass-override", "scale") // mpv's default is 'scale'

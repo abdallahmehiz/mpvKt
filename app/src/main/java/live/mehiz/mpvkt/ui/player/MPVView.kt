@@ -246,5 +246,6 @@ class MPVView(context: Context, attributes: AttributeSet) : BaseMPVView(context,
     MPVLib.setOptionString("sub-border-style", subtitlesPreferences.borderStyle.get().value)
     MPVLib.setOptionString("sub-shadow-offset", subtitlesPreferences.shadowOffset.get().toString())
     MPVLib.setOptionString("sub-pos", subtitlesPreferences.subPos.get().toString())
+    MPVLib.setOptionString("sub-scale", subtitlesPreferences.subScale.get().toString())
   }
 }
