@@ -104,6 +104,89 @@
                 <data android:scheme="http" />
                 <data android:scheme="https" />
                 <data android:host="*" />
+
+                <!-- basically copied from mpv-android -->
+                <!-- the duplicate patterns below work around an Android bug: -->
+                <!-- http://stackoverflow.com/questions/3400072/#answer-8599921 -->
+                <data android:pathPattern=".*\\.mkv" />
+                <data android:pathPattern=".*\\..*\\.mkv" />
+                <data android:pathPattern=".*\\..*\\..*\\.mkv" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\.mkv" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\.mkv" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\..*\\.mkv" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\..*\\..*\\.mkv" />
+
+                <data android:pathPattern=".*\\.mp4" />
+                <data android:pathPattern=".*\\..*\\.mp4" />
+                <data android:pathPattern=".*\\..*\\..*\\.mp4" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\.mp4" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\.mp4" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\..*\\.mp4" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\..*\\..*\\.mp4" />
+
+                <data android:pathPattern=".*\\.webm" />
+                <data android:pathPattern=".*\\..*\\.webm" />
+                <data android:pathPattern=".*\\..*\\..*\\.webm" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\.webm" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\.webm" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\..*\\.webm" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\..*\\..*\\.webm" />
+
+                <data android:pathPattern=".*\\.avi" />
+                <data android:pathPattern=".*\\..*\\.avi" />
+                <data android:pathPattern=".*\\..*\\..*\\.avi" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\.avi" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\.avi" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\..*\\.avi" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\..*\\..*\\.avi" />
+
+                <data android:pathPattern=".*\\.mov" />
+                <data android:pathPattern=".*\\..*\\.mov" />
+                <data android:pathPattern=".*\\..*\\..*\\.mov" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\.mov" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\.mov" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\..*\\.mov" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\..*\\..*\\.mov" />
+
+                <data android:pathPattern=".*\\.m4v" />
+                <data android:pathPattern=".*\\..*\\.m4v" />
+                <data android:pathPattern=".*\\..*\\..*\\.m4v" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\.m4v" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\.m4v" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\..*\\.m4v" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\..*\\..*\\.m4v" />
+
+                <data android:pathPattern=".*\\.flac" />
+                <data android:pathPattern=".*\\..*\\.flac" />
+                <data android:pathPattern=".*\\..*\\..*\\.flac" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\.flac" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\.flac" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\..*\\.flac" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\..*\\..*\\.flac" />
+
+                <data android:pathPattern=".*\\.mp3" />
+                <data android:pathPattern=".*\\..*\\.mp3" />
+                <data android:pathPattern=".*\\..*\\..*\\.mp3" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\.mp3" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\.mp3" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\..*\\.mp3" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\..*\\..*\\.mp3" />
+
+                <data android:pathPattern=".*\\.ogg" />
+                <data android:pathPattern=".*\\..*\\.ogg" />
+                <data android:pathPattern=".*\\..*\\..*\\.ogg" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\.ogg" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\.ogg" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\..*\\.ogg" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\..*\\..*\\.ogg" />
+
+                <data android:pathPattern=".*\\.m3u8*" />
+                <data android:pathPattern=".*\\..*\\.m3u8*" />
+                <data android:pathPattern=".*\\..*\\..*\\.m3u8*" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\.m3u8*" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\.m3u8*" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\..*\\.m3u8*" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\..*\\..*\\.m3u8*" />
             </intent-filter>
         </activity>
         <activity android:name=".presentation.crash.CrashActivity" />
