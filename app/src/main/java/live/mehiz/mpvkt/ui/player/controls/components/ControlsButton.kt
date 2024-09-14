@@ -2,6 +2,7 @@ package live.mehiz.mpvkt.ui.player.controls.components
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.indication
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
@@ -24,6 +25,7 @@ import androidx.compose.ui.unit.dp
 import live.mehiz.mpvkt.ui.player.controls.LocalPlayerButtonsClickEvent
 import live.mehiz.mpvkt.ui.theme.spacing
 
+@Suppress("ModifierClickableOrder")
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun ControlsButton(
@@ -39,7 +41,6 @@ fun ControlsButton(
   val clickEvent = LocalPlayerButtonsClickEvent.current
   Box(
     modifier = modifier
-      .clip(CircleShape)
       .combinedClickable(
         onClick = {
           clickEvent()
@@ -47,7 +48,12 @@ fun ControlsButton(
         },
         onLongClick = onLongClick,
         interactionSource = interactionSource,
-        indication = ripple(),
+        indication = null,
+      )
+      .clip(CircleShape)
+      .indication(
+        interactionSource,
+        ripple()
       )
       .padding(MaterialTheme.spacing.medium),
   ) {
@@ -60,6 +66,7 @@ fun ControlsButton(
   }
 }
 
+@Suppress("ModifierClickableOrder")
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun ControlsButton(
@@ -74,7 +81,6 @@ fun ControlsButton(
   val clickEvent = LocalPlayerButtonsClickEvent.current
   Box(
     modifier = modifier
-      .clip(CircleShape)
       .combinedClickable(
         onClick = {
           clickEvent()
@@ -82,7 +88,13 @@ fun ControlsButton(
         },
         onLongClick = onLongClick,
         interactionSource = interactionSource,
-        indication = ripple(),
+        indication = null,
+
+      )
+      .clip(CircleShape)
+      .indication(
+        interactionSource,
+        ripple()
       )
       .padding(MaterialTheme.spacing.medium),
   ) {
