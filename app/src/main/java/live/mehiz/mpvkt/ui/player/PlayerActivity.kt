@@ -524,7 +524,9 @@ class PlayerActivity : AppCompatActivity() {
       player.playbackSpeed = it.playbackSpeed
       MPVLib.setPropertyDouble("audio-delay", audioDelay)
     }
-    player.timePos = if (playerPreferences.savePositionOnQuit.get()) state?.lastPosition ?: 0 else 0
+    if (playerPreferences.savePositionOnQuit.get()) {
+      state?.lastPosition?.let { if (it != 0) player.timePos = it }
+    }
     MPVLib.setPropertyDouble("sub-speed", state?.subSpeed ?: subtitlesPreferences.defaultSubSpeed.get().toDouble())
   }
 
