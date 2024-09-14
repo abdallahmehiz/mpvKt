@@ -13,7 +13,6 @@ import android.media.AudioManager
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
-import android.os.ParcelFileDescriptor
 import android.provider.MediaStore
 import android.util.Log
 import android.util.Rational
@@ -98,6 +97,7 @@ class PlayerActivity : AppCompatActivity() {
     setupMPV()
     setupAudio()
     getPlayableUri(intent)?.let { player.playFile(it) }
+    setIntentExtras(intent.extras)
     setOrientation()
     loadKoinModules(viewModelModule)
 
@@ -114,7 +114,7 @@ class PlayerActivity : AppCompatActivity() {
 
   private fun getPlayableUri(intent: Intent): String? {
     val uri = parsePathFromIntent(intent)
-    return if (uri?.startsWith("content://") == true) openContentFd(Uri.parse(uri)) else uri
+    return if (uri?.startsWith("content://") == true) Uri.parse(uri).openContentFd(this) else uri
   }
 
   override fun onDestroy() {
@@ -320,31 +320,34 @@ class PlayerActivity : AppCompatActivity() {
     viewModel.currentBrightness.update { window.attributes.screenBrightness }
   }
 
-  private fun setupIntents(intent: Intent) {
-    intent.getStringExtra("title")?.let {
+  private fun setIntentExtras(extras: Bundle?) {
+    if (extras == null) return
+
+    extras.getString("title")?.let {
       viewModel.mediaTitle.update { _ -> it }
       MPVLib.setPropertyString("force-media-title", it)
     }
-    player.timePos = intent.getIntExtra("position", 0) / 1000
-  }
+    player.timePos = extras.getInt("position", 0) / 1000
 
-  @Suppress("NestedBlockDepth")
-  private fun parsePathFromIntent(intent: Intent): String? {
-    intent.getStringArrayExtra("headers")?.let { headers ->
+    extras.getStringArray("headers")?.let { headers ->
       if (headers[0].startsWith("User-Agent", true)) MPVLib.setPropertyString("user-agent", headers[1])
       val headersString = headers.asSequence().drop(2).chunked(2).associate { it[0] to it[1] }
         .map { "${it.key}: ${it.value.replace(",", "\\,")}" }.joinToString(",")
       MPVLib.setPropertyString("http-header-fields", headersString)
     }
+  }
+
+  @Suppress("NestedBlockDepth")
+  private fun parsePathFromIntent(intent: Intent): String? {
     return when (intent.action) {
-      Intent.ACTION_VIEW -> intent.data?.let { resolveUri(it) }
+      Intent.ACTION_VIEW -> intent.data?.resolveUri(this)
       Intent.ACTION_SEND -> {
         if (intent.hasExtra(Intent.EXTRA_STREAM)) {
-          resolveUri(intent.getParcelableExtra(Intent.EXTRA_STREAM)!!)
+          intent.getParcelableExtra<Uri>(Intent.EXTRA_STREAM)!!.resolveUri(this)
         } else {
           intent.getStringExtra(Intent.EXTRA_TEXT)?.let {
             val uri = Uri.parse(it.trim())
-            if (uri.isHierarchical && !uri.isRelative) resolveUri(uri) else null
+            if (uri.isHierarchical && !uri.isRelative) uri.resolveUri(this) else null
           }
         }
       }
@@ -366,18 +369,6 @@ class PlayerActivity : AppCompatActivity() {
     return uri?.lastPathSegment?.substringAfterLast("/") ?: uri?.path ?: ""
   }
 
-  private fun resolveUri(data: Uri): String? {
-    val filepath = when {
-      data.scheme == "file" -> data.path
-      data.scheme == "content" -> openContentFd(data)
-      Utils.PROTOCOLS.contains(data.scheme) -> data.toString()
-      else -> null
-    }
-
-    if (filepath == null) Log.e("mpvKt", "unknown scheme: ${data.scheme}")
-    return filepath
-  }
-
   override fun onConfigurationChanged(newConfig: Configuration) {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
       if (!isInPictureInPictureMode) {
@@ -387,31 +378,6 @@ class PlayerActivity : AppCompatActivity() {
       }
     }
     super.onConfigurationChanged(newConfig)
-  }
-
-  @Suppress("ReturnCount")
-  fun openContentFd(uri: Uri): String? {
-    if (uri.scheme != "content") return null
-    val resolver = contentResolver
-    Log.d(TAG, "Resolving content URI: $uri")
-    val fd = try {
-      val desc = resolver.openFileDescriptor(uri, "r")
-      desc!!.detachFd()
-    } catch (e: Exception) {
-      Log.d(TAG, "Failed to open content fd: $e")
-      return null
-    }
-    try {
-      val path = File("/proc/self/fd/$fd").canonicalPath
-      if (!path.startsWith("/proc") && File(path).canRead()) {
-        Log.d(TAG, "Found real file path: $path")
-        ParcelFileDescriptor.adoptFd(fd).close() // we don't need that anymore
-        return path
-      }
-    } catch (_: Exception) {
-    }
-    // Else, pass the fd to mpv
-    return "fdclose://$fd"
   }
 
   // a bunch of observers
@@ -482,6 +448,7 @@ class PlayerActivity : AppCompatActivity() {
     }
   }
 
+  @SuppressLint("NewApi")
   internal fun onObserverEvent(property: String, value: Double) {
     if (player.isExiting) return
     when (property) {
@@ -489,6 +456,7 @@ class PlayerActivity : AppCompatActivity() {
         if (viewModel.sheetShown.value == Sheets.PlaybackSpeed) return
         viewModel.playbackSpeed.update { value.toFloat() }
       }
+      "video-params/aspect" -> if (isPipSupported) createPipParams()
     }
   }
 
@@ -502,7 +470,6 @@ class PlayerActivity : AppCompatActivity() {
         }
         lifecycleScope.launch(Dispatchers.IO) {
           loadVideoPlaybackState(fileName)
-          if (intent.hasExtra("position")) setupIntents(intent)
         }
         setOrientation()
         viewModel.changeVideoAspect(playerPreferences.videoAspect.get())

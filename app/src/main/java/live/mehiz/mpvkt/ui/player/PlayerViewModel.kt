@@ -207,7 +207,7 @@ class PlayerViewModel(
   fun addAudio(uri: Uri) {
     val url = uri.toString()
     val path = if (url.startsWith("content://")) {
-      activity.openContentFd(Uri.parse(url))
+      Uri.parse(url).openContentFd(activity)
     } else {
       url
     } ?: return
@@ -225,7 +225,7 @@ class PlayerViewModel(
   fun addSubtitle(uri: Uri) {
     val url = uri.toString()
     val path = if (url.startsWith("content://")) {
-      activity.openContentFd(Uri.parse(url))
+      Uri.parse(url).openContentFd(activity)
     } else {
       url
     } ?: return
@@ -382,7 +382,6 @@ class PlayerViewModel(
     when (aspect) {
       VideoAspect.Crop -> {
         pan = 1.0
-        playerPreferences.videoAspect.set(VideoAspect.Crop)
       }
 
       VideoAspect.Fit -> {
@@ -401,11 +400,6 @@ class PlayerViewModel(
     MPVLib.setPropertyDouble("video-aspect-override", ratio)
     playerPreferences.videoAspect.set(aspect)
     playerUpdate.update { PlayerUpdates.AspectRatio }
-    runCatching {
-      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-        activity.setPictureInPictureParams(activity.createPipParams())
-      }
-    }
   }
 
   fun cycleScreenRotations() {

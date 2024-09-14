@@ -55,7 +55,7 @@ class MPVView(context: Context, attributes: AttributeSet) : BaseMPVView(context,
 
   var secondarySubDelay: Double?
     get() = MPVLib.getPropertyDouble("secondary-sub-delay")
-    set(delay) = MPVLib.setPropertyDouble("seondary-sub-delay", delay!!)
+    set(delay) = MPVLib.setPropertyDouble("secondary-sub-delay", delay!!)
 
   val videoH: Int?
     get() = MPVLib.getPropertyInt("video-params/h")
@@ -201,6 +201,7 @@ class MPVView(context: Context, attributes: AttributeSet) : BaseMPVView(context,
     "aid" to MPVLib.mpvFormat.MPV_FORMAT_STRING,
 
     "speed" to MPVLib.mpvFormat.MPV_FORMAT_DOUBLE,
+    "video-params/aspect" to MPVLib.mpvFormat.MPV_FORMAT_DOUBLE,
 
     "hwdec-current" to MPVLib.mpvFormat.MPV_FORMAT_STRING,
     "hwdec" to MPVLib.mpvFormat.MPV_FORMAT_STRING,
