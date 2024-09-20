@@ -396,7 +396,10 @@ class PlayerActivity : AppCompatActivity() {
   internal fun onObserverEvent(property: String) {
     if (player.isExiting) return
     when (property) {
-      "chapter-list" -> viewModel.loadChapters()
+      "chapter-list" -> {
+        viewModel.loadChapters()
+        viewModel.updateChapter(0)
+      }
       "track-list" -> viewModel.loadTracks()
     }
   }
