@@ -18,7 +18,6 @@ import live.mehiz.mpvkt.preferences.SubtitlesPreferences
 import live.mehiz.mpvkt.ui.player.controls.components.panels.toColorHexString
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
-import java.io.File
 import kotlin.reflect.KProperty
 
 class MPVView(context: Context, attributes: AttributeSet) : BaseMPVView(context, attributes), KoinComponent {
@@ -129,7 +128,6 @@ class MPVView(context: Context, attributes: AttributeSet) : BaseMPVView(context,
 
     setupSubtitlesOptions()
     setupAudioOptions()
-    File(context.filesDir.path, "mpv.conf").readLines().forEach(::println)
   }
 
   override fun observeProperties() {
