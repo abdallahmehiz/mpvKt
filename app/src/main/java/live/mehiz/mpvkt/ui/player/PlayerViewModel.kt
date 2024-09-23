@@ -4,6 +4,7 @@ import android.content.pm.ActivityInfo
 import android.media.AudioManager
 import android.net.Uri
 import android.os.Build
+import android.provider.Settings
 import android.util.DisplayMetrics
 import android.util.Log
 import android.widget.Toast
@@ -71,7 +72,12 @@ class PlayerViewModel(
   val playerUpdate = MutableStateFlow(PlayerUpdates.None)
   val isBrightnessSliderShown = MutableStateFlow(false)
   val isVolumeSliderShown = MutableStateFlow(false)
-  val currentBrightness = MutableStateFlow(activity.window.attributes.screenBrightness)
+  val currentBrightness = MutableStateFlow(
+    runCatching {
+      Settings.System.getFloat(activity.contentResolver, Settings.System.SCREEN_BRIGHTNESS)
+        .normalize(0f, 255f, 0f, 1f)
+    }.getOrElse { 0f },
+  )
   val currentVolume = MutableStateFlow(activity.audioManager.getStreamVolume(AudioManager.STREAM_MUSIC))
   val currentMPVVolume = MutableStateFlow(MPVLib.getPropertyInt("volume"))
   var volumeBoostCap: Int = MPVLib.getPropertyInt("volume-max")
@@ -431,3 +437,7 @@ data class Track(
   val name: String,
   val language: String?,
 )
+
+fun Float.normalize(inMin: Float, inMax: Float, outMin: Float, outMax: Float): Float {
+  return (this - inMin) * (outMax - outMin) / (inMax - inMin) + outMin
+}

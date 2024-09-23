@@ -317,7 +317,6 @@ class PlayerActivity : AppCompatActivity() {
         if (it < viewModel.maxVolume) viewModel.changeMPVVolumeTo(100)
       }
     }
-    viewModel.currentBrightness.update { window.attributes.screenBrightness }
   }
 
   private fun setIntentExtras(extras: Bundle?) {

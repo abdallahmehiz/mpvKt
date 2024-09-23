@@ -125,6 +125,8 @@ class MPVView(context: Context, attributes: AttributeSet) : BaseMPVView(context,
     }
 
     MPVLib.setOptionString("speed", playerPreferences.defaultSpeed.get().toString())
+    // workaround for <https://github.com/mpv-player/mpv/issues/14651>
+    MPVLib.setOptionString("vd-lavc-film-grain", "cpu")
 
     setupSubtitlesOptions()
     setupAudioOptions()
