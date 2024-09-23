@@ -7,6 +7,7 @@ import android.os.Build
 import android.util.DisplayMetrics
 import android.util.Log
 import android.widget.Toast
+import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dev.vivvvek.seeker.Segment
@@ -286,12 +287,17 @@ class PlayerViewModel(
     _paused.update { false }
   }
 
+  private val showStatusBar = playerPreferences.showSystemStatusBar.get()
   fun showControls() {
     if (sheetShown.value != Sheets.None || panelShown.value != Panels.None) return
+    if (showStatusBar) {
+      activity.windowInsetsController.show(WindowInsetsCompat.Type.statusBars())
+    }
     _controlsShown.update { true }
   }
 
   fun hideControls() {
+    activity.windowInsetsController.hide(WindowInsetsCompat.Type.statusBars())
     _controlsShown.update { false }
   }
 

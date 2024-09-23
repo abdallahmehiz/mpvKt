@@ -200,6 +200,12 @@ object PlayerPreferencesScreen : Screen() {
             title = { Text(stringResource(R.string.pref_player_controls_show_chapter_indicator)) },
             summary = { Text(stringResource(R.string.pref_player_controls_show_chapters_summary)) },
           )
+          val showSystemStatusBar by preferences.showSystemStatusBar.collectAsState()
+          SwitchPreference(
+            value = showSystemStatusBar,
+            onValueChange = preferences.showSystemStatusBar::set,
+            title = { Text(stringResource(R.string.pref_player_controls_show_status_bar)) },
+          )
         }
       }
     }

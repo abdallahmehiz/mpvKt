@@ -66,7 +66,7 @@ class PlayerActivity : AppCompatActivity() {
   private val playerObserver by lazy { PlayerObserver(this) }
   private val mpvKtDatabase: MpvKtDatabase by inject()
   val player by lazy { binding.player }
-  private val windowInsetsController by lazy { WindowCompat.getInsetsController(window, window.decorView) }
+  val windowInsetsController by lazy { WindowCompat.getInsetsController(window, window.decorView) }
   val audioManager by lazy { getSystemService(Context.AUDIO_SERVICE) as AudioManager }
   private val playerPreferences: PlayerPreferences by inject()
   private val audioPreferences: AudioPreferences by inject()
