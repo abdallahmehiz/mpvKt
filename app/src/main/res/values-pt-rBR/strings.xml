@@ -24,7 +24,7 @@
     <string name="pref_appearance_darkmode_light">Claro</string>
     <string name="pref_appearance_darkmode_dark">Escuro</string>
     <string name="pref_appearance_material_you_title">Material You</string>
-    <string name="pref_appearance_material_you_summary">Ativar cores dinâmicas do Material You.</string>
+    <string name="pref_appearance_material_you_summary">Ativa as cores dinâmicas do Material You.</string>
     <string name="pref_appearance_material_you_summary_disabled">Disponível apenas para Android 12 ou superior.</string>
 
     <string name="pref_player">Reprodutor</string>
@@ -34,10 +34,10 @@
     <string name="pref_player_orientation_video">Vídeo</string>
     <string name="pref_player_orientation_portrait">Retrato</string>
     <string name="pref_player_orientation_reverse_portrait">Retrato invertido</string>
-    <string name="pref_player_orientation_sensor_portrait">Sensor de retrato</string>
+    <string name="pref_player_orientation_sensor_portrait">Retrato por sensor</string>
     <string name="pref_player_orientation_landscape">Paisagem</string>
     <string name="pref_player_orientation_reverse_landscape">Paisagem invertida</string>
-    <string name="pref_player_orientation_sensor_landscape">Sensor de paisagem</string>
+    <string name="pref_player_orientation_sensor_landscape">Paisagem por sensor</string>
     <string name="pref_player_draw_over_cutout">Desenhar sobre o recorte da tela</string>
     <string name="pref_player_save_position_on_quit">Salvar posição ao sair</string>
     <string name="pref_player_double_tap_to_pause">Toque duplo para pausar</string>
