@@ -14,7 +14,7 @@ class AudioPreferences(preferenceStore: PreferenceStore) {
 }
 
 enum class AudioChannels(@StringRes val title: Int, val property: String, val value: String) {
-  Auto(R.string.pref_audio_channels_auto, "audio-channels", "audio-safe"),
+  Auto(R.string.pref_audio_channels_auto, "audio-channels", "auto-safe"),
   AutoSafe(R.string.pref_audio_channels_auto_safe, "audio-channels", "auto"),
   Mono(R.string.pref_audio_channels_mono, "audio-channels", "mono"),
   Stereo(R.string.pref_audio_channels_stereo, "audio-channels", "stereo"),
