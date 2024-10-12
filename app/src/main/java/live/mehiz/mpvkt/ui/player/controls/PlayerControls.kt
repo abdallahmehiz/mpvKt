@@ -151,7 +151,7 @@ fun PlayerControls(
         val brightness by viewModel.currentBrightness.collectAsState()
         val volume by viewModel.currentVolume.collectAsState()
         val mpvVolume by viewModel.currentMPVVolume.collectAsState()
-        val displayVolumeOnRight by playerPreferences.displayVolumeOnRight.collectAsState()
+        val swapVolumeAndBrightness by playerPreferences.swapVolumeAndBrightness.collectAsState()
 
         LaunchedEffect(volume, mpvVolume, isVolumeSliderShown) {
           delay(2000)
@@ -163,14 +163,19 @@ fun PlayerControls(
         }
         AnimatedVisibility(
           isBrightnessSliderShown,
-          enter = slideInHorizontally(playerControlsEnterAnimationSpec()) { it } + fadeIn(
+          enter = slideInHorizontally(playerControlsEnterAnimationSpec()) {
+            if (swapVolumeAndBrightness) -it else it
+          } + fadeIn(
             playerControlsEnterAnimationSpec(),
           ),
-          exit = slideOutHorizontally(playerControlsExitAnimationSpec()) { it } + fadeOut(
+          exit = slideOutHorizontally(playerControlsExitAnimationSpec()) {
+            if (swapVolumeAndBrightness) -it else it
+          } + fadeOut(
             playerControlsExitAnimationSpec(),
           ),
           modifier = Modifier.constrainAs(brightnessSlider) {
-            end.linkTo(parent.end, spacing.medium)
+            if (swapVolumeAndBrightness) start.linkTo(parent.start, spacing.medium)
+            else end.linkTo(parent.end, spacing.medium)
             top.linkTo(parent.top)
             bottom.linkTo(parent.bottom)
           },
@@ -179,17 +184,17 @@ fun PlayerControls(
         AnimatedVisibility(
           isVolumeSliderShown,
           enter = slideInHorizontally(playerControlsEnterAnimationSpec()) {
-            if (displayVolumeOnRight) it else -it
+            if (swapVolumeAndBrightness) it else -it
           } + fadeIn(
             playerControlsEnterAnimationSpec(),
           ),
           exit = slideOutHorizontally(playerControlsExitAnimationSpec()) {
-            if (displayVolumeOnRight) it else -it
+            if (swapVolumeAndBrightness) it else -it
           } + fadeOut(
             playerControlsExitAnimationSpec(),
           ),
           modifier = Modifier.constrainAs(volumeSlider) {
-            if (displayVolumeOnRight) start.linkTo(parent.end, -spacing.medium)
+            if (swapVolumeAndBrightness) end.linkTo(parent.end, spacing.medium)
             else start.linkTo(parent.start, spacing.medium)
             top.linkTo(parent.top)
             bottom.linkTo(parent.bottom)
