@@ -151,7 +151,6 @@ fun PlayerControls(
         val brightness by viewModel.currentBrightness.collectAsState()
         val volume by viewModel.currentVolume.collectAsState()
         val mpvVolume by viewModel.currentMPVVolume.collectAsState()
-        val displayVolumeOnRight by playerPreferences.displayVolumeOnRight.collectAsState()
 
         LaunchedEffect(volume, mpvVolume, isVolumeSliderShown) {
           delay(2000)
@@ -178,19 +177,14 @@ fun PlayerControls(
 
         AnimatedVisibility(
           isVolumeSliderShown,
-          enter = slideInHorizontally(playerControlsEnterAnimationSpec()) {
-            if (displayVolumeOnRight) it else -it
-          } + fadeIn(
+          enter = slideInHorizontally(playerControlsEnterAnimationSpec()) { -it } + fadeIn(
             playerControlsEnterAnimationSpec(),
           ),
-          exit = slideOutHorizontally(playerControlsExitAnimationSpec()) {
-            if (displayVolumeOnRight) it else -it
-          } + fadeOut(
+          exit = slideOutHorizontally(playerControlsExitAnimationSpec()) { -it } + fadeOut(
             playerControlsExitAnimationSpec(),
           ),
           modifier = Modifier.constrainAs(volumeSlider) {
-            if (displayVolumeOnRight) start.linkTo(parent.end, -spacing.medium)
-            else start.linkTo(parent.start, spacing.medium)
+            start.linkTo(parent.start, spacing.medium)
             top.linkTo(parent.top)
             bottom.linkTo(parent.bottom)
           },
