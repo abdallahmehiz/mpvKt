@@ -212,6 +212,16 @@ object PlayerPreferencesScreen : Screen() {
             onValueChange = preferences.showSystemStatusBar::set,
             title = { Text(stringResource(R.string.pref_player_controls_show_status_bar)) },
           )
+          val playerTimeToDisappear by preferences.playerTimeToDisappear.collectAsState()
+          ListPreference(
+            value = playerTimeToDisappear,
+            onValueChange = preferences.playerTimeToDisappear::set,
+            values = listOf(500, 1000, 1500, 2000, 2500, 3000, 3500, 4000, 4500, 5000),
+            valueToText = { AnnotatedString("$it ms") },
+            title = { Text(text = stringResource(R.string.hide_player_control_time)) },
+            summary = { Text(text = "$playerTimeToDisappear ms") },
+            enabled = doubleTapToSeek,
+          )
         }
       }
     }

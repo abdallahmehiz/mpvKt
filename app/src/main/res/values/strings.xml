@@ -209,6 +209,7 @@
 
     <string name="github_repo_url" translatable="false">https://github.com/abdallahmehiz/mpvKt</string>
     <string name="swap_the_volume_and_brightness_slider">Swap volume and brightness slider</string>
+    <string name="hide_player_control_time">Hide player control time</string>
 
     <plurals name="plural_items">
         <item quantity="one">%1$d item</item>
