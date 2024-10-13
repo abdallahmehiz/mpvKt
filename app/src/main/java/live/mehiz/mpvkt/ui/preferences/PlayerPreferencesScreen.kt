@@ -216,7 +216,7 @@ object PlayerPreferencesScreen : Screen() {
           SwitchPreference(
             value = reduceMotion,
             onValueChange = preferences.reduceMotion::set,
-            title = { Text("Reduce player controls animation") },
+            title = { Text(stringResource(R.string.reduce_player_animation)) },
           )
         }
       }
