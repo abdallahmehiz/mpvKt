@@ -70,7 +70,7 @@ class PlayerActivity : AppCompatActivity() {
   val player by lazy { binding.player }
   val windowInsetsController by lazy { WindowCompat.getInsetsController(window, window.decorView) }
   val audioManager by lazy { getSystemService(Context.AUDIO_SERVICE) as AudioManager }
-  private lateinit var mediaSession: MediaSession
+  private var mediaSession: MediaSession? = null
   private val playerPreferences: PlayerPreferences by inject()
   private val audioPreferences: AudioPreferences by inject()
   private val subtitlesPreferences: SubtitlesPreferences by inject()
@@ -127,7 +127,7 @@ class PlayerActivity : AppCompatActivity() {
       AudioManagerCompat.abandonAudioFocusRequest(audioManager, it)
     }
     audioFocusRequest = null
-    mediaSession.release()
+    mediaSession?.release()
 
     unloadKoinModules(viewModelModule)
     MPVLib.removeObserver(playerObserver)
@@ -670,36 +670,39 @@ class PlayerActivity : AppCompatActivity() {
   }
 
   private fun setupMediaSession() {
-    mediaSession = MediaSession(this, "PlayerActivity").apply {
-      setCallback(object : MediaSession.Callback() {
-        override fun onPlay() {
-          super.onPlay()
-          viewModel.unpause()
-          window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
-        }
+    val allowHeadsetControl = playerPreferences.allowHeadsetControl.get()
+    if (allowHeadsetControl) {
+      mediaSession = MediaSession(this, "PlayerActivity").apply {
+        setCallback(object : MediaSession.Callback() {
+          override fun onPlay() {
+            super.onPlay()
+            viewModel.unpause()
+            window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+          }
 
-        override fun onPause() {
-          super.onPause()
-          viewModel.pause()
-          window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
-        }
+          override fun onPause() {
+            super.onPause()
+            viewModel.pause()
+            window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+          }
 
-        override fun onStop() {
-          super.onStop()
-          isActive = false
-          this@PlayerActivity.onStop()
-        }
-      })
-      setPlaybackState(
-        PlaybackState.Builder()
-          .setActions(
-            PlaybackState.ACTION_PLAY or
-              PlaybackState.ACTION_PAUSE or
-              PlaybackState.ACTION_STOP
-          )
-          .build()
-      )
-      isActive = true
+          override fun onStop() {
+            super.onStop()
+            isActive = false
+            this@PlayerActivity.onStop()
+          }
+        })
+        setPlaybackState(
+          PlaybackState.Builder()
+            .setActions(
+              PlaybackState.ACTION_PLAY or
+                PlaybackState.ACTION_PAUSE or
+                PlaybackState.ACTION_STOP
+            )
+            .build()
+        )
+        isActive = true
+      }
     }
   }
 }
