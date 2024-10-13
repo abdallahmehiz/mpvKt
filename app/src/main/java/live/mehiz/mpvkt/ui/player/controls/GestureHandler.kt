@@ -91,6 +91,7 @@ fun GestureHandler(modifier: Modifier = Modifier) {
   val doubleSpeedGesture by playerPreferences.holdForDoubleSpeed.collectAsState()
   val brightnessGesture = playerPreferences.brightnessGesture.get()
   val volumeGesture by playerPreferences.volumeGesture.collectAsState()
+  val swapVolumeAndBrightness by playerPreferences.swapVolumeAndBrightness.collectAsState()
   val seekGesture by playerPreferences.horizontalSeekGesture.collectAsState()
   val preciseSeeking by playerPreferences.preciseSeeking.collectAsState()
   val showSeekbarWhenSeeking by playerPreferences.showSeekBarWhenSeeking.collectAsState()
@@ -307,7 +308,11 @@ fun GestureHandler(modifier: Modifier = Modifier) {
           }
           when {
             volumeGesture && brightnessGesture -> {
-              if (change.position.x < size.width / 2) changeBrightness() else changeVolume()
+              if (swapVolumeAndBrightness) {
+                if (change.position.x > size.width / 2) changeBrightness() else changeVolume()
+              } else {
+                if (change.position.x < size.width / 2) changeBrightness() else changeVolume()
+              }
             }
 
             brightnessGesture -> changeBrightness()

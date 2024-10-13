@@ -18,13 +18,13 @@
     <string name="pref_preferences">Preferences</string>
 
     <string name="pref_appearance_title">Appearance</string>
-    <string name="pref_appearance_summary">Dark mode, material you</string>
+    <string name="pref_appearance_summary">Dark mode, Material You</string>
     <string name="pref_appearance_category_theme">Theme</string>
     <string name="pref_appearance_darkmode_system">System</string>
     <string name="pref_appearance_darkmode_light">Light</string>
     <string name="pref_appearance_darkmode_dark">Dark</string>
     <string name="pref_appearance_material_you_title">Material You</string>
-    <string name="pref_appearance_material_you_summary">Enable Material You dynamic colors.</string>
+    <string name="pref_appearance_material_you_summary">Enable Material You dynamic colors</string>
     <string name="pref_appearance_material_you_summary_disabled">Only available for Android 12 and newer.</string>
 
     <string name="pref_player">Player</string>
@@ -55,7 +55,7 @@
     <string name="pref_player_gestures_seek">Horizontal seek gestures</string>
     <string name="pref_player_gestures_brightness">Brightness gestures</string>
     <string name="pref_player_gestures_volume">Volume gestures</string>
-    <string name="pref_player_gestures_hold_for_double_speed">Hold for x2 speed</string>
+    <string name="pref_player_gestures_hold_for_double_speed">Hold for 2x speed</string>
 
     <string name="pref_player_controls">Controls</string>
     <string name="pref_player_controls_allow_gestures_in_panels">Allow gestures in panels</string>
@@ -63,17 +63,17 @@
     <string name="pref_player_controls_show_loading_circle">Show loading circle</string>
     <string name="pref_player_controls_show_chapter_indicator">Show current chapter indicator</string>
     <string name="pref_player_controls_show_chapters_button">Show chapters select button</string>
-    <string name="pref_player_controls_show_chapters_summary">Only appears if the video has chapters.</string>
+    <string name="pref_player_controls_show_chapters_summary">Only appears if the video has chapters</string>
     <string name="pref_player_controls_show_status_bar">Show system status bar with controls</string>
 
     <string name="pref_decoder">Decoder</string>
     <string name="pref_decoder_summary">Hardware decoding, pixel format, debanding</string>
     <string name="pref_decoder_try_hw_dec_title">Try hardware decoding</string>
     <string name="pref_decoder_gpu_next_title">Use gpu-next</string>
-    <string name="pref_decoder_gpu_next_summary">A new rendering backend.</string>
+    <string name="pref_decoder_gpu_next_summary">A new rendering backend</string>
     <string name="pref_decoder_debanding_title">Debanding</string>
     <string name="pref_decoder_yuv420p_title">Use YUV420P pixel format</string>
-    <string name="pref_decoder_yuv420p_summary">May fix black screens on some video codecs, can also improve performance at the cost of quality.</string>
+    <string name="pref_decoder_yuv420p_summary">May fix black screens on some video codecs, can also improve performance at the cost of quality</string>
 
     <string name="pref_subtitles">Subtitles</string>
     <string name="pref_subtitles_summary">Preferred languages, fonts</string>
@@ -84,7 +84,7 @@
     <string name="pref_audio">Audio</string>
     <string name="pref_audio_summary">Preferred languages, audio channels, pitch correction</string>
     <string name="pref_audio_pitch_correction_title">Enable audio pitch correction</string>
-    <string name="pref_audio_pitch_correction_summary">Prevents the audio from becoming high-pitched at faster speeds and low-pitched at slower speeds.</string>
+    <string name="pref_audio_pitch_correction_summary">Prevents the audio from becoming high-pitched at faster speeds and low-pitched at slower speeds</string>
     <string name="pref_audio_channels">Audio channels</string>
     <string name="pref_audio_channels_auto">Auto</string>
     <string name="pref_audio_channels_auto_safe">Auto Safe</string>
@@ -96,7 +96,7 @@
 
     <string name="pref_advanced">Advanced</string>
     <string name="pref_advanced_summary">Configuration location, mpv.conf, input.conf</string>
-    <string name="pref_advanced_mpv_conf_storage_location">pick mpv configuration storage location</string>
+    <string name="pref_advanced_mpv_conf_storage_location">Pick configuration storage location</string>
     <string name="pref_advanced_mpv_conf">Edit mpv.conf</string>
     <string name="pref_advanced_input_conf">Edit input.conf</string>
     <string name="pref_advanced_verbose_logging_title">Verbose logging</string>
@@ -209,6 +209,7 @@
 
     <string name="github_repo_url" translatable="false">https://github.com/abdallahmehiz/mpvKt</string>
     <string name="control_player_with_media_buttons">Control player with media buttons</string>
+    <string name="swap_the_volume_and_brightness_slider">Swap volume and brightness slider</string>
 
     <plurals name="plural_items">
         <item quantity="one">%1$d item</item>
