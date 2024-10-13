@@ -180,6 +180,12 @@ object PlayerPreferencesScreen : Screen() {
             onValueChange = preferences.displayVolumeAsPercentage::set,
             title = { Text(stringResource(R.string.pref_player_controls_display_volume_as_percentage)) },
           )
+          val swapVolumeAndBrightness by preferences.swapVolumeAndBrightness.collectAsState()
+          SwitchPreference(
+            value = swapVolumeAndBrightness,
+            onValueChange = preferences.swapVolumeAndBrightness::set,
+            title = { Text(stringResource(R.string.swap_the_volume_and_brightness_slider)) },
+          )
           val showLoadingCircle by preferences.showLoadingCircle.collectAsState()
           SwitchPreference(
             value = showLoadingCircle,

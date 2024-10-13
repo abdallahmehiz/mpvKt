@@ -208,6 +208,7 @@
     <string name="value_percentage_float" translatable="false">%.2f\%%</string>
 
     <string name="github_repo_url" translatable="false">https://github.com/abdallahmehiz/mpvKt</string>
+    <string name="swap_the_volume_and_brightness_slider">Swap volume and brightness slider</string>
 
     <plurals name="plural_items">
         <item quantity="one">%1$d item</item>
