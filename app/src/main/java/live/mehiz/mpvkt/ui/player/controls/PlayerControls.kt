@@ -174,8 +174,11 @@ fun PlayerControls(
             playerControlsExitAnimationSpec(),
           ),
           modifier = Modifier.constrainAs(brightnessSlider) {
-            if (swapVolumeAndBrightness) start.linkTo(parent.start, spacing.medium)
-            else end.linkTo(parent.end, spacing.medium)
+            if (swapVolumeAndBrightness) {
+              start.linkTo(parent.start, spacing.medium)
+            } else {
+              end.linkTo(parent.end, spacing.medium)
+            }
             top.linkTo(parent.top)
             bottom.linkTo(parent.bottom)
           },
@@ -194,8 +197,11 @@ fun PlayerControls(
             playerControlsExitAnimationSpec(),
           ),
           modifier = Modifier.constrainAs(volumeSlider) {
-            if (swapVolumeAndBrightness) end.linkTo(parent.end, spacing.medium)
-            else start.linkTo(parent.start, spacing.medium)
+            if (swapVolumeAndBrightness) {
+              end.linkTo(parent.end, spacing.medium)
+            } else {
+              start.linkTo(parent.start, spacing.medium)
+            }
             top.linkTo(parent.top)
             bottom.linkTo(parent.bottom)
           },
