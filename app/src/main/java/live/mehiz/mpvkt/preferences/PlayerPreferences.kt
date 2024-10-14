@@ -45,4 +45,5 @@ class PlayerPreferences(
 
   val allowGesturesInPanels = preferenceStore.getBoolean("allow_gestures_in_panels")
   val showSystemStatusBar = preferenceStore.getBoolean("show_system_status_bar")
+  val reduceMotion = preferenceStore.getBoolean("reduce_motion")
 }
