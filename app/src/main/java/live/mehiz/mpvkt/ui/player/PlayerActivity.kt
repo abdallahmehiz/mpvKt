@@ -92,6 +92,16 @@ class PlayerActivity : AppCompatActivity() {
   }
   private var pipReceiver: BroadcastReceiver? = null
 
+  private val noisyReceiver = object : BroadcastReceiver() {
+    var initialized = false
+    override fun onReceive(context: Context?, intent: Intent?) {
+      if (intent?.action == AudioManager.ACTION_AUDIO_BECOMING_NOISY) {
+        viewModel.pause()
+        window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+      }
+    }
+  }
+
   override fun onCreate(savedInstanceState: Bundle?) {
     enableEdgeToEdge()
     super.onCreate(savedInstanceState)
@@ -99,11 +109,11 @@ class PlayerActivity : AppCompatActivity() {
 
     setupMPV()
     setupAudio()
+    setupMediaSession()
     getPlayableUri(intent)?.let { player.playFile(it) }
     setIntentExtras(intent.extras)
     setOrientation()
     loadKoinModules(viewModelModule)
-    setupMediaSession()
 
     binding.controls.setContent {
       MpvKtTheme {
@@ -128,6 +138,10 @@ class PlayerActivity : AppCompatActivity() {
     }
     audioFocusRequest = null
     mediaSession?.release()
+    if (noisyReceiver.initialized) {
+      unregisterReceiver(noisyReceiver)
+      noisyReceiver.initialized = false
+    }
 
     unloadKoinModules(viewModelModule)
     MPVLib.removeObserver(playerObserver)
@@ -703,6 +717,10 @@ class PlayerActivity : AppCompatActivity() {
         )
         isActive = true
       }
+
+      val filter = IntentFilter().apply { addAction(AudioManager.ACTION_AUDIO_BECOMING_NOISY) }
+      registerReceiver(noisyReceiver, filter)
+      noisyReceiver.initialized = true
     }
   }
 }
