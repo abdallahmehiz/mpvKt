@@ -89,7 +89,7 @@ fun SubtitleSettingsTypographyCard(
           fileManager.isFile(it) && fileManager.getName(it).lowercase().matches(".*\\.[ot]tf$".toRegex())
         }.mapNotNull {
           runCatching { TTFFile.open(fileManager.getInputStream(it)!!).families.values.first() }.getOrNull()
-        },
+        }.distinct(),
       )
       fontsLoadingIndicator = null
     }
