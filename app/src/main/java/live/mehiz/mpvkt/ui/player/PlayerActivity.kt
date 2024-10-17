@@ -10,6 +10,8 @@ import android.content.pm.ActivityInfo
 import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.media.AudioManager
+import android.media.session.MediaSession
+import android.media.session.PlaybackState
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -68,6 +70,7 @@ class PlayerActivity : AppCompatActivity() {
   val player by lazy { binding.player }
   val windowInsetsController by lazy { WindowCompat.getInsetsController(window, window.decorView) }
   val audioManager by lazy { getSystemService(Context.AUDIO_SERVICE) as AudioManager }
+  private var mediaSession: MediaSession? = null
   private val playerPreferences: PlayerPreferences by inject()
   private val audioPreferences: AudioPreferences by inject()
   private val subtitlesPreferences: SubtitlesPreferences by inject()
@@ -89,6 +92,16 @@ class PlayerActivity : AppCompatActivity() {
   }
   private var pipReceiver: BroadcastReceiver? = null
 
+  private val noisyReceiver = object : BroadcastReceiver() {
+    var initialized = false
+    override fun onReceive(context: Context?, intent: Intent?) {
+      if (intent?.action == AudioManager.ACTION_AUDIO_BECOMING_NOISY) {
+        viewModel.pause()
+        window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+      }
+    }
+  }
+
   override fun onCreate(savedInstanceState: Bundle?) {
     enableEdgeToEdge()
     super.onCreate(savedInstanceState)
@@ -96,6 +109,7 @@ class PlayerActivity : AppCompatActivity() {
 
     setupMPV()
     setupAudio()
+    setupMediaSession()
     getPlayableUri(intent)?.let { player.playFile(it) }
     setIntentExtras(intent.extras)
     setOrientation()
@@ -123,6 +137,11 @@ class PlayerActivity : AppCompatActivity() {
       AudioManagerCompat.abandonAudioFocusRequest(audioManager, it)
     }
     audioFocusRequest = null
+    mediaSession?.release()
+    if (noisyReceiver.initialized) {
+      unregisterReceiver(noisyReceiver)
+      noisyReceiver.initialized = false
+    }
 
     unloadKoinModules(viewModelModule)
     MPVLib.removeObserver(playerObserver)
@@ -662,6 +681,47 @@ class PlayerActivity : AppCompatActivity() {
   override fun onKeyUp(keyCode: Int, event: KeyEvent?): Boolean {
     if (player.onKey(event!!)) return true
     return super.onKeyUp(keyCode, event)
+  }
+
+  private fun setupMediaSession() {
+    val allowHeadsetControl = playerPreferences.allowHeadsetControl.get()
+    if (allowHeadsetControl) {
+      mediaSession = MediaSession(this, "PlayerActivity").apply {
+        setCallback(object : MediaSession.Callback() {
+          override fun onPlay() {
+            super.onPlay()
+            viewModel.unpause()
+            window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+          }
+
+          override fun onPause() {
+            super.onPause()
+            viewModel.pause()
+            window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+          }
+
+          override fun onStop() {
+            super.onStop()
+            isActive = false
+            this@PlayerActivity.onStop()
+          }
+        })
+        setPlaybackState(
+          PlaybackState.Builder()
+            .setActions(
+              PlaybackState.ACTION_PLAY or
+                PlaybackState.ACTION_PAUSE or
+                PlaybackState.ACTION_STOP
+            )
+            .build()
+        )
+        isActive = true
+      }
+
+      val filter = IntentFilter().apply { addAction(AudioManager.ACTION_AUDIO_BECOMING_NOISY) }
+      registerReceiver(noisyReceiver, filter)
+      noisyReceiver.initialized = true
+    }
   }
 }
 

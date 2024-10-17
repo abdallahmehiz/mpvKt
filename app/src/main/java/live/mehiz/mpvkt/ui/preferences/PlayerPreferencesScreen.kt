@@ -221,6 +221,11 @@ object PlayerPreferencesScreen : Screen() {
             title = { Text(text = stringResource(R.string.hide_player_control_time)) },
             summary = { Text(text = "$playerTimeToDisappear ms") },
             enabled = doubleTapToSeek,
+          val allowHeadsetControl by preferences.allowHeadsetControl.collectAsState()
+          SwitchPreference(
+            value = allowHeadsetControl,
+            onValueChange = preferences.allowHeadsetControl::set,
+            title = { Text(stringResource(R.string.control_player_with_media_buttons)) },
           )
         }
       }

@@ -1,7 +1,12 @@
 name: Build
 
 on:
+  pull_request:
   push:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
 
 jobs:
   build:
@@ -22,4 +27,4 @@ jobs:
         run: chmod +x ./gradlew
 
       - name: Build with Gradle
-        run: ./gradlew detekt assembleDebug
+        run: ./gradlew detekt assembleRelease
