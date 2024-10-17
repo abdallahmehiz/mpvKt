@@ -99,6 +99,7 @@ fun PlayerControls(
   val gestureSeekAmount by viewModel.gestureSeekAmount.collectAsState()
   var isSeeking by remember { mutableStateOf(false) }
   var resetControls by remember { mutableStateOf(true) }
+  val playerTimeToDisappear by playerPreferences.playerTimeToDisappear.collectAsState()
   LaunchedEffect(
     controlsShown,
     paused,
@@ -106,7 +107,7 @@ fun PlayerControls(
     resetControls,
   ) {
     if (controlsShown && !paused && !isSeeking) {
-      delay(4_000)
+      delay(playerTimeToDisappear.toLong())
       viewModel.hideControls()
     }
   }
