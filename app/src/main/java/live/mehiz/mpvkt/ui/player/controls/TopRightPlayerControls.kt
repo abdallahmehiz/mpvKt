@@ -13,6 +13,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import kotlinx.coroutines.flow.update
 import live.mehiz.mpvkt.preferences.PlayerPreferences
+import live.mehiz.mpvkt.ui.player.Panels
 import live.mehiz.mpvkt.ui.player.PlayerViewModel
 import live.mehiz.mpvkt.ui.player.Sheets
 import live.mehiz.mpvkt.ui.player.controls.components.ControlsButton
@@ -41,14 +42,17 @@ fun TopRightPlayerControls(modifier: Modifier = Modifier) {
     ControlsButton(
       Icons.Default.Subtitles,
       onClick = { viewModel.sheetShown.update { Sheets.SubtitleTracks } },
+      onLongClick = { viewModel.panelShown.update { Panels.SubtitleSettings } },
     )
     ControlsButton(
       Icons.Default.Audiotrack,
       onClick = { viewModel.sheetShown.update { Sheets.AudioTracks } },
+      onLongClick = { viewModel.panelShown.update { Panels.AudioDelay } },
     )
     ControlsButton(
       Icons.Default.MoreVert,
       onClick = { viewModel.sheetShown.update { Sheets.More } },
+      onLongClick = { viewModel.panelShown.update { Panels.VideoFilters } },
     )
   }
 }
