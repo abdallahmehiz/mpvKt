@@ -115,6 +115,7 @@
     <string name="pref_about_app_version">App version</string>
     <string name="pref_about_app_version_formatted" translatable="false">%s %s</string>
     <string name="pref_about_oss_libraries">Open source libraries</string>
+    <string name="pref_about_privacy_policy">Privacy policy</string>
 
     <string name="player_sheets_add_ext_sub">Add external subtitles</string>
     <string name="player_sheets_add_ext_audio">Add external audio tracks</string>
@@ -208,8 +209,11 @@
     <string name="value_percentage_float" translatable="false">%.2f\%%</string>
 
     <string name="github_repo_url" translatable="false">https://github.com/abdallahmehiz/mpvKt</string>
+    <string name="privacy_policy_url" translatable="false">https://abdallahmehiz.github.io/mpvKt/privacy_policy.html</string>
+    <string name="control_player_with_media_buttons">Control player with media buttons</string>
     <string name="swap_the_volume_and_brightness_slider">Swap volume and brightness slider</string>
     <string name="reduce_player_animation">Reduce player animation</string>
+    <string name="hide_player_control_time">Hide player control time</string>
 
     <plurals name="plural_items">
         <item quantity="one">%1$d item</item>

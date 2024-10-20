@@ -93,7 +93,7 @@ object AboutScreen : Screen() {
                   id = R.string.pref_about_app_version_formatted,
                   BuildConfig.BUILD_TYPE.replaceFirstChar { it.uppercaseChar() },
                   BuildConfig.VERSION_NAME,
-                )
+                ),
               )
             },
             onClick = {
@@ -104,6 +104,17 @@ object AboutScreen : Screen() {
           Preference(
             title = { Text(text = stringResource(id = R.string.pref_about_oss_libraries)) },
             onClick = { navigator.push(LibrariesScreen) },
+          )
+          Preference(
+            title = { Text(text = stringResource(id = R.string.pref_about_privacy_policy)) },
+            onClick = {
+              context.startActivity(
+                Intent(
+                  Intent.ACTION_VIEW,
+                  Uri.parse(context.getString(R.string.privacy_policy_url)),
+                ),
+              )
+            },
           )
         }
         Row(
@@ -133,15 +144,9 @@ object LibrariesScreen : Screen() {
     Scaffold(
       topBar = {
         TopAppBar(
-          title = {
-            Text(text = stringResource(R.string.pref_about_oss_libraries))
-          },
+          title = { Text(text = stringResource(R.string.pref_about_oss_libraries)) },
           navigationIcon = {
-            IconButton(
-              onClick = {
-                navigator.pop()
-              },
-            ) {
+            IconButton(onClick = navigator::pop) {
               Icon(imageVector = Icons.AutoMirrored.Default.ArrowBack, contentDescription = null)
             }
           },

@@ -102,6 +102,7 @@ fun PlayerControls(
   val gestureSeekAmount by viewModel.gestureSeekAmount.collectAsState()
   var isSeeking by remember { mutableStateOf(false) }
   var resetControls by remember { mutableStateOf(true) }
+  val playerTimeToDisappear by playerPreferences.playerTimeToDisappear.collectAsState()
   LaunchedEffect(
     controlsShown,
     paused,
@@ -109,7 +110,7 @@ fun PlayerControls(
     resetControls,
   ) {
     if (controlsShown && !paused && !isSeeking) {
-      delay(4_000)
+      delay(playerTimeToDisappear.toLong())
       viewModel.hideControls()
     }
   }
@@ -180,8 +181,11 @@ fun PlayerControls(
           )
           else fadeOut(playerControlsExitAnimationSpec()),
           modifier = Modifier.constrainAs(brightnessSlider) {
-            if (swapVolumeAndBrightness) start.linkTo(parent.start, spacing.medium)
-            else end.linkTo(parent.end, spacing.medium)
+            if (swapVolumeAndBrightness) {
+              start.linkTo(parent.start, spacing.medium)
+            } else {
+              end.linkTo(parent.end, spacing.medium)
+            }
             top.linkTo(parent.top)
             bottom.linkTo(parent.bottom)
           },
@@ -202,8 +206,11 @@ fun PlayerControls(
           )
           else fadeOut(playerControlsExitAnimationSpec()),
           modifier = Modifier.constrainAs(volumeSlider) {
-            if (swapVolumeAndBrightness) end.linkTo(parent.end, spacing.medium)
-            else start.linkTo(parent.start, spacing.medium)
+            if (swapVolumeAndBrightness) {
+              end.linkTo(parent.end, spacing.medium)
+            } else {
+              start.linkTo(parent.start, spacing.medium)
+            }
             top.linkTo(parent.top)
             bottom.linkTo(parent.bottom)
           },

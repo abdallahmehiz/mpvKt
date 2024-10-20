@@ -217,6 +217,21 @@ object PlayerPreferencesScreen : Screen() {
             value = reduceMotion,
             onValueChange = preferences.reduceMotion::set,
             title = { Text(stringResource(R.string.reduce_player_animation)) },
+          val playerTimeToDisappear by preferences.playerTimeToDisappear.collectAsState()
+          ListPreference(
+            value = playerTimeToDisappear,
+            onValueChange = preferences.playerTimeToDisappear::set,
+            values = listOf(500, 1000, 1500, 2000, 2500, 3000, 3500, 4000, 4500, 5000),
+            valueToText = { AnnotatedString("$it ms") },
+            title = { Text(text = stringResource(R.string.hide_player_control_time)) },
+            summary = { Text(text = "$playerTimeToDisappear ms") },
+            enabled = doubleTapToSeek,
+          )
+          val allowHeadsetControl by preferences.allowHeadsetControl.collectAsState()
+          SwitchPreference(
+            value = allowHeadsetControl,
+            onValueChange = preferences.allowHeadsetControl::set,
+            title = { Text(stringResource(R.string.control_player_with_media_buttons)) },
           )
         }
       }
