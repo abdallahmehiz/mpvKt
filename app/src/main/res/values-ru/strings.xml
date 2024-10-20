@@ -16,13 +16,13 @@
     <string name="pref_preferences">Предпочтения</string>
 
     <string name="pref_appearance_title">Внешний вид</string>
-    <string name="pref_appearance_summary">Тёмный режим, material you</string>
+    <string name="pref_appearance_summary">Тёмный режим, Material You</string>
     <string name="pref_appearance_category_theme">Тема</string>
     <string name="pref_appearance_darkmode_system">Система</string>
     <string name="pref_appearance_darkmode_light">Светлая</string>
     <string name="pref_appearance_darkmode_dark">Тёмная</string>
     <string name="pref_appearance_material_you_title">Material You</string>
-    <string name="pref_appearance_material_you_summary">Включить динамические цвета Material You.</string>
+    <string name="pref_appearance_material_you_summary">Включить динамические цвета Material You</string>
     <string name="pref_appearance_material_you_summary_disabled">Доступно только для Android 12 и новее.</string>
 
     <string name="pref_player">Плеер</string>
@@ -53,7 +53,7 @@
     <string name="pref_player_gestures_seek">Жесты горизонтальной перемотки</string>
     <string name="pref_player_gestures_brightness">Жесты яркости</string>
     <string name="pref_player_gestures_volume">Жесты громкости</string>
-    <string name="pref_player_gestures_hold_for_double_speed">Удерживать для x2 скорости</string>
+    <string name="pref_player_gestures_hold_for_double_speed">Удерживать для 2x скорости</string>
 
     <string name="pref_player_controls">Элементы управления</string>
     <string name="pref_player_controls_allow_gestures_in_panels">Разрешить жесты на панелях</string>
@@ -61,17 +61,17 @@
     <string name="pref_player_controls_show_loading_circle">Показывать круг загрузки</string>
     <string name="pref_player_controls_show_chapter_indicator">Показывать индикатор текущей главы</string>
     <string name="pref_player_controls_show_chapters_button">Показывать кнопку выбора глав</string>
-    <string name="pref_player_controls_show_chapters_summary">Появляется только если в видео есть главы.</string>
+    <string name="pref_player_controls_show_chapters_summary">Появляется только если в видео есть главы</string>
     <string name="pref_player_controls_show_status_bar">Показывать строку состояния системы с элементами управления</string>
 
     <string name="pref_decoder">Декодер</string>
     <string name="pref_decoder_summary">Аппаратное декодирование, формат пикселя, дебандинг</string>
     <string name="pref_decoder_try_hw_dec_title">Пробывать аппаратное декодирование</string>
     <string name="pref_decoder_gpu_next_title">Использовать gpu-next</string>
-    <string name="pref_decoder_gpu_next_summary">Новый движок рендеринга.</string>
+    <string name="pref_decoder_gpu_next_summary">Новый движок рендеринга</string>
     <string name="pref_decoder_debanding_title">Дебандинг</string>
     <string name="pref_decoder_yuv420p_title">Использовать YUV420P формат пикселя</string>
-    <string name="pref_decoder_yuv420p_summary">Может исправить чёрные экраны на некоторых видеокодеках, а также повысить производительность за счёт снижения качества.</string>
+    <string name="pref_decoder_yuv420p_summary">Может исправить чёрные экраны на некоторых видеокодеках, а также повысить производительность за счёт снижения качества</string>
 
     <string name="pref_subtitles">Субтитры</string>
     <string name="pref_subtitles_summary">Предпочитаемые языки, шрифты</string>
@@ -82,7 +82,7 @@
     <string name="pref_audio">Аудио</string>
     <string name="pref_audio_summary">Предпочитаемые языки, аудиоканалы, коррекция высоты</string>
     <string name="pref_audio_pitch_correction_title">Включить коррекцию высоты звука</string>
-    <string name="pref_audio_pitch_correction_summary">Предотвращает появление высоких тонов на высоких скоростях и низких тонов на низких скоростях.</string>
+    <string name="pref_audio_pitch_correction_summary">Предотвращает появление высоких тонов на высоких скоростях и низких тонов на низких скоростях</string>
     <string name="pref_audio_channels">Аудиоканалы</string>
     <string name="pref_audio_channels_auto">Авто</string>
     <string name="pref_audio_channels_auto_safe">Авто безопасный</string>
@@ -94,7 +94,7 @@
     
     <string name="pref_advanced">Дополнительно</string>
     <string name="pref_advanced_summary">Местоположение конфигурации, mpv.conf, input.conf</string>
-    <string name="pref_advanced_mpv_conf_storage_location">выбрать место хранения конфигурации mpv</string>
+    <string name="pref_advanced_mpv_conf_storage_location">выбрать место хранения конфигурации</string>
     <string name="pref_advanced_mpv_conf">Править mpv.conf</string>
     <string name="pref_advanced_input_conf">Править input.conf</string>
     <string name="pref_advanced_verbose_logging_title">Подробное журналирование</string>
@@ -111,8 +111,8 @@
     <string name="pref_about_title">О приложении</string>
     <string name="pref_about_summary">Благодарности, лицензии</string>
     <string name="pref_about_app_version">Версия приложения</string>
-
     <string name="pref_about_oss_libraries">Библиотеки с открытым исходным кодом</string>
+    <string name="pref_about_privacy_policy">Политика конфиденциальности</string>
 
     <string name="player_sheets_add_ext_sub">Добавить внешние субтитры</string>
     <string name="player_sheets_add_ext_audio">Добавить внешние аудиодорожки</string>
@@ -190,6 +190,10 @@
     <string name="timer_picker_pick_time">Выберите время</string>
 
     <string name="toast_sleep_timer_ended">Таймер сна закончился</string>
+    <string name="control_player_with_media_buttons">Управлять плеером с помощью кнопок мультимедиа</string>
+    <string name="swap_the_volume_and_brightness_slider">Поменять местами панель громкости и яркости</string>
+    <string name="reduce_player_animation">Уменьшить анимацию плеера</string>
+    <string name="hide_player_control_time">Время скрытия управления плеера</string>
 
     <plurals name="plural_items">
         <item quantity="one">%1$d элемент</item>
