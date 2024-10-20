@@ -217,6 +217,7 @@ object PlayerPreferencesScreen : Screen() {
             value = reduceMotion,
             onValueChange = preferences.reduceMotion::set,
             title = { Text(stringResource(R.string.reduce_player_animation)) },
+          )
           val playerTimeToDisappear by preferences.playerTimeToDisappear.collectAsState()
           ListPreference(
             value = playerTimeToDisappear,
