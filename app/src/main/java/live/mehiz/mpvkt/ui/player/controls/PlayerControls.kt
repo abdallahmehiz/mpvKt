@@ -1,5 +1,8 @@
 package live.mehiz.mpvkt.ui.player.controls
 
+import android.R.attr.bottom
+import android.R.attr.end
+import android.R.attr.top
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.FiniteAnimationSpec
@@ -153,6 +156,7 @@ fun PlayerControls(
         val volume by viewModel.currentVolume.collectAsState()
         val mpvVolume by viewModel.currentMPVVolume.collectAsState()
         val swapVolumeAndBrightness by playerPreferences.swapVolumeAndBrightness.collectAsState()
+        val reduceMotion by playerPreferences.reduceMotion.collectAsState()
 
         LaunchedEffect(volume, mpvVolume, isVolumeSliderShown) {
           delay(2000)
@@ -164,16 +168,28 @@ fun PlayerControls(
         }
         AnimatedVisibility(
           isBrightnessSliderShown,
-          enter = slideInHorizontally(playerControlsEnterAnimationSpec()) {
-            if (swapVolumeAndBrightness) -it else it
-          } + fadeIn(
-            playerControlsEnterAnimationSpec(),
-          ),
-          exit = slideOutHorizontally(playerControlsExitAnimationSpec()) {
-            if (swapVolumeAndBrightness) -it else it
-          } + fadeOut(
-            playerControlsExitAnimationSpec(),
-          ),
+          enter =
+          if (!reduceMotion) {
+            slideInHorizontally(playerControlsEnterAnimationSpec()) {
+              if (swapVolumeAndBrightness) -it else it
+            } +
+              fadeIn(
+                playerControlsEnterAnimationSpec(),
+              )
+          } else {
+            fadeIn(playerControlsEnterAnimationSpec())
+          },
+          exit =
+          if (!reduceMotion) {
+            slideOutHorizontally(playerControlsExitAnimationSpec()) {
+              if (swapVolumeAndBrightness) -it else it
+            } +
+              fadeOut(
+                playerControlsExitAnimationSpec(),
+              )
+          } else {
+            fadeOut(playerControlsExitAnimationSpec())
+          },
           modifier = Modifier.constrainAs(brightnessSlider) {
             if (swapVolumeAndBrightness) {
               start.linkTo(parent.start, spacing.medium)
@@ -187,16 +203,28 @@ fun PlayerControls(
 
         AnimatedVisibility(
           isVolumeSliderShown,
-          enter = slideInHorizontally(playerControlsEnterAnimationSpec()) {
-            if (swapVolumeAndBrightness) it else -it
-          } + fadeIn(
-            playerControlsEnterAnimationSpec(),
-          ),
-          exit = slideOutHorizontally(playerControlsExitAnimationSpec()) {
-            if (swapVolumeAndBrightness) it else -it
-          } + fadeOut(
-            playerControlsExitAnimationSpec(),
-          ),
+          enter =
+          if (!reduceMotion) {
+            slideInHorizontally(playerControlsEnterAnimationSpec()) {
+              if (swapVolumeAndBrightness) it else -it
+            } +
+              fadeIn(
+                playerControlsEnterAnimationSpec(),
+              )
+          } else {
+            fadeIn(playerControlsEnterAnimationSpec())
+          },
+          exit =
+          if (!reduceMotion) {
+            slideOutHorizontally(playerControlsExitAnimationSpec()) {
+              if (swapVolumeAndBrightness) it else -it
+            } +
+              fadeOut(
+                playerControlsExitAnimationSpec(),
+              )
+          } else {
+            fadeOut(playerControlsExitAnimationSpec())
+          },
           modifier = Modifier.constrainAs(volumeSlider) {
             if (swapVolumeAndBrightness) {
               end.linkTo(parent.end, spacing.medium)
@@ -305,10 +333,18 @@ fun PlayerControls(
         }
         AnimatedVisibility(
           visible = (controlsShown || seekBarShown) && !areControlsLocked,
-          enter = slideInVertically(playerControlsEnterAnimationSpec()) { it } +
-            fadeIn(playerControlsEnterAnimationSpec()),
-          exit = slideOutVertically(playerControlsExitAnimationSpec()) { it } +
-            fadeOut(playerControlsExitAnimationSpec()),
+          enter = if (!reduceMotion) {
+            slideInVertically(playerControlsEnterAnimationSpec()) { it } +
+              fadeIn(playerControlsEnterAnimationSpec())
+          } else {
+            fadeIn(playerControlsEnterAnimationSpec())
+          },
+          exit = if (!reduceMotion) {
+            slideOutVertically(playerControlsExitAnimationSpec()) { it } +
+              fadeOut(playerControlsExitAnimationSpec())
+          } else {
+            fadeOut(playerControlsExitAnimationSpec())
+          },
           modifier = Modifier.constrainAs(seekbar) {
             bottom.linkTo(parent.bottom, spacing.medium)
           },
@@ -334,10 +370,18 @@ fun PlayerControls(
         }
         AnimatedVisibility(
           controlsShown && !areControlsLocked,
-          enter = slideInHorizontally(playerControlsEnterAnimationSpec()) { -it } +
-            fadeIn(playerControlsEnterAnimationSpec()),
-          exit = slideOutHorizontally(playerControlsExitAnimationSpec()) { -it } +
-            fadeOut(playerControlsExitAnimationSpec()),
+          enter = if (!reduceMotion) {
+            slideInHorizontally(playerControlsEnterAnimationSpec()) { -it } +
+              fadeIn(playerControlsEnterAnimationSpec())
+          } else {
+            fadeIn(playerControlsEnterAnimationSpec())
+          },
+          exit = if (!reduceMotion) {
+            slideOutHorizontally(playerControlsExitAnimationSpec()) { -it } +
+              fadeOut(playerControlsExitAnimationSpec())
+          } else {
+            fadeOut(playerControlsExitAnimationSpec())
+          },
           modifier = Modifier.constrainAs(topLeftControls) {
             top.linkTo(parent.top, spacing.medium)
             start.linkTo(parent.start)
@@ -348,10 +392,18 @@ fun PlayerControls(
         // Top right controls
         AnimatedVisibility(
           controlsShown && !areControlsLocked,
-          enter = slideInHorizontally(playerControlsEnterAnimationSpec()) { it } +
-            fadeIn(playerControlsEnterAnimationSpec()),
-          exit = slideOutHorizontally(playerControlsExitAnimationSpec()) { it } +
-            fadeOut(playerControlsExitAnimationSpec()),
+          enter = if (!reduceMotion) {
+            slideInHorizontally(playerControlsEnterAnimationSpec()) { it } +
+              fadeIn(playerControlsEnterAnimationSpec())
+          } else {
+            fadeIn(playerControlsEnterAnimationSpec())
+          },
+          exit = if (!reduceMotion) {
+            slideOutHorizontally(playerControlsExitAnimationSpec()) { it } +
+              fadeOut(playerControlsExitAnimationSpec())
+          } else {
+            fadeOut(playerControlsExitAnimationSpec())
+          },
           modifier = Modifier.constrainAs(topRightControls) {
             top.linkTo(parent.top, spacing.medium)
             end.linkTo(parent.end)
@@ -360,10 +412,18 @@ fun PlayerControls(
         // Bottom right controls
         AnimatedVisibility(
           controlsShown && !areControlsLocked,
-          enter = slideInHorizontally(playerControlsEnterAnimationSpec()) { it } +
-            fadeIn(playerControlsEnterAnimationSpec()),
-          exit = slideOutHorizontally(playerControlsExitAnimationSpec()) { it } +
-            fadeOut(playerControlsExitAnimationSpec()),
+          enter = if (!reduceMotion) {
+            slideInHorizontally(playerControlsEnterAnimationSpec()) { it } +
+              fadeIn(playerControlsEnterAnimationSpec())
+          } else {
+            fadeIn(playerControlsEnterAnimationSpec())
+          },
+          exit = if (!reduceMotion) {
+            slideOutHorizontally(playerControlsExitAnimationSpec()) { it } +
+              fadeOut(playerControlsExitAnimationSpec())
+          } else {
+            fadeOut(playerControlsExitAnimationSpec())
+          },
           modifier = Modifier.constrainAs(bottomRightControls) {
             bottom.linkTo(seekbar.top)
             end.linkTo(seekbar.end)
@@ -372,10 +432,18 @@ fun PlayerControls(
         // Bottom left controls
         AnimatedVisibility(
           controlsShown && !areControlsLocked,
-          enter = slideInHorizontally(playerControlsEnterAnimationSpec()) { -it } +
-            fadeIn(playerControlsEnterAnimationSpec()),
-          exit = slideOutHorizontally(playerControlsExitAnimationSpec()) { -it } +
-            fadeOut(playerControlsExitAnimationSpec()),
+          enter = if (!reduceMotion) {
+            slideInHorizontally(playerControlsEnterAnimationSpec()) { -it } +
+              fadeIn(playerControlsEnterAnimationSpec())
+          } else {
+            fadeIn(playerControlsEnterAnimationSpec())
+          },
+          exit = if (!reduceMotion) {
+            slideOutHorizontally(playerControlsExitAnimationSpec()) { -it } +
+              fadeOut(playerControlsExitAnimationSpec())
+          } else {
+            fadeOut(playerControlsExitAnimationSpec())
+          },
           modifier = Modifier.constrainAs(bottomLeftControls) {
             bottom.linkTo(seekbar.top)
             start.linkTo(seekbar.start)

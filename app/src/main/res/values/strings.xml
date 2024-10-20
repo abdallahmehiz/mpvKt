@@ -212,6 +212,7 @@
     <string name="privacy_policy_url" translatable="false">https://abdallahmehiz.github.io/mpvKt/privacy_policy.html</string>
     <string name="control_player_with_media_buttons">Control player with media buttons</string>
     <string name="swap_the_volume_and_brightness_slider">Swap volume and brightness slider</string>
+    <string name="reduce_player_animation">Reduce player animation</string>
     <string name="hide_player_control_time">Hide player control time</string>
 
     <plurals name="plural_items">

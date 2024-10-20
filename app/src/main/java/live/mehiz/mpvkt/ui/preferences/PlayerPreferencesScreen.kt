@@ -212,6 +212,12 @@ object PlayerPreferencesScreen : Screen() {
             onValueChange = preferences.showSystemStatusBar::set,
             title = { Text(stringResource(R.string.pref_player_controls_show_status_bar)) },
           )
+          val reduceMotion by preferences.reduceMotion.collectAsState()
+          SwitchPreference(
+            value = reduceMotion,
+            onValueChange = preferences.reduceMotion::set,
+            title = { Text(stringResource(R.string.reduce_player_animation)) },
+          )
           val playerTimeToDisappear by preferences.playerTimeToDisappear.collectAsState()
           ListPreference(
             value = playerTimeToDisappear,
