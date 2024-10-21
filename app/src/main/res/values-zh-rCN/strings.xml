@@ -6,6 +6,7 @@
     <string name="generic_cancel">取消</string>
     <string name="generic_ok">OK</string>
     <string name="generic_unit_ms">ms</string>
+    <string name="generic_disabled">禁用</string>
     <string name="home_pick_file">选择文件</string>
     <string name="home_open_file_picker">打开文件选择器</string>
     <string name="home_open_url">打开 URL</string>
@@ -38,8 +39,10 @@
     <string name="pref_player_double_tap_to_seek">双击跳转</string>
     <string name="pref_player_double_tap_seek_duration">双击跳转时长</string>
     <string name="pref_player_show_seekbar_when_seeking">在跳转时显示进度条</string>
+    <string name="pref_player_precise_seeking_summary">跳转到精确的位置而非关键帧（慢）</string>
     <string name="pref_player_automatically_enter_pip">自动切换到画中画</string>
     <string name="pref_player_close_after_eof">播放结束后关闭</string>
+    <string name="pref_player_remember_brightness">记住屏幕亮度</string>
     <string name="pref_player_gestures">手势</string>
     <string name="pref_player_gestures_seek">水平跳转手势</string>
     <string name="pref_player_gestures_brightness">亮度调整手势</string>
@@ -47,9 +50,11 @@
     <string name="pref_player_gestures_hold_for_double_speed">长按二倍速</string>
     <string name="pref_player_controls">控制</string>
     <string name="pref_player_controls_allow_gestures_in_panels">允许在面板中使用手势</string>
+    <string name="pref_player_controls_show_loading_circle">显示加载动画</string>
     <string name="pref_player_controls_show_chapter_indicator">显示当前章节指示器</string>
     <string name="pref_player_controls_show_chapters_button">显示章节选择按钮</string>
     <string name="pref_player_controls_show_chapters_summary">只会在章节存在时显示</string>
+    <string name="pref_player_controls_show_status_bar">与控制栏一起显示系统状态栏</string>
     <string name="pref_decoder">解码器</string>
     <string name="pref_decoder_summary">硬件解码，像素格式，去色带</string>
     <string name="pref_decoder_try_hw_dec_title">尝试硬件解码</string>
@@ -74,9 +79,10 @@
     <string name="pref_audio_channels_stereo">双声道</string>
     <string name="pref_audio_channels_stereo_reversed">双声道（反转）</string>
     <string name="pref_audio_preferred_language">在具有多个音频流的视频中，默认选择的音频语言。支持两位或三位字母的语言代码。多个值可以用逗号分隔。</string>
+    <string name="pref_audio_volume_boost_cap">音量增强限制</string>
     <string name="pref_advanced">高级</string>
     <string name="pref_advanced_summary">配置文件位置，mpv.conf，input.conf</string>
-    <string name="pref_advanced_mpv_conf_storage_location">选择 mpv 配置文件存储位置</string>
+    <string name="pref_advanced_mpv_conf_storage_location">选择配置文件存储位置</string>
     <string name="pref_advanced_mpv_conf">编辑 mpv.conf</string>
     <string name="pref_advanced_input_conf">编辑 input.conf</string>
     <string name="pref_advanced_verbose_logging_title">详细日志</string>
@@ -93,6 +99,7 @@
     <string name="pref_about_summary">致谢，许可协议</string>
     <string name="pref_about_app_version">应用版本</string>
     <string name="pref_about_oss_libraries">开源库</string>
+    <string name="pref_about_privacy_policy">隐私协议</string>
     <string name="player_sheets_add_ext_sub">添加外部字幕</string>
     <string name="player_sheets_add_ext_audio">添加外部音轨</string>
     <string name="player_sheets_tracks_off">无</string>
@@ -101,11 +108,13 @@
     <string name="player_sheets_subtitles_color_text">文本</string>
     <string name="player_sheets_subtitles_color_border">边框</string>
     <string name="player_sheets_subtitles_color_background">背景</string>
+    <string name="player_sheets_subtitles_shadow_offset">阴影偏移</string>
     <string name="player_sheets_sub_color_red">红</string>
     <string name="player_sheets_sub_color_green">绿</string>
     <string name="player_sheets_sub_color_blue">蓝</string>
     <string name="player_sheets_sub_color_alpha">透明度</string>
     <string name="player_sheets_sub_override_ass">覆盖 ASS/SSA 字幕</string>
+    <string name="player_sheets_sub_scale">缩放</string>
     <string name="player_sheets_sub_position">位置</string>
     <string name="player_sheets_sub_typography_card_title">排版</string>
     <string name="player_sheets_sub_typography_font">字体</string>
@@ -120,8 +129,10 @@
     <string name="player_sheets_sub_delay_subtitle_type_primary">主要</string>
     <string name="player_sheets_sub_delay_subtitle_type_secondary">次要</string>
     <string name="player_sheets_sub_delay_subtitle_type_primary_and_secondary">两者</string>
+    <string name="player_sheets_sub_delay_subtitle_text_seen">已看到字幕</string>
     <string name="player_sheets_delay_set_as_default">设为默认</string>
     <string name="player_sheets_audio_delay_card_title">音频延迟</string>
+    <string name="player_sheets_sub_delay_sound_sound_spotted">已看到声音对应的画面</string>
     <string name="player_sheets_filters_title">滤镜</string>
     <string name="player_sheets_filters_brightness">亮度</string>
     <string name="player_sheets_filters_contrast">对比度</string>
@@ -131,6 +142,7 @@
     <string name="player_sheets_filters_warning">某些滤镜可能在当前的视频驱动程序上无法正常工作</string>
     <string name="player_sheets_speed_slider_label">速度</string>
     <string name="player_sheets_speed_make_default">设为默认速度</string>
+    <string name="player_sheets_decoder_formatted">%s (%s)</string>
     <string name="numeric_chooser_value_too_big">数值过大</string>
     <string name="numeric_chooser_value_too_small">数值过小</string>
     <string name="player_sheets_more_title">更多</string>
@@ -148,4 +160,17 @@
     <string name="timer_picker_enter_timer">输入时间</string>
     <string name="timer_picker_pick_time">选择时间</string>
     <string name="toast_sleep_timer_ended">睡眠定时器结束</string>
+    <string name="pref_player_seeking_title">跳转</string>
+    <string name="pref_player_precise_seeking_title">精确跳转</string>
+    <string name="pref_player_controls_display_volume_as_percentage">将音量显示为百分比</string>
+    <string name="player_sheets_subtitles_border_style">边框样式</string>
+    <string name="player_sheets_subtitles_border_style_outline_and_shadow">描边与阴影</string>
+    <string name="player_sheets_subtitles_border_style_opaque_box">不透明框</string>
+    <string name="player_sheets_subtitles_border_style_background_box">背景框</string>
+    <string name="player_sheets_sub_delay_subtitle_voice_heard">已听到语音</string>
+    <string name="player_sheets_sub_delay_audio_sound_heard">已听到声音</string>
+    <string name="control_player_with_media_buttons">使用媒体按钮控制播放器</string>
+    <string name="swap_the_volume_and_brightness_slider">交换音量与亮度手势</string>
+    <string name="reduce_player_animation">减少播放器动画</string>
+    <string name="hide_player_control_time">播放器控制栏隐藏超时</string>
 </resources>
