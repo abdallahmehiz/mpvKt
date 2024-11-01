@@ -616,8 +616,8 @@ class PlayerActivity : AppCompatActivity() {
         when (intent.getIntExtra(PIP_INTENT_ACTION, 0)) {
           PIP_PAUSE -> viewModel.pause()
           PIP_PLAY -> viewModel.unpause()
-          PIP_FF -> viewModel.seekBy(playerPreferences.doubleTapToSeekDuration.get())
-          PIP_FR -> viewModel.seekBy(-playerPreferences.doubleTapToSeekDuration.get())
+          PIP_FF -> viewModel.handleRightDoubleTap()
+          PIP_FR -> viewModel.handleLeftDoubleTap()
         }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
           setPictureInPictureParams(createPipParams())
@@ -660,14 +660,13 @@ class PlayerActivity : AppCompatActivity() {
         viewModel.changeVolumeBy(-1)
         viewModel.displayVolumeSlider()
       }
-      KeyEvent.KEYCODE_DPAD_RIGHT -> viewModel.seekBy(playerPreferences.doubleTapToSeekDuration.get())
-      KeyEvent.KEYCODE_DPAD_LEFT -> viewModel.seekBy(-playerPreferences.doubleTapToSeekDuration.get())
+      KeyEvent.KEYCODE_DPAD_RIGHT -> viewModel.handleLeftDoubleTap()
+      KeyEvent.KEYCODE_DPAD_LEFT -> viewModel.handleRightDoubleTap()
       KeyEvent.KEYCODE_SPACE -> viewModel.pauseUnpause()
       KeyEvent.KEYCODE_MEDIA_STOP -> finishAndRemoveTask()
 
-      // They don't have a seek animation cause that's in GestureHandler.kt :despair:
-      KeyEvent.KEYCODE_MEDIA_REWIND -> viewModel.seekBy(-playerPreferences.doubleTapToSeekDuration.get())
-      KeyEvent.KEYCODE_MEDIA_FAST_FORWARD -> viewModel.seekBy(playerPreferences.doubleTapToSeekDuration.get())
+      KeyEvent.KEYCODE_MEDIA_REWIND -> viewModel.handleLeftDoubleTap()
+      KeyEvent.KEYCODE_MEDIA_FAST_FORWARD -> viewModel.handleRightDoubleTap()
 
       // other keys should be bound by the user in input.conf ig
       else -> {

@@ -22,6 +22,19 @@ enum class VideoAspect(@StringRes val titleRes: Int) {
   Stretch(R.string.player_aspect_stretch),
 }
 
+enum class DoubleTapGesture(@StringRes val titleRes: Int) {
+  None(R.string.pref_gesture_double_tap_none),
+  Seek(R.string.pref_gesture_double_tap_seek),
+  PlayPause(R.string.pref_gesture_double_tap_play),
+  Custom(R.string.pref_gesture_double_tap_custom),
+}
+
+enum class CustomKeyCodes(val keyCode: String) {
+  Left("0x10001"),
+  Center("0x10002"),
+  Right("0x10003"),
+}
+
 enum class Decoder(val title: String, val value: String) {
   AutoCopy("Auto", "auto-copy"),
   Auto("Auto", "auto"),

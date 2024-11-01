@@ -25,8 +25,6 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -68,9 +66,9 @@ fun GestureHandler(modifier: Modifier = Modifier) {
   val position by viewModel.pos.collectAsState()
   val controlsShown by viewModel.controlsShown.collectAsState()
   val areControlsLocked by viewModel.areControlsLocked.collectAsState()
-  var seekAmount by remember { mutableIntStateOf(0) }
-  var isSeekingForwards by remember { mutableStateOf(true) }
-  var targetAlpha by remember { mutableFloatStateOf(0f) }
+  val seekAmount by viewModel.doubleTapSeekAmount.collectAsState()
+  val isSeekingForwards by viewModel.isSeekingForwards.collectAsState()
+  val targetAlpha by viewModel.targetAlpha.collectAsState()
   val alpha by animateFloatAsState(
     targetAlpha,
     animationSpec = tween(300),
@@ -78,16 +76,13 @@ fun GestureHandler(modifier: Modifier = Modifier) {
   )
   LaunchedEffect(seekAmount) {
     delay(600)
-    targetAlpha = 0f
+    viewModel.updateTargetAlpha(0f)
     delay(200)
-    seekAmount = 0
+    viewModel.updateSeekAmount(0)
     delay(100)
     viewModel.hideSeekBar()
   }
   val interactionSource = remember { MutableInteractionSource() }
-  val doubleTapToPause by playerPreferences.doubleTapToPause.collectAsState()
-  val doubleTapToSeek by playerPreferences.doubleTapToSeek.collectAsState()
-  val doubleTapToSeekDuration by playerPreferences.doubleTapToSeekDuration.collectAsState()
   val doubleSpeedGesture by playerPreferences.holdForDoubleSpeed.collectAsState()
   val brightnessGesture = playerPreferences.brightnessGesture.get()
   val volumeGesture by playerPreferences.volumeGesture.collectAsState()
@@ -95,27 +90,25 @@ fun GestureHandler(modifier: Modifier = Modifier) {
   val seekGesture by playerPreferences.horizontalSeekGesture.collectAsState()
   val preciseSeeking by playerPreferences.preciseSeeking.collectAsState()
   val showSeekbarWhenSeeking by playerPreferences.showSeekBarWhenSeeking.collectAsState()
-  val doubleTapSeek: (Offset, IntSize) -> Unit = { offset, size ->
-    targetAlpha = 0.2f
-    val isForward = offset.x > 3 * size.width / 5
-    if (isForward != isSeekingForwards) seekAmount = 0
-    isSeekingForwards = isForward
-    seekAmount += if (isSeekingForwards && position < duration) {
-      doubleTapToSeekDuration
-    } else if (!isSeekingForwards && position > 0) {
-      -doubleTapToSeekDuration
-    } else {
-      0
-    }
-    viewModel.seekBy(if (isSeekingForwards) doubleTapToSeekDuration else -doubleTapToSeekDuration)
-    if (showSeekbarWhenSeeking) viewModel.showSeekBar()
-  }
   var isLongPressing by remember { mutableStateOf(false) }
   val currentVolume by viewModel.currentVolume.collectAsState()
   val currentMPVVolume by viewModel.currentMPVVolume.collectAsState()
   val currentBrightness by viewModel.currentBrightness.collectAsState()
   val volumeBoostingCap = audioPreferences.volumeBoostCap.get()
   val haptics = LocalHapticFeedback.current
+
+  fun handleDoubleTap(offset: Offset, intSize: IntSize) {
+    if (offset.x > intSize.width * 3 / 5) {
+      if (!isSeekingForwards) viewModel.updateSeekAmount(0)
+      viewModel.handleRightDoubleTap()
+    } else if (offset.x < intSize.width * 2 / 5) {
+      if (isSeekingForwards) viewModel.updateSeekAmount(0)
+      viewModel.handleLeftDoubleTap()
+    } else {
+      viewModel.handleCenterDoubleTap()
+    }
+  }
+
   Box(
     modifier = modifier.fillMaxSize(),
     contentAlignment = if (isSeekingForwards) Alignment.CenterEnd else Alignment.CenterStart,
@@ -169,17 +162,7 @@ fun GestureHandler(modifier: Modifier = Modifier) {
             }
           },
           onDoubleTap = {
-            if (areControlsLocked) return@detectTapGestures
-            if (!doubleTapToSeek && doubleTapToPause) {
-              viewModel.pauseUnpause()
-              return@detectTapGestures
-            }
-            // divided by 2 fifths
-            if (doubleTapToSeek && (it.x > size.width * 3 / 5 || it.x < size.width * 2 / 5)) {
-              doubleTapSeek(it, size)
-            } else if (doubleTapToPause) {
-              viewModel.pauseUnpause()
-            }
+            handleDoubleTap(it, size)
           },
           onPress = {
             if (panelShown != Panels.None && !allowGesturesInPanels) {

@@ -20,6 +20,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import live.mehiz.mpvkt.R
+import live.mehiz.mpvkt.preferences.GesturePreferences
 import live.mehiz.mpvkt.preferences.PlayerPreferences
 import org.koin.java.KoinJavaComponent.inject
 
@@ -28,6 +29,7 @@ class PlayerViewModel(
   private val activity: PlayerActivity,
 ) : ViewModel() {
   private val playerPreferences: PlayerPreferences by inject(PlayerPreferences::class.java)
+  private val gesturePreferences: GesturePreferences by inject(GesturePreferences::class.java)
 
   private val _currentDecoder = MutableStateFlow(getDecoderFromValue(MPVLib.getPropertyString("hwdec")))
   val currentDecoder = _currentDecoder.asStateFlow()
@@ -87,6 +89,13 @@ class PlayerViewModel(
 
   // Pair(startingPosition, seekAmount)
   val gestureSeekAmount = MutableStateFlow<Pair<Int, Int>?>(null)
+
+  private val _doubleTapSeekAmount = MutableStateFlow(0)
+  val doubleTapSeekAmount = _doubleTapSeekAmount.asStateFlow()
+  private val _isSeekingForwards = MutableStateFlow(false)
+  val isSeekingForwards = _isSeekingForwards.asStateFlow()
+  private val _targetAlpha = MutableStateFlow(0f)
+  val targetAlpha = _targetAlpha.asStateFlow()
 
   private var timerJob: Job? = null
   private val _remainingTime = MutableStateFlow(0)
@@ -428,6 +437,71 @@ class PlayerViewModel(
         playerPreferences.orientation.set(PlayerOrientation.SensorLandscape)
         ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
       }
+    }
+  }
+
+  private val doubleTapToSeekDuration = gesturePreferences.doubleTapToSeekDuration.get()
+
+  fun updateSeekAmount(amount: Int) {
+    _doubleTapSeekAmount.update { _ -> amount }
+  }
+
+  fun updateTargetAlpha(target: Float) {
+    _targetAlpha.update { _ -> target }
+  }
+
+  fun handleLeftDoubleTap() {
+    when (gesturePreferences.leftDoubleTapGesture.get()) {
+      DoubleTapGesture.Seek -> {
+        _targetAlpha.update { _ -> 0.2f }
+        if (pos.value > 0) {
+          _doubleTapSeekAmount.value -= doubleTapToSeekDuration
+        }
+        _isSeekingForwards.value = false
+        seekBy(-doubleTapToSeekDuration)
+        if (playerPreferences.showSeekBarWhenSeeking.get()) showSeekBar()
+      }
+      DoubleTapGesture.PlayPause -> {
+        pauseUnpause()
+      }
+      DoubleTapGesture.Custom -> {
+        MPVLib.command(arrayOf("keypress", CustomKeyCodes.Left.keyCode))
+      }
+      DoubleTapGesture.None -> {}
+    }
+  }
+
+  fun handleCenterDoubleTap() {
+    when (gesturePreferences.centerDoubleTapGesture.get()) {
+      DoubleTapGesture.PlayPause -> {
+        pauseUnpause()
+      }
+      DoubleTapGesture.Custom -> {
+        MPVLib.command(arrayOf("keypress", CustomKeyCodes.Center.keyCode))
+      }
+      DoubleTapGesture.Seek -> {}
+      DoubleTapGesture.None -> {}
+    }
+  }
+
+  fun handleRightDoubleTap() {
+    when (gesturePreferences.rightDoubleTapGesture.get()) {
+      DoubleTapGesture.Seek -> {
+        _targetAlpha.update { _ -> 0.2f }
+        if (pos.value < duration.value) {
+          _doubleTapSeekAmount.value += doubleTapToSeekDuration
+        }
+        _isSeekingForwards.value = true
+        seekBy(doubleTapToSeekDuration)
+        if (playerPreferences.showSeekBarWhenSeeking.get()) showSeekBar()
+      }
+      DoubleTapGesture.PlayPause -> {
+        pauseUnpause()
+      }
+      DoubleTapGesture.Custom -> {
+        MPVLib.command(arrayOf("keypress", CustomKeyCodes.Right.keyCode))
+      }
+      DoubleTapGesture.None -> {}
     }
   }
 }
