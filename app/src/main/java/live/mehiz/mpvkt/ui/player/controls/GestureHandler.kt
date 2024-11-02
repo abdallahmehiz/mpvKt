@@ -25,27 +25,28 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalHapticFeedback
-import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.viewinterop.AndroidView
 import `is`.xyz.mpv.MPVLib
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.update
 import live.mehiz.mpvkt.preferences.AudioPreferences
+import live.mehiz.mpvkt.preferences.GesturePreferences
 import live.mehiz.mpvkt.preferences.PlayerPreferences
 import live.mehiz.mpvkt.preferences.preference.collectAsState
 import live.mehiz.mpvkt.presentation.components.LeftSideOvalShape
 import live.mehiz.mpvkt.presentation.components.RightSideOvalShape
+import live.mehiz.mpvkt.ui.player.DoubleTapGesture
 import live.mehiz.mpvkt.ui.player.Panels
 import live.mehiz.mpvkt.ui.player.PlayerUpdates
 import live.mehiz.mpvkt.ui.player.PlayerViewModel
@@ -60,6 +61,7 @@ fun GestureHandler(modifier: Modifier = Modifier) {
   val viewModel = koinInject<PlayerViewModel>()
   val playerPreferences = koinInject<PlayerPreferences>()
   val audioPreferences = koinInject<AudioPreferences>()
+  val gesturePreferences = koinInject<GesturePreferences>()
   val panelShown by viewModel.panelShown.collectAsState()
   val allowGesturesInPanels by playerPreferences.allowGesturesInPanels.collectAsState()
   val duration by viewModel.duration.collectAsState()
@@ -68,7 +70,7 @@ fun GestureHandler(modifier: Modifier = Modifier) {
   val areControlsLocked by viewModel.areControlsLocked.collectAsState()
   val seekAmount by viewModel.doubleTapSeekAmount.collectAsState()
   val isSeekingForwards by viewModel.isSeekingForwards.collectAsState()
-  val targetAlpha by viewModel.targetAlpha.collectAsState()
+  var targetAlpha by remember { mutableFloatStateOf(0f) }
   val alpha by animateFloatAsState(
     targetAlpha,
     animationSpec = tween(300),
@@ -76,7 +78,7 @@ fun GestureHandler(modifier: Modifier = Modifier) {
   )
   LaunchedEffect(seekAmount) {
     delay(600)
-    viewModel.updateTargetAlpha(0f)
+    targetAlpha = 0f
     delay(200)
     viewModel.updateSeekAmount(0)
     delay(100)
@@ -96,18 +98,6 @@ fun GestureHandler(modifier: Modifier = Modifier) {
   val currentBrightness by viewModel.currentBrightness.collectAsState()
   val volumeBoostingCap = audioPreferences.volumeBoostCap.get()
   val haptics = LocalHapticFeedback.current
-
-  fun handleDoubleTap(offset: Offset, intSize: IntSize) {
-    if (offset.x > intSize.width * 3 / 5) {
-      if (!isSeekingForwards) viewModel.updateSeekAmount(0)
-      viewModel.handleRightDoubleTap()
-    } else if (offset.x < intSize.width * 2 / 5) {
-      if (isSeekingForwards) viewModel.updateSeekAmount(0)
-      viewModel.handleLeftDoubleTap()
-    } else {
-      viewModel.handleCenterDoubleTap()
-    }
-  }
 
   Box(
     modifier = modifier.fillMaxSize(),
@@ -162,7 +152,17 @@ fun GestureHandler(modifier: Modifier = Modifier) {
             }
           },
           onDoubleTap = {
-            handleDoubleTap(it, size)
+            if (it.x > size.width * 3 / 5) {
+              if (!isSeekingForwards) viewModel.updateSeekAmount(0)
+              if (gesturePreferences.rightDoubleTapGesture.get() == DoubleTapGesture.Seek) targetAlpha = 0.2f
+              viewModel.handleRightDoubleTap()
+            } else if (it.x < size.width * 2 / 5) {
+              if (isSeekingForwards) viewModel.updateSeekAmount(0)
+              if (gesturePreferences.leftDoubleTapGesture.get() == DoubleTapGesture.Seek) targetAlpha = 0.2f
+              viewModel.handleLeftDoubleTap()
+            } else {
+              viewModel.handleCenterDoubleTap()
+            }
           },
           onPress = {
             if (panelShown != Panels.None && !allowGesturesInPanels) {

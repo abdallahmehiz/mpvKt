@@ -94,8 +94,6 @@ class PlayerViewModel(
   val doubleTapSeekAmount = _doubleTapSeekAmount.asStateFlow()
   private val _isSeekingForwards = MutableStateFlow(false)
   val isSeekingForwards = _isSeekingForwards.asStateFlow()
-  private val _targetAlpha = MutableStateFlow(0f)
-  val targetAlpha = _targetAlpha.asStateFlow()
 
   private var timerJob: Job? = null
   private val _remainingTime = MutableStateFlow(0)
@@ -446,14 +444,9 @@ class PlayerViewModel(
     _doubleTapSeekAmount.update { _ -> amount }
   }
 
-  fun updateTargetAlpha(target: Float) {
-    _targetAlpha.update { _ -> target }
-  }
-
   fun handleLeftDoubleTap() {
     when (gesturePreferences.leftDoubleTapGesture.get()) {
       DoubleTapGesture.Seek -> {
-        _targetAlpha.update { _ -> 0.2f }
         if (pos.value > 0) {
           _doubleTapSeekAmount.value -= doubleTapToSeekDuration
         }
@@ -487,7 +480,6 @@ class PlayerViewModel(
   fun handleRightDoubleTap() {
     when (gesturePreferences.rightDoubleTapGesture.get()) {
       DoubleTapGesture.Seek -> {
-        _targetAlpha.update { _ -> 0.2f }
         if (pos.value < duration.value) {
           _doubleTapSeekAmount.value += doubleTapToSeekDuration
         }
