@@ -4,6 +4,8 @@ import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -47,6 +49,7 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import `is`.xyz.mpv.MPVLib
 import live.mehiz.mpvkt.R
+import live.mehiz.mpvkt.database.entities.CustomButtonEntity
 import live.mehiz.mpvkt.preferences.AdvancedPreferences
 import live.mehiz.mpvkt.preferences.AudioChannels
 import live.mehiz.mpvkt.preferences.AudioPreferences
@@ -55,17 +58,21 @@ import live.mehiz.mpvkt.presentation.components.PlayerSheet
 import live.mehiz.mpvkt.ui.player.PlayerViewModel
 import live.mehiz.mpvkt.ui.theme.spacing
 import org.koin.compose.koinInject
+import java.io.File
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun MoreSheet(
   onDismissRequest: () -> Unit,
   onEnterFiltersPanel: () -> Unit,
+  customButtons: List<CustomButtonEntity>,
   modifier: Modifier = Modifier,
 ) {
   val viewModel = koinInject<PlayerViewModel>()
   val advancedPreferences = koinInject<AdvancedPreferences>()
   val audioPreferences = koinInject<AudioPreferences>()
   val statisticsPage by advancedPreferences.enabledStatisticsPage.collectAsState()
+
   PlayerSheet(
     onDismissRequest,
     modifier,
@@ -140,6 +147,29 @@ fun MoreSheet(
             },
             selected = statisticsPage == page,
           )
+        }
+      }
+      if (customButtons.isNotEmpty()) {
+        Text(text = stringResource(id = R.string.player_sheets_custom_buttons_title))
+        FlowRow(
+          verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.small),
+          horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.smaller),
+          maxItemsInEachRow = Int.MAX_VALUE,
+        ) {
+          customButtons.forEach { button ->
+            FilterChip(
+              onClick = {
+                val tempFile = File.createTempFile("script", ".lua").apply {
+                  writeText(button.content)
+                  deleteOnExit()
+                }
+
+                MPVLib.command(arrayOf("load-script", tempFile.absolutePath))
+              },
+              label = { Text(text = button.title) },
+              selected = false,
+            )
+          }
         }
       }
       Text(text = stringResource(id = R.string.pref_audio_channels))

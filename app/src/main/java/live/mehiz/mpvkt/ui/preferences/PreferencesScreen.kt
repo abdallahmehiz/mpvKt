@@ -12,6 +12,7 @@ import androidx.compose.material.icons.outlined.Memory
 import androidx.compose.material.icons.outlined.Palette
 import androidx.compose.material.icons.outlined.PlayCircle
 import androidx.compose.material.icons.outlined.Subtitles
+import androidx.compose.material.icons.outlined.Terminal
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -25,6 +26,7 @@ import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import live.mehiz.mpvkt.R
 import live.mehiz.mpvkt.presentation.Screen
+import live.mehiz.mpvkt.ui.custombuttons.CustomButtonsScreen
 import me.zhanghai.compose.preference.ProvidePreferenceLocals
 import me.zhanghai.compose.preference.preference
 
@@ -92,6 +94,13 @@ object PreferencesScreen : Screen() {
             summary = { Text(text = stringResource(id = R.string.pref_advanced_summary)) },
             icon = { Icon(Icons.Outlined.Code, null) },
             onClick = { navigator.push(AdvancedPreferencesScreen) }
+          )
+          preference(
+            key = "customButtons",
+            title = { Text(text = stringResource(id = R.string.pref_custom_buttons_title)) },
+            summary = { Text(text = stringResource(id = R.string.pref_custom_buttons_summary)) },
+            icon = { Icon(Icons.Outlined.Terminal, null) },
+            onClick = { navigator.push(CustomButtonsScreen) },
           )
           preference(
             key = "about",

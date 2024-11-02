@@ -7,6 +7,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.flow.update
+import live.mehiz.mpvkt.ui.custombuttons.getButtons
 import live.mehiz.mpvkt.ui.player.Panels
 import live.mehiz.mpvkt.ui.player.PlayerViewModel
 import live.mehiz.mpvkt.ui.player.Sheets
@@ -26,6 +27,8 @@ fun PlayerSheets() {
   val audioTracks by viewModel.audioTracks.collectAsState()
   val selectedAudio by viewModel.selectedAudio.collectAsState()
   val sheetShown by viewModel.sheetShown.collectAsState()
+  val buttons by viewModel.customButtons.collectAsState()
+
   val onDismissRequest: () -> Unit = {
     viewModel.sheetShown.update { Sheets.None }
     viewModel.showControls()
@@ -106,7 +109,8 @@ fun PlayerSheets() {
         onEnterFiltersPanel = {
           viewModel.panelShown.update { Panels.VideoFilters }
           onDismissRequest()
-        }
+        },
+        customButtons = buttons.getButtons(),
       )
     }
 

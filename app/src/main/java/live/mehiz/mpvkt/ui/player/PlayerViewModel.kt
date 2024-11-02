@@ -13,14 +13,19 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dev.vivvvek.seeker.Segment
 import `is`.xyz.mpv.MPVLib
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import live.mehiz.mpvkt.R
+import live.mehiz.mpvkt.database.MpvKtDatabase
 import live.mehiz.mpvkt.preferences.PlayerPreferences
+import live.mehiz.mpvkt.ui.custombuttons.CustomButtonsUiState
 import org.koin.java.KoinJavaComponent.inject
 
 @Suppress("TooManyFunctions")
@@ -28,6 +33,28 @@ class PlayerViewModel(
   private val activity: PlayerActivity,
 ) : ViewModel() {
   private val playerPreferences: PlayerPreferences by inject(PlayerPreferences::class.java)
+  private val mpvKtDatabase: MpvKtDatabase by inject(MpvKtDatabase::class.java)
+
+  private val _customButtons = MutableStateFlow<CustomButtonsUiState>(CustomButtonsUiState.Loading)
+  val customButtons = _customButtons.asStateFlow()
+
+  init {
+    viewModelScope.launch(Dispatchers.IO) {
+      try {
+        mpvKtDatabase.customButtonDao().getCustomButtons()
+          .catch { e ->
+            Log.e(TAG, e.message ?: "Unable to fetch buttons")
+            _customButtons.update { _ -> CustomButtonsUiState.Error(e.message ?: "Unable to fetch buttons") }
+          }
+          .collectLatest { buttons ->
+            _customButtons.update { _ -> CustomButtonsUiState.Success(buttons) }
+          }
+      } catch (e: Exception) {
+        Log.e(TAG, e.message ?: "Unable to fetch buttons")
+        _customButtons.update { _ -> CustomButtonsUiState.Error(e.message ?: "Unable to fetch buttons") }
+      }
+    }
+  }
 
   private val _currentDecoder = MutableStateFlow(getDecoderFromValue(MPVLib.getPropertyString("hwdec")))
   val currentDecoder = _currentDecoder.asStateFlow()
