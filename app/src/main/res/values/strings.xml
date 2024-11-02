@@ -66,6 +66,18 @@
     <string name="pref_player_controls_show_chapters_summary">Only appears if the video has chapters</string>
     <string name="pref_player_controls_show_status_bar">Show system status bar with controls</string>
 
+    <string name="pref_gesture">Touch gestures</string>
+    <string name="pref_gesture_summary">Double tap</string>
+    <string name="pref_gesture_double_tap_title">Double tap</string>
+    <string name="pref_gesture_double_tap_none">None</string>
+    <string name="pref_gesture_double_tap_seek">Seek</string>
+    <string name="pref_gesture_double_tap_play">Play/Pause</string>
+    <string name="pref_gesture_double_tap_custom">Custom</string>
+    <string name="pref_gesture_double_tap_left_title">Double tap (left)</string>
+    <string name="pref_gesture_double_tap_center_title">Double tap (center)</string>
+    <string name="pref_gesture_double_tap_right_title">Double tap (right)</string>
+    <string name="pref_gesture_double_tap_custom_info">When a tap gesture is set to "Custom", it can be bound through input.conf. The key codes are 0x10001 for left, 0x10002 for center, and 0x10003 for right.</string>
+
     <string name="pref_decoder">Decoder</string>
     <string name="pref_decoder_summary">Hardware decoding, pixel format, debanding</string>
     <string name="pref_decoder_try_hw_dec_title">Try hardware decoding</string>

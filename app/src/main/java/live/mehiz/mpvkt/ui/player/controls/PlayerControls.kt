@@ -92,6 +92,7 @@ fun PlayerControls(
   val spacing = MaterialTheme.spacing
   val playerPreferences = koinInject<PlayerPreferences>()
   val audioPreferences = koinInject<AudioPreferences>()
+  val interactionSource = remember { MutableInteractionSource() }
   val controlsShown by viewModel.controlsShown.collectAsState()
   val areControlsLocked by viewModel.areControlsLocked.collectAsState()
   val seekBarShown by viewModel.seekBarShown.collectAsState()
@@ -100,6 +101,7 @@ fun PlayerControls(
   val position by viewModel.pos.collectAsState()
   val paused by viewModel.paused.collectAsState()
   val gestureSeekAmount by viewModel.gestureSeekAmount.collectAsState()
+  val doubleTapSeekAmount by viewModel.doubleTapSeekAmount.collectAsState()
   var isSeeking by remember { mutableStateOf(false) }
   var resetControls by remember { mutableStateOf(true) }
   val playerTimeToDisappear by playerPreferences.playerTimeToDisappear.collectAsState()
@@ -119,7 +121,8 @@ fun PlayerControls(
     animationSpec = playerControlsExitAnimationSpec(),
     label = "controls_transparent_overlay",
   )
-  GestureHandler()
+  GestureHandler(interactionSource = interactionSource)
+  DoubleTapToSeekOvals(doubleTapSeekAmount, interactionSource)
   CompositionLocalProvider(
     LocalRippleConfiguration provides playerRippleConfiguration,
     LocalPlayerButtonsClickEvent provides { resetControls = !resetControls },

@@ -103,22 +103,6 @@ object PlayerPreferencesScreen : Screen() {
           PreferenceCategory(
             title = { Text(stringResource(R.string.pref_player_seeking_title)) }
           )
-          val doubleTapToSeek by preferences.doubleTapToSeek.collectAsState()
-          SwitchPreference(
-            value = doubleTapToSeek,
-            onValueChange = preferences.doubleTapToSeek::set,
-            title = { Text(text = stringResource(id = R.string.pref_player_double_tap_to_seek)) },
-          )
-          val doubleTapSeekDuration by preferences.doubleTapToSeekDuration.collectAsState()
-          ListPreference(
-            value = doubleTapSeekDuration,
-            onValueChange = preferences.doubleTapToSeekDuration::set,
-            values = listOf(3, 5, 10, 15, 20, 25, 30),
-            valueToText = { AnnotatedString("${it}s") },
-            title = { Text(text = stringResource(id = R.string.pref_player_double_tap_seek_duration)) },
-            summary = { Text(text = "${doubleTapSeekDuration}s") },
-            enabled = doubleTapToSeek,
-          )
           val horizontalSeekGesture by preferences.horizontalSeekGesture.collectAsState()
           SwitchPreference(
             value = horizontalSeekGesture,
@@ -140,12 +124,6 @@ object PlayerPreferencesScreen : Screen() {
           )
           PreferenceCategory(
             title = { Text(stringResource(R.string.pref_player_gestures)) },
-          )
-          val doubleTapToPause by preferences.doubleTapToPause.collectAsState()
-          SwitchPreference(
-            value = doubleTapToPause,
-            onValueChange = preferences.doubleTapToPause::set,
-            title = { Text(text = stringResource(id = R.string.pref_player_double_tap_to_pause)) },
           )
           val brightnessGesture by preferences.brightnessGesture.collectAsState()
           SwitchPreference(
@@ -226,7 +204,6 @@ object PlayerPreferencesScreen : Screen() {
             valueToText = { AnnotatedString("$it ms") },
             title = { Text(text = stringResource(R.string.hide_player_control_time)) },
             summary = { Text(text = "$playerTimeToDisappear ms") },
-            enabled = doubleTapToSeek,
           )
           val allowHeadsetControl by preferences.allowHeadsetControl.collectAsState()
           SwitchPreference(
