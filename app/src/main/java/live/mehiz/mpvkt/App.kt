@@ -4,6 +4,7 @@ import android.app.Application
 import live.mehiz.mpvkt.di.DatabaseModule
 import live.mehiz.mpvkt.di.FileManagerModule
 import live.mehiz.mpvkt.di.PreferencesModule
+import live.mehiz.mpvkt.di.ViewModelModule
 import live.mehiz.mpvkt.presentation.crash.CrashActivity
 import live.mehiz.mpvkt.presentation.crash.GlobalExceptionHandler
 import org.koin.android.ext.koin.androidContext
@@ -19,6 +20,7 @@ class App : Application() {
         PreferencesModule,
         DatabaseModule,
         FileManagerModule,
+        ViewModelModule,
       )
     }
   }
