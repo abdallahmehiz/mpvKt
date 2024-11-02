@@ -4,6 +4,7 @@ import live.mehiz.mpvkt.preferences.AdvancedPreferences
 import live.mehiz.mpvkt.preferences.AppearancePreferences
 import live.mehiz.mpvkt.preferences.AudioPreferences
 import live.mehiz.mpvkt.preferences.DecoderPreferences
+import live.mehiz.mpvkt.preferences.GesturePreferences
 import live.mehiz.mpvkt.preferences.PlayerPreferences
 import live.mehiz.mpvkt.preferences.SubtitlesPreferences
 import live.mehiz.mpvkt.preferences.preference.AndroidPreferenceStore
@@ -18,6 +19,7 @@ val PreferencesModule = module {
 
   singleOf(::AppearancePreferences)
   singleOf(::PlayerPreferences)
+  singleOf(::GesturePreferences)
   singleOf(::DecoderPreferences)
   singleOf(::SubtitlesPreferences)
   singleOf(::AudioPreferences)

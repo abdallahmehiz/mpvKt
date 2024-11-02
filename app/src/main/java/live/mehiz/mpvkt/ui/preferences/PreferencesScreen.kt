@@ -7,6 +7,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.outlined.Audiotrack
 import androidx.compose.material.icons.outlined.Code
+import androidx.compose.material.icons.outlined.Gesture
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.Memory
 import androidx.compose.material.icons.outlined.Palette
@@ -66,6 +67,13 @@ object PreferencesScreen : Screen() {
             summary = { Text(text = stringResource(id = R.string.pref_player_summary)) },
             icon = { Icon(Icons.Outlined.PlayCircle, null) },
             onClick = { navigator.push(PlayerPreferencesScreen) },
+          )
+          preference(
+            key = "gesture",
+            title = { Text(text = stringResource(id = R.string.pref_gesture)) },
+            summary = { Text(text = stringResource(id = R.string.pref_gesture_summary)) },
+            icon = { Icon(Icons.Outlined.Gesture, null) },
+            onClick = { navigator.push(GesturePreferencesScreen) },
           )
           preference(
             key = "decoder",

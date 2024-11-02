@@ -17,6 +17,7 @@ A media player for Android based on [mpv-android](https://github.com/mpv-android
 
 ## Installation
 you can download the app from the [Github releases page](https://github.com/abdallahmehiz/mpvKt/releases) or one of the official sources listed below:
+
 [<img src="https://fdroid.gitlab.io/artwork/badge/get-it-on-en.svg" height="80">](https://f-droid.org/en/packages/live.mehiz.mpvkt/)
 [<img src="https://gitlab.com/IzzyOnDroid/repo/-/raw/master/assets/IzzyOnDroid.png" height="80">](https://apt.izzysoft.de/fdroid/index/apk/live.mehiz.mpvkt)
 [<img src="https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png" height="80">](https://play.google.com/store/apps/details?id=live.mehiz.mpvkt)

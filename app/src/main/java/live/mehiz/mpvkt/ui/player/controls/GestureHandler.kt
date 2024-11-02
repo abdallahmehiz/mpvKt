@@ -2,7 +2,6 @@ package live.mehiz.mpvkt.ui.player.controls
 
 import android.view.View
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -25,20 +24,16 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalHapticFeedback
-import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.viewinterop.AndroidView
 import `is`.xyz.mpv.MPVLib
 import kotlinx.coroutines.delay
@@ -55,10 +50,12 @@ import live.mehiz.mpvkt.ui.player.controls.components.DoubleTapSeekSecondsView
 import live.mehiz.mpvkt.ui.theme.playerRippleConfiguration
 import org.koin.compose.koinInject
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Suppress("CyclomaticComplexMethod", "MultipleEmitters")
 @Composable
-fun GestureHandler(modifier: Modifier = Modifier) {
+fun GestureHandler(
+  interactionSource: MutableInteractionSource,
+  modifier: Modifier = Modifier
+) {
   val viewModel = koinInject<PlayerViewModel>()
   val playerPreferences = koinInject<PlayerPreferences>()
   val audioPreferences = koinInject<AudioPreferences>()
@@ -68,26 +65,14 @@ fun GestureHandler(modifier: Modifier = Modifier) {
   val position by viewModel.pos.collectAsState()
   val controlsShown by viewModel.controlsShown.collectAsState()
   val areControlsLocked by viewModel.areControlsLocked.collectAsState()
-  var seekAmount by remember { mutableIntStateOf(0) }
-  var isSeekingForwards by remember { mutableStateOf(true) }
-  var targetAlpha by remember { mutableFloatStateOf(0f) }
-  val alpha by animateFloatAsState(
-    targetAlpha,
-    animationSpec = tween(300),
-    label = "doubletapseekalpha",
-  )
+  val seekAmount by viewModel.doubleTapSeekAmount.collectAsState()
+  val isSeekingForwards by viewModel.isSeekingForwards.collectAsState()
   LaunchedEffect(seekAmount) {
-    delay(600)
-    targetAlpha = 0f
-    delay(200)
-    seekAmount = 0
+    delay(800)
+    viewModel.updateSeekAmount(0)
     delay(100)
     viewModel.hideSeekBar()
   }
-  val interactionSource = remember { MutableInteractionSource() }
-  val doubleTapToPause by playerPreferences.doubleTapToPause.collectAsState()
-  val doubleTapToSeek by playerPreferences.doubleTapToSeek.collectAsState()
-  val doubleTapToSeekDuration by playerPreferences.doubleTapToSeekDuration.collectAsState()
   val doubleSpeedGesture by playerPreferences.holdForDoubleSpeed.collectAsState()
   val brightnessGesture = playerPreferences.brightnessGesture.get()
   val volumeGesture by playerPreferences.volumeGesture.collectAsState()
@@ -95,21 +80,6 @@ fun GestureHandler(modifier: Modifier = Modifier) {
   val seekGesture by playerPreferences.horizontalSeekGesture.collectAsState()
   val preciseSeeking by playerPreferences.preciseSeeking.collectAsState()
   val showSeekbarWhenSeeking by playerPreferences.showSeekBarWhenSeeking.collectAsState()
-  val doubleTapSeek: (Offset, IntSize) -> Unit = { offset, size ->
-    targetAlpha = 0.2f
-    val isForward = offset.x > 3 * size.width / 5
-    if (isForward != isSeekingForwards) seekAmount = 0
-    isSeekingForwards = isForward
-    seekAmount += if (isSeekingForwards && position < duration) {
-      doubleTapToSeekDuration
-    } else if (!isSeekingForwards && position > 0) {
-      -doubleTapToSeekDuration
-    } else {
-      0
-    }
-    viewModel.seekBy(if (isSeekingForwards) doubleTapToSeekDuration else -doubleTapToSeekDuration)
-    if (showSeekbarWhenSeeking) viewModel.showSeekBar()
-  }
   var isLongPressing by remember { mutableStateOf(false) }
   val currentVolume by viewModel.currentVolume.collectAsState()
   val currentMPVVolume by viewModel.currentMPVVolume.collectAsState()
@@ -117,68 +87,24 @@ fun GestureHandler(modifier: Modifier = Modifier) {
   val volumeBoostingCap = audioPreferences.volumeBoostCap.get()
   val haptics = LocalHapticFeedback.current
   Box(
-    modifier = modifier.fillMaxSize(),
-    contentAlignment = if (isSeekingForwards) Alignment.CenterEnd else Alignment.CenterStart,
-  ) {
-    CompositionLocalProvider(
-      LocalRippleConfiguration provides playerRippleConfiguration,
-    ) {
-      if (seekAmount != 0) {
-        Box(
-          modifier = Modifier
-            .fillMaxHeight()
-            .fillMaxWidth(0.4f), // 2 fifths
-          contentAlignment = Alignment.Center,
-        ) {
-          Box(
-            modifier = Modifier
-              .fillMaxSize()
-              .clip(if (isSeekingForwards) RightSideOvalShape else LeftSideOvalShape)
-              .background(Color.White.copy(alpha))
-              .indication(interactionSource, ripple()),
-          )
-          AndroidView(
-            factory = { DoubleTapSeekSecondsView(it, null) },
-            update = {
-              if (seekAmount != 0) {
-                it.isForward = isSeekingForwards
-                it.seconds = seekAmount
-                it.visibility = View.VISIBLE
-                it.start()
-              } else {
-                it.visibility = View.GONE
-              }
-            },
-          )
-        }
-      }
-    }
-  }
-  Box(
-    modifier = Modifier
+    modifier = modifier
       .fillMaxSize()
       .windowInsetsPadding(WindowInsets.safeGestures)
       .pointerInput(Unit) {
         var originalSpeed = viewModel.playbackSpeed.value
         detectTapGestures(
           onTap = {
-            if (controlsShown) {
-              viewModel.hideControls()
-            } else {
-              viewModel.showControls()
-            }
+            if (controlsShown) viewModel.hideControls() else viewModel.showControls()
           },
           onDoubleTap = {
-            if (areControlsLocked) return@detectTapGestures
-            if (!doubleTapToSeek && doubleTapToPause) {
-              viewModel.pauseUnpause()
-              return@detectTapGestures
-            }
-            // divided by 2 fifths
-            if (doubleTapToSeek && (it.x > size.width * 3 / 5 || it.x < size.width * 2 / 5)) {
-              doubleTapSeek(it, size)
-            } else if (doubleTapToPause) {
-              viewModel.pauseUnpause()
+            if (it.x > size.width * 3 / 5) {
+              if (!isSeekingForwards) viewModel.updateSeekAmount(0)
+              viewModel.handleRightDoubleTap()
+            } else if (it.x < size.width * 2 / 5) {
+              if (isSeekingForwards) viewModel.updateSeekAmount(0)
+              viewModel.handleLeftDoubleTap()
+            } else {
+              viewModel.handleCenterDoubleTap()
             }
           },
           onPress = {
@@ -234,7 +160,7 @@ fun GestureHandler(modifier: Modifier = Modifier) {
               Pair(
                 startingPosition,
                 (it - startingPosition)
-                  .coerceIn(0 - startingPosition, (duration - startingPosition).toInt())
+                  .coerceIn(0 - startingPosition, (duration - startingPosition).toInt()),
               )
             }
             viewModel.seekTo(it, preciseSeeking)
@@ -283,7 +209,7 @@ fun GestureHandler(modifier: Modifier = Modifier) {
                   originalMPVVolume,
                   mpvVolumeStartingY,
                   change.position.y,
-                  mpvVolumeGestureSens
+                  mpvVolumeGestureSens,
                 )
                   .coerceIn(100..volumeBoostingCap + 100),
               )
@@ -302,7 +228,7 @@ fun GestureHandler(modifier: Modifier = Modifier) {
           val changeBrightness: () -> Unit = {
             if (startingY == 0f) startingY = change.position.y
             viewModel.changeBrightnessTo(
-              calculateNewVerticalGestureValue(originalBrightness, startingY, change.position.y, brightnessGestureSens)
+              calculateNewVerticalGestureValue(originalBrightness, startingY, change.position.y, brightnessGestureSens),
             )
             viewModel.displayBrightnessSlider()
           }
@@ -323,6 +249,54 @@ fun GestureHandler(modifier: Modifier = Modifier) {
         }
       },
   )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun DoubleTapToSeekOvals(
+  amount: Int,
+  interactionSource: MutableInteractionSource,
+  modifier: Modifier = Modifier,
+) {
+  val alpha by animateFloatAsState(if (amount == 0) 0f else 0.2f, label = "double_tap_animation_alpha")
+  Box(
+    modifier = modifier.fillMaxSize(),
+    contentAlignment = if (amount > 0) Alignment.CenterEnd else Alignment.CenterStart,
+  ) {
+    CompositionLocalProvider(
+      LocalRippleConfiguration provides playerRippleConfiguration,
+    ) {
+      if (amount != 0) {
+        Box(
+          modifier = Modifier
+            .fillMaxHeight()
+            .fillMaxWidth(0.4f), // 2 fifths
+          contentAlignment = Alignment.Center,
+        ) {
+          Box(
+            modifier = Modifier
+              .fillMaxSize()
+              .clip(if (amount > 0) RightSideOvalShape else LeftSideOvalShape)
+              .background(Color.White.copy(alpha))
+              .indication(interactionSource, ripple()),
+          )
+          AndroidView(
+            factory = { DoubleTapSeekSecondsView(it, null) },
+            update = {
+              if (amount != 0) {
+                it.isForward = amount > 0
+                it.seconds = amount
+                it.visibility = View.VISIBLE
+                it.start()
+              } else {
+                it.visibility = View.GONE
+              }
+            },
+          )
+        }
+      }
+    }
+  }
 }
 
 fun calculateNewVerticalGestureValue(originalValue: Int, startingY: Float, newY: Float, sensitivity: Float): Int {
