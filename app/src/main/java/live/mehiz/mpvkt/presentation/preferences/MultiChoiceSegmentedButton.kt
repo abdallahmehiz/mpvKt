@@ -13,7 +13,6 @@ import androidx.compose.ui.Modifier
 import kotlinx.collections.immutable.ImmutableList
 import live.mehiz.mpvkt.ui.theme.spacing
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MultiChoiceSegmentedButton(
   choices: ImmutableList<String>,

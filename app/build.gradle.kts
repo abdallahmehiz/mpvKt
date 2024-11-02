@@ -14,12 +14,12 @@ plugins {
 
 android {
   namespace = "live.mehiz.mpvkt"
-  compileSdk = 34
+  compileSdk = 35
 
   defaultConfig {
     applicationId = "live.mehiz.mpvkt"
     minSdk = 21
-    targetSdk = 34
+    targetSdk = 35
     versionCode = 12
     versionName = "0.1.6"
 
