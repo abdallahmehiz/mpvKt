@@ -64,7 +64,11 @@
     <string name="pref_player_controls_show_chapter_indicator">Show current chapter indicator</string>
     <string name="pref_player_controls_show_chapters_button">Show chapters select button</string>
     <string name="pref_player_controls_show_chapters_summary">Only appears if the video has chapters</string>
-    <string name="pref_player_controls_show_status_bar">Show system status bar with controls</string>
+    <string name="pref_player_display_show_status_bar">Show system status bar with controls</string>
+    
+    <string name="pref_player_display">Display</string>
+    <string name="pref_player_display_panel_transparency">Panel transparency</string>
+    <string name="pref_player_display_panel_transparency_summary">%d%%</string>
 
     <string name="pref_gesture">Touch gestures</string>
     <string name="pref_gesture_summary">Double tap</string>
@@ -238,8 +242,8 @@
     <string name="privacy_policy_url" translatable="false">https://abdallahmehiz.github.io/mpvKt/privacy_policy.html</string>
     <string name="control_player_with_media_buttons">Control player with media buttons</string>
     <string name="swap_the_volume_and_brightness_slider">Swap volume and brightness slider</string>
-    <string name="reduce_player_animation">Reduce player animation</string>
-    <string name="hide_player_control_time">Hide player control time</string>
+    <string name="pref_player_display_reduce_player_animation">Reduce player animation</string>
+    <string name="pref_player_display_hide_player_control_time">Hide player control time</string>
 
     <plurals name="plural_items">
         <item quantity="one">%1$d item</item>
