@@ -54,7 +54,7 @@
     <string name="pref_player_controls_show_chapter_indicator">显示当前章节指示器</string>
     <string name="pref_player_controls_show_chapters_button">显示章节选择按钮</string>
     <string name="pref_player_controls_show_chapters_summary">只会在章节存在时显示</string>
-    <string name="pref_player_controls_show_status_bar">与控制栏一起显示系统状态栏</string>
+    <string name="pref_player_display_show_status_bar">与控制栏一起显示系统状态栏</string>
     <string name="pref_decoder">解码器</string>
     <string name="pref_decoder_summary">硬件解码，像素格式，去色带</string>
     <string name="pref_decoder_try_hw_dec_title">尝试硬件解码</string>
@@ -171,6 +171,6 @@
     <string name="player_sheets_sub_delay_audio_sound_heard">已听到声音</string>
     <string name="control_player_with_media_buttons">使用媒体按钮控制播放器</string>
     <string name="swap_the_volume_and_brightness_slider">交换音量与亮度手势</string>
-    <string name="reduce_player_animation">减少播放器动画</string>
-    <string name="hide_player_control_time">播放器控制栏隐藏超时</string>
+    <string name="pref_player_display_reduce_player_animation">减少播放器动画</string>
+    <string name="pref_player_display_hide_player_control_time">播放器控制栏隐藏超时</string>
 </resources>

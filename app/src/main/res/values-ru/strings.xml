@@ -62,7 +62,7 @@
     <string name="pref_player_controls_show_chapter_indicator">Показывать индикатор текущей главы</string>
     <string name="pref_player_controls_show_chapters_button">Показывать кнопку выбора глав</string>
     <string name="pref_player_controls_show_chapters_summary">Появляется только если в видео есть главы</string>
-    <string name="pref_player_controls_show_status_bar">Показывать строку состояния системы с элементами управления</string>
+    <string name="pref_player_display_show_status_bar">Показывать строку состояния системы с элементами управления</string>
 
     <string name="pref_decoder">Декодер</string>
     <string name="pref_decoder_summary">Аппаратное декодирование, формат пикселя, дебандинг</string>
@@ -192,8 +192,8 @@
     <string name="toast_sleep_timer_ended">Таймер сна закончился</string>
     <string name="control_player_with_media_buttons">Управлять плеером с помощью кнопок мультимедиа</string>
     <string name="swap_the_volume_and_brightness_slider">Поменять местами панель громкости и яркости</string>
-    <string name="reduce_player_animation">Уменьшить анимацию плеера</string>
-    <string name="hide_player_control_time">Время скрытия управления плеера</string>
+    <string name="pref_player_display_reduce_player_animation">Уменьшить анимацию плеера</string>
+    <string name="pref_player_display_hide_player_control_time">Время скрытия управления плеера</string>
 
     <plurals name="plural_items">
         <item quantity="one">%1$d элемент</item>

@@ -64,7 +64,7 @@
     <string name="pref_player_controls_show_chapter_indicator">Mostrar indicador de capítulo atual</string>
     <string name="pref_player_controls_show_chapters_button">Mostrar botão de seleção de capítulos</string>
     <string name="pref_player_controls_show_chapters_summary">Aparece apenas se o vídeo tiver capítulos.</string>
-    <string name="pref_player_controls_show_status_bar">Mostrar barra de status do sistema com controles</string>
+    <string name="pref_player_display_show_status_bar">Mostrar barra de status do sistema com controles</string>
 
     <string name="pref_decoder">Decodificador</string>
     <string name="pref_decoder_summary">Decodificação por hardware, formato de pixel, remoção de artefatos</string>

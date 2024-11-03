@@ -20,8 +20,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material3.CardColors
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -39,6 +37,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import live.mehiz.mpvkt.R
+import live.mehiz.mpvkt.ui.player.controls.CARDS_MAX_WIDTH
 import live.mehiz.mpvkt.ui.theme.spacing
 
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
@@ -127,13 +126,4 @@ fun SubtitleSettingsPanel(
       }
     }
   }
-}
-
-val CARDS_MAX_WIDTH = 420.dp
-val panelCardsColors: @Composable () -> CardColors = {
-  val colors = CardDefaults.cardColors()
-  colors.copy(
-    containerColor = colors.containerColor.copy(0.6f),
-    disabledContainerColor = colors.disabledContainerColor.copy(0.6f),
-  )
 }
