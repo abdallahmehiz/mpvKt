@@ -28,7 +28,9 @@ import live.mehiz.mpvkt.preferences.SubtitlesPreferences
 import live.mehiz.mpvkt.preferences.preference.deleteAndGet
 import live.mehiz.mpvkt.presentation.components.ExpandableCard
 import live.mehiz.mpvkt.presentation.components.SliderItem
+import live.mehiz.mpvkt.ui.player.controls.CARDS_MAX_WIDTH
 import live.mehiz.mpvkt.ui.player.controls.components.sheets.toFixed
+import live.mehiz.mpvkt.ui.player.controls.panelCardsColors
 import live.mehiz.mpvkt.ui.theme.spacing
 import me.zhanghai.compose.preference.ProvidePreferenceLocals
 import me.zhanghai.compose.preference.SwitchPreference

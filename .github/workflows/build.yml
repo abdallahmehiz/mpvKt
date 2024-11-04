@@ -28,3 +28,9 @@ jobs:
 
       - name: Build with Gradle
         run: ./gradlew detekt assembleRelease
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: arm64-v8a-${{ github.sha }}
+          path: app/build/outputs/apk/release/app-arm64-v8a-release-unsigned.apk

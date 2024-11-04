@@ -30,6 +30,7 @@ import live.mehiz.mpvkt.ui.player.PlayerOrientation
 import me.zhanghai.compose.preference.ListPreference
 import me.zhanghai.compose.preference.PreferenceCategory
 import me.zhanghai.compose.preference.ProvidePreferenceLocals
+import me.zhanghai.compose.preference.SliderPreference
 import me.zhanghai.compose.preference.SwitchPreference
 import org.koin.compose.koinInject
 
@@ -184,17 +185,22 @@ object PlayerPreferencesScreen : Screen() {
             title = { Text(stringResource(R.string.pref_player_controls_show_chapter_indicator)) },
             summary = { Text(stringResource(R.string.pref_player_controls_show_chapters_summary)) },
           )
+
+          PreferenceCategory(
+            title = { Text(stringResource(R.string.pref_player_display)) },
+          )
+
           val showSystemStatusBar by preferences.showSystemStatusBar.collectAsState()
           SwitchPreference(
             value = showSystemStatusBar,
             onValueChange = preferences.showSystemStatusBar::set,
-            title = { Text(stringResource(R.string.pref_player_controls_show_status_bar)) },
+            title = { Text(stringResource(R.string.pref_player_display_show_status_bar)) },
           )
           val reduceMotion by preferences.reduceMotion.collectAsState()
           SwitchPreference(
             value = reduceMotion,
             onValueChange = preferences.reduceMotion::set,
-            title = { Text(stringResource(R.string.reduce_player_animation)) },
+            title = { Text(stringResource(R.string.pref_player_display_reduce_player_animation)) },
           )
           val playerTimeToDisappear by preferences.playerTimeToDisappear.collectAsState()
           ListPreference(
@@ -202,8 +208,25 @@ object PlayerPreferencesScreen : Screen() {
             onValueChange = preferences.playerTimeToDisappear::set,
             values = listOf(500, 1000, 1500, 2000, 2500, 3000, 3500, 4000, 4500, 5000),
             valueToText = { AnnotatedString("$it ms") },
-            title = { Text(text = stringResource(R.string.hide_player_control_time)) },
+            title = { Text(text = stringResource(R.string.pref_player_display_hide_player_control_time)) },
             summary = { Text(text = "$playerTimeToDisappear ms") },
+          )
+          val panelTransparency by preferences.panelTransparency.collectAsState()
+          SliderPreference(
+            value = panelTransparency,
+            onValueChange = { preferences.panelTransparency.set(it) },
+            title = { Text(stringResource(R.string.pref_player_display_panel_transparency)) },
+            valueRange = 0f..1f,
+            summary = {
+              Text(
+                text = stringResource(
+                  id = R.string.pref_player_display_panel_transparency_summary,
+                  panelTransparency.times(100).toInt(),
+                ),
+              )
+            },
+            onSliderValueChange = { preferences.panelTransparency.set(it) },
+            sliderValue = panelTransparency,
           )
         }
       }
