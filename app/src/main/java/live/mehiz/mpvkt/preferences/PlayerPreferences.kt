@@ -47,4 +47,6 @@ class PlayerPreferences(
   val allowHeadsetControl = preferenceStore.getBoolean("allow_headset_control", true)
 
   val panelTransparency = preferenceStore.getFloat("panel_transparency", 0.6f)
+
+  val primaryCustomButtonId = preferenceStore.getInt("player_custom_button_id", 0)
 }
