@@ -46,6 +46,8 @@ import kotlinx.coroutines.delay
 import live.mehiz.mpvkt.R
 import live.mehiz.mpvkt.preferences.SubtitlesPreferences
 import live.mehiz.mpvkt.presentation.components.OutlinedNumericChooser
+import live.mehiz.mpvkt.ui.player.controls.CARDS_MAX_WIDTH
+import live.mehiz.mpvkt.ui.player.controls.panelCardsColors
 import live.mehiz.mpvkt.ui.theme.spacing
 import org.koin.compose.koinInject
 import kotlin.math.round
