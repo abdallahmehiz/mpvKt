@@ -44,7 +44,10 @@ jobs:
       - name: Copy build artifacts
         run: |
           set -e
-          
+
+          commit_count=$(git rev-list --count HEAD)
+          echo "COMMIT_COUNT=$commit_count" >> $GITHUB_ENV
+
           declare -a apks=("universal" "arm64-v8a" "armeabi-v7a" "x86" "x86_64")
 
           printf "%s\n" "${apks[@]}" | xargs -n 1 -I {} sh -c '
@@ -54,24 +57,24 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           path: ./mpvKt-universal*
-          name: universal
+          name: universal-r${{ env.COMMIT_COUNT }}
       - name: Upload the arm64-v8a artifact
         uses: actions/upload-artifact@v4
         with:
           path: ./mpvKt-arm64-v8a*
-          name: arm64-v8a
+          name: arm64-v8a-r${{ env.COMMIT_COUNT }}
       - name: Upload the armeabi-v7a artifact
         uses: actions/upload-artifact@v4
         with:
           path: ./mpvKt-armeabi-v7a*
-          name: armeabi-v7a
+          name: armeabi-v7a-r${{ env.COMMIT_COUNT }}
       - name: Upload the x86 artifact
         uses: actions/upload-artifact@v4
         with:
           path: ./mpvKt-x86*
-          name: x86
+          name: x86-r${{ env.COMMIT_COUNT }}
       - name: Upload the x86_64 artifact
         uses: actions/upload-artifact@v4
         with:
           path: ./mpvKt-x86_64*
-          name: x86_64
+          name: x86_64-r${{ env.COMMIT_COUNT }}
