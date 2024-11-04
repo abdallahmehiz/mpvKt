@@ -13,13 +13,11 @@ import kotlinx.coroutines.launch
 import live.mehiz.mpvkt.database.entities.CustomButtonEntity
 import live.mehiz.mpvkt.database.repository.CustomButtonRepositoryImpl
 import live.mehiz.mpvkt.preferences.PlayerPreferences
-import org.koin.java.KoinJavaComponent.inject
 
 class CustomButtonsScreenViewModel(
   private val customButtonsRepository: CustomButtonRepositoryImpl,
+  private val playerPreferences: PlayerPreferences
 ) : ViewModel() {
-  private val playerPreferences: PlayerPreferences by inject(PlayerPreferences::class.java)
-
   private val _dialog = MutableStateFlow<CustomButtonDialog>(CustomButtonDialog.None)
   val dialog = _dialog.asStateFlow()
 
