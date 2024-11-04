@@ -47,6 +47,7 @@ import live.mehiz.mpvkt.database.entities.PlaybackStateEntity
 import live.mehiz.mpvkt.databinding.PlayerLayoutBinding
 import live.mehiz.mpvkt.preferences.AdvancedPreferences
 import live.mehiz.mpvkt.preferences.AudioPreferences
+import live.mehiz.mpvkt.preferences.GesturePreferences
 import live.mehiz.mpvkt.preferences.PlayerPreferences
 import live.mehiz.mpvkt.preferences.SubtitlesPreferences
 import live.mehiz.mpvkt.ui.player.controls.PlayerControls
@@ -75,6 +76,7 @@ class PlayerActivity : AppCompatActivity() {
   private val audioPreferences: AudioPreferences by inject()
   private val subtitlesPreferences: SubtitlesPreferences by inject()
   private val advancedPreferences: AdvancedPreferences by inject()
+  private val gesturePreferences: GesturePreferences by inject()
   private val fileManager: FileManager by inject()
 
   private var fileName = ""
@@ -683,20 +685,71 @@ class PlayerActivity : AppCompatActivity() {
   }
 
   private fun setupMediaSession() {
-    val allowHeadsetControl = playerPreferences.allowHeadsetControl.get()
-    if (allowHeadsetControl) {
-      mediaSession = MediaSession(this, "PlayerActivity").apply {
-        setCallback(object : MediaSession.Callback() {
+    val previousAction = gesturePreferences.mediaPreviousGesture.get()
+    val playAction = gesturePreferences.mediaPlayGesture.get()
+    val nextAction = gesturePreferences.mediaNextGesture.get()
+
+    mediaSession = MediaSession(this, "PlayerActivity").apply {
+      setCallback(
+        object : MediaSession.Callback() {
           override fun onPlay() {
-            super.onPlay()
-            viewModel.unpause()
-            window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+            when (playAction) {
+              SingleActionGesture.None -> {}
+              SingleActionGesture.Seek -> {}
+              SingleActionGesture.PlayPause -> {
+                super.onPlay()
+                viewModel.unpause()
+                window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+              }
+              SingleActionGesture.Custom -> {
+                MPVLib.command(arrayOf("keypress", CustomKeyCodes.MediaPlay.keyCode))
+              }
+            }
           }
 
           override fun onPause() {
-            super.onPause()
-            viewModel.pause()
-            window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+            when (playAction) {
+              SingleActionGesture.None -> {}
+              SingleActionGesture.Seek -> {}
+              SingleActionGesture.PlayPause -> {
+                super.onPause()
+                viewModel.pause()
+                window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+              }
+              SingleActionGesture.Custom -> {
+                MPVLib.command(arrayOf("keypress", CustomKeyCodes.MediaPlay.keyCode))
+              }
+            }
+          }
+
+          override fun onSkipToPrevious() {
+            when (previousAction) {
+              SingleActionGesture.None -> {}
+              SingleActionGesture.Seek -> {
+                viewModel.leftSeek()
+              }
+              SingleActionGesture.PlayPause -> {
+                viewModel.pauseUnpause()
+              }
+              SingleActionGesture.Custom -> {
+                MPVLib.command(arrayOf("keypress", CustomKeyCodes.MediaPrevious.keyCode))
+              }
+            }
+          }
+
+          override fun onSkipToNext() {
+            when (nextAction) {
+              SingleActionGesture.None -> {}
+              SingleActionGesture.Seek -> {
+                viewModel.rightSeek()
+              }
+              SingleActionGesture.PlayPause -> {
+                viewModel.pauseUnpause()
+              }
+              SingleActionGesture.Custom -> {
+                MPVLib.command(arrayOf("keypress", CustomKeyCodes.MediaNext.keyCode))
+              }
+            }
           }
 
           override fun onStop() {
@@ -704,23 +757,25 @@ class PlayerActivity : AppCompatActivity() {
             isActive = false
             this@PlayerActivity.onStop()
           }
-        })
-        setPlaybackState(
-          PlaybackState.Builder()
-            .setActions(
-              PlaybackState.ACTION_PLAY or
-                PlaybackState.ACTION_PAUSE or
-                PlaybackState.ACTION_STOP
-            )
-            .build()
-        )
-        isActive = true
-      }
-
-      val filter = IntentFilter().apply { addAction(AudioManager.ACTION_AUDIO_BECOMING_NOISY) }
-      registerReceiver(noisyReceiver, filter)
-      noisyReceiver.initialized = true
+        },
+      )
+      setPlaybackState(
+        PlaybackState.Builder()
+          .setActions(
+            PlaybackState.ACTION_PLAY or
+              PlaybackState.ACTION_PAUSE or
+              PlaybackState.ACTION_STOP or
+              PlaybackState.ACTION_SKIP_TO_PREVIOUS or
+              PlaybackState.ACTION_SKIP_TO_NEXT
+          )
+          .build()
+      )
+      isActive = true
     }
+
+    val filter = IntentFilter().apply { addAction(AudioManager.ACTION_AUDIO_BECOMING_NOISY) }
+    registerReceiver(noisyReceiver, filter)
+    noisyReceiver.initialized = true
   }
 }
 

@@ -471,56 +471,64 @@ class PlayerViewModel(
     _doubleTapSeekAmount.update { _ -> amount }
   }
 
+  fun leftSeek() {
+    if (pos.value > 0) {
+      _doubleTapSeekAmount.value -= doubleTapToSeekDuration
+    }
+    _isSeekingForwards.value = false
+    seekBy(-doubleTapToSeekDuration)
+    if (playerPreferences.showSeekBarWhenSeeking.get()) showSeekBar()
+  }
+
+  fun rightSeek() {
+    if (pos.value < duration.value) {
+      _doubleTapSeekAmount.value += doubleTapToSeekDuration
+    }
+    _isSeekingForwards.value = true
+    seekBy(doubleTapToSeekDuration)
+    if (playerPreferences.showSeekBarWhenSeeking.get()) showSeekBar()
+  }
+
   fun handleLeftDoubleTap() {
-    when (gesturePreferences.leftDoubleTapGesture.get()) {
-      DoubleTapGesture.Seek -> {
-        if (pos.value > 0) {
-          _doubleTapSeekAmount.value -= doubleTapToSeekDuration
-        }
-        _isSeekingForwards.value = false
-        seekBy(-doubleTapToSeekDuration)
-        if (playerPreferences.showSeekBarWhenSeeking.get()) showSeekBar()
+    when (gesturePreferences.leftSingleActionGesture.get()) {
+      SingleActionGesture.Seek -> {
+        leftSeek()
       }
-      DoubleTapGesture.PlayPause -> {
+      SingleActionGesture.PlayPause -> {
         pauseUnpause()
       }
-      DoubleTapGesture.Custom -> {
-        MPVLib.command(arrayOf("keypress", CustomKeyCodes.Left.keyCode))
+      SingleActionGesture.Custom -> {
+        MPVLib.command(arrayOf("keypress", CustomKeyCodes.DoubleTapLeft.keyCode))
       }
-      DoubleTapGesture.None -> {}
+      SingleActionGesture.None -> {}
     }
   }
 
   fun handleCenterDoubleTap() {
-    when (gesturePreferences.centerDoubleTapGesture.get()) {
-      DoubleTapGesture.PlayPause -> {
+    when (gesturePreferences.centerSingleActionGesture.get()) {
+      SingleActionGesture.PlayPause -> {
         pauseUnpause()
       }
-      DoubleTapGesture.Custom -> {
-        MPVLib.command(arrayOf("keypress", CustomKeyCodes.Center.keyCode))
+      SingleActionGesture.Custom -> {
+        MPVLib.command(arrayOf("keypress", CustomKeyCodes.DoubleTapCenter.keyCode))
       }
-      DoubleTapGesture.Seek -> {}
-      DoubleTapGesture.None -> {}
+      SingleActionGesture.Seek -> {}
+      SingleActionGesture.None -> {}
     }
   }
 
   fun handleRightDoubleTap() {
-    when (gesturePreferences.rightDoubleTapGesture.get()) {
-      DoubleTapGesture.Seek -> {
-        if (pos.value < duration.value) {
-          _doubleTapSeekAmount.value += doubleTapToSeekDuration
-        }
-        _isSeekingForwards.value = true
-        seekBy(doubleTapToSeekDuration)
-        if (playerPreferences.showSeekBarWhenSeeking.get()) showSeekBar()
+    when (gesturePreferences.rightSingleActionGesture.get()) {
+      SingleActionGesture.Seek -> {
+        rightSeek()
       }
-      DoubleTapGesture.PlayPause -> {
+      SingleActionGesture.PlayPause -> {
         pauseUnpause()
       }
-      DoubleTapGesture.Custom -> {
-        MPVLib.command(arrayOf("keypress", CustomKeyCodes.Right.keyCode))
+      SingleActionGesture.Custom -> {
+        MPVLib.command(arrayOf("keypress", CustomKeyCodes.DoubleTapRight.keyCode))
       }
-      DoubleTapGesture.None -> {}
+      SingleActionGesture.None -> {}
     }
   }
 }
