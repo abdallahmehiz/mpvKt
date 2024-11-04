@@ -35,7 +35,6 @@ import me.zhanghai.compose.preference.FooterPreference
 import me.zhanghai.compose.preference.ListPreference
 import me.zhanghai.compose.preference.PreferenceCategory
 import me.zhanghai.compose.preference.ProvidePreferenceLocals
-import me.zhanghai.compose.preference.SwitchPreference
 import org.koin.compose.koinInject
 
 object GesturePreferencesScreen : Screen() {
