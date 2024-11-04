@@ -24,10 +24,12 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import live.mehiz.mpvkt.R
 import live.mehiz.mpvkt.database.MpvKtDatabase
+import live.mehiz.mpvkt.database.entities.CustomButtonEntity
 import live.mehiz.mpvkt.preferences.GesturePreferences
 import live.mehiz.mpvkt.preferences.PlayerPreferences
 import live.mehiz.mpvkt.ui.custombuttons.CustomButtonsUiState
 import org.koin.java.KoinJavaComponent.inject
+import java.io.File
 
 @Suppress("TooManyFunctions")
 class PlayerViewModel(
@@ -522,6 +524,15 @@ class PlayerViewModel(
       }
       DoubleTapGesture.None -> {}
     }
+  }
+
+  fun executeCustomButton(button: CustomButtonEntity) {
+    val tempFile = File.createTempFile("script", ".lua").apply {
+      writeText(button.content)
+      deleteOnExit()
+    }
+
+    MPVLib.command(arrayOf("load-script", tempFile.absolutePath))
   }
 }
 

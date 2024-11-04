@@ -1,6 +1,9 @@
 package live.mehiz.mpvkt.ui.player.controls.components.sheets
 
 import androidx.compose.animation.animateContentSize
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -53,14 +56,14 @@ import live.mehiz.mpvkt.database.entities.CustomButtonEntity
 import live.mehiz.mpvkt.preferences.AdvancedPreferences
 import live.mehiz.mpvkt.preferences.AudioChannels
 import live.mehiz.mpvkt.preferences.AudioPreferences
+import live.mehiz.mpvkt.preferences.PlayerPreferences
 import live.mehiz.mpvkt.preferences.preference.collectAsState
 import live.mehiz.mpvkt.presentation.components.PlayerSheet
 import live.mehiz.mpvkt.ui.player.PlayerViewModel
 import live.mehiz.mpvkt.ui.theme.spacing
 import org.koin.compose.koinInject
-import java.io.File
 
-@OptIn(ExperimentalLayoutApi::class)
+@OptIn(ExperimentalLayoutApi::class, ExperimentalFoundationApi::class)
 @Composable
 fun MoreSheet(
   onDismissRequest: () -> Unit,
@@ -70,8 +73,10 @@ fun MoreSheet(
 ) {
   val viewModel = koinInject<PlayerViewModel>()
   val advancedPreferences = koinInject<AdvancedPreferences>()
+  val playerPreferences = koinInject<PlayerPreferences>()
   val audioPreferences = koinInject<AudioPreferences>()
   val statisticsPage by advancedPreferences.enabledStatisticsPage.collectAsState()
+  val primaryCustomButtonId by playerPreferences.primaryCustomButtonId.collectAsState()
 
   PlayerSheet(
     onDismissRequest,
@@ -149,6 +154,7 @@ fun MoreSheet(
           )
         }
       }
+
       if (customButtons.isNotEmpty()) {
         Text(text = stringResource(id = R.string.player_sheets_custom_buttons_title))
         FlowRow(
@@ -157,18 +163,33 @@ fun MoreSheet(
           maxItemsInEachRow = Int.MAX_VALUE,
         ) {
           customButtons.forEach { button ->
-            FilterChip(
-              onClick = {
-                val tempFile = File.createTempFile("script", ".lua").apply {
-                  writeText(button.content)
-                  deleteOnExit()
-                }
 
-                MPVLib.command(arrayOf("load-script", tempFile.absolutePath))
-              },
-              label = { Text(text = button.title) },
-              selected = false,
-            )
+            val inputChipInteractionSource = remember { MutableInteractionSource() }
+
+            Box {
+              FilterChip(
+                onClick = {},
+                label = { Text(text = button.title) },
+                selected = button.id == primaryCustomButtonId,
+                interactionSource = inputChipInteractionSource,
+              )
+              Box(
+                modifier = Modifier
+                  .matchParentSize()
+                  .combinedClickable(
+                    onClick = { viewModel.executeCustomButton(button) },
+                    onLongClick = {
+                      if (button.id == primaryCustomButtonId) {
+                        playerPreferences.primaryCustomButtonId.set(0)
+                      } else {
+                        playerPreferences.primaryCustomButtonId.set(button.id)
+                      }
+                    },
+                    interactionSource = inputChipInteractionSource,
+                    indication = null,
+                  )
+              )
+            }
           }
         }
       }
