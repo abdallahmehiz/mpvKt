@@ -30,7 +30,7 @@ import live.mehiz.mpvkt.preferences.GesturePreferences
 import live.mehiz.mpvkt.preferences.preference.collectAsState
 import live.mehiz.mpvkt.presentation.Screen
 import live.mehiz.mpvkt.ui.player.CustomKeyCodes
-import live.mehiz.mpvkt.ui.player.DoubleTapGesture
+import live.mehiz.mpvkt.ui.player.SingleActionGesture
 import me.zhanghai.compose.preference.FooterPreference
 import me.zhanghai.compose.preference.ListPreference
 import me.zhanghai.compose.preference.PreferenceCategory
@@ -78,48 +78,112 @@ object GesturePreferencesScreen : Screen() {
             summary = { Text(text = "${doubleTapSeekDuration}s") },
           )
 
-          val leftDoubleTap by preferences.leftDoubleTapGesture.collectAsState()
+          val leftDoubleTap by preferences.leftSingleActionGesture.collectAsState()
           ListPreference(
             value = leftDoubleTap,
-            onValueChange = { preferences.leftDoubleTapGesture.set(it) },
-            values = DoubleTapGesture.entries,
+            onValueChange = { preferences.leftSingleActionGesture.set(it) },
+            values = SingleActionGesture.entries,
             valueToText = { AnnotatedString(context.getString(it.titleRes)) },
             title = { Text(text = stringResource(R.string.pref_gesture_double_tap_left_title)) },
             summary = { Text(text = stringResource(leftDoubleTap.titleRes)) },
           )
 
-          val centerDoubleTap by preferences.centerDoubleTapGesture.collectAsState()
+          val centerDoubleTap by preferences.centerSingleActionGesture.collectAsState()
           ListPreference(
             value = centerDoubleTap,
-            onValueChange = { preferences.centerDoubleTapGesture.set(it) },
+            onValueChange = { preferences.centerSingleActionGesture.set(it) },
             values = listOf(
-              DoubleTapGesture.None,
-              DoubleTapGesture.PlayPause,
-              DoubleTapGesture.Custom,
+              SingleActionGesture.None,
+              SingleActionGesture.PlayPause,
+              SingleActionGesture.Custom,
             ),
             valueToText = { AnnotatedString(context.getString(it.titleRes)) },
             title = { Text(text = stringResource(R.string.pref_gesture_double_tap_center_title)) },
             summary = { Text(text = stringResource(centerDoubleTap.titleRes)) },
           )
 
-          val rightDoubleTap by preferences.rightDoubleTapGesture.collectAsState()
+          val rightDoubleTap by preferences.rightSingleActionGesture.collectAsState()
           ListPreference(
             value = rightDoubleTap,
-            onValueChange = { preferences.rightDoubleTapGesture.set(it) },
-            values = DoubleTapGesture.entries,
+            onValueChange = { preferences.rightSingleActionGesture.set(it) },
+            values = SingleActionGesture.entries,
             valueToText = { AnnotatedString(context.getString(it.titleRes)) },
             title = { Text(text = stringResource(R.string.pref_gesture_double_tap_right_title)) },
             summary = { Text(text = stringResource(rightDoubleTap.titleRes)) },
           )
 
-          val keyCodes = CustomKeyCodes.entries.map { it.keyCode }.toImmutableList()
+          val doubleTapKeyCodes = listOf(
+            CustomKeyCodes.DoubleTapLeft,
+            CustomKeyCodes.DoubleTapCenter,
+            CustomKeyCodes.DoubleTapRight,
+          ).map { it.keyCode }.toImmutableList()
           FooterPreference(
             summary = {
               var annotatedString = buildAnnotatedString {
                 append(stringResource(R.string.pref_gesture_double_tap_custom_info))
               }
 
-              keyCodes.forEach { keyCode ->
+              doubleTapKeyCodes.forEach { keyCode ->
+                annotatedString = buildAnnotatedString {
+                  val startIndex = annotatedString.indexOf(keyCode)
+                  val endIndex = startIndex + keyCode.length
+                  append(annotatedString)
+                  addStyle(style = SpanStyle(fontWeight = FontWeight.Bold), start = startIndex, end = endIndex)
+                }
+              }
+
+              Text(text = annotatedString)
+            }
+          )
+
+          PreferenceCategory(
+            title = { Text(text = stringResource(R.string.pref_gesture_media_title)) }
+          )
+
+          val mediaPreviousGesture by preferences.mediaPreviousGesture.collectAsState()
+          ListPreference(
+            value = mediaPreviousGesture,
+            onValueChange = { preferences.mediaPreviousGesture.set(it) },
+            values = SingleActionGesture.entries,
+            valueToText = { AnnotatedString(context.getString(it.titleRes)) },
+            title = { Text(text = stringResource(R.string.pref_gesture_media_previous)) },
+            summary = { Text(text = stringResource(mediaPreviousGesture.titleRes)) },
+          )
+          val mediaPlayGesture by preferences.mediaPlayGesture.collectAsState()
+          ListPreference(
+            value = mediaPlayGesture,
+            onValueChange = { preferences.mediaPlayGesture.set(it) },
+            values = listOf(
+              SingleActionGesture.None,
+              SingleActionGesture.PlayPause,
+              SingleActionGesture.Custom,
+            ),
+            valueToText = { AnnotatedString(context.getString(it.titleRes)) },
+            title = { Text(text = stringResource(R.string.pref_gesture_media_play)) },
+            summary = { Text(text = stringResource(mediaPlayGesture.titleRes)) },
+          )
+          val mediaNextGesture by preferences.mediaNextGesture.collectAsState()
+          ListPreference(
+            value = mediaNextGesture,
+            onValueChange = { preferences.mediaNextGesture.set(it) },
+            values = SingleActionGesture.entries,
+            valueToText = { AnnotatedString(context.getString(it.titleRes)) },
+            title = { Text(text = stringResource(R.string.pref_gesture_media_next)) },
+            summary = { Text(text = stringResource(mediaNextGesture.titleRes)) },
+          )
+
+          val mediaKeyCodes = listOf(
+            CustomKeyCodes.MediaPrevious,
+            CustomKeyCodes.MediaPlay,
+            CustomKeyCodes.MediaNext,
+          ).map { it.keyCode }.toImmutableList()
+          FooterPreference(
+            summary = {
+              var annotatedString = buildAnnotatedString {
+                append(stringResource(R.string.pref_gesture_media_custom_info))
+              }
+
+              mediaKeyCodes.forEach { keyCode ->
                 annotatedString = buildAnnotatedString {
                   val startIndex = annotatedString.indexOf(keyCode)
                   val endIndex = startIndex + keyCode.length

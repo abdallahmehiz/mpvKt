@@ -44,7 +44,6 @@ class PlayerPreferences(
   val showSystemStatusBar = preferenceStore.getBoolean("show_system_status_bar")
   val reduceMotion = preferenceStore.getBoolean("reduce_motion")
   val playerTimeToDisappear = preferenceStore.getInt("player_time_to_disappear", 4000)
-  val allowHeadsetControl = preferenceStore.getBoolean("allow_headset_control", true)
 
   val panelTransparency = preferenceStore.getFloat("panel_transparency", 0.6f)
 

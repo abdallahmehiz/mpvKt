@@ -185,12 +185,6 @@ object PlayerPreferencesScreen : Screen() {
             title = { Text(stringResource(R.string.pref_player_controls_show_chapter_indicator)) },
             summary = { Text(stringResource(R.string.pref_player_controls_show_chapters_summary)) },
           )
-          val allowHeadsetControl by preferences.allowHeadsetControl.collectAsState()
-          SwitchPreference(
-            value = allowHeadsetControl,
-            onValueChange = preferences.allowHeadsetControl::set,
-            title = { Text(stringResource(R.string.control_player_with_media_buttons)) },
-          )
 
           PreferenceCategory(
             title = { Text(stringResource(R.string.pref_player_display)) },

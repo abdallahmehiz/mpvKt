@@ -169,7 +169,6 @@
     <string name="player_sheets_subtitles_border_style_background_box">背景框</string>
     <string name="player_sheets_sub_delay_subtitle_voice_heard">已听到语音</string>
     <string name="player_sheets_sub_delay_audio_sound_heard">已听到声音</string>
-    <string name="control_player_with_media_buttons">使用媒体按钮控制播放器</string>
     <string name="swap_the_volume_and_brightness_slider">交换音量与亮度手势</string>
     <string name="pref_player_display_reduce_player_animation">减少播放器动画</string>
     <string name="pref_player_display_hide_player_control_time">播放器控制栏隐藏超时</string>
