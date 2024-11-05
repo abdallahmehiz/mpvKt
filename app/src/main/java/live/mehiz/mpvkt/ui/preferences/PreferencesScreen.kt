@@ -97,18 +97,18 @@ object PreferencesScreen : Screen() {
             onClick = { navigator.push(AudioPreferencesScreen) },
           )
           preference(
-            key = "advanced",
-            title = { Text(text = stringResource(R.string.pref_advanced)) },
-            summary = { Text(text = stringResource(id = R.string.pref_advanced_summary)) },
-            icon = { Icon(Icons.Outlined.Code, null) },
-            onClick = { navigator.push(AdvancedPreferencesScreen) }
-          )
-          preference(
             key = "customButtons",
             title = { Text(text = stringResource(id = R.string.pref_custom_buttons_title)) },
             summary = { Text(text = stringResource(id = R.string.pref_custom_buttons_summary)) },
             icon = { Icon(Icons.Outlined.Terminal, null) },
             onClick = { navigator.push(CustomButtonsScreen) },
+          )
+          preference(
+            key = "advanced",
+            title = { Text(text = stringResource(R.string.pref_advanced)) },
+            summary = { Text(text = stringResource(id = R.string.pref_advanced_summary)) },
+            icon = { Icon(Icons.Outlined.Code, null) },
+            onClick = { navigator.push(AdvancedPreferencesScreen) }
           )
           preference(
             key = "about",
