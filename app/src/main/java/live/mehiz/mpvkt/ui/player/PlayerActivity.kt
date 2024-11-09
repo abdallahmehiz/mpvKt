@@ -231,8 +231,8 @@ class PlayerActivity : AppCompatActivity() {
 
   private fun copyMPVAssets() {
     Utils.copyAssets(this@PlayerActivity)
-    copyMPVConfigFiles()
     copyMPVScripts()
+    copyMPVConfigFiles()
     // fonts can be lazily loaded
     lifecycleScope.launch(Dispatchers.IO) {
       copyMPVFonts()
