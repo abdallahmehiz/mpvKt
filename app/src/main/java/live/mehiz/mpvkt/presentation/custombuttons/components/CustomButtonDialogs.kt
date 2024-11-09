@@ -157,7 +157,7 @@ fun CustomButtonEditDialog(
           onDismissRequest()
         }
       ) {
-        Text(text = stringResource(id = R.string.pref_custom_button_action_add))
+        Text(text = stringResource(id = R.string.generic_ok))
       }
     },
     dismissButton = {

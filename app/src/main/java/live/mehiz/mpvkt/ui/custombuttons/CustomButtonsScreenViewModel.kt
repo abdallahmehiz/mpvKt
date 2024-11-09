@@ -21,7 +21,6 @@ class CustomButtonsScreenViewModel(
   private val _dialog = MutableStateFlow<CustomButtonDialog>(CustomButtonDialog.None)
   val dialog = _dialog.asStateFlow()
 
-  private val primaryCustomButtonId = MutableStateFlow(playerPreferences.primaryCustomButtonId.get())
   val customButtons: StateFlow<List<CustomButtonEntity>> = customButtonsRepository.getCustomButtons()
     .stateIn(
       scope = viewModelScope,
@@ -64,8 +63,16 @@ class CustomButtonsScreenViewModel(
       customButtonsRepository.deleteAndReindex(customButton)
     }
 
-    if (customButton.id == primaryCustomButtonId.value) {
+    if (customButton.id == playerPreferences.primaryCustomButtonId.get()) {
       playerPreferences.primaryCustomButtonId.set(0)
+    }
+  }
+
+  fun togglePrimary(customButton: CustomButtonEntity) {
+    if (customButton.id == playerPreferences.primaryCustomButtonId.get()) {
+      playerPreferences.primaryCustomButtonId.set(0)
+    } else {
+      playerPreferences.primaryCustomButtonId.set(customButton.id)
     }
   }
 

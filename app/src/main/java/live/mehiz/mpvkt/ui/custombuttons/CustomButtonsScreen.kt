@@ -7,11 +7,14 @@ import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import kotlinx.collections.immutable.toImmutableList
 import live.mehiz.mpvkt.database.entities.CustomButtonEntity
+import live.mehiz.mpvkt.preferences.PlayerPreferences
+import live.mehiz.mpvkt.preferences.preference.collectAsState
 import live.mehiz.mpvkt.presentation.Screen
 import live.mehiz.mpvkt.presentation.custombuttons.CustomButtonsScreen
 import live.mehiz.mpvkt.presentation.custombuttons.components.CustomButtonAddDialog
 import live.mehiz.mpvkt.presentation.custombuttons.components.CustomButtonDeleteDialog
 import live.mehiz.mpvkt.presentation.custombuttons.components.CustomButtonEditDialog
+import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
 
 object CustomButtonsScreen : Screen() {
@@ -19,14 +22,19 @@ object CustomButtonsScreen : Screen() {
   override fun Content() {
     val navigator = LocalNavigator.currentOrThrow
     val viewModel = koinViewModel<CustomButtonsScreenViewModel>()
+    val playerPreferences = koinInject<PlayerPreferences>()
+
+    val primaryButtonId by playerPreferences.primaryCustomButtonId.collectAsState()
     val customButtons by viewModel.customButtons.collectAsState()
     val dialog by viewModel.dialog.collectAsState()
 
     CustomButtonsScreen(
       buttons = customButtons,
+      primaryId = primaryButtonId,
       onClickAdd = { viewModel.showDialog(CustomButtonDialog.Create) },
       onClickRename = { viewModel.showDialog(CustomButtonDialog.Edit(it)) },
       onClickDelete = { viewModel.showDialog(CustomButtonDialog.Delete(it)) },
+      onTogglePrimary = viewModel::togglePrimary,
       onClickMoveUp = viewModel::moveUp,
       onClickMoveDown = viewModel::moveDown,
       onNavigateBack = navigator::pop,

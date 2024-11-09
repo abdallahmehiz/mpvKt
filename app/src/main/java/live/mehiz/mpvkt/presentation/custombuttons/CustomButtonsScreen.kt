@@ -41,11 +41,13 @@ import live.mehiz.mpvkt.ui.theme.spacing
 @Composable
 fun CustomButtonsScreen(
   buttons: List<CustomButtonEntity>,
+  primaryId: Int,
   onClickAdd: () -> Unit,
   onClickRename: (CustomButtonEntity) -> Unit,
   onClickDelete: (CustomButtonEntity) -> Unit,
   onClickMoveUp: (CustomButtonEntity) -> Unit,
   onClickMoveDown: (CustomButtonEntity) -> Unit,
+  onTogglePrimary: (CustomButtonEntity) -> Unit,
   onNavigateBack: () -> Unit,
 ) {
   val lazyListState = rememberLazyListState()
@@ -91,6 +93,7 @@ fun CustomButtonsScreen(
     val layoutDirection = LocalLayoutDirection.current
     CustomButtonsContent(
       customButtons = buttons,
+      primaryId = primaryId,
       lazyListState = lazyListState,
       paddingValues = PaddingValues(
         top = MaterialTheme.spacing.small + padding.calculateTopPadding(),
@@ -100,6 +103,7 @@ fun CustomButtonsScreen(
       ),
       onClickRename = onClickRename,
       onClickDelete = onClickDelete,
+      onTogglePrimary = onTogglePrimary,
       onMoveUp = onClickMoveUp,
       onMoveDown = onClickMoveDown,
     )
@@ -109,10 +113,12 @@ fun CustomButtonsScreen(
 @Composable
 private fun CustomButtonsContent(
   customButtons: List<CustomButtonEntity>,
+  primaryId: Int,
   lazyListState: LazyListState,
   paddingValues: PaddingValues,
   onClickRename: (CustomButtonEntity) -> Unit,
   onClickDelete: (CustomButtonEntity) -> Unit,
+  onTogglePrimary: (CustomButtonEntity) -> Unit,
   onMoveUp: (CustomButtonEntity) -> Unit,
   onMoveDown: (CustomButtonEntity) -> Unit,
 ) {
@@ -128,12 +134,14 @@ private fun CustomButtonsContent(
       CustomButtonListItem(
         modifier = Modifier.animateItem(),
         customButton = button,
+        isPrimary = button.id == primaryId,
         canMoveUp = index != 0,
         canMoveDown = index != customButtons.lastIndex,
         onMoveUp = onMoveUp,
         onMoveDown = onMoveDown,
         onRename = { onClickRename(button) },
         onDelete = { onClickDelete(button) },
+        onTogglePrimary = { onTogglePrimary(button) },
       )
     }
   }
