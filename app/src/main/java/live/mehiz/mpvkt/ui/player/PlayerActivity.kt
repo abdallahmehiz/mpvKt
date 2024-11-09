@@ -43,6 +43,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import live.mehiz.mpvkt.database.MpvKtDatabase
+import live.mehiz.mpvkt.database.entities.CustomButtonEntity
 import live.mehiz.mpvkt.database.entities.PlaybackStateEntity
 import live.mehiz.mpvkt.databinding.PlayerLayoutBinding
 import live.mehiz.mpvkt.preferences.AdvancedPreferences
@@ -230,6 +231,7 @@ class PlayerActivity : AppCompatActivity() {
 
   private fun copyMPVAssets() {
     Utils.copyAssets(this@PlayerActivity)
+    copyMPVScripts()
     copyMPVConfigFiles()
     // fonts can be lazily loaded
     lifecycleScope.launch(Dispatchers.IO) {
@@ -275,6 +277,46 @@ class PlayerActivity : AppCompatActivity() {
         .writeText(advancedPreferences.inputConf.get())
       Log.e("PlayerActivity", "Couldn't copy mpv configuration files: ${e.message}")
     }
+  }
+
+  private fun copyMPVScripts() {
+    val mpvktLua = assets.open("mpvkt.lua")
+    val applicationPath = filesDir.path
+
+    val scriptsDir = fileManager.createDir(fileManager.fromPath(applicationPath), "scripts")!!
+
+    fileManager.deleteContent(scriptsDir)
+
+    File("$scriptsDir/mpvkt.lua")
+      .also { if (!it.exists()) it.createNewFile() }
+      .writeText(mpvktLua.bufferedReader().readText())
+  }
+
+  fun setupCustomButtons(buttons: List<CustomButtonEntity>) {
+    val applicationPath = filesDir.path
+
+    val scriptsDir = fileManager.createDir(fileManager.fromPath(applicationPath), "scripts")!!
+
+    val customButtonsContent = buildString {
+      appendLine("local lua_modules = mp.find_config_file('scripts')")
+      appendLine("if lua_modules then")
+      appendLine("package.path = package.path .. ';' .. lua_modules .. '/?.lua;' .. lua_modules .. '/?/init.lua'")
+      appendLine("end")
+      appendLine("local mpvkt = require \"mpvkt\"")
+      buttons.forEach { button ->
+        appendLine("function button${button.id}()")
+        appendLine(button.content)
+        appendLine("end")
+        appendLine("mp.register_script_message('call_button${button.id}', button${button.id})")
+      }
+    }
+
+    val file = File("$scriptsDir/custombuttons.lua")
+      .also { if (!it.exists()) it.createNewFile() }
+
+    file.writeText(customButtonsContent)
+
+    MPVLib.command(arrayOf("load-script", file.absolutePath))
   }
 
   private fun copyMPVFonts() {
@@ -468,7 +510,7 @@ class PlayerActivity : AppCompatActivity() {
       "sid" -> trackId(value)?.let { viewModel.updateSubtitle(it, viewModel.selectedSubtitles.value.second) }
       "secondary-sid" -> trackId(value)?.let { viewModel.updateSubtitle(viewModel.selectedSubtitles.value.first, it) }
       "hwdec", "hwdec-current" -> viewModel.getDecoder()
-      "user-data/mpvkt" -> {}
+      "user-data/mpvkt" -> viewModel.handleLuaInvocation(value)
     }
   }
 

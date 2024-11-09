@@ -19,8 +19,7 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import live.mehiz.mpvkt.R
@@ -29,8 +28,8 @@ import live.mehiz.mpvkt.database.entities.CustomButtonEntity
 import live.mehiz.mpvkt.preferences.GesturePreferences
 import live.mehiz.mpvkt.preferences.PlayerPreferences
 import live.mehiz.mpvkt.ui.custombuttons.CustomButtonsUiState
+import org.json.JSONObject
 import org.koin.java.KoinJavaComponent.inject
-import java.io.File
 
 @Suppress("TooManyFunctions")
 class PlayerViewModel(
@@ -46,14 +45,9 @@ class PlayerViewModel(
   init {
     viewModelScope.launch(Dispatchers.IO) {
       try {
-        mpvKtDatabase.customButtonDao().getCustomButtons()
-          .catch { e ->
-            Log.e(TAG, e.message ?: "Unable to fetch buttons")
-            _customButtons.update { _ -> CustomButtonsUiState.Error(e.message ?: "Unable to fetch buttons") }
-          }
-          .collectLatest { buttons ->
-            _customButtons.update { _ -> CustomButtonsUiState.Success(buttons) }
-          }
+        val buttons = mpvKtDatabase.customButtonDao().getCustomButtons().first()
+        activity.setupCustomButtons(buttons)
+        _customButtons.update { _ -> CustomButtonsUiState.Success(buttons) }
       } catch (e: Exception) {
         Log.e(TAG, e.message ?: "Unable to fetch buttons")
         _customButtons.update { _ -> CustomButtonsUiState.Error(e.message ?: "Unable to fetch buttons") }
@@ -101,7 +95,7 @@ class PlayerViewModel(
   private val _areControlsLocked = MutableStateFlow(false)
   val areControlsLocked = _areControlsLocked.asStateFlow()
 
-  val playerUpdate = MutableStateFlow(PlayerUpdates.None)
+  val playerUpdate = MutableStateFlow<PlayerUpdates>(PlayerUpdates.None)
   val isBrightnessSliderShown = MutableStateFlow(false)
   val isVolumeSliderShown = MutableStateFlow(false)
   val currentBrightness = MutableStateFlow(
@@ -468,6 +462,21 @@ class PlayerViewModel(
     }
   }
 
+  fun handleLuaInvocation(value: String) {
+    val jsonObject = JSONObject(value)
+    val type = jsonObject.keys().asSequence().firstOrNull { key ->
+      jsonObject.getString(key).isNotEmpty()
+    } ?: return
+    val data = jsonObject.getString(type)
+
+    when (type) {
+      "show_text" -> playerUpdate.update { PlayerUpdates.ShowText(data) }
+      "hide_ui" -> hideControls()
+    }
+
+    MPVLib.setPropertyString("user-data/mpvkt/$type", "")
+  }
+
   private val doubleTapToSeekDuration = gesturePreferences.doubleTapToSeekDuration.get()
 
   fun updateSeekAmount(amount: Int) {
@@ -536,12 +545,7 @@ class PlayerViewModel(
   }
 
   fun executeCustomButton(button: CustomButtonEntity) {
-    val tempFile = File.createTempFile("script", ".lua").apply {
-      writeText(button.content)
-      deleteOnExit()
-    }
-
-    MPVLib.command(arrayOf("load-script", tempFile.absolutePath))
+    MPVLib.command(arrayOf("script-message", "call_button${button.id}"))
   }
 
   override fun onCleared() {

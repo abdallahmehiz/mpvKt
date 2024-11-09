@@ -252,14 +252,14 @@ fun PlayerControls(
         val currentPlayerUpdate by viewModel.playerUpdate.collectAsState()
         val aspectRatio by playerPreferences.videoAspect.collectAsState()
         LaunchedEffect(currentPlayerUpdate, aspectRatio) {
-          if (currentPlayerUpdate == PlayerUpdates.DoubleSpeed || currentPlayerUpdate == PlayerUpdates.None) {
+          if (currentPlayerUpdate is PlayerUpdates.DoubleSpeed || currentPlayerUpdate is PlayerUpdates.None) {
             return@LaunchedEffect
           }
           delay(2000)
           viewModel.playerUpdate.update { PlayerUpdates.None }
         }
         AnimatedVisibility(
-          currentPlayerUpdate != PlayerUpdates.None,
+          currentPlayerUpdate !is PlayerUpdates.None,
           enter = fadeIn(playerControlsEnterAnimationSpec()),
           exit = fadeOut(playerControlsExitAnimationSpec()),
           modifier = Modifier.constrainAs(playerUpdates) {
@@ -268,8 +268,9 @@ fun PlayerControls(
           },
         ) {
           when (currentPlayerUpdate) {
-            PlayerUpdates.DoubleSpeed -> DoubleSpeedPlayerUpdate()
-            PlayerUpdates.AspectRatio -> TextPlayerUpdate(stringResource(aspectRatio.titleRes))
+            is PlayerUpdates.DoubleSpeed -> DoubleSpeedPlayerUpdate()
+            is PlayerUpdates.AspectRatio -> TextPlayerUpdate(stringResource(aspectRatio.titleRes))
+            is PlayerUpdates.ShowText -> TextPlayerUpdate((currentPlayerUpdate as PlayerUpdates.ShowText).value)
             else -> {}
           }
         }
