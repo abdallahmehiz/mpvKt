@@ -468,6 +468,7 @@ class PlayerActivity : AppCompatActivity() {
       "sid" -> trackId(value)?.let { viewModel.updateSubtitle(it, viewModel.selectedSubtitles.value.second) }
       "secondary-sid" -> trackId(value)?.let { viewModel.updateSubtitle(viewModel.selectedSubtitles.value.first, it) }
       "hwdec", "hwdec-current" -> viewModel.getDecoder()
+      "user-data/mpvkt" -> {}
     }
   }
 

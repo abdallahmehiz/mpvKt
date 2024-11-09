@@ -210,6 +210,7 @@ class MPVView(context: Context, attributes: AttributeSet) : BaseMPVView(context,
     "paused-for-cache" to MPVLib.mpvFormat.MPV_FORMAT_FLAG,
     "seeking" to MPVLib.mpvFormat.MPV_FORMAT_FLAG,
     "eof-reached" to MPVLib.mpvFormat.MPV_FORMAT_FLAG,
+    "user-data/mpvkt" to MPVLib.mpvFormat.MPV_FORMAT_STRING,
   )
 
   private fun setupAudioOptions() {
