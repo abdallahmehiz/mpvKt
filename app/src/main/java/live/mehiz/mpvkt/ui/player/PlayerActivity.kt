@@ -287,7 +287,7 @@ class PlayerActivity : AppCompatActivity() {
 
     fileManager.deleteContent(scriptsDir)
 
-    File("$scriptsDir/mpvkt-module.lua")
+    File("$scriptsDir/mpvkt.lua")
       .also { if (!it.exists()) it.createNewFile() }
       .writeText(mpvktLua.bufferedReader().readText())
   }
@@ -302,7 +302,7 @@ class PlayerActivity : AppCompatActivity() {
       appendLine("if lua_modules then")
       appendLine("package.path = package.path .. ';' .. lua_modules .. '/?.lua;' .. lua_modules .. '/?/init.lua'")
       appendLine("end")
-      appendLine("local mpvkt = require \"mpvkt-module\"")
+      appendLine("local mpvkt = require \"mpvkt\"")
       buttons.forEach { button ->
         appendLine("function button${button.id}()")
         appendLine(button.content)
