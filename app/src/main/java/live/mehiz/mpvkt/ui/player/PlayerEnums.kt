@@ -74,10 +74,11 @@ enum class Panels {
   VideoFilters,
 }
 
-enum class PlayerUpdates {
-  None,
-  DoubleSpeed,
-  AspectRatio,
+sealed class PlayerUpdates {
+  data object None : PlayerUpdates()
+  data object DoubleSpeed : PlayerUpdates()
+  data object AspectRatio : PlayerUpdates()
+  data class ShowText(val value: String) : PlayerUpdates()
 }
 
 enum class VideoFilters(
