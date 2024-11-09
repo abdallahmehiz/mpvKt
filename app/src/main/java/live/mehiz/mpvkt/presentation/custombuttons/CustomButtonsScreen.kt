@@ -123,7 +123,7 @@ private fun CustomButtonsContent(
   ) {
     itemsIndexed(
       items = customButtons,
-      key = { _, button -> "button-${button.index}" }
+      key = { _, button -> "button-${button.id}" },
     ) { index, button ->
       CustomButtonListItem(
         modifier = Modifier.animateItem(),
