@@ -215,7 +215,7 @@ object PlayerPreferencesScreen : Screen() {
           SliderPreference(
             value = panelTransparency,
             onValueChange = { preferences.panelTransparency.set(it) },
-            title = { Text(stringResource(R.string.pref_player_display_panel_transparency)) },
+            title = { Text(stringResource(R.string.pref_player_display_panel_opacity)) },
             valueRange = 0f..1f,
             summary = {
               Text(
