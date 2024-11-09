@@ -485,6 +485,7 @@ class PlayerActivity : AppCompatActivity() {
   }
 
   internal fun event(eventId: Int) {
+    if (player.isExiting) return
     when (eventId) {
       MPVLib.mpvEventId.MPV_EVENT_FILE_LOADED -> {
         fileName = getFileName(intent)

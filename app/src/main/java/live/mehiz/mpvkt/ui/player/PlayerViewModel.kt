@@ -15,6 +15,7 @@ import dev.vivvvek.seeker.Segment
 import `is`.xyz.mpv.MPVLib
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -541,6 +542,11 @@ class PlayerViewModel(
     }
 
     MPVLib.command(arrayOf("load-script", tempFile.absolutePath))
+  }
+
+  override fun onCleared() {
+    super.onCleared()
+    viewModelScope.cancel()
   }
 }
 
