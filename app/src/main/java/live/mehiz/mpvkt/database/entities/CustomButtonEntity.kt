@@ -9,5 +9,6 @@ data class CustomButtonEntity(
   val id: Int = 0,
   val title: String,
   val content: String,
+  val longPressContent: String,
   val index: Int,
 )

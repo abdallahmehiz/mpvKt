@@ -2,6 +2,10 @@ package live.mehiz.mpvkt.ui.player.controls
 
 import android.annotation.SuppressLint
 import android.os.Build
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
@@ -13,6 +17,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import live.mehiz.mpvkt.preferences.PlayerPreferences
@@ -25,6 +30,7 @@ import live.mehiz.mpvkt.ui.player.controls.components.ControlsButton
 import live.mehiz.mpvkt.ui.theme.spacing
 import org.koin.compose.koinInject
 
+@OptIn(ExperimentalFoundationApi::class)
 @SuppressLint("NewApi")
 @Composable
 fun BottomRightPlayerControls(modifier: Modifier = Modifier) {
@@ -36,11 +42,24 @@ fun BottomRightPlayerControls(modifier: Modifier = Modifier) {
   Row(modifier) {
     if (primaryCustomButtonId != 0 && customButtons.getButtons().isNotEmpty()) {
       val button = customButtons.getButtons().first { it.id == primaryCustomButtonId }
-      Button(
-        onClick = { viewModel.executeCustomButton(button) },
+      val interactionSource = remember { MutableInteractionSource() }
+
+      Box(
         modifier = Modifier.padding(end = MaterialTheme.spacing.smaller),
       ) {
-        Text(text = button.title)
+        Button(onClick = {}) {
+          Text(text = button.title)
+        }
+        Box(
+          modifier = Modifier
+            .matchParentSize()
+            .combinedClickable(
+              onClick = { viewModel.executeCustomButton(button) },
+              onLongClick = { viewModel.executeCustomButtonLongClick(button) },
+              interactionSource = interactionSource,
+              indication = null,
+            )
+        )
       }
     }
 

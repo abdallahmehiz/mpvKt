@@ -302,12 +302,16 @@ class PlayerActivity : AppCompatActivity() {
       appendLine("if lua_modules then")
       appendLine("package.path = package.path .. ';' .. lua_modules .. '/?.lua;' .. lua_modules .. '/?/init.lua'")
       appendLine("end")
-      appendLine("local mpvkt = require \"mpvkt\"")
+      appendLine("local mpvkt = require 'mpvkt'")
       buttons.forEach { button ->
         appendLine("function button${button.id}()")
         appendLine(button.content)
         appendLine("end")
         appendLine("mp.register_script_message('call_button${button.id}', button${button.id})")
+        appendLine("function button${button.id}long()")
+        appendLine(button.longPressContent)
+        appendLine("end")
+        appendLine("mp.register_script_message('call_button${button.id}long', button${button.id}long)")
       }
     }
 

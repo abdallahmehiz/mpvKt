@@ -53,9 +53,9 @@ object CustomButtonsScreen : Screen() {
         val button = (dialog as CustomButtonDialog.Edit).customButton
         CustomButtonEditDialog(
           onDismissRequest = viewModel::dismissDialog,
-          onEdit = { title, content ->
+          onEdit = { title, content, longPressContent ->
             viewModel.editButton(
-              button.copy(title = title, content = content)
+              button.copy(title = title, content = content, longPressContent = longPressContent)
             )
           },
           buttonNames = customButtons.filter { it.title != button.title }

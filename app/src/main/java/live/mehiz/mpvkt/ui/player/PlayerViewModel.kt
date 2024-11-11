@@ -548,6 +548,10 @@ class PlayerViewModel(
     MPVLib.command(arrayOf("script-message", "call_button${button.id}"))
   }
 
+  fun executeCustomButtonLongClick(button: CustomButtonEntity) {
+    MPVLib.command(arrayOf("script-message", "call_button${button.id}long"))
+  }
+
   override fun onCleared() {
     super.onCleared()
     viewModelScope.cancel()

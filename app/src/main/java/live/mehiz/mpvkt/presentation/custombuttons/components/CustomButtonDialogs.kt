@@ -27,11 +27,12 @@ import kotlin.time.Duration.Companion.seconds
 @Composable
 fun CustomButtonAddDialog(
   onDismissRequest: () -> Unit,
-  onAdd: (String, String) -> Unit,
+  onAdd: (String, String, String) -> Unit,
   buttonNames: ImmutableList<String>,
 ) {
   var title by remember { mutableStateOf("") }
   var content by remember { mutableStateOf("") }
+  var longPressContent by remember { mutableStateOf("") }
 
   val focusRequester = remember { FocusRequester() }
   val titleAlreadyExists = remember(title) { buttonNames.contains(title) }
@@ -42,7 +43,7 @@ fun CustomButtonAddDialog(
       TextButton(
         enabled = title.isNotEmpty() && content.isNotEmpty() && !titleAlreadyExists,
         onClick = {
-          onAdd(title, content)
+          onAdd(title, content, longPressContent)
           onDismissRequest()
         }
       ) {
@@ -92,6 +93,18 @@ fun CustomButtonAddDialog(
           },
           minLines = 3,
         )
+
+        OutlinedTextField(
+          value = longPressContent,
+          onValueChange = { longPressContent = it },
+          label = {
+            Text(text = stringResource(id = R.string.pref_custom_button_action_add_long_press_text))
+          },
+          supportingText = {
+            Text(text = stringResource(id = R.string.pref_custom_button_action_add_optional))
+          },
+          minLines = 3,
+        )
       }
     }
   )
@@ -137,12 +150,13 @@ fun CustomButtonDeleteDialog(
 @Composable
 fun CustomButtonEditDialog(
   onDismissRequest: () -> Unit,
-  onEdit: (String, String) -> Unit,
+  onEdit: (String, String, String) -> Unit,
   buttonNames: ImmutableList<String>,
   initialState: CustomButtonEntity,
 ) {
   var title by remember { mutableStateOf(initialState.title) }
   var content by remember { mutableStateOf(initialState.content) }
+  var longPressContent by remember { mutableStateOf(initialState.longPressContent) }
 
   val focusRequester = remember { FocusRequester() }
   val titleAlreadyExists = remember(title) { buttonNames.contains(title) }
@@ -153,7 +167,7 @@ fun CustomButtonEditDialog(
       TextButton(
         enabled = title.isNotEmpty() && content.isNotEmpty() && !titleAlreadyExists,
         onClick = {
-          onEdit(title, content)
+          onEdit(title, content, longPressContent)
           onDismissRequest()
         }
       ) {
@@ -202,6 +216,20 @@ fun CustomButtonEditDialog(
             Text(text = stringResource(id = R.string.pref_custom_button_action_add_required))
           },
           minLines = 3,
+          maxLines = 6,
+        )
+
+        OutlinedTextField(
+          value = longPressContent,
+          onValueChange = { longPressContent = it },
+          label = {
+            Text(text = stringResource(id = R.string.pref_custom_button_action_add_long_press_text))
+          },
+          supportingText = {
+            Text(text = stringResource(id = R.string.pref_custom_button_action_add_optional))
+          },
+          minLines = 3,
+          maxLines = 6,
         )
       }
     }
