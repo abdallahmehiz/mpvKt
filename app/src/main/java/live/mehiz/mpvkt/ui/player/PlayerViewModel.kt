@@ -470,7 +470,10 @@ class PlayerViewModel(
 
     when (property.substringAfterLast("/")) {
       "show_text" -> playerUpdate.update { PlayerUpdates.ShowText(data) }
-      "hide_ui" -> hideControls()
+      "hide_ui" -> {
+        sheetShown.update { Sheets.None }
+        hideControls()
+      }
     }
 
     MPVLib.setPropertyString(property, "")
