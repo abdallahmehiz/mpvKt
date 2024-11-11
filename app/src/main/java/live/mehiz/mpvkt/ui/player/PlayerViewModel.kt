@@ -28,7 +28,6 @@ import live.mehiz.mpvkt.database.entities.CustomButtonEntity
 import live.mehiz.mpvkt.preferences.GesturePreferences
 import live.mehiz.mpvkt.preferences.PlayerPreferences
 import live.mehiz.mpvkt.ui.custombuttons.CustomButtonsUiState
-import org.json.JSONObject
 import org.koin.java.KoinJavaComponent.inject
 
 @Suppress("TooManyFunctions")
