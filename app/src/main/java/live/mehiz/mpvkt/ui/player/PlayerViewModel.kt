@@ -462,19 +462,18 @@ class PlayerViewModel(
     }
   }
 
-  fun handleLuaInvocation(value: String) {
-    val jsonObject = JSONObject(value)
-    val type = jsonObject.keys().asSequence().firstOrNull { key ->
-      jsonObject.getString(key).isNotEmpty()
-    } ?: return
-    val data = jsonObject.getString(type)
+  fun handleLuaInvocation(property: String, value: String) {
+    val data = value
+      .removePrefix("\"")
+      .removeSuffix("\"")
+      .ifEmpty { return }
 
-    when (type) {
+    when (property.substringAfterLast("/")) {
       "show_text" -> playerUpdate.update { PlayerUpdates.ShowText(data) }
       "hide_ui" -> hideControls()
     }
 
-    MPVLib.setPropertyString("user-data/mpvkt/$type", "")
+    MPVLib.setPropertyString(property, "")
   }
 
   private val doubleTapToSeekDuration = gesturePreferences.doubleTapToSeekDuration.get()
