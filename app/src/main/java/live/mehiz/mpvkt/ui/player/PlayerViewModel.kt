@@ -28,7 +28,6 @@ import live.mehiz.mpvkt.database.entities.CustomButtonEntity
 import live.mehiz.mpvkt.preferences.GesturePreferences
 import live.mehiz.mpvkt.preferences.PlayerPreferences
 import live.mehiz.mpvkt.ui.custombuttons.CustomButtonsUiState
-import org.json.JSONObject
 import org.koin.java.KoinJavaComponent.inject
 
 @Suppress("TooManyFunctions")
@@ -462,19 +461,38 @@ class PlayerViewModel(
     }
   }
 
-  fun handleLuaInvocation(value: String) {
-    val jsonObject = JSONObject(value)
-    val type = jsonObject.keys().asSequence().firstOrNull { key ->
-      jsonObject.getString(key).isNotEmpty()
-    } ?: return
-    val data = jsonObject.getString(type)
+  fun handleLuaInvocation(property: String, value: String) {
+    val data = value
+      .removePrefix("\"")
+      .removeSuffix("\"")
+      .ifEmpty { return }
 
-    when (type) {
+    when (property.substringAfterLast("/")) {
       "show_text" -> playerUpdate.update { PlayerUpdates.ShowText(data) }
-      "hide_ui" -> hideControls()
+      "toggle_ui" -> {
+        when (data) {
+          "show" -> showControls()
+          "toggle" -> {
+            if (controlsShown.value) hideControls() else showControls()
+          }
+          "hide" -> {
+            sheetShown.update { Sheets.None }
+            panelShown.update { Panels.None }
+            hideControls()
+          }
+        }
+      }
+      "show_panel" -> {
+        when (data) {
+          "subtitle_settings" -> panelShown.update { Panels.SubtitleSettings }
+          "subtitle_delay" -> panelShown.update { Panels.SubtitleDelay }
+          "audio_delay" -> panelShown.update { Panels.AudioDelay }
+          "video_filters" -> panelShown.update { Panels.VideoFilters }
+        }
+      }
     }
 
-    MPVLib.setPropertyString("user-data/mpvkt/$type", "")
+    MPVLib.setPropertyString(property, "")
   }
 
   private val doubleTapToSeekDuration = gesturePreferences.doubleTapToSeekDuration.get()
@@ -546,6 +564,10 @@ class PlayerViewModel(
 
   fun executeCustomButton(button: CustomButtonEntity) {
     MPVLib.command(arrayOf("script-message", "call_button${button.id}"))
+  }
+
+  fun executeCustomButtonLongClick(button: CustomButtonEntity) {
+    MPVLib.command(arrayOf("script-message", "call_button${button.id}long"))
   }
 
   override fun onCleared() {

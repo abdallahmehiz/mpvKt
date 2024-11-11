@@ -138,7 +138,9 @@
     <string name="pref_custom_button_action_add_title_text">Title</string>
     <string name="pref_custom_button_action_add_already_exists">Button already exists!</string>
     <string name="pref_custom_button_action_add_required">*required</string>
+    <string name="pref_custom_button_action_add_optional">(optional)</string>
     <string name="pref_custom_button_action_add_content_text">Lua code</string>
+    <string name="pref_custom_button_action_add_long_press_text">Lua code (on long press)</string>
     <string name="pref_custom_button_add_button">Add custom button</string>
     <string name="pref_custom_button_empty">You have no custom buttons. Tap the plus button to add custom buttons.</string>
     <string name="pref_custom_button_edit_button">Edit button</string>

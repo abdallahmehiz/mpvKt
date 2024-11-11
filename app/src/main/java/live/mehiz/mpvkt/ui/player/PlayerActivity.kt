@@ -302,12 +302,16 @@ class PlayerActivity : AppCompatActivity() {
       appendLine("if lua_modules then")
       appendLine("package.path = package.path .. ';' .. lua_modules .. '/?.lua;' .. lua_modules .. '/?/init.lua'")
       appendLine("end")
-      appendLine("local mpvkt = require \"mpvkt\"")
+      appendLine("local mpvkt = require 'mpvkt'")
       buttons.forEach { button ->
         appendLine("function button${button.id}()")
         appendLine(button.content)
         appendLine("end")
         appendLine("mp.register_script_message('call_button${button.id}', button${button.id})")
+        appendLine("function button${button.id}long()")
+        appendLine(button.longPressContent)
+        appendLine("end")
+        appendLine("mp.register_script_message('call_button${button.id}long', button${button.id}long)")
       }
     }
 
@@ -505,12 +509,12 @@ class PlayerActivity : AppCompatActivity() {
 
   internal fun onObserverEvent(property: String, value: String) {
     if (player.isExiting) return
-    when (property) {
+    when (property.substringBeforeLast("/")) {
       "aid" -> trackId(value)?.let { viewModel.updateAudio(it) }
       "sid" -> trackId(value)?.let { viewModel.updateSubtitle(it, viewModel.selectedSubtitles.value.second) }
       "secondary-sid" -> trackId(value)?.let { viewModel.updateSubtitle(viewModel.selectedSubtitles.value.first, it) }
       "hwdec", "hwdec-current" -> viewModel.getDecoder()
-      "user-data/mpvkt" -> viewModel.handleLuaInvocation(value)
+      "user-data/mpvkt" -> viewModel.handleLuaInvocation(property, value)
     }
   }
 

@@ -170,7 +170,7 @@ fun MoreSheet(
               FilterChip(
                 onClick = {},
                 label = { Text(text = button.title) },
-                selected = button.id == primaryCustomButtonId,
+                selected = false,
                 interactionSource = inputChipInteractionSource,
               )
               Box(
@@ -178,13 +178,7 @@ fun MoreSheet(
                   .matchParentSize()
                   .combinedClickable(
                     onClick = { viewModel.executeCustomButton(button) },
-                    onLongClick = {
-                      if (button.id == primaryCustomButtonId) {
-                        playerPreferences.primaryCustomButtonId.set(0)
-                      } else {
-                        playerPreferences.primaryCustomButtonId.set(button.id)
-                      }
-                    },
+                    onLongClick = { viewModel.executeCustomButtonLongClick(button) },
                     interactionSource = inputChipInteractionSource,
                     indication = null,
                   )
