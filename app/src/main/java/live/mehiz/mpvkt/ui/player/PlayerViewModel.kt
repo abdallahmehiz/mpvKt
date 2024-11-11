@@ -470,9 +470,26 @@ class PlayerViewModel(
 
     when (property.substringAfterLast("/")) {
       "show_text" -> playerUpdate.update { PlayerUpdates.ShowText(data) }
-      "hide_ui" -> {
-        sheetShown.update { Sheets.None }
-        hideControls()
+      "toggle_ui" -> {
+        when (data) {
+          "show" -> showControls()
+          "toggle" -> {
+            if (controlsShown.value) hideControls() else showControls()
+          }
+          "hide" -> {
+            sheetShown.update { Sheets.None }
+            panelShown.update { Panels.None }
+            hideControls()
+          }
+        }
+      }
+      "show_panel" -> {
+        when (data) {
+          "subtitle_settings" -> panelShown.update { Panels.SubtitleSettings }
+          "subtitle_delay" -> panelShown.update { Panels.SubtitleDelay }
+          "audio_delay" -> panelShown.update { Panels.AudioDelay }
+          "video_filters" -> panelShown.update { Panels.VideoFilters }
+        }
       }
     }
 
