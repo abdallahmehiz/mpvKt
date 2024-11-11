@@ -42,10 +42,10 @@ import `is`.xyz.mpv.Utils
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import live.mehiz.mpvkt.database.MpvKtDatabase
 import live.mehiz.mpvkt.database.entities.CustomButtonEntity
 import live.mehiz.mpvkt.database.entities.PlaybackStateEntity
 import live.mehiz.mpvkt.databinding.PlayerLayoutBinding
+import live.mehiz.mpvkt.domain.playbackstate.repository.PlaybackStateRepository
 import live.mehiz.mpvkt.preferences.AdvancedPreferences
 import live.mehiz.mpvkt.preferences.AudioPreferences
 import live.mehiz.mpvkt.preferences.GesturePreferences
@@ -68,7 +68,7 @@ class PlayerActivity : AppCompatActivity() {
   private val viewModelModule: Module by lazy { module { viewModel { viewModel } } }
   private val binding by lazy { PlayerLayoutBinding.inflate(layoutInflater) }
   private val playerObserver by lazy { PlayerObserver(this) }
-  private val mpvKtDatabase: MpvKtDatabase by inject()
+  private val playbackStateRepository: PlaybackStateRepository by inject()
   val player by lazy { binding.player }
   val windowInsetsController by lazy { WindowCompat.getInsetsController(window, window.decorView) }
   val audioManager by lazy { getSystemService(Context.AUDIO_SERVICE) as AudioManager }
@@ -550,9 +550,9 @@ class PlayerActivity : AppCompatActivity() {
   private fun saveVideoPlaybackState(mediaTitle: String) {
     if (mediaTitle.isBlank()) return
     lifecycleScope.launch(Dispatchers.IO) {
-      val oldState = mpvKtDatabase.videoDataDao().getVideoDataByTitle(fileName)
+      val oldState = playbackStateRepository.getVideoDataByTitle(fileName)
       Log.d(TAG, "Saving playback state")
-      mpvKtDatabase.videoDataDao().upsert(
+      playbackStateRepository.upsert(
         PlaybackStateEntity(
           mediaTitle = mediaTitle,
           lastPosition = if (playerPreferences.savePositionOnQuit.get()) {
@@ -575,7 +575,7 @@ class PlayerActivity : AppCompatActivity() {
 
   private suspend fun loadVideoPlaybackState(mediaTitle: String) {
     if (mediaTitle.isBlank()) return
-    val state = mpvKtDatabase.videoDataDao().getVideoDataByTitle(mediaTitle)
+    val state = playbackStateRepository.getVideoDataByTitle(mediaTitle)
     val getDelay: (Int, Int?) -> Double = { preferenceDelay, stateDelay ->
       (stateDelay ?: preferenceDelay) / 1000.0
     }

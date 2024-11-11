@@ -11,11 +11,11 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import live.mehiz.mpvkt.database.entities.CustomButtonEntity
-import live.mehiz.mpvkt.database.repository.CustomButtonRepositoryImpl
+import live.mehiz.mpvkt.domain.custombuttons.repository.CustomButtonRepository
 import live.mehiz.mpvkt.preferences.PlayerPreferences
 
 class CustomButtonsScreenViewModel(
-  private val customButtonsRepository: CustomButtonRepositoryImpl,
+  private val customButtonsRepository: CustomButtonRepository,
   private val playerPreferences: PlayerPreferences
 ) : ViewModel() {
   private val _dialog = MutableStateFlow<CustomButtonDialog>(CustomButtonDialog.None)
