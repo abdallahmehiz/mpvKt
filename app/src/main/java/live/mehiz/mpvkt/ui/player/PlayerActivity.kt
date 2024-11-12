@@ -55,17 +55,12 @@ import live.mehiz.mpvkt.ui.player.controls.PlayerControls
 import live.mehiz.mpvkt.ui.theme.MpvKtTheme
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.dsl.viewModel
-import org.koin.core.context.loadKoinModules
-import org.koin.core.context.unloadKoinModules
-import org.koin.core.module.Module
-import org.koin.dsl.module
 import java.io.File
 
 @Suppress("TooManyFunctions")
 class PlayerActivity : AppCompatActivity() {
 
   private val viewModel: PlayerViewModel by lazy { PlayerViewModel(this) }
-  private val viewModelModule: Module by lazy { module { viewModel { viewModel } } }
   private val binding by lazy { PlayerLayoutBinding.inflate(layoutInflater) }
   private val playerObserver by lazy { PlayerObserver(this) }
   private val playbackStateRepository: PlaybackStateRepository by inject()
@@ -113,14 +108,15 @@ class PlayerActivity : AppCompatActivity() {
     setupMPV()
     setupAudio()
     setupMediaSession()
-    getPlayableUri(intent)?.let { player.playFile(it) }
+    getPlayableUri(intent)?.let(player::playFile)
     setIntentExtras(intent.extras)
     setOrientation()
-    loadKoinModules(viewModelModule)
 
     binding.controls.setContent {
       MpvKtTheme {
         PlayerControls(
+          viewModel = viewModel,
+          onBackPress = ::finish,
           modifier = Modifier.onGloballyPositioned {
             pipRect = it.boundsInWindow().toAndroidRect()
           },
@@ -146,7 +142,6 @@ class PlayerActivity : AppCompatActivity() {
       noisyReceiver.initialized = false
     }
 
-    unloadKoinModules(viewModelModule)
     MPVLib.removeObserver(playerObserver)
     MPVLib.destroy()
 
@@ -522,10 +517,7 @@ class PlayerActivity : AppCompatActivity() {
   internal fun onObserverEvent(property: String, value: Double) {
     if (player.isExiting) return
     when (property) {
-      "speed" -> {
-        if (viewModel.sheetShown.value == Sheets.PlaybackSpeed) return
-        viewModel.playbackSpeed.update { value.toFloat() }
-      }
+      "speed" -> viewModel.playbackSpeed.update { value.toFloat() }
       "video-params/aspect" -> if (isPipSupported) createPipParams()
     }
   }

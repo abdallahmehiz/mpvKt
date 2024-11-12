@@ -1,8 +1,6 @@
 package live.mehiz.mpvkt.ui.player.controls
 
-import android.R.attr.bottom
-import android.R.attr.end
-import android.R.attr.top
+import android.os.Build
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.FiniteAnimationSpec
@@ -40,6 +38,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -50,6 +49,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shadow
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -58,6 +58,7 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
+import `is`.xyz.mpv.MPVLib
 import `is`.xyz.mpv.Utils
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.delay
@@ -66,14 +67,20 @@ import live.mehiz.mpvkt.R
 import live.mehiz.mpvkt.preferences.AudioPreferences
 import live.mehiz.mpvkt.preferences.PlayerPreferences
 import live.mehiz.mpvkt.preferences.preference.collectAsState
+import live.mehiz.mpvkt.ui.custombuttons.getButtons
+import live.mehiz.mpvkt.ui.player.Panels
+import live.mehiz.mpvkt.ui.player.PlayerActivity
 import live.mehiz.mpvkt.ui.player.PlayerUpdates
 import live.mehiz.mpvkt.ui.player.PlayerViewModel
+import live.mehiz.mpvkt.ui.player.Sheets
+import live.mehiz.mpvkt.ui.player.VideoAspect
 import live.mehiz.mpvkt.ui.player.controls.components.BrightnessSlider
 import live.mehiz.mpvkt.ui.player.controls.components.ControlsButton
 import live.mehiz.mpvkt.ui.player.controls.components.DoubleSpeedPlayerUpdate
 import live.mehiz.mpvkt.ui.player.controls.components.SeekbarWithTimers
 import live.mehiz.mpvkt.ui.player.controls.components.TextPlayerUpdate
 import live.mehiz.mpvkt.ui.player.controls.components.VolumeSlider
+import live.mehiz.mpvkt.ui.player.controls.components.sheets.toFixed
 import live.mehiz.mpvkt.ui.theme.playerRippleConfiguration
 import live.mehiz.mpvkt.ui.theme.spacing
 import org.koin.compose.koinInject
@@ -84,11 +91,12 @@ val LocalPlayerButtonsClickEvent = staticCompositionLocalOf { {} }
 
 @OptIn(ExperimentalAnimationGraphicsApi::class, ExperimentalMaterial3Api::class)
 @Composable
-@Suppress("CyclomaticComplexMethod")
+@Suppress("CyclomaticComplexMethod", "ViewModelForwarding")
 fun PlayerControls(
+  viewModel: PlayerViewModel,
+  onBackPress: () -> Unit,
   modifier: Modifier = Modifier,
 ) {
-  val viewModel = koinInject<PlayerViewModel>()
   val spacing = MaterialTheme.spacing
   val playerPreferences = koinInject<PlayerPreferences>()
   val audioPreferences = koinInject<AudioPreferences>()
@@ -104,7 +112,33 @@ fun PlayerControls(
   val doubleTapSeekAmount by viewModel.doubleTapSeekAmount.collectAsState()
   var isSeeking by remember { mutableStateOf(false) }
   var resetControls by remember { mutableStateOf(true) }
+  val currentChapter by viewModel.currentChapter.collectAsState()
   val playerTimeToDisappear by playerPreferences.playerTimeToDisappear.collectAsState()
+  val onOpenSheet: (Sheets) -> Unit = {
+    viewModel.sheetShown.update { _ -> it }
+    if (it == Sheets.None) {
+      viewModel.showControls()
+    } else {
+      viewModel.hideControls()
+      viewModel.panelShown.update { Panels.None }
+    }
+  }
+  val onOpenPanel: (Panels) -> Unit = {
+    viewModel.panelShown.update { _ -> it }
+    if (it == Panels.None) {
+      viewModel.showControls()
+    } else {
+      viewModel.hideControls()
+      viewModel.sheetShown.update { Sheets.None }
+    }
+  }
+  val customButtons by viewModel.customButtons.collectAsState()
+  val primaryCustomButtonId by playerPreferences.primaryCustomButtonId.collectAsState()
+  val customButton by remember {
+    derivedStateOf {
+      customButtons.getButtons().firstOrNull { it.id == primaryCustomButtonId }
+    }
+  }
   LaunchedEffect(
     controlsShown,
     paused,
@@ -117,11 +151,14 @@ fun PlayerControls(
     }
   }
   val transparentOverlay by animateFloatAsState(
-    if (controlsShown && !areControlsLocked) .9f else 0f,
+    if (controlsShown && !areControlsLocked) .8f else 0f,
     animationSpec = playerControlsExitAnimationSpec(),
     label = "controls_transparent_overlay",
   )
-  GestureHandler(interactionSource = interactionSource)
+  GestureHandler(
+    viewModel = viewModel,
+    interactionSource = interactionSource,
+  )
   DoubleTapToSeekOvals(doubleTapSeekAmount, interactionSource)
   CompositionLocalProvider(
     LocalRippleConfiguration provides playerRippleConfiguration,
@@ -313,7 +350,7 @@ fun PlayerControls(
                   Utils.prettyTime(gestureSeekAmount!!.first + gestureSeekAmount!!.second),
                 ),
                 style = MaterialTheme.typography.headlineMedium.copy(
-                  shadow = Shadow(Color.Black, blurRadius = 5f)
+                  shadow = Shadow(Color.Black, blurRadius = 5f),
                 ),
                 fontWeight = FontWeight.Bold,
                 textAlign = TextAlign.Center,
@@ -329,7 +366,8 @@ fun PlayerControls(
                 .clickable(
                   interaction,
                   ripple(),
-                ) { viewModel.pauseUnpause() }
+                  onClick = viewModel::pauseUnpause,
+                )
                 .padding(MaterialTheme.spacing.medium),
               contentDescription = null,
             )
@@ -372,6 +410,7 @@ fun PlayerControls(
             chapters = viewModel.chapters.toImmutableList(),
           )
         }
+        val mediaTitle by viewModel.mediaTitle.collectAsState()
         AnimatedVisibility(
           controlsShown && !areControlsLocked,
           enter = if (!reduceMotion) {
@@ -392,8 +431,14 @@ fun PlayerControls(
             width = Dimension.fillToConstraints
             end.linkTo(topRightControls.start)
           },
-        ) { TopLeftPlayerControls() }
+        ) {
+          TopLeftPlayerControls(
+            mediaTitle = mediaTitle,
+            onBackClick = onBackPress,
+          )
+        }
         // Top right controls
+        val decoder by viewModel.currentDecoder.collectAsState()
         AnimatedVisibility(
           controlsShown && !areControlsLocked,
           enter = if (!reduceMotion) {
@@ -412,7 +457,21 @@ fun PlayerControls(
             top.linkTo(parent.top, spacing.medium)
             end.linkTo(parent.end)
           },
-        ) { TopRightPlayerControls() }
+        ) {
+          TopRightPlayerControls(
+            decoder = decoder,
+            onDecoderClick = { viewModel.cycleDecoders() },
+            onDecoderLongClick = { onOpenSheet(Sheets.Decoders) },
+            isChaptersVisible = viewModel.chapters.isNotEmpty(),
+            onChaptersClick = { onOpenSheet(Sheets.Chapters) },
+            onSubtitlesClick = { onOpenSheet(Sheets.SubtitleTracks) },
+            onSubtitlesLongClick = { onOpenPanel(Panels.SubtitleSettings) },
+            onAudioClick = { onOpenSheet(Sheets.AudioTracks) },
+            onAudioLongClick = { onOpenPanel(Panels.AudioDelay) },
+            onMoreClick = { onOpenSheet(Sheets.More) },
+            onMoreLongClick = { onOpenPanel(Panels.VideoFilters) },
+          )
+        }
         // Bottom right controls
         AnimatedVisibility(
           controlsShown && !areControlsLocked,
@@ -432,8 +491,31 @@ fun PlayerControls(
             bottom.linkTo(seekbar.top)
             end.linkTo(seekbar.end)
           },
-        ) { BottomRightPlayerControls() }
+        ) {
+          val activity = LocalContext.current as PlayerActivity
+          BottomRightPlayerControls(
+            customButton = customButton,
+            isPipAvailable = activity.isPipSupported,
+            onPipClick = {
+              if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                activity.enterPictureInPictureMode(activity.createPipParams())
+              } else {
+                activity.enterPictureInPictureMode()
+              }
+            },
+            onAspectClick = {
+              viewModel.changeVideoAspect(
+                when (aspectRatio) {
+                  VideoAspect.Fit -> VideoAspect.Stretch
+                  VideoAspect.Stretch -> VideoAspect.Crop
+                  VideoAspect.Crop -> VideoAspect.Fit
+                },
+              )
+            },
+          )
+        }
         // Bottom left controls
+        val playbackSpeed by viewModel.playbackSpeed.collectAsState()
         AnimatedVisibility(
           controlsShown && !areControlsLocked,
           enter = if (!reduceMotion) {
@@ -454,11 +536,62 @@ fun PlayerControls(
             width = Dimension.fillToConstraints
             end.linkTo(bottomRightControls.start)
           },
-        ) { BottomLeftPlayerControls() }
+        ) {
+          BottomLeftPlayerControls(
+            playbackSpeed,
+            currentChapter = currentChapter,
+            onLockControls = viewModel::lockControls,
+            onCycleRotation = viewModel::cycleScreenRotations,
+            onPlaybackSpeedChange = {
+              MPVLib.setPropertyDouble("speed", it.toDouble())
+            },
+            onOpenSheet = onOpenSheet,
+          )
+        }
       }
     }
-    PlayerSheets()
-    PlayerPanels()
+    val sheetShown by viewModel.sheetShown.collectAsState()
+    val subtitles by viewModel.subtitleTracks.collectAsState()
+    val selectedSubtitles by viewModel.selectedSubtitles.collectAsState()
+    val audioTracks by viewModel.audioTracks.collectAsState()
+    val selectedAudio by viewModel.selectedAudio.collectAsState()
+    val decoder by viewModel.currentDecoder.collectAsState()
+    val speed by viewModel.playbackSpeed.collectAsState()
+    val sleepTimerTimeRemaining by viewModel.remainingTime.collectAsState()
+    LaunchedEffect(sheetShown) {
+      println(sheetShown.name)
+    }
+    PlayerSheets(
+      sheetShown = sheetShown,
+      subtitles = subtitles.toImmutableList(),
+      selectedSubtitles = selectedSubtitles.toList().toImmutableList(),
+      onAddSubtitle = viewModel::addSubtitle,
+      onSelectSubtitle = viewModel::selectSub,
+      audioTracks = audioTracks.toImmutableList(),
+      selectedAudio = selectedAudio,
+      onAddAudio = viewModel::addAudio,
+      onSelectAudio = viewModel::selectAudio,
+      chapter = currentChapter,
+      chapters = viewModel.chapters.toImmutableList(),
+      onSeekToChapter = {
+        viewModel.selectChapter(it)
+        viewModel.unpause()
+      },
+      decoder = decoder,
+      onUpdateDecoder = viewModel::updateDecoder,
+      speed = speed,
+      onSpeedChange = { MPVLib.setPropertyDouble("speed", it.toFixed(2).toDouble()) },
+      sleepTimerTimeRemaining = sleepTimerTimeRemaining,
+      onStartSleepTimer = viewModel::startTimer,
+      buttons = customButtons.getButtons().toImmutableList(),
+      onOpenPanel = onOpenPanel,
+      onDismissRequest = { onOpenSheet(Sheets.None) },
+    )
+    val panel by viewModel.panelShown.collectAsState()
+    PlayerPanels(
+      panelShown = panel,
+      onDismissRequest = { onOpenPanel(Panels.None) },
+    )
   }
 }
 

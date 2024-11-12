@@ -562,14 +562,6 @@ class PlayerViewModel(
     }
   }
 
-  fun executeCustomButton(button: CustomButtonEntity) {
-    MPVLib.command(arrayOf("script-message", "call_button${button.id}"))
-  }
-
-  fun executeCustomButtonLongClick(button: CustomButtonEntity) {
-    MPVLib.command(arrayOf("script-message", "call_button${button.id}long"))
-  }
-
   override fun onCleared() {
     super.onCleared()
     viewModelScope.cancel()
@@ -584,4 +576,12 @@ data class Track(
 
 fun Float.normalize(inMin: Float, inMax: Float, outMin: Float, outMax: Float): Float {
   return (this - inMin) * (outMax - outMin) / (inMax - inMin) + outMin
+}
+
+fun CustomButtonEntity.execute() {
+  MPVLib.command(arrayOf("script-message", "call_button$id"))
+}
+
+fun CustomButtonEntity.executeLongClick() {
+  MPVLib.command(arrayOf("script-message", "call_button${id}long"))
 }

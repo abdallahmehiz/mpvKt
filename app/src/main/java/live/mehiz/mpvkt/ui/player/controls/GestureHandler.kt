@@ -53,10 +53,10 @@ import org.koin.compose.koinInject
 @Suppress("CyclomaticComplexMethod", "MultipleEmitters")
 @Composable
 fun GestureHandler(
+  viewModel: PlayerViewModel,
   interactionSource: MutableInteractionSource,
   modifier: Modifier = Modifier
 ) {
-  val viewModel = koinInject<PlayerViewModel>()
   val playerPreferences = koinInject<PlayerPreferences>()
   val audioPreferences = koinInject<AudioPreferences>()
   val panelShown by viewModel.panelShown.collectAsState()

@@ -1,6 +1,5 @@
 package live.mehiz.mpvkt.ui.player.controls.components.sheets
 
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -23,21 +22,18 @@ import androidx.compose.material3.InputChip
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import `is`.xyz.mpv.MPVLib
-import kotlinx.coroutines.flow.update
 import live.mehiz.mpvkt.R
 import live.mehiz.mpvkt.preferences.AudioPreferences
 import live.mehiz.mpvkt.preferences.PlayerPreferences
 import live.mehiz.mpvkt.preferences.preference.collectAsState
 import live.mehiz.mpvkt.presentation.components.PlayerSheet
 import live.mehiz.mpvkt.presentation.components.SliderItem
-import live.mehiz.mpvkt.ui.player.PlayerViewModel
 import live.mehiz.mpvkt.ui.theme.spacing
 import me.zhanghai.compose.preference.ProvidePreferenceLocals
 import me.zhanghai.compose.preference.SwitchPreference
@@ -45,18 +41,14 @@ import org.koin.compose.koinInject
 import kotlin.math.pow
 import kotlin.math.roundToInt
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun PlaybackSpeedSheet(
+  speed: Float,
+  onSpeedChange: (Float) -> Unit,
   onDismissRequest: () -> Unit,
   modifier: Modifier = Modifier,
 ) {
   val preferences = koinInject<PlayerPreferences>()
-  val viewModel = koinInject<PlayerViewModel>()
-  val currentSpeed by viewModel.playbackSpeed.collectAsState()
-  LaunchedEffect(currentSpeed) {
-    MPVLib.setPropertyDouble("speed", currentSpeed.toDouble())
-  }
   PlayerSheet(onDismissRequest = onDismissRequest) {
     Column(
       modifier
@@ -65,11 +57,9 @@ fun PlaybackSpeedSheet(
     ) {
       SliderItem(
         label = stringResource(id = R.string.player_sheets_speed_slider_label),
-        value = currentSpeed,
-        valueText = stringResource(id = R.string.player_speed, currentSpeed),
-        onChange = { newSpeed ->
-          viewModel.playbackSpeed.update { newSpeed.toFixed(2) }
-        },
+        value = speed,
+        valueText = stringResource(id = R.string.player_speed, speed),
+        onChange = onSpeedChange,
         max = 6f,
         min = 0.01f,
       )
@@ -93,19 +83,20 @@ fun PlaybackSpeedSheet(
         ) {
           items(
             playbackSpeedPresets.map { it.toFloat() }.sorted(),
+            key = { it }
           ) {
             InputChip(
-              selected = currentSpeed == it,
-              onClick = { viewModel.playbackSpeed.update { _ -> it } },
+              selected = speed == it,
+              onClick = { onSpeedChange(it) },
               label = { Text(stringResource(R.string.player_speed, it)) },
               modifier = Modifier
-                .animateItemPlacement(),
+                .animateItem(),
               trailingIcon = {
                 Icon(
                   Icons.Default.Close,
                   null,
                   modifier = Modifier
-                    .clickable { preferences.speedPresets.set(playbackSpeedPresets.minus(it.toString())) },
+                    .clickable { preferences.speedPresets.set(playbackSpeedPresets.minus(it.toFixed(2).toString())) },
                 )
               },
             )
@@ -113,7 +104,7 @@ fun PlaybackSpeedSheet(
         }
         FilledTonalIconButton(
           onClick = {
-            preferences.speedPresets.set(playbackSpeedPresets.plus(currentSpeed.toString()))
+            preferences.speedPresets.set(playbackSpeedPresets.plus(speed.toFixed(2).toString()))
           },
         ) {
           Icon(Icons.Default.Add, null)
@@ -139,17 +130,14 @@ fun PlaybackSpeedSheet(
       ) {
         Button(
           modifier = Modifier.weight(1f),
-          onClick = {
-            preferences.defaultSpeed.set(currentSpeed)
-          },
+          onClick = { preferences.defaultSpeed.set(speed) },
         ) {
           Text(text = stringResource(id = R.string.player_sheets_speed_make_default))
         }
         FilledIconButton(
           onClick = {
             preferences.defaultSpeed.delete()
-            viewModel.playbackSpeed.update { 1f }
-            MPVLib.setPropertyDouble("speed", 1.0)
+            onSpeedChange(1f)
           },
         ) {
           Icon(imageVector = Icons.Default.RestartAlt, contentDescription = null)

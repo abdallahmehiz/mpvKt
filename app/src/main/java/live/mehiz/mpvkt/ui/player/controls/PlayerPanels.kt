@@ -12,15 +12,11 @@ import androidx.compose.material3.CardColors
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import kotlinx.coroutines.flow.update
 import live.mehiz.mpvkt.preferences.PlayerPreferences
 import live.mehiz.mpvkt.ui.player.Panels
-import live.mehiz.mpvkt.ui.player.PlayerViewModel
 import live.mehiz.mpvkt.ui.player.controls.components.panels.AudioDelayPanel
 import live.mehiz.mpvkt.ui.player.controls.components.panels.SubtitleDelayPanel
 import live.mehiz.mpvkt.ui.player.controls.components.panels.SubtitleSettingsPanel
@@ -28,15 +24,11 @@ import live.mehiz.mpvkt.ui.player.controls.components.panels.VideoFiltersPanel
 import org.koin.compose.koinInject
 
 @Composable
-fun PlayerPanels(modifier: Modifier = Modifier) {
-  val viewModel = koinInject<PlayerViewModel>()
-
-  val panelShown by viewModel.panelShown.collectAsState()
-  val onDismissRequest: () -> Unit = {
-    viewModel.panelShown.update { Panels.None }
-    viewModel.showControls()
-  }
-
+fun PlayerPanels(
+  panelShown: Panels,
+  onDismissRequest: () -> Unit,
+  modifier: Modifier = Modifier,
+) {
   AnimatedContent(
     targetState = panelShown,
     label = "panels",
@@ -50,20 +42,15 @@ fun PlayerPanels(modifier: Modifier = Modifier) {
     when (currentPanel) {
       Panels.None -> { Box(Modifier.fillMaxHeight()) }
       Panels.SubtitleSettings -> {
-        viewModel.hideControls()
         SubtitleSettingsPanel(onDismissRequest)
       }
       Panels.SubtitleDelay -> {
-        viewModel.hideControls()
         SubtitleDelayPanel(onDismissRequest)
       }
       Panels.AudioDelay -> {
-        viewModel.hideControls()
         AudioDelayPanel(onDismissRequest)
       }
-
       Panels.VideoFilters -> {
-        viewModel.hideControls()
         VideoFiltersPanel(onDismissRequest)
       }
     }

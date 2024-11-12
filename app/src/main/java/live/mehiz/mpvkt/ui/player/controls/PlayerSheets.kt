@@ -1,39 +1,56 @@
 package live.mehiz.mpvkt.ui.player.controls
 
+import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
+import dev.vivvvek.seeker.Segment
+import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
-import kotlinx.coroutines.flow.update
-import live.mehiz.mpvkt.ui.custombuttons.getButtons
+import live.mehiz.mpvkt.database.entities.CustomButtonEntity
+import live.mehiz.mpvkt.ui.player.Decoder
 import live.mehiz.mpvkt.ui.player.Panels
-import live.mehiz.mpvkt.ui.player.PlayerViewModel
 import live.mehiz.mpvkt.ui.player.Sheets
+import live.mehiz.mpvkt.ui.player.Track
 import live.mehiz.mpvkt.ui.player.controls.components.sheets.AudioTracksSheet
 import live.mehiz.mpvkt.ui.player.controls.components.sheets.ChaptersSheet
 import live.mehiz.mpvkt.ui.player.controls.components.sheets.DecodersSheet
 import live.mehiz.mpvkt.ui.player.controls.components.sheets.MoreSheet
 import live.mehiz.mpvkt.ui.player.controls.components.sheets.PlaybackSpeedSheet
 import live.mehiz.mpvkt.ui.player.controls.components.sheets.SubtitlesSheet
-import org.koin.compose.koinInject
 
 @Composable
-fun PlayerSheets() {
-  val viewModel = koinInject<PlayerViewModel>()
-  val subtitles by viewModel.subtitleTracks.collectAsState()
-  val selectedSubs by viewModel.selectedSubtitles.collectAsState()
-  val audioTracks by viewModel.audioTracks.collectAsState()
-  val selectedAudio by viewModel.selectedAudio.collectAsState()
-  val sheetShown by viewModel.sheetShown.collectAsState()
-  val buttons by viewModel.customButtons.collectAsState()
+fun PlayerSheets(
+  sheetShown: Sheets,
 
-  val onDismissRequest: () -> Unit = {
-    viewModel.sheetShown.update { Sheets.None }
-    viewModel.showControls()
-  }
+  // subtitles sheet
+  subtitles: ImmutableList<Track>,
+  selectedSubtitles: ImmutableList<Int>,
+  onAddSubtitle: (Uri) -> Unit,
+  onSelectSubtitle: (Int) -> Unit,
+  // audio sheet
+  audioTracks: ImmutableList<Track>,
+  selectedAudio: Int,
+  onAddAudio: (Uri) -> Unit,
+  onSelectAudio: (Int) -> Unit,
+  // chapters sheet
+  chapter: Segment?,
+  chapters: ImmutableList<Segment>,
+  onSeekToChapter: (Int) -> Unit,
+  // Decoders sheet
+  decoder: Decoder,
+  onUpdateDecoder: (Decoder) -> Unit,
+  // Speed sheet
+  speed: Float,
+  onSpeedChange: (Float) -> Unit,
+  // More sheet
+  sleepTimerTimeRemaining: Int,
+  onStartSleepTimer: (Int) -> Unit,
+  buttons: ImmutableList<CustomButtonEntity>,
 
+  onOpenPanel: (Panels) -> Unit,
+  onDismissRequest: () -> Unit,
+) {
   when (sheetShown) {
     Sheets.None -> {}
     Sheets.SubtitleTracks -> {
@@ -41,21 +58,15 @@ fun PlayerSheets() {
         ActivityResultContracts.OpenDocument(),
       ) {
         if (it == null) return@rememberLauncherForActivityResult
-        viewModel.addSubtitle(it)
+        onAddSubtitle(it)
       }
       SubtitlesSheet(
         tracks = subtitles.toImmutableList(),
-        selectedTracks = selectedSubs.toList().toImmutableList(),
-        onSelect = { viewModel.selectSub(it) },
+        selectedTracks = selectedSubtitles,
+        onSelect = onSelectSubtitle,
         onAddSubtitle = { subtitlesPicker.launch(arrayOf("*/*")) },
-        onOpenSubtitleSettings = {
-          viewModel.panelShown.update { Panels.SubtitleSettings }
-          onDismissRequest()
-        },
-        onOpenSubtitleDelay = {
-          viewModel.panelShown.update { Panels.SubtitleDelay }
-          onDismissRequest()
-        },
+        onOpenSubtitleSettings = { onOpenPanel(Panels.SubtitleSettings) },
+        onOpenSubtitleDelay = { onOpenPanel(Panels.SubtitleDelay) },
         onDismissRequest = onDismissRequest,
       )
     }
@@ -65,57 +76,52 @@ fun PlayerSheets() {
         ActivityResultContracts.OpenDocument(),
       ) {
         if (it == null) return@rememberLauncherForActivityResult
-        viewModel.addAudio(it)
+        onAddAudio(it)
       }
       AudioTracksSheet(
-        audioTracks.toImmutableList(),
-        selectedAudio,
-        { viewModel.selectAudio(it) },
-        { audioPicker.launch(arrayOf("*/*")) },
-        onOpenDelayPanel = {
-          viewModel.panelShown.update { Panels.AudioDelay }
-          onDismissRequest()
-        },
+        tracks = audioTracks,
+        selectedId = selectedAudio,
+        onSelect = onSelectAudio,
+        onAddAudioTrack = { audioPicker.launch(arrayOf("*/*")) },
+        onOpenDelayPanel = { onOpenPanel(Panels.AudioDelay) },
         onDismissRequest,
       )
     }
 
     Sheets.Chapters -> {
-      val chapter by viewModel.currentChapter.collectAsState()
+      if (chapter == null) return
       ChaptersSheet(
-        viewModel.chapters.toImmutableList(),
-        currentChapter = chapter ?: viewModel.chapters[0],
-        onClick = {
-          viewModel.selectChapter(viewModel.chapters.indexOf(it))
-          onDismissRequest()
-          viewModel.unpause()
-        },
+        chapters,
+        currentChapter = chapter,
+        onClick = { onSeekToChapter(chapters.indexOf(chapter)) },
         onDismissRequest,
       )
     }
 
     Sheets.Decoders -> {
-      val currentDecoder by viewModel.currentDecoder.collectAsState()
       DecodersSheet(
-        selectedDecoder = currentDecoder,
-        onSelect = { viewModel.updateDecoder(it) },
+        selectedDecoder = decoder,
+        onSelect = onUpdateDecoder,
         onDismissRequest,
       )
     }
 
     Sheets.More -> {
       MoreSheet(
-        onDismissRequest,
-        onEnterFiltersPanel = {
-          viewModel.panelShown.update { Panels.VideoFilters }
-          onDismissRequest()
-        },
-        customButtons = buttons.getButtons(),
+        remainingTime = sleepTimerTimeRemaining,
+        onStartTimer = onStartSleepTimer,
+        onDismissRequest = onDismissRequest,
+        onEnterFiltersPanel = { onOpenPanel(Panels.VideoFilters) },
+        customButtons = buttons,
       )
     }
 
     Sheets.PlaybackSpeed -> {
-      PlaybackSpeedSheet(onDismissRequest = onDismissRequest)
+      PlaybackSpeedSheet(
+        speed,
+        onSpeedChange = onSpeedChange,
+        onDismissRequest = onDismissRequest
+      )
     }
   }
 }
