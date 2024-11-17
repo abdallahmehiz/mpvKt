@@ -558,9 +558,6 @@ fun PlayerControls(
     val decoder by viewModel.currentDecoder.collectAsState()
     val speed by viewModel.playbackSpeed.collectAsState()
     val sleepTimerTimeRemaining by viewModel.remainingTime.collectAsState()
-    LaunchedEffect(sheetShown) {
-      println(sheetShown.name)
-    }
     PlayerSheets(
       sheetShown = sheetShown,
       subtitles = subtitles.toImmutableList(),

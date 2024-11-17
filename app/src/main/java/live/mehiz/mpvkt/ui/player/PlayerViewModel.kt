@@ -10,12 +10,13 @@ import android.util.Log
 import android.widget.Toast
 import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.CreationExtras
 import dev.vivvvek.seeker.Segment
 import `is`.xyz.mpv.MPVLib
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -29,6 +30,14 @@ import live.mehiz.mpvkt.preferences.GesturePreferences
 import live.mehiz.mpvkt.preferences.PlayerPreferences
 import live.mehiz.mpvkt.ui.custombuttons.CustomButtonsUiState
 import org.koin.java.KoinJavaComponent.inject
+
+class PlayerViewModelProviderFactory(
+  private val activity: PlayerActivity,
+) : ViewModelProvider.Factory {
+  override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
+    return PlayerViewModel(activity) as T
+  }
+}
 
 @Suppress("TooManyFunctions")
 class PlayerViewModel(
@@ -560,11 +569,6 @@ class PlayerViewModel(
       }
       SingleActionGesture.None -> {}
     }
-  }
-
-  override fun onCleared() {
-    super.onCleared()
-    viewModelScope.cancel()
   }
 }
 

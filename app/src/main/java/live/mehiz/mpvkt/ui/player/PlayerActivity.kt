@@ -22,6 +22,7 @@ import android.view.KeyEvent
 import android.view.View
 import android.view.WindowManager
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.viewModels
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.ui.Modifier
@@ -54,13 +55,12 @@ import live.mehiz.mpvkt.preferences.SubtitlesPreferences
 import live.mehiz.mpvkt.ui.player.controls.PlayerControls
 import live.mehiz.mpvkt.ui.theme.MpvKtTheme
 import org.koin.android.ext.android.inject
-import org.koin.androidx.viewmodel.dsl.viewModel
 import java.io.File
 
 @Suppress("TooManyFunctions")
 class PlayerActivity : AppCompatActivity() {
 
-  private val viewModel: PlayerViewModel by lazy { PlayerViewModel(this) }
+  private val viewModel: PlayerViewModel by viewModels<PlayerViewModel> { PlayerViewModelProviderFactory(this) }
   private val binding by lazy { PlayerLayoutBinding.inflate(layoutInflater) }
   private val playerObserver by lazy { PlayerObserver(this) }
   private val playbackStateRepository: PlaybackStateRepository by inject()
@@ -142,6 +142,7 @@ class PlayerActivity : AppCompatActivity() {
       noisyReceiver.initialized = false
     }
 
+    player.isExiting = true
     MPVLib.removeObserver(playerObserver)
     MPVLib.destroy()
 
@@ -164,7 +165,6 @@ class PlayerActivity : AppCompatActivity() {
   override fun onStop() {
     viewModel.pause()
     saveVideoPlaybackState(fileName)
-    player.isExiting = true
     window.attributes.screenBrightness.let {
       if (playerPreferences.rememberBrightness.get() && it != -1f) {
         playerPreferences.defaultBrightness.set(it)
