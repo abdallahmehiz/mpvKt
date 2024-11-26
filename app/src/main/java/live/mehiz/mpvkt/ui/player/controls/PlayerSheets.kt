@@ -93,7 +93,7 @@ fun PlayerSheets(
       ChaptersSheet(
         chapters,
         currentChapter = chapter,
-        onClick = { onSeekToChapter(chapters.indexOf(chapter)) },
+        onClick = { onSeekToChapter(chapters.indexOf(it)) },
         onDismissRequest,
       )
     }
