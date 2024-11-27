@@ -3,6 +3,7 @@ package live.mehiz.mpvkt.ui.custombuttons
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.platform.LocalUriHandler
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import kotlinx.collections.immutable.toImmutableList
@@ -21,6 +22,7 @@ object CustomButtonsScreen : Screen() {
   @Composable
   override fun Content() {
     val navigator = LocalNavigator.currentOrThrow
+    val uriHandler = LocalUriHandler.current
     val viewModel = koinViewModel<CustomButtonsScreenViewModel>()
     val playerPreferences = koinInject<PlayerPreferences>()
 
@@ -37,6 +39,7 @@ object CustomButtonsScreen : Screen() {
       onTogglePrimary = viewModel::togglePrimary,
       onClickMoveUp = viewModel::moveUp,
       onClickMoveDown = viewModel::moveDown,
+      onClickFaq = { uriHandler.openUri(CUSTOM_BUTTONS_DOC_URL) },
       onNavigateBack = navigator::pop,
     )
 
@@ -82,3 +85,5 @@ sealed interface CustomButtonDialog {
   data class Edit(val customButton: CustomButtonEntity) : CustomButtonDialog
   data class Delete(val customButton: CustomButtonEntity) : CustomButtonDialog
 }
+
+private const val CUSTOM_BUTTONS_DOC_URL = "https://github.com/abdallahmehiz/mpvKt/blob/main/CUSTOMBUTTONS.md"

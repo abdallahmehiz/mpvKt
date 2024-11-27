@@ -583,9 +583,9 @@ fun Float.normalize(inMin: Float, inMax: Float, outMin: Float, outMax: Float): F
 }
 
 fun CustomButtonEntity.execute() {
-  MPVLib.command(arrayOf("script-message", "call_button$id"))
+  MPVLib.command(arrayOf("script-message", "call_button_$id"))
 }
 
 fun CustomButtonEntity.executeLongClick() {
-  MPVLib.command(arrayOf("script-message", "call_button${id}long"))
+  MPVLib.command(arrayOf("script-message", "call_button_${id}_long"))
 }

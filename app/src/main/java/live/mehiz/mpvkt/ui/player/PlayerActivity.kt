@@ -302,11 +302,11 @@ class PlayerActivity : AppCompatActivity() {
         appendLine("function button${button.id}()")
         appendLine(button.content)
         appendLine("end")
-        appendLine("mp.register_script_message('call_button${button.id}', button${button.id})")
+        appendLine("mp.register_script_message('call_button_${button.id}', button${button.id})")
         appendLine("function button${button.id}long()")
         appendLine(button.longPressContent)
         appendLine("end")
-        appendLine("mp.register_script_message('call_button${button.id}long', button${button.id}long)")
+        appendLine("mp.register_script_message('call_button_${button.id}_long', button${button.id}long)")
       }
     }
 
