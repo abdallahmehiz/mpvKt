@@ -473,6 +473,7 @@ fun PlayerControls(
           )
         }
         // Bottom right controls
+        val customButtonTitle by viewModel.primaryButtonTitle.collectAsState()
         AnimatedVisibility(
           controlsShown && !areControlsLocked,
           enter = if (!reduceMotion) {
@@ -495,6 +496,7 @@ fun PlayerControls(
           val activity = LocalContext.current as PlayerActivity
           BottomRightPlayerControls(
             customButton = customButton,
+            customButtonTitle = customButtonTitle,
             isPipAvailable = activity.isPipSupported,
             onPipClick = {
               if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {

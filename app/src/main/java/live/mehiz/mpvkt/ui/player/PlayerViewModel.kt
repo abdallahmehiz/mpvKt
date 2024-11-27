@@ -29,6 +29,7 @@ import live.mehiz.mpvkt.database.entities.CustomButtonEntity
 import live.mehiz.mpvkt.preferences.GesturePreferences
 import live.mehiz.mpvkt.preferences.PlayerPreferences
 import live.mehiz.mpvkt.ui.custombuttons.CustomButtonsUiState
+import live.mehiz.mpvkt.ui.custombuttons.getButtons
 import org.koin.java.KoinJavaComponent.inject
 
 class PlayerViewModelProviderFactory(
@@ -50,10 +51,20 @@ class PlayerViewModel(
   private val _customButtons = MutableStateFlow<CustomButtonsUiState>(CustomButtonsUiState.Loading)
   val customButtons = _customButtons.asStateFlow()
 
+  private val _primaryButtonTitle = MutableStateFlow("")
+  val primaryButtonTitle = _primaryButtonTitle.asStateFlow()
+
   init {
     viewModelScope.launch(Dispatchers.IO) {
       try {
         val buttons = mpvKtDatabase.customButtonDao().getCustomButtons().first()
+        buttons.firstOrNull { it.id == playerPreferences.primaryCustomButtonId.get() }?.let {
+          // If the button text is not empty, it has been set buy a lua script in which
+          // case we don't want to override it
+          if (_primaryButtonTitle.value.isEmpty()) {
+            setPrimaryCustomButtonTitle(it)
+          }
+        }
         activity.setupCustomButtons(buttons)
         _customButtons.update { _ -> CustomButtonsUiState.Success(buttons) }
       } catch (e: Exception) {
@@ -470,6 +481,7 @@ class PlayerViewModel(
     }
   }
 
+  @Suppress("CyclomaticComplexMethod")
   fun handleLuaInvocation(property: String, value: String) {
     val data = value
       .removePrefix("\"")
@@ -497,6 +509,14 @@ class PlayerViewModel(
           "subtitle_delay" -> panelShown.update { Panels.SubtitleDelay }
           "audio_delay" -> panelShown.update { Panels.AudioDelay }
           "video_filters" -> panelShown.update { Panels.VideoFilters }
+        }
+      }
+      "set_button_title" -> {
+        _primaryButtonTitle.update { _ -> data }
+      }
+      "reset_button_title" -> {
+        _customButtons.value.getButtons().firstOrNull { it.id == playerPreferences.primaryCustomButtonId.get() }?.let {
+          setPrimaryCustomButtonTitle(it)
         }
       }
     }
@@ -569,6 +589,10 @@ class PlayerViewModel(
       }
       SingleActionGesture.None -> {}
     }
+  }
+
+  fun setPrimaryCustomButtonTitle(button: CustomButtonEntity) {
+    _primaryButtonTitle.update { _ -> button.title }
   }
 }
 

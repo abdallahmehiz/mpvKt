@@ -23,4 +23,10 @@ end
 function mpvkt.show_video_filters()
     mp.set_property("user-data/mpvkt/show_panel", "video_filters")
 end
+function mpvkt.set_button_title(text)
+   mp.set_property("user-data/mpvkt/set_button_title", text)
+end
+function mpvkt.reset_button_title(text)
+    mp.set_property("user-data/mpvkt/reset_button_title", "unused")
+end
 return mpvkt

@@ -14,7 +14,6 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import live.mehiz.mpvkt.database.entities.CustomButtonEntity
@@ -28,6 +27,7 @@ import live.mehiz.mpvkt.ui.theme.spacing
 @Composable
 fun BottomRightPlayerControls(
   customButton: CustomButtonEntity?,
+  customButtonTitle: String,
   isPipAvailable: Boolean,
   onAspectClick: () -> Unit,
   onPipClick: () -> Unit,
@@ -39,7 +39,7 @@ fun BottomRightPlayerControls(
         modifier = Modifier.padding(end = MaterialTheme.spacing.smaller),
       ) {
         Button(onClick = {}) {
-          Text(text = customButton.title)
+          Text(text = customButtonTitle)
         }
         Box(
           modifier = Modifier
