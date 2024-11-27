@@ -214,6 +214,8 @@ class MPVView(context: Context, attributes: AttributeSet) : BaseMPVView(context,
     "user-data/mpvkt/show_text" to MPVLib.mpvFormat.MPV_FORMAT_STRING,
     "user-data/mpvkt/toggle_ui" to MPVLib.mpvFormat.MPV_FORMAT_STRING,
     "user-data/mpvkt/show_panel" to MPVLib.mpvFormat.MPV_FORMAT_STRING,
+    "user-data/mpvkt/set_button_title" to MPVLib.mpvFormat.MPV_FORMAT_STRING,
+    "user-data/mpvkt/reset_button_title" to MPVLib.mpvFormat.MPV_FORMAT_STRING,
   )
 
   private fun setupAudioOptions() {
