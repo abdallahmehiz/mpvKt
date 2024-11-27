@@ -144,6 +144,7 @@
     <string name="pref_custom_button_add_button">Add custom button</string>
     <string name="pref_custom_button_empty">You have no custom buttons. Tap the plus button to add custom buttons.</string>
     <string name="pref_custom_button_edit_button">Edit button</string>
+    <string name="pref_custom_button_edit_button_id">(ID: %d)</string>
     <string name="pref_custom_button_delete_button">Delete button</string>
     <string name="pref_custom_button_delete_confirmation">Do you wish to delete the button \"%s\"?</string>
 
