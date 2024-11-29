@@ -19,7 +19,7 @@ import live.mehiz.mpvkt.ui.theme.MpvKtTheme
 import org.koin.android.ext.android.inject
 
 class MainActivity : ComponentActivity() {
-  private val appearancePreferences by inject<AppearancePreferences>()
+  private val appearancePreferences by lazy { inject<AppearancePreferences>() }
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
