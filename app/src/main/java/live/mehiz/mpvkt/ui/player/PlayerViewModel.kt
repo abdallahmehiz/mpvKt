@@ -535,7 +535,7 @@ class PlayerViewModel(
       _doubleTapSeekAmount.value -= doubleTapToSeekDuration
     }
     _isSeekingForwards.value = false
-    seekBy(-doubleTapToSeekDuration)
+    seekBy(-doubleTapToSeekDuration, playerPreferences.preciseSeeking.get())
     if (playerPreferences.showSeekBarWhenSeeking.get()) showSeekBar()
   }
 
@@ -544,7 +544,7 @@ class PlayerViewModel(
       _doubleTapSeekAmount.value += doubleTapToSeekDuration
     }
     _isSeekingForwards.value = true
-    seekBy(doubleTapToSeekDuration)
+    seekBy(doubleTapToSeekDuration, playerPreferences.preciseSeeking.get())
     if (playerPreferences.showSeekBarWhenSeeking.get()) showSeekBar()
   }
 

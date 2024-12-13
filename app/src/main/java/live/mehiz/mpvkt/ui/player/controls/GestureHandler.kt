@@ -67,9 +67,11 @@ fun GestureHandler(
   val areControlsLocked by viewModel.areControlsLocked.collectAsState()
   val seekAmount by viewModel.doubleTapSeekAmount.collectAsState()
   val isSeekingForwards by viewModel.isSeekingForwards.collectAsState()
+  var isDoubleTapSeeking by remember { mutableStateOf(false) }
   LaunchedEffect(seekAmount) {
     delay(800)
     viewModel.updateSeekAmount(0)
+    isDoubleTapSeeking = false
     delay(100)
     viewModel.hideSeekBar()
   }
@@ -97,6 +99,7 @@ fun GestureHandler(
             if (controlsShown) viewModel.hideControls() else viewModel.showControls()
           },
           onDoubleTap = {
+            if (isDoubleTapSeeking) return@detectTapGestures
             if (it.x > size.width * 3 / 5) {
               if (!isSeekingForwards) viewModel.updateSeekAmount(0)
               viewModel.handleRightDoubleTap()
@@ -106,10 +109,22 @@ fun GestureHandler(
             } else {
               viewModel.handleCenterDoubleTap()
             }
+            isDoubleTapSeeking = true
           },
           onPress = {
             if (panelShown != Panels.None && !allowGesturesInPanels) {
               viewModel.panelShown.update { Panels.None }
+            }
+            if (isDoubleTapSeeking) {
+              if (it.x > size.width * 3 / 5) {
+                if (!isSeekingForwards) viewModel.updateSeekAmount(0)
+                viewModel.handleRightDoubleTap()
+              } else if (it.x < size.width * 2 / 5) {
+                if (isSeekingForwards) viewModel.updateSeekAmount(0)
+                viewModel.handleLeftDoubleTap()
+              } else {
+                viewModel.handleCenterDoubleTap()
+              }
             }
             val press = PressInteraction.Press(
               it.copy(x = if (it.x > size.width * 3 / 5) it.x - size.width * 0.6f else it.x),
