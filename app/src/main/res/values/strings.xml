@@ -234,6 +234,8 @@
 
     <string name="timer_picker_enter_timer">Enter time</string>
     <string name="timer_picker_pick_time">Pick time</string>
+    <string name="timer_title">Sleep timer</string>
+    <string name="timer_remaining">%s remaining</string>
 
     <string name="toast_sleep_timer_ended">Sleep timer ended</string>
 

@@ -1,5 +1,6 @@
 package live.mehiz.mpvkt.ui.player.controls.components.sheets
 
+import android.text.format.DateUtils
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
@@ -28,7 +29,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.IconToggleButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -37,7 +37,6 @@ import androidx.compose.material3.TimeInput
 import androidx.compose.material3.TimePicker
 import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -103,17 +102,30 @@ fun MoreSheet(
           horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.extraSmall),
         ) {
           var isSleepTimerDialogShown by remember { mutableStateOf(false) }
-          IconToggleButton(
-            checked = remainingTime > 0,
-            onCheckedChange = { isSleepTimerDialogShown = true },
-          ) {
-            Icon(Icons.Outlined.Timer, null)
-            if (isSleepTimerDialogShown) {
-              TimePickerDialog(
-                remainingTime = remainingTime,
-                onDismissRequest = { isSleepTimerDialogShown = false },
-                onTimeSelect = onStartTimer
+          TextButton(onClick = { isSleepTimerDialogShown = true }) {
+            Row(
+              verticalAlignment = Alignment.CenterVertically,
+              horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.extraSmall),
+            ) {
+              Icon(imageVector = Icons.Outlined.Timer, contentDescription = null)
+              Text(
+                text =
+                if (remainingTime == 0) {
+                  stringResource(R.string.timer_title)
+                } else {
+                  stringResource(
+                    R.string.timer_remaining,
+                    DateUtils.formatElapsedTime(remainingTime.toLong()),
+                  )
+                },
               )
+              if (isSleepTimerDialogShown) {
+                TimePickerDialog(
+                  remainingTime = remainingTime,
+                  onDismissRequest = { isSleepTimerDialogShown = false },
+                  onTimeSelect = onStartTimer,
+                )
+              }
             }
           }
           TextButton(onClick = onEnterFiltersPanel) {
