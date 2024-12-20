@@ -109,7 +109,6 @@ class PlayerActivity : AppCompatActivity() {
     setupAudio()
     setupMediaSession()
     getPlayableUri(intent)?.let(player::playFile)
-    setIntentExtras(intent.extras)
     setOrientation()
 
     binding.controls.setContent {
@@ -390,6 +389,20 @@ class PlayerActivity : AppCompatActivity() {
     }
     player.timePos = extras.getInt("position", 0) / 1000
 
+    // subtitles
+    if (extras.containsKey("subs")) {
+      val subList = Utils.getParcelableArray<Uri>(extras, "subs")
+      val subsToEnable = Utils.getParcelableArray<Uri>(extras, "subs.enable")
+
+      for (suburi in subList) {
+        val subfile = suburi.resolveUri(this) ?: continue
+        val flag = if (subsToEnable.any { it == suburi }) "select" else "auto"
+
+        Log.v(TAG, "Adding subtitles from intent extras: $subfile")
+        MPVLib.command(arrayOf("sub-add", subfile, flag))
+      }
+    }
+
     extras.getStringArray("headers")?.let { headers ->
       if (headers[0].startsWith("User-Agent", true)) MPVLib.setPropertyString("user-agent", headers[1])
       val headersString = headers.asSequence().drop(2).chunked(2).associate { it[0] to it[1] }
@@ -527,6 +540,7 @@ class PlayerActivity : AppCompatActivity() {
     when (eventId) {
       MPVLib.mpvEventId.MPV_EVENT_FILE_LOADED -> {
         fileName = getFileName(intent)
+        setIntentExtras(intent.extras)
         viewModel.mediaTitle.update {
           val mediaTitle = MPVLib.getPropertyString("media-title")
           if (mediaTitle.isBlank() || mediaTitle.isDigitsOnly()) fileName else mediaTitle
@@ -597,7 +611,7 @@ class PlayerActivity : AppCompatActivity() {
     Log.d(TAG, "setting return intent")
     setResult(
       RESULT_OK,
-      Intent().apply {
+      Intent(RESULT_INTENT).apply {
         player.timePos?.let { putExtra("position", it * 1000) }
         player.duration?.let { putExtra("duration", it * 1000) }
       },
@@ -816,6 +830,11 @@ class PlayerActivity : AppCompatActivity() {
     val filter = IntentFilter().apply { addAction(AudioManager.ACTION_AUDIO_BECOMING_NOISY) }
     registerReceiver(noisyReceiver, filter)
     noisyReceiver.initialized = true
+  }
+
+  companion object {
+    // action of result intent
+    private const val RESULT_INTENT = "live.mehiz.mpvKt.PlayerActivity"
   }
 }
 
