@@ -103,13 +103,14 @@ fun GestureHandler(
             if (it.x > size.width * 3 / 5) {
               if (!isSeekingForwards) viewModel.updateSeekAmount(0)
               viewModel.handleRightDoubleTap()
+              isDoubleTapSeeking = true
             } else if (it.x < size.width * 2 / 5) {
               if (isSeekingForwards) viewModel.updateSeekAmount(0)
               viewModel.handleLeftDoubleTap()
+              isDoubleTapSeeking = true
             } else {
               viewModel.handleCenterDoubleTap()
             }
-            isDoubleTapSeeking = true
           },
           onPress = {
             if (panelShown != Panels.None && !allowGesturesInPanels) {
