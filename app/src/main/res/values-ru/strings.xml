@@ -22,7 +22,7 @@
     <string name="pref_appearance_darkmode_light">Светлая</string>
     <string name="pref_appearance_darkmode_dark">Тёмная</string>
     <string name="pref_appearance_material_you_title">Material You</string>
-    <string name="pref_appearance_material_you_summary">Включить динамические цвета Material You</string>
+    <string name="pref_appearance_material_you_summary">Включить динамические цвета</string>
     <string name="pref_appearance_material_you_summary_disabled">Доступно только для Android 12 и новее.</string>
 
     <string name="pref_player">Плеер</string>
@@ -136,7 +136,9 @@
     <string name="pref_custom_button_action_add_title_text">Заголовок</string>
     <string name="pref_custom_button_action_add_already_exists">Кнопка уже существует!</string>
     <string name="pref_custom_button_action_add_required">*обязательный</string>
+    <string name="pref_custom_button_action_add_optional">(необязательный)</string>
     <string name="pref_custom_button_action_add_content_text">Lua код</string>
+    <string name="pref_custom_button_action_add_long_press_text">Lua код (при долгом нажатии)</string>
     <string name="pref_custom_button_add_button">Добавить пользовательскую кнопку</string>
     <string name="pref_custom_button_empty">У вас нет пользовательских кнопок. Нажмите кнопку плюс, чтобы добавить пользовательские кнопки.</string>
     <string name="pref_custom_button_edit_button">Редактировать кнопку</string>
@@ -224,6 +226,8 @@
 
     <string name="timer_picker_enter_timer">Введите время</string>
     <string name="timer_picker_pick_time">Выберите время</string>
+    <string name="timer_title">Таймер сна</string>
+    <string name="timer_remaining">%s осталось</string>
 
     <string name="toast_sleep_timer_ended">Таймер сна закончился</string>
     <string name="swap_the_volume_and_brightness_slider">Поменять местами панель громкости и яркости</string>
