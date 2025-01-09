@@ -22,7 +22,7 @@
     <string name="pref_appearance_darkmode_light">Светлая</string>
     <string name="pref_appearance_darkmode_dark">Тёмная</string>
     <string name="pref_appearance_material_you_title">Material You</string>
-    <string name="pref_appearance_material_you_summary">Включить динамические цвета Material You</string>
+    <string name="pref_appearance_material_you_summary">Включить динамические цвета</string>
     <string name="pref_appearance_material_you_summary_disabled">Доступно только для Android 12 и новее.</string>
 
     <string name="pref_player">Плеер</string>
@@ -64,6 +64,28 @@
     <string name="pref_player_controls_show_chapters_summary">Появляется только если в видео есть главы</string>
     <string name="pref_player_display_show_status_bar">Показывать строку состояния системы с элементами управления</string>
 
+    <string name="pref_player_display">Дисплей</string>
+    <string name="pref_player_display_panel_opacity">Непрозрачность панели</string>
+    <string name="pref_player_display_panel_transparency_summary">%d%%</string>
+
+    <string name="pref_gesture">Жесты</string>
+    <string name="pref_gesture_summary">Двойное нажатие, управление мультимедиа</string>
+    <string name="pref_gesture_double_tap_title">Двойное нажатие</string>
+    <string name="pref_gesture_double_tap_none">Нет</string>
+    <string name="pref_gesture_double_tap_seek">Перемотка</string>
+    <string name="pref_gesture_double_tap_play">Воспроизведение/Пауза</string>
+    <string name="pref_gesture_double_tap_custom">Пользовательский</string>
+    <string name="pref_gesture_double_tap_left_title">Двойное нажатие (слева)</string>
+    <string name="pref_gesture_double_tap_center_title">Двойное нажатие (центр)</string>
+    <string name="pref_gesture_double_tap_right_title">Двойное нажатие (справа)</string>
+    <string name="pref_gesture_double_tap_custom_info">Когда жест нажатия установлен на "Пользовательский", его можно привязать через input.conf. Коды клавиш: 0x10001 слева, 0x10002 центр, и 0x10003 справа.</string>
+
+    <string name="pref_gesture_media_title">Управление мультимедиа</string>
+    <string name="pref_gesture_media_previous">Предыдущий</string>
+    <string name="pref_gesture_media_play">Воспроизведение/Пауза</string>
+    <string name="pref_gesture_media_next">Следующий</string>
+    <string name="pref_gesture_media_custom_info">Когда управление мультимедиа установлено на "Пользовательский", его можно привязать через input.conf. Коды клавиш: 0x10004 предыдущий, 0x10005 воспроизведение/пауза, и 0x10006 следующий.</string>
+
     <string name="pref_decoder">Декодер</string>
     <string name="pref_decoder_summary">Аппаратное декодирование, формат пикселя, дебандинг</string>
     <string name="pref_decoder_try_hw_dec_title">Пробывать аппаратное декодирование</string>
@@ -91,12 +113,12 @@
     <string name="pref_audio_channels_stereo_reversed">Обратное стерео</string>
     <string name="pref_audio_preferred_language">Язык(и) аудио которые будут выбраны по умолчанию для видео с несколькими аудиопотоками. Подойдут двух- или трёхбуквенные коды языков. Несколько значений можно разделить запятой.</string>
     <string name="pref_audio_volume_boost_cap">Предел усиления громкости</string>
-    
+
     <string name="pref_advanced">Дополнительно</string>
     <string name="pref_advanced_summary">Местоположение конфигурации, mpv.conf, input.conf</string>
     <string name="pref_advanced_mpv_conf_storage_location">выбрать место хранения конфигурации</string>
-    <string name="pref_advanced_mpv_conf">Править mpv.conf</string>
-    <string name="pref_advanced_input_conf">Править input.conf</string>
+    <string name="pref_advanced_mpv_conf">Редактировать mpv.conf</string>
+    <string name="pref_advanced_input_conf">Редактировать input.conf</string>
     <string name="pref_advanced_verbose_logging_title">Подробное журналирование</string>
     <string name="pref_advanced_verbose_logging_summary">Помогает при отладке, но может снизить производительность</string>
     <string name="pref_advanced_clear_playback_history">Очистить историю воспроизведения</string>
@@ -107,6 +129,21 @@
     <string name="pref_advanced_cleared_fonts_cache">Очищены кэшированные шрифты</string>
     <string name="pref_advanced_clear_mpv_conf_cache">Очистить кэшированные конфигурации mpv</string>
     <string name="pref_advanced_cleared_mpv_conf_cache">Очищены кэшированные конфигурации mpv</string>
+
+    <string name="pref_custom_buttons_title">Пользовательские кнопки</string>
+    <string name="pref_custom_buttons_summary">Запуск lua кода с помощью пользовательских кнопок</string>
+    <string name="pref_custom_button_action_add">Добавить</string>
+    <string name="pref_custom_button_action_add_title_text">Заголовок</string>
+    <string name="pref_custom_button_action_add_already_exists">Кнопка уже существует!</string>
+    <string name="pref_custom_button_action_add_required">*обязательный</string>
+    <string name="pref_custom_button_action_add_optional">(необязательный)</string>
+    <string name="pref_custom_button_action_add_content_text">Lua код</string>
+    <string name="pref_custom_button_action_add_long_press_text">Lua код (при долгом нажатии)</string>
+    <string name="pref_custom_button_add_button">Добавить пользовательскую кнопку</string>
+    <string name="pref_custom_button_empty">У вас нет пользовательских кнопок. Нажмите кнопку плюс, чтобы добавить пользовательские кнопки.</string>
+    <string name="pref_custom_button_edit_button">Редактировать кнопку</string>
+    <string name="pref_custom_button_delete_button">Удалить кнопку</string>
+    <string name="pref_custom_button_delete_confirmation">Вы хотите удалить кнопку \"%s\"?</string>
 
     <string name="pref_about_title">О приложении</string>
     <string name="pref_about_summary">Благодарности, лицензии</string>
@@ -174,6 +211,7 @@
     <string name="player_sheets_more_title">Больше</string>
     <string name="player_sheets_stats_page_title">Страница статистики по умолчанию</string>
     <string name="player_sheets_stats_page_chip">Стр %d</string>
+    <string name="player_sheets_custom_buttons_title">Пользовательские кнопки</string>
     <string name="player_seek_n_seconds">%d секунды</string>
 
     <string name="player_aspect_fit">Подогнать под экран</string>
@@ -188,6 +226,8 @@
 
     <string name="timer_picker_enter_timer">Введите время</string>
     <string name="timer_picker_pick_time">Выберите время</string>
+    <string name="timer_title">Таймер сна</string>
+    <string name="timer_remaining">%s осталось</string>
 
     <string name="toast_sleep_timer_ended">Таймер сна закончился</string>
     <string name="swap_the_volume_and_brightness_slider">Поменять местами панель громкости и яркости</string>
