@@ -273,6 +273,9 @@ fun GestureHandler(
 @Composable
 fun DoubleTapToSeekOvals(
   amount: Int,
+  showOvals: Boolean,
+  showSeekIcon: Boolean,
+  showSeekTime: Boolean,
   interactionSource: MutableInteractionSource,
   modifier: Modifier = Modifier,
 ) {
@@ -291,26 +294,30 @@ fun DoubleTapToSeekOvals(
             .fillMaxWidth(0.4f), // 2 fifths
           contentAlignment = Alignment.Center,
         ) {
-          Box(
-            modifier = Modifier
-              .fillMaxSize()
-              .clip(if (amount > 0) RightSideOvalShape else LeftSideOvalShape)
-              .background(Color.White.copy(alpha))
-              .indication(interactionSource, ripple()),
-          )
-          AndroidView(
-            factory = { DoubleTapSeekSecondsView(it, null) },
-            update = {
-              if (amount != 0) {
-                it.isForward = amount > 0
-                it.seconds = amount
-                it.visibility = View.VISIBLE
-                it.start()
-              } else {
-                it.visibility = View.GONE
-              }
-            },
-          )
+          if (showOvals) {
+            Box(
+              modifier = Modifier
+                .fillMaxSize()
+                .clip(if (amount > 0) RightSideOvalShape else LeftSideOvalShape)
+                .background(Color.White.copy(alpha))
+                .indication(interactionSource, ripple()),
+            )
+          }
+          if (showSeekIcon || showSeekTime) {
+            AndroidView(
+              factory = { DoubleTapSeekSecondsView(it, showSeekIcon, showSeekTime, null) },
+              update = {
+                if (amount != 0) {
+                  it.isForward = amount > 0
+                  it.seconds = amount
+                  it.visibility = View.VISIBLE
+                  it.start()
+                } else {
+                  it.visibility = View.GONE
+                }
+              },
+            )
+          }
         }
       }
     }

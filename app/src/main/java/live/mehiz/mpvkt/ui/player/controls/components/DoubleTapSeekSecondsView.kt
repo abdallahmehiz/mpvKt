@@ -5,6 +5,7 @@ import android.animation.ValueAnimator
 import android.content.Context
 import android.util.AttributeSet
 import android.view.LayoutInflater
+import android.view.View
 import android.widget.LinearLayout
 import androidx.annotation.DrawableRes
 import live.mehiz.mpvkt.R
@@ -15,7 +16,12 @@ import live.mehiz.mpvkt.databinding.PlayerDoubleTapSeekViewBinding
  * Originally from https://github.com/aniyomiorg/aniyomi
  * Thanks @Quickdesh for allowing me to use it
  */
-class DoubleTapSeekSecondsView(context: Context, attrs: AttributeSet?) : LinearLayout(context, attrs) {
+class DoubleTapSeekSecondsView(
+  context: Context,
+  showSeekIcon: Boolean,
+  showSeekTime: Boolean,
+  attrs: AttributeSet?
+) : LinearLayout(context, attrs) {
 
   var binding: PlayerDoubleTapSeekViewBinding
 
@@ -63,6 +69,8 @@ class DoubleTapSeekSecondsView(context: Context, attrs: AttributeSet?) : LinearL
     binding = PlayerDoubleTapSeekViewBinding.inflate(LayoutInflater.from(context), this)
     orientation = VERTICAL
     layoutParams = LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT)
+    binding.triangleContainer.visibility = if (showSeekIcon) View.VISIBLE else View.GONE
+    binding.doubleTapSeconds.visibility = if (showSeekTime) View.VISIBLE else View.GONE
   }
 
   fun start() {

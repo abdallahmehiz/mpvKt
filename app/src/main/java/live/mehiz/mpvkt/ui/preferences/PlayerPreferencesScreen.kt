@@ -123,6 +123,24 @@ object PlayerPreferencesScreen : Screen() {
             title = { Text(stringResource(R.string.pref_player_precise_seeking_title)) },
             summary = { Text(stringResource(R.string.pref_player_precise_seeking_summary)) }
           )
+          val showDoubleTapOvals by preferences.showDoubleTapOvals.collectAsState()
+          SwitchPreference(
+            value = showDoubleTapOvals,
+            onValueChange = preferences.showDoubleTapOvals::set,
+            title = { Text(stringResource(R.string.show_splash_ovals_on_double_tap_to_seek)) },
+          )
+          val showSeekIcon by preferences.showSeekIcon.collectAsState()
+          SwitchPreference(
+            value = showSeekIcon,
+            onValueChange = preferences.showSeekIcon::set,
+            title = { Text("Show seek icon") },
+          )
+          val showSeekTimeWhileSeeking by preferences.showSeekTimeWhileSeeking.collectAsState()
+          SwitchPreference(
+            value = showSeekTimeWhileSeeking,
+            onValueChange = preferences.showSeekTimeWhileSeeking::set,
+            title = { Text("Show seek time") },
+          )
           PreferenceCategory(
             title = { Text(stringResource(R.string.pref_player_gestures)) },
           )
