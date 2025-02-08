@@ -123,8 +123,10 @@ dependencies {
 
   implementation(libs.mpv.lib)
 
-  implementation(libs.seeker)
+  implementation(platform(libs.koin.bom))
   implementation(libs.bundles.koin)
+
+  implementation(libs.seeker)
   implementation(libs.bundles.voyager)
   implementation(libs.compose.prefs)
   implementation(libs.bundles.about.libs)
