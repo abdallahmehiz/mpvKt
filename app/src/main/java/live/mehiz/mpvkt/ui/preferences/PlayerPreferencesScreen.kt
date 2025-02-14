@@ -156,11 +156,24 @@ object PlayerPreferencesScreen : Screen() {
             onValueChange = preferences.volumeGesture::set,
             title = { Text(stringResource(R.string.pref_player_gestures_volume)) },
           )
-          val holdForDoubleSpeed by preferences.holdForDoubleSpeed.collectAsState()
-          SwitchPreference(
-            value = holdForDoubleSpeed,
-            onValueChange = preferences.holdForDoubleSpeed::set,
-            title = { Text(stringResource(R.string.pref_player_gestures_hold_for_double_speed)) },
+          val holdForMultipleSpeed by preferences.holdForMultipleSpeed.collectAsState()
+          SliderPreference(
+            value = holdForMultipleSpeed,
+            onValueChange = preferences.holdForMultipleSpeed::set,
+            title = { Text(stringResource(R.string.pref_player_gestures_hold_for_multiple_speed)) },
+            valueRange = 0f..6f,
+            valueSteps = 23,
+            summary = {
+              Text(
+                if (holdForMultipleSpeed == 0F) {
+                  stringResource(R.string.generic_disabled)
+                } else {
+                  holdForMultipleSpeed.toString()
+                },
+              )
+            },
+            onSliderValueChange = { preferences.holdForMultipleSpeed.set(it) },
+            sliderValue = holdForMultipleSpeed,
           )
           PreferenceCategory(
             title = { Text(stringResource(R.string.pref_player_controls)) },

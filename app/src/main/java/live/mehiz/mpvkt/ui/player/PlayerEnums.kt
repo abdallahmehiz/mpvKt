@@ -76,7 +76,7 @@ enum class Panels {
 
 sealed class PlayerUpdates {
   data object None : PlayerUpdates()
-  data object DoubleSpeed : PlayerUpdates()
+  data object MultipleSpeed : PlayerUpdates()
   data object AspectRatio : PlayerUpdates()
   data class ShowText(val value: String) : PlayerUpdates()
 }
