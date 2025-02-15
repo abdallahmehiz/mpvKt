@@ -27,13 +27,13 @@ import live.mehiz.mpvkt.preferences.PlayerPreferences
 import live.mehiz.mpvkt.preferences.preference.collectAsState
 import live.mehiz.mpvkt.presentation.Screen
 import live.mehiz.mpvkt.ui.player.PlayerOrientation
+import live.mehiz.mpvkt.ui.player.controls.components.sheets.toFixed
 import me.zhanghai.compose.preference.ListPreference
 import me.zhanghai.compose.preference.PreferenceCategory
 import me.zhanghai.compose.preference.ProvidePreferenceLocals
 import me.zhanghai.compose.preference.SliderPreference
 import me.zhanghai.compose.preference.SwitchPreference
 import org.koin.compose.koinInject
-import kotlin.math.roundToInt
 
 object PlayerPreferencesScreen : Screen() {
   @OptIn(ExperimentalMaterial3Api::class)
@@ -160,9 +160,7 @@ object PlayerPreferencesScreen : Screen() {
           val holdForMultipleSpeed by preferences.holdForMultipleSpeed.collectAsState()
           SliderPreference(
             value = holdForMultipleSpeed,
-            onValueChange = { newValue ->
-              preferences.holdForMultipleSpeed.set((newValue * 100).roundToInt() / 100f)
-            },
+            onValueChange = { preferences.holdForMultipleSpeed.set(it.toFixed(2)) },
             title = { Text(stringResource(R.string.pref_player_gestures_hold_for_multiple_speed)) },
             valueRange = 0f..6f,
             summary = {
@@ -171,12 +169,10 @@ object PlayerPreferencesScreen : Screen() {
                   stringResource(R.string.generic_disabled)
                 } else {
                   "%.2fx".format(holdForMultipleSpeed)
-                }
+                },
               )
             },
-            onSliderValueChange = { newValue ->
-              preferences.holdForMultipleSpeed.set((newValue * 100).roundToInt() / 100f)
-            },
+            onSliderValueChange = { preferences.holdForMultipleSpeed.set(it.toFixed(2)) },
             sliderValue = holdForMultipleSpeed,
           )
           PreferenceCategory(
