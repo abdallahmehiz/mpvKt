@@ -51,8 +51,8 @@ fun TextPlayerUpdate(
 
 @Composable
 fun MultipleSpeedPlayerUpdate(
-  modifier: Modifier = Modifier,
-  currentSpeed: Float
+  currentSpeed: Float,
+  modifier: Modifier = Modifier
 ) {
   PlayerUpdate(modifier) {
     Row(
