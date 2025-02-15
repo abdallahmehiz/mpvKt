@@ -33,6 +33,7 @@ import me.zhanghai.compose.preference.ProvidePreferenceLocals
 import me.zhanghai.compose.preference.SliderPreference
 import me.zhanghai.compose.preference.SwitchPreference
 import org.koin.compose.koinInject
+import kotlin.math.roundToInt
 
 object PlayerPreferencesScreen : Screen() {
   @OptIn(ExperimentalMaterial3Api::class)
@@ -159,20 +160,23 @@ object PlayerPreferencesScreen : Screen() {
           val holdForMultipleSpeed by preferences.holdForMultipleSpeed.collectAsState()
           SliderPreference(
             value = holdForMultipleSpeed,
-            onValueChange = preferences.holdForMultipleSpeed::set,
+            onValueChange = { newValue ->
+              preferences.holdForMultipleSpeed.set((newValue * 100).roundToInt() / 100f)
+            },
             title = { Text(stringResource(R.string.pref_player_gestures_hold_for_multiple_speed)) },
             valueRange = 0f..6f,
-            valueSteps = 23,
             summary = {
               Text(
                 if (holdForMultipleSpeed == 0F) {
                   stringResource(R.string.generic_disabled)
                 } else {
-                  holdForMultipleSpeed.toString()
-                },
+                  "%.2fx".format(holdForMultipleSpeed)
+                }
               )
             },
-            onSliderValueChange = { preferences.holdForMultipleSpeed.set(it) },
+            onSliderValueChange = { newValue ->
+              preferences.holdForMultipleSpeed.set((newValue * 100).roundToInt() / 100f)
+            },
             sliderValue = holdForMultipleSpeed,
           )
           PreferenceCategory(
