@@ -27,6 +27,7 @@ import live.mehiz.mpvkt.preferences.PlayerPreferences
 import live.mehiz.mpvkt.preferences.preference.collectAsState
 import live.mehiz.mpvkt.presentation.Screen
 import live.mehiz.mpvkt.ui.player.PlayerOrientation
+import live.mehiz.mpvkt.ui.player.controls.components.sheets.toFixed
 import me.zhanghai.compose.preference.ListPreference
 import me.zhanghai.compose.preference.PreferenceCategory
 import me.zhanghai.compose.preference.ProvidePreferenceLocals
@@ -156,11 +157,23 @@ object PlayerPreferencesScreen : Screen() {
             onValueChange = preferences.volumeGesture::set,
             title = { Text(stringResource(R.string.pref_player_gestures_volume)) },
           )
-          val holdForDoubleSpeed by preferences.holdForDoubleSpeed.collectAsState()
-          SwitchPreference(
-            value = holdForDoubleSpeed,
-            onValueChange = preferences.holdForDoubleSpeed::set,
-            title = { Text(stringResource(R.string.pref_player_gestures_hold_for_double_speed)) },
+          val holdForMultipleSpeed by preferences.holdForMultipleSpeed.collectAsState()
+          SliderPreference(
+            value = holdForMultipleSpeed,
+            onValueChange = { preferences.holdForMultipleSpeed.set(it.toFixed(2)) },
+            title = { Text(stringResource(R.string.pref_player_gestures_hold_for_multiple_speed)) },
+            valueRange = 0f..6f,
+            summary = {
+              Text(
+                if (holdForMultipleSpeed == 0F) {
+                  stringResource(R.string.generic_disabled)
+                } else {
+                  "%.2fx".format(holdForMultipleSpeed)
+                },
+              )
+            },
+            onSliderValueChange = { preferences.holdForMultipleSpeed.set(it.toFixed(2)) },
+            sliderValue = holdForMultipleSpeed,
           )
           PreferenceCategory(
             title = { Text(stringResource(R.string.pref_player_controls)) },

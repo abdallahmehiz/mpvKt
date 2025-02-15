@@ -50,7 +50,8 @@ fun TextPlayerUpdate(
 }
 
 @Composable
-fun DoubleSpeedPlayerUpdate(
+fun MultipleSpeedPlayerUpdate(
+  currentSpeed: Float,
   modifier: Modifier = Modifier
 ) {
   PlayerUpdate(modifier) {
@@ -58,7 +59,7 @@ fun DoubleSpeedPlayerUpdate(
       verticalAlignment = Alignment.Bottom,
     ) {
       Text(
-        stringResource(R.string.player_speed, 2f),
+        stringResource(R.string.player_speed, currentSpeed),
         fontWeight = FontWeight.Bold,
         fontSize = 20.sp,
       )
@@ -72,6 +73,6 @@ fun DoubleSpeedPlayerUpdate(
 
 @Composable
 @Preview
-private fun PreviewDoubleSpeedPlayerUpdate() {
-  DoubleSpeedPlayerUpdate()
+private fun PreviewMultipleSpeedPlayerUpdate() {
+  MultipleSpeedPlayerUpdate(currentSpeed = 2f)
 }

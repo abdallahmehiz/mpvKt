@@ -75,7 +75,7 @@ fun GestureHandler(
     delay(100)
     viewModel.hideSeekBar()
   }
-  val doubleSpeedGesture by playerPreferences.holdForDoubleSpeed.collectAsState()
+  val multipleSpeedGesture by playerPreferences.holdForMultipleSpeed.collectAsState()
   val brightnessGesture = playerPreferences.brightnessGesture.get()
   val volumeGesture by playerPreferences.volumeGesture.collectAsState()
   val swapVolumeAndBrightness by playerPreferences.swapVolumeAndBrightness.collectAsState()
@@ -142,13 +142,13 @@ fun GestureHandler(
             interactionSource.emit(PressInteraction.Release(press))
           },
           onLongPress = {
-            if (!doubleSpeedGesture || areControlsLocked) return@detectTapGestures
+            if (multipleSpeedGesture == 0f || areControlsLocked) return@detectTapGestures
             if (!isLongPressing && !viewModel.paused.value) {
               originalSpeed = viewModel.playbackSpeed.value
               haptics.performHapticFeedback(HapticFeedbackType.LongPress)
               isLongPressing = true
-              MPVLib.setPropertyDouble("speed", 2.0)
-              viewModel.playerUpdate.update { PlayerUpdates.DoubleSpeed }
+              MPVLib.setPropertyDouble("speed", multipleSpeedGesture.toDouble())
+              viewModel.playerUpdate.update { PlayerUpdates.MultipleSpeed }
             }
           },
         )
