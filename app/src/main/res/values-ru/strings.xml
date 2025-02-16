@@ -54,7 +54,7 @@
     <string name="pref_player_gestures_brightness">Жесты яркости</string>
     <string name="pref_player_gestures_volume">Жесты громкости</string>
     <string name="pref_player_gestures_hold_for_double_speed">Удерживать для 2x скорости</string>
-    <string name="pref_player_gestures_hold_for_multiple_speed">Удерживать для x скорости</string>
+    <string name="pref_player_gestures_hold_for_multiple_speed">Удерживать для разной - x скорости</string>
 
     <string name="pref_player_controls">Элементы управления</string>
     <string name="pref_player_controls_allow_gestures_in_panels">Разрешить жесты на панелях</string>
