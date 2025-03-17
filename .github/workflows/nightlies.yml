@@ -39,7 +39,7 @@ jobs:
           keyStorePassword: ${{ secrets.SIGNING_STORE_PASSWORD }}
           keyPassword: ${{ secrets.KEY_PASSWORD }}
         env:
-          BUILD_TOOLS_VERSION: "34.0.0"
+          BUILD_TOOLS_VERSION: "35.0.0"
 
       - name: Copy build artifacts
         run: |
@@ -56,25 +56,25 @@ jobs:
       - name: Upload the universal artifact
         uses: actions/upload-artifact@v4
         with:
-          path: ./mpvKt-universal*
+          path: ./mpvKt-universal.apk
           name: universal-r${{ env.COMMIT_COUNT }}
       - name: Upload the arm64-v8a artifact
         uses: actions/upload-artifact@v4
         with:
-          path: ./mpvKt-arm64-v8a*
+          path: ./mpvKt-arm64-v8a.apk
           name: arm64-v8a-r${{ env.COMMIT_COUNT }}
       - name: Upload the armeabi-v7a artifact
         uses: actions/upload-artifact@v4
         with:
-          path: ./mpvKt-armeabi-v7a*
+          path: ./mpvKt-armeabi-v7a.apk
           name: armeabi-v7a-r${{ env.COMMIT_COUNT }}
       - name: Upload the x86 artifact
         uses: actions/upload-artifact@v4
         with:
-          path: ./mpvKt-x86*
+          path: ./mpvKt-x86.apk
           name: x86-r${{ env.COMMIT_COUNT }}
       - name: Upload the x86_64 artifact
         uses: actions/upload-artifact@v4
         with:
-          path: ./mpvKt-x86_64*
+          path: ./mpvKt-x86_64.apk
           name: x86_64-r${{ env.COMMIT_COUNT }}
