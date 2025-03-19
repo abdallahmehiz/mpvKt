@@ -142,6 +142,9 @@ class PlayerActivity : AppCompatActivity() {
     }
 
     player.isExiting = true
+    if (isFinishing) {
+      MPVLib.command(arrayOf("stop"))
+    }
     MPVLib.removeObserver(playerObserver)
     MPVLib.destroy()
 
