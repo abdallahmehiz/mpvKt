@@ -4,9 +4,11 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -15,6 +17,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.focus.FocusRequester
@@ -25,17 +28,20 @@ import kotlinx.coroutines.delay
 import live.mehiz.mpvkt.R
 import live.mehiz.mpvkt.database.entities.CustomButtonEntity
 import live.mehiz.mpvkt.ui.theme.spacing
+import me.zhanghai.compose.preference.SwitchPreference
 import kotlin.time.Duration.Companion.seconds
 
 @Composable
 fun CustomButtonAddDialog(
   onDismissRequest: () -> Unit,
-  onAdd: (String, String, String) -> Unit,
+  onAdd: (String, String, String, Boolean, Boolean) -> Unit,
   buttonNames: ImmutableList<String>,
 ) {
   var title by remember { mutableStateOf("") }
   var content by remember { mutableStateOf("") }
   var longPressContent by remember { mutableStateOf("") }
+  var showInPlayer by remember { mutableStateOf(true) }
+  var showInMoreSheet by remember { mutableStateOf(true) }
 
   val focusRequester = remember { FocusRequester() }
   val titleAlreadyExists = remember(title) { buttonNames.contains(title) }
@@ -46,7 +52,7 @@ fun CustomButtonAddDialog(
       TextButton(
         enabled = title.isNotEmpty() && content.isNotEmpty() && !titleAlreadyExists,
         onClick = {
-          onAdd(title, content, longPressContent)
+          onAdd(title, content, longPressContent, showInPlayer, showInMoreSheet)
           onDismissRequest()
         }
       ) {
@@ -108,6 +114,34 @@ fun CustomButtonAddDialog(
           },
           minLines = 3,
         )
+
+        Row(
+          modifier = Modifier.fillMaxWidth(),
+          verticalAlignment = Alignment.CenterVertically
+        ) {
+          Text(
+            text = stringResource(id = R.string.pref_custom_button_show_in_player),
+            modifier = Modifier.weight(1f)
+          )
+          Switch(
+            checked = showInPlayer,
+            onCheckedChange = { showInPlayer = it }
+          )
+        }
+
+        Row(
+          modifier = Modifier.fillMaxWidth(),
+          verticalAlignment = Alignment.CenterVertically
+        ) {
+          Text(
+            text = stringResource(id = R.string.pref_custom_button_show_in_more_sheet),
+            modifier = Modifier.weight(1f)
+          )
+          Switch(
+            checked = showInMoreSheet,
+            onCheckedChange = { showInMoreSheet = it }
+          )
+        }
       }
     }
   )
@@ -153,13 +187,15 @@ fun CustomButtonDeleteDialog(
 @Composable
 fun CustomButtonEditDialog(
   onDismissRequest: () -> Unit,
-  onEdit: (String, String, String) -> Unit,
+  onEdit: (String, String, String, Boolean, Boolean) -> Unit,
   buttonNames: ImmutableList<String>,
   initialState: CustomButtonEntity,
 ) {
   var title by remember { mutableStateOf(initialState.title) }
   var content by remember { mutableStateOf(initialState.content) }
   var longPressContent by remember { mutableStateOf(initialState.longPressContent) }
+  var showInPlayer by remember { mutableStateOf(initialState.showInPlayer) }
+  var showInMoreSheet by remember { mutableStateOf(initialState.showInMoreSheet) }
 
   val focusRequester = remember { FocusRequester() }
   val titleAlreadyExists = remember(title) { buttonNames.contains(title) }
@@ -170,7 +206,7 @@ fun CustomButtonEditDialog(
       TextButton(
         enabled = title.isNotEmpty() && content.isNotEmpty() && !titleAlreadyExists,
         onClick = {
-          onEdit(title, content, longPressContent)
+          onEdit(title, content, longPressContent, showInPlayer, showInMoreSheet)
           onDismissRequest()
         }
       ) {
@@ -242,6 +278,34 @@ fun CustomButtonEditDialog(
           minLines = 3,
           maxLines = 6,
         )
+
+        Row(
+          modifier = Modifier.fillMaxWidth(),
+          verticalAlignment = Alignment.CenterVertically
+        ) {
+          Text(
+            text = stringResource(id = R.string.pref_custom_button_show_in_player),
+            modifier = Modifier.weight(1f)
+          )
+          Switch(
+            checked = showInPlayer,
+            onCheckedChange = { showInPlayer = it }
+          )
+        }
+
+        Row(
+          modifier = Modifier.fillMaxWidth(),
+          verticalAlignment = Alignment.CenterVertically
+        ) {
+          Text(
+            text = stringResource(id = R.string.pref_custom_button_show_in_more_sheet),
+            modifier = Modifier.weight(1f)
+          )
+          Switch(
+            checked = showInMoreSheet,
+            onCheckedChange = { showInMoreSheet = it }
+          )
+        }
       }
     }
   )

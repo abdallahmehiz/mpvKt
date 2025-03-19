@@ -10,5 +10,7 @@ data class CustomButtonEntity(
   val title: String,
   val content: String,
   val longPressContent: String,
+  val showInPlayer: Boolean,
+  val showInMoreSheet: Boolean,
   val index: Int,
 )
