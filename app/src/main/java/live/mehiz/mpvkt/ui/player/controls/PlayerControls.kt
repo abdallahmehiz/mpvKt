@@ -139,7 +139,7 @@ fun PlayerControls(
   val primaryCustomButtonId by playerPreferences.primaryCustomButtonId.collectAsState()
   val customButtonsList by remember {
     derivedStateOf {
-      customButtons.getButtons()
+      customButtons.getButtons().filter { it.showInPlayer }
     }
   }
   LaunchedEffect(
@@ -610,7 +610,7 @@ fun PlayerControls(
       onSpeedChange = { MPVLib.setPropertyDouble("speed", it.toFixed(2).toDouble()) },
       sleepTimerTimeRemaining = sleepTimerTimeRemaining,
       onStartSleepTimer = viewModel::startTimer,
-      buttons = customButtons.getButtons().toImmutableList(),
+      buttons = customButtons.getButtons().filter { it.showInMoreSheet }.toImmutableList(),
       onOpenPanel = onOpenPanel,
       onDismissRequest = { onOpenSheet(Sheets.None) },
     )
