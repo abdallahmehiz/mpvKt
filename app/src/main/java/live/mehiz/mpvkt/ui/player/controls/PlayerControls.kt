@@ -137,9 +137,9 @@ fun PlayerControls(
   }
   val customButtons by viewModel.customButtons.collectAsState()
   val primaryCustomButtonId by playerPreferences.primaryCustomButtonId.collectAsState()
-  val customButton by remember {
+  val customButtonsList by remember {
     derivedStateOf {
-      customButtons.getButtons().firstOrNull { it.id == primaryCustomButtonId }
+      customButtons.getButtons()
     }
   }
   LaunchedEffect(
@@ -188,7 +188,7 @@ fun PlayerControls(
         val (topLeftControls, topRightControls) = createRefs()
         val (volumeSlider, brightnessSlider) = createRefs()
         val unlockControlsButton = createRef()
-        val (bottomRightControls, bottomLeftControls) = createRefs()
+        val (bottomRightControls, bottomCenterControls, bottomLeftControls) = createRefs()
         val playerPauseButton = createRef()
         val seekbar = createRef()
         val (playerUpdates) = createRefs()
@@ -494,12 +494,11 @@ fun PlayerControls(
           modifier = Modifier.constrainAs(bottomRightControls) {
             bottom.linkTo(seekbar.top)
             end.linkTo(seekbar.end)
+            width = Dimension.wrapContent
           },
         ) {
           val activity = LocalContext.current as PlayerActivity
           BottomRightPlayerControls(
-            customButton = customButton,
-            customButtonTitle = customButtonTitle,
             isPipAvailable = activity.isPipSupported,
             onPipClick = {
               if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -538,8 +537,7 @@ fun PlayerControls(
           modifier = Modifier.constrainAs(bottomLeftControls) {
             bottom.linkTo(seekbar.top)
             start.linkTo(seekbar.start)
-            width = Dimension.fillToConstraints
-            end.linkTo(bottomRightControls.start)
+            width = Dimension.wrapContent
           },
         ) {
           BottomLeftPlayerControls(
@@ -551,6 +549,33 @@ fun PlayerControls(
               MPVLib.setPropertyDouble("speed", it.toDouble())
             },
             onOpenSheet = onOpenSheet,
+          )
+        }
+        // Bottom center controls
+        AnimatedVisibility(
+          visible = controlsShown && !areControlsLocked,
+          enter = if (!reduceMotion) {
+            slideInHorizontally(playerControlsEnterAnimationSpec()) { it } +
+              fadeIn(playerControlsEnterAnimationSpec())
+          } else {
+            fadeIn(playerControlsEnterAnimationSpec())
+          },
+          exit = if (!reduceMotion) {
+            slideOutHorizontally(playerControlsExitAnimationSpec()) { it } +
+              fadeOut(playerControlsExitAnimationSpec())
+          } else {
+            fadeOut(playerControlsExitAnimationSpec())
+          },
+          modifier = Modifier.constrainAs(bottomCenterControls) {
+            start.linkTo(bottomLeftControls.end)
+            end.linkTo(bottomRightControls.start)
+            bottom.linkTo(seekbar.top)
+            width = Dimension.fillToConstraints
+          }
+        ) {
+          BottomCenterPlayerControls(
+            customButtons = customButtonsList,
+            modifier = Modifier.padding(horizontal = MaterialTheme.spacing.small)
           )
         }
       }
