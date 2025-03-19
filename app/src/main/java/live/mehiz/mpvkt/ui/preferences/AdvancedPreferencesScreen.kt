@@ -4,6 +4,7 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Environment
 import android.widget.Toast
+import androidx.activity.compose.LocalActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Column
@@ -30,8 +31,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.util.fastJoinToString
 import androidx.documentfile.provider.DocumentFile
 import cafe.adriel.voyager.navigator.LocalNavigator
@@ -46,6 +49,7 @@ import live.mehiz.mpvkt.preferences.AdvancedPreferences
 import live.mehiz.mpvkt.preferences.preference.collectAsState
 import live.mehiz.mpvkt.presentation.Screen
 import live.mehiz.mpvkt.presentation.components.ConfirmDialog
+import live.mehiz.mpvkt.presentation.crash.CrashActivity
 import me.zhanghai.compose.preference.Preference
 import me.zhanghai.compose.preference.ProvidePreferenceLocals
 import me.zhanghai.compose.preference.SwitchPreference
@@ -65,7 +69,7 @@ object AdvancedPreferencesScreen : Screen() {
     val navigator = LocalNavigator.currentOrThrow
     val preferences = koinInject<AdvancedPreferences>()
     val fileManager = koinInject<FileManager>()
-
+    val scope = rememberCoroutineScope()
     Scaffold(
       topBar = {
         TopAppBar(
@@ -207,6 +211,21 @@ object AdvancedPreferencesScreen : Screen() {
             },
             summary = { if (inputConf.isNotBlank()) Text(inputConf.lines()[0]) },
           )
+          val activity = LocalActivity.currentOrThrow
+          val clipboard = LocalClipboardManager.current
+          Preference(
+            title = { Text(stringResource(R.string.pref_advanced_dump_logs_title)) },
+            summary = { Text(stringResource(R.string.pref_advanced_dump_logs_summary)) },
+            onClick = {
+              scope.launch(Dispatchers.IO) {
+                val deviceInfo = CrashActivity.collectDeviceInfo()
+                val logcat = CrashActivity.collectLogcat()
+
+                clipboard.setText(AnnotatedString(CrashActivity.concatLogs(deviceInfo, null, logcat)))
+                CrashActivity.shareLogs(deviceInfo, null, logcat, activity)
+              }
+            },
+          )
           val verboseLogging by preferences.verboseLogging.collectAsState()
           SwitchPreference(
             value = verboseLogging,
@@ -216,7 +235,6 @@ object AdvancedPreferencesScreen : Screen() {
           )
           var isConfirmDialogShown by remember { mutableStateOf(false) }
           val mpvKtDatabase = koinInject<MpvKtDatabase>()
-          val scope = rememberCoroutineScope()
           Preference(
             title = { Text(stringResource(R.string.pref_advanced_clear_playback_history)) },
             onClick = { isConfirmDialogShown = true },

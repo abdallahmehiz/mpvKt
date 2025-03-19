@@ -1,8 +1,5 @@
 package live.mehiz.mpvkt.ui.preferences
 
-import android.content.ClipData
-import android.content.ClipboardManager
-import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import androidx.compose.foundation.Image
@@ -27,9 +24,11 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
@@ -39,7 +38,7 @@ import compose.icons.simpleicons.Github
 import live.mehiz.mpvkt.BuildConfig
 import live.mehiz.mpvkt.R
 import live.mehiz.mpvkt.presentation.Screen
-import live.mehiz.mpvkt.presentation.crash.collectDeviceInfo
+import live.mehiz.mpvkt.presentation.crash.CrashActivity.Companion.collectDeviceInfo
 import live.mehiz.mpvkt.ui.theme.spacing
 import me.zhanghai.compose.preference.Preference
 import me.zhanghai.compose.preference.ProvidePreferenceLocals
@@ -49,6 +48,7 @@ object AboutScreen : Screen() {
   @Composable
   override fun Content() {
     val context = LocalContext.current
+    val clipboard = LocalClipboardManager.current
     val navigator = LocalNavigator.currentOrThrow
     Scaffold(
       topBar = {
@@ -97,8 +97,7 @@ object AboutScreen : Screen() {
               )
             },
             onClick = {
-              val clipboardManager = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-              clipboardManager.setPrimaryClip(ClipData.newPlainText("app_version_data", collectDeviceInfo()))
+              clipboard.setText(AnnotatedString(collectDeviceInfo()))
             },
           )
           Preference(
