@@ -56,6 +56,7 @@ import live.mehiz.mpvkt.ui.player.controls.PlayerControls
 import live.mehiz.mpvkt.ui.theme.MpvKtTheme
 import org.koin.android.ext.android.inject
 import java.io.File
+import androidx.core.net.toUri
 
 @Suppress("TooManyFunctions", "LargeClass")
 class PlayerActivity : AppCompatActivity() {
@@ -66,7 +67,7 @@ class PlayerActivity : AppCompatActivity() {
   private val playbackStateRepository: PlaybackStateRepository by inject()
   val player by lazy { binding.player }
   val windowInsetsController by lazy { WindowCompat.getInsetsController(window, window.decorView) }
-  val audioManager by lazy { getSystemService(Context.AUDIO_SERVICE) as AudioManager }
+  val audioManager by lazy { getSystemService(AUDIO_SERVICE) as AudioManager }
   private var mediaSession: MediaSession? = null
   private val playerPreferences: PlayerPreferences by inject()
   private val audioPreferences: AudioPreferences by inject()
@@ -126,7 +127,7 @@ class PlayerActivity : AppCompatActivity() {
 
   private fun getPlayableUri(intent: Intent): String? {
     val uri = parsePathFromIntent(intent)
-    return if (uri?.startsWith("content://") == true) Uri.parse(uri).openContentFd(this) else uri
+    return if (uri?.startsWith("content://") == true) uri.toUri().openContentFd(this) else uri
   }
 
   override fun onDestroy() {
@@ -261,7 +262,7 @@ class PlayerActivity : AppCompatActivity() {
   private fun copyMPVConfigFiles() {
     val applicationPath = filesDir.path
     try {
-      val mpvConf = fileManager.fromUri(Uri.parse(advancedPreferences.mpvConfStorageUri.get()))
+      val mpvConf = fileManager.fromUri(advancedPreferences.mpvConfStorageUri.get().toUri())
         ?: error("User hasn't set any mpvConfig directory")
       if (!fileManager.exists(mpvConf)) error("Couldn't access mpv configuration directory")
       fileManager.copyDirectoryWithContent(mpvConf, fileManager.fromPath(applicationPath), true)
@@ -323,7 +324,7 @@ class PlayerActivity : AppCompatActivity() {
   private fun copyMPVFonts() {
     try {
       val cachePath = cacheDir.path
-      val fontsDir = fileManager.fromUri(Uri.parse(subtitlesPreferences.fontsFolder.get()))
+      val fontsDir = fileManager.fromUri(subtitlesPreferences.fontsFolder.get().toUri())
         ?: error("User hasn't set any fonts directory")
       if (!fileManager.exists(fontsDir)) error("Couldn't access fonts directory")
 
@@ -423,7 +424,7 @@ class PlayerActivity : AppCompatActivity() {
           intent.getParcelableExtra<Uri>(Intent.EXTRA_STREAM)!!.resolveUri(this)
         } else {
           intent.getStringExtra(Intent.EXTRA_TEXT)?.let {
-            val uri = Uri.parse(it.trim())
+            val uri = it.trim().toUri()
             if (uri.isHierarchical && !uri.isRelative) uri.resolveUri(this) else null
           }
         }
@@ -435,7 +436,7 @@ class PlayerActivity : AppCompatActivity() {
 
   private fun getFileName(intent: Intent): String {
     val uri = if (intent.type == "text/plain") {
-      Uri.parse(intent.getStringExtra(Intent.EXTRA_TEXT))
+      intent.getStringExtra(Intent.EXTRA_TEXT)!!.toUri()
     } else {
       (intent.data ?: intent.getParcelableExtra(Intent.EXTRA_STREAM))
     }
@@ -823,9 +824,9 @@ class PlayerActivity : AppCompatActivity() {
               PlaybackState.ACTION_PAUSE or
               PlaybackState.ACTION_STOP or
               PlaybackState.ACTION_SKIP_TO_PREVIOUS or
-              PlaybackState.ACTION_SKIP_TO_NEXT
+              PlaybackState.ACTION_SKIP_TO_NEXT,
           )
-          .build()
+          .build(),
       )
       isActive = true
     }

@@ -60,6 +60,7 @@ import java.io.File
 import kotlin.io.path.deleteIfExists
 import kotlin.io.path.outputStream
 import kotlin.io.path.readLines
+import androidx.core.net.toUri
 
 object AdvancedPreferencesScreen : Screen() {
   @OptIn(ExperimentalMaterial3Api::class)
@@ -121,7 +122,7 @@ object AdvancedPreferencesScreen : Screen() {
               runCatching {
                 val uri = DocumentFile.fromTreeUri(
                   context,
-                  Uri.parse(mpvConfStorageLocation),
+                  mpvConfStorageLocation.toUri(),
                 )!!.findFile("mpv.conf")!!.uri
                 context.contentResolver.openInputStream(uri)?.copyTo(tempFile.outputStream())
                 preferences.mpvConf.set(tempFile.readLines().fastJoinToString("\n"))
@@ -145,7 +146,7 @@ object AdvancedPreferencesScreen : Screen() {
               preferences.mpvConf.set(it)
               File(context.filesDir.path, "mpv.conf").writeText(it)
               if (mpvConfStorageLocation.isNotBlank()) {
-                val tree = DocumentFile.fromTreeUri(context, Uri.parse(mpvConfStorageLocation))!!
+                val tree = DocumentFile.fromTreeUri(context, mpvConfStorageLocation.toUri())!!
                 val uri = if (tree.findFile("mpv.conf") == null) {
                   val conf = tree.createFile("text/plain", "mpv.conf")!!
                   conf.renameTo("mpv.conf")
@@ -170,7 +171,7 @@ object AdvancedPreferencesScreen : Screen() {
               runCatching {
                 val uri = DocumentFile.fromTreeUri(
                   context,
-                  Uri.parse(mpvConfStorageLocation),
+                  mpvConfStorageLocation.toUri(),
                 )!!.findFile("input.conf")!!.uri
                 context.contentResolver.openInputStream(uri)?.copyTo(tempFile.outputStream())
                 preferences.inputConf.set(tempFile.readLines().fastJoinToString("\n"))
@@ -194,7 +195,7 @@ object AdvancedPreferencesScreen : Screen() {
               preferences.inputConf.set(it)
               File(context.filesDir.path, "input.conf").writeText(it)
               if (mpvConfStorageLocation.isNotBlank()) {
-                val tree = DocumentFile.fromTreeUri(context, Uri.parse(mpvConfStorageLocation))!!
+                val tree = DocumentFile.fromTreeUri(context, mpvConfStorageLocation.toUri())!!
                 val uri = if (tree.findFile("input.conf") == null) {
                   val conf = tree.createFile("text/plain", "input.conf")!!
                   conf.renameTo("input.conf")

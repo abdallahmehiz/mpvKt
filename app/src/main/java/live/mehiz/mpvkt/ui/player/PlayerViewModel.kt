@@ -31,6 +31,7 @@ import live.mehiz.mpvkt.preferences.PlayerPreferences
 import live.mehiz.mpvkt.ui.custombuttons.CustomButtonsUiState
 import live.mehiz.mpvkt.ui.custombuttons.getButtons
 import org.koin.java.KoinJavaComponent.inject
+import androidx.core.net.toUri
 
 class PlayerViewModelProviderFactory(
   private val activity: PlayerActivity,
@@ -264,7 +265,7 @@ class PlayerViewModel(
   fun addAudio(uri: Uri) {
     val url = uri.toString()
     val path = if (url.startsWith("content://")) {
-      Uri.parse(url).openContentFd(activity)
+      url.toUri().openContentFd(activity)
     } else {
       url
     } ?: return
@@ -282,7 +283,7 @@ class PlayerViewModel(
   fun addSubtitle(uri: Uri) {
     val url = uri.toString()
     val path = if (url.startsWith("content://")) {
-      Uri.parse(url).openContentFd(activity)
+      url.toUri().openContentFd(activity)
     } else {
       url
     } ?: return

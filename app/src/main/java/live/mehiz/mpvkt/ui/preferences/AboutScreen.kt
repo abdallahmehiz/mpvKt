@@ -42,6 +42,7 @@ import live.mehiz.mpvkt.presentation.crash.CrashActivity.Companion.collectDevice
 import live.mehiz.mpvkt.ui.theme.spacing
 import me.zhanghai.compose.preference.Preference
 import me.zhanghai.compose.preference.ProvidePreferenceLocals
+import androidx.core.net.toUri
 
 object AboutScreen : Screen() {
   @OptIn(ExperimentalMaterial3Api::class)
@@ -110,7 +111,7 @@ object AboutScreen : Screen() {
               context.startActivity(
                 Intent(
                   Intent.ACTION_VIEW,
-                  Uri.parse(context.getString(R.string.privacy_policy_url)),
+                  context.getString(R.string.privacy_policy_url).toUri(),
                 ),
               )
             },
@@ -123,7 +124,7 @@ object AboutScreen : Screen() {
           IconButton(
             onClick = {
               context.startActivity(
-                Intent(Intent.ACTION_VIEW, Uri.parse(context.getString(R.string.github_repo_url))),
+                Intent(Intent.ACTION_VIEW, context.getString(R.string.github_repo_url).toUri()),
               )
             },
           ) {

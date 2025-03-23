@@ -59,6 +59,7 @@ import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import kotlin.math.abs
+import androidx.core.net.toUri
 
 data class FilePickerScreen(val uri: String) : Screen() {
 
@@ -81,7 +82,7 @@ data class FilePickerScreen(val uri: String) : Screen() {
       },
     ) { paddingValues ->
       FilePicker(
-        directory = fileManager.fromUri(Uri.parse(uri))!!,
+        directory = fileManager.fromUri(uri.toUri())!!,
         onNavigate = { newFile ->
           if (fileManager.isFile(newFile)) {
             HomeScreen.playFile(newFile.getFullPath(), context)
@@ -197,7 +198,7 @@ data class FilePickerScreen(val uri: String) : Screen() {
                 pluralStringResource(
                   id = R.plurals.plural_items,
                   count = items!!,
-                  items
+                  items,
                 )
               } else {
                 size!!

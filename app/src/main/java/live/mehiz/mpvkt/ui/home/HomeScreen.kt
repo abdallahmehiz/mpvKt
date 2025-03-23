@@ -46,6 +46,7 @@ import live.mehiz.mpvkt.presentation.Screen
 import live.mehiz.mpvkt.ui.player.PlayerActivity
 import live.mehiz.mpvkt.ui.preferences.PreferencesScreen
 import live.mehiz.mpvkt.ui.theme.spacing
+import androidx.core.net.toUri
 
 object HomeScreen : Screen() {
   @OptIn(ExperimentalMaterial3Api::class)
@@ -148,7 +149,7 @@ object HomeScreen : Screen() {
   // Basically a copy of:
   // https://github.com/mpv-android/mpv-android/blob/32cbff3cedea73b4616b34542cb95bf1d00504cc/app/src/main/java/is/xyz/mpv/Utils.kt#L406
   private fun isURLValid(url: String): Boolean {
-    val uri = Uri.parse(url)
+    val uri = url.toUri()
     return uri.isHierarchical && !uri.isRelative &&
       !(uri.host.isNullOrBlank() && uri.path.isNullOrBlank()) &&
       PROTOCOLS.contains(uri.scheme)
@@ -158,7 +159,7 @@ object HomeScreen : Screen() {
     filepath: String,
     context: Context,
   ) {
-    val i = Intent(Intent.ACTION_VIEW, Uri.parse(filepath))
+    val i = Intent(Intent.ACTION_VIEW, filepath.toUri())
     i.setClass(context, PlayerActivity::class.java)
     context.startActivity(i)
   }
