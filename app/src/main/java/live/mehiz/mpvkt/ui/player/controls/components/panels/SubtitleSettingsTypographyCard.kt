@@ -1,7 +1,6 @@
 package live.mehiz.mpvkt.ui.player.controls.components.panels
 
 import android.annotation.SuppressLint
-import android.net.Uri
 import androidx.annotation.StringRes
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
@@ -40,6 +39,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.dp
+import androidx.core.net.toUri
 import com.github.k1rakishou.fsaf.FileManager
 import com.yubyf.truetypeparser.TTFFile
 import `is`.xyz.mpv.MPVLib
@@ -61,7 +61,6 @@ import me.zhanghai.compose.preference.ListPreferenceType
 import me.zhanghai.compose.preference.ProvidePreferenceLocals
 import me.zhanghai.compose.preference.preferenceTheme
 import org.koin.compose.koinInject
-import androidx.core.net.toUri
 
 @SuppressLint("MutableCollectionMutableState")
 @Composable

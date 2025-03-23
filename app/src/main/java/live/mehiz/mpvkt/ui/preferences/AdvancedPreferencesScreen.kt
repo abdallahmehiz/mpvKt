@@ -36,6 +36,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.util.fastJoinToString
+import androidx.core.net.toUri
 import androidx.documentfile.provider.DocumentFile
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
@@ -60,7 +61,6 @@ import java.io.File
 import kotlin.io.path.deleteIfExists
 import kotlin.io.path.outputStream
 import kotlin.io.path.readLines
-import androidx.core.net.toUri
 
 object AdvancedPreferencesScreen : Screen() {
   @OptIn(ExperimentalMaterial3Api::class)

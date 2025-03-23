@@ -1,7 +1,6 @@
 package live.mehiz.mpvkt.ui.preferences
 
 import android.content.Intent
-import android.net.Uri
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -30,6 +29,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.dp
+import androidx.core.net.toUri
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import com.mikepenz.aboutlibraries.ui.compose.m3.LibrariesContainer
@@ -42,7 +42,6 @@ import live.mehiz.mpvkt.presentation.crash.CrashActivity.Companion.collectDevice
 import live.mehiz.mpvkt.ui.theme.spacing
 import me.zhanghai.compose.preference.Preference
 import me.zhanghai.compose.preference.ProvidePreferenceLocals
-import androidx.core.net.toUri
 
 object AboutScreen : Screen() {
   @OptIn(ExperimentalMaterial3Api::class)

@@ -8,6 +8,7 @@ import android.provider.Settings
 import android.util.DisplayMetrics
 import android.util.Log
 import android.widget.Toast
+import androidx.core.net.toUri
 import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -31,7 +32,6 @@ import live.mehiz.mpvkt.preferences.PlayerPreferences
 import live.mehiz.mpvkt.ui.custombuttons.CustomButtonsUiState
 import live.mehiz.mpvkt.ui.custombuttons.getButtons
 import org.koin.java.KoinJavaComponent.inject
-import androidx.core.net.toUri
 
 class PlayerViewModelProviderFactory(
   private val activity: PlayerActivity,
