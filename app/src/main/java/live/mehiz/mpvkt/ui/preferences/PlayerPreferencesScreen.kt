@@ -134,13 +134,13 @@ object PlayerPreferencesScreen : Screen() {
           SwitchPreference(
             value = showSeekIcon,
             onValueChange = preferences.showSeekIcon::set,
-            title = { Text("Show seek icon") },
+            title = { Text(stringResource(R.string.show_icon_on_double_tap_to_seek)) },
           )
           val showSeekTimeWhileSeeking by preferences.showSeekTimeWhileSeeking.collectAsState()
           SwitchPreference(
             value = showSeekTimeWhileSeeking,
             onValueChange = preferences.showSeekTimeWhileSeeking::set,
-            title = { Text("Show seek time") },
+            title = { Text(stringResource(R.string.show_time_on_double_tap_to_seek)) },
           )
           PreferenceCategory(
             title = { Text(stringResource(R.string.pref_player_gestures)) },
