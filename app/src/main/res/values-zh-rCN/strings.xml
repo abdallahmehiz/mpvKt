@@ -209,4 +209,8 @@
     <string name="pref_custom_button_edit_button_id">（ID：%d）</string>
     <string name="pref_custom_button_delete_button">删除按钮</string>
     <string name="timer_title">休眠计时器</string>
+    <string name="show_splash_ovals_on_double_tap_to_seek">双击跳转时显示涟漪效果</string>
+    <string name="show_icon_on_double_tap_to_seek">显示跳转时间</string>
+    <string name="show_time_on_double_tap_to_seek">显示跳转图标</string>
+    
 </resources>
