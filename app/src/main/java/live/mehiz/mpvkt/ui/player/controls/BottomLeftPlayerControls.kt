@@ -32,7 +32,6 @@ fun BottomLeftPlayerControls(
 ) {
   val playerPreferences = koinInject<PlayerPreferences>()
   Row(
-    modifier = modifier.fillMaxWidth(),
     verticalAlignment = Alignment.CenterVertically,
   ) {
     ControlsButton(

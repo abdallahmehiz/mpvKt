@@ -28,13 +28,15 @@ class CustomButtonsScreenViewModel(
       initialValue = emptyList(),
     )
 
-  fun addCustomButton(title: String, content: String, longPressContent: String) {
+  fun addCustomButton(title: String, content: String, longPressContent: String, showInPlayer: Boolean, showInMoreSheet: Boolean) {
     viewModelScope.launch(Dispatchers.IO) {
       customButtonsRepository.upsert(
         CustomButtonEntity(
           title = title,
           content = content,
           longPressContent = longPressContent,
+          showInPlayer = showInPlayer,
+          showInMoreSheet = showInMoreSheet,
           index = customButtons.value.size,
         )
       )
