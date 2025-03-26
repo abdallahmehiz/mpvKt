@@ -1,6 +1,5 @@
 package live.mehiz.mpvkt.ui.player.controls
 
-import android.view.View
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
@@ -10,6 +9,7 @@ import androidx.compose.foundation.indication
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.PressInteraction
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.safeGestures
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.LocalRippleConfiguration
+import androidx.compose.material3.Text
 import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -34,10 +35,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalHapticFeedback
-import androidx.compose.ui.viewinterop.AndroidView
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.sp
 import `is`.xyz.mpv.MPVLib
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.update
+import live.mehiz.mpvkt.R
 import live.mehiz.mpvkt.preferences.AudioPreferences
 import live.mehiz.mpvkt.preferences.PlayerPreferences
 import live.mehiz.mpvkt.preferences.preference.collectAsState
@@ -46,7 +50,7 @@ import live.mehiz.mpvkt.presentation.components.RightSideOvalShape
 import live.mehiz.mpvkt.ui.player.Panels
 import live.mehiz.mpvkt.ui.player.PlayerUpdates
 import live.mehiz.mpvkt.ui.player.PlayerViewModel
-import live.mehiz.mpvkt.ui.player.controls.components.DoubleTapSeekSecondsView
+import live.mehiz.mpvkt.ui.player.controls.components.DoubleTapSeekTriangles
 import live.mehiz.mpvkt.ui.theme.playerRippleConfiguration
 import org.koin.compose.koinInject
 
@@ -70,8 +74,9 @@ fun GestureHandler(
   var isDoubleTapSeeking by remember { mutableStateOf(false) }
   LaunchedEffect(seekAmount) {
     delay(800)
-    viewModel.updateSeekAmount(0)
     isDoubleTapSeeking = false
+    viewModel.updateSeekAmount(0)
+    viewModel.updateSeekText(null)
     delay(100)
     viewModel.hideSeekBar()
   }
@@ -273,6 +278,7 @@ fun GestureHandler(
 @Composable
 fun DoubleTapToSeekOvals(
   amount: Int,
+  text: String?,
   showOvals: Boolean,
   showSeekIcon: Boolean,
   showSeekTime: Boolean,
@@ -304,19 +310,15 @@ fun DoubleTapToSeekOvals(
             )
           }
           if (showSeekIcon || showSeekTime) {
-            AndroidView(
-              factory = { DoubleTapSeekSecondsView(it, showSeekIcon, showSeekTime, null) },
-              update = {
-                if (amount != 0) {
-                  it.isForward = amount > 0
-                  it.seconds = amount
-                  it.visibility = View.VISIBLE
-                  it.start()
-                } else {
-                  it.visibility = View.GONE
-                }
-              },
-            )
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+              DoubleTapSeekTriangles(isForward = amount > 0)
+              Text(
+                text = text ?: pluralStringResource(R.plurals.seconds, amount, amount),
+                fontSize = 12.sp,
+                textAlign = TextAlign.Center,
+                color = Color.White,
+              )
+            }
           }
         }
       }

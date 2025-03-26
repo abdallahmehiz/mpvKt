@@ -493,6 +493,11 @@ class PlayerActivity : AppCompatActivity() {
           viewModel.unpause()
           window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+          runCatching {
+            setPictureInPictureParams(createPipParams())
+          }
+        }
       }
 
       "paused-for-cache" -> {

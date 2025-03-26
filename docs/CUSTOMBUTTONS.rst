@@ -38,6 +38,36 @@ Lua interface
 ``mpvkt.reset_button_title(text)``
     Reset the title for the primary custom button.
 
+``mpvkt.show_button()``
+    Show the primary custom button.
+
+``mpvkt.hide_button()``
+    Hide the primary custom button.
+
+``mpvkt.toggle_button()``
+    Toggle the visibility of the primary custom button.
+
+``mpvkt.seek_by(value)``
+    Seek by the specified number of seconds.
+
+``mpvkt.seek_to(value)``
+    Seek to the specified position in seconds.
+
+``mpvkt.seek_by_with_text(value, text)``
+    Seek by the specified number of seconds and display the given text.
+
+``mpvkt.seek_to_with_text(value, text)``
+    Seek to the specified position in seconds and display the given text.
+
+``mpvkt.hide_software_keyboard()``
+    Hide the software keyboard.
+
+``mpvkt.show_software_keyboard()``
+    Show the software keyboard.
+
+``mpvkt.toggle_software_keyboard()``
+    Toggle the visibility of the software keyboard.
+
 Call a custom button from key input or from lua
 -----------------------------------------------
 

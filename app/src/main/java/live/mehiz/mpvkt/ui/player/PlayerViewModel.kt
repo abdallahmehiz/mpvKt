@@ -1,12 +1,13 @@
 package live.mehiz.mpvkt.ui.player
 
+import android.content.Context
 import android.content.pm.ActivityInfo
 import android.media.AudioManager
 import android.net.Uri
-import android.os.Build
 import android.provider.Settings
 import android.util.DisplayMetrics
 import android.util.Log
+import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
 import androidx.core.net.toUri
 import androidx.core.view.WindowInsetsCompat
@@ -52,6 +53,9 @@ class PlayerViewModel(
   private val _customButtons = MutableStateFlow<CustomButtonsUiState>(CustomButtonsUiState.Loading)
   val customButtons = _customButtons.asStateFlow()
 
+  private val _primaryButton = MutableStateFlow<CustomButtonEntity?>(null)
+  val primaryButton = _primaryButton.asStateFlow()
+
   private val _primaryButtonTitle = MutableStateFlow("")
   val primaryButtonTitle = _primaryButtonTitle.asStateFlow()
 
@@ -60,6 +64,7 @@ class PlayerViewModel(
       try {
         val buttons = mpvKtDatabase.customButtonDao().getCustomButtons().first()
         buttons.firstOrNull { it.id == playerPreferences.primaryCustomButtonId.get() }?.let {
+          _primaryButton.update { it }
           // If the button text is not empty, it has been set buy a lua script in which
           // case we don't want to override it
           if (_primaryButtonTitle.value.isEmpty()) {
@@ -134,6 +139,8 @@ class PlayerViewModel(
   // Pair(startingPosition, seekAmount)
   val gestureSeekAmount = MutableStateFlow<Pair<Int, Int>?>(null)
 
+  private val _seekText = MutableStateFlow<String?>(null)
+  val seekText = _seekText.asStateFlow()
   private val _doubleTapSeekAmount = MutableStateFlow(0)
   val doubleTapSeekAmount = _doubleTapSeekAmount.asStateFlow()
   private val _isSeekingForwards = MutableStateFlow(false)
@@ -332,11 +339,6 @@ class PlayerViewModel(
   fun pause() {
     activity.player.paused = true
     _paused.update { true }
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-      runCatching {
-        activity.setPictureInPictureParams(activity.createPipParams())
-      }
-    }
   }
 
   fun unpause() {
@@ -482,7 +484,7 @@ class PlayerViewModel(
     }
   }
 
-  @Suppress("CyclomaticComplexMethod")
+  @Suppress("CyclomaticComplexMethod", "LongMethod")
   fun handleLuaInvocation(property: String, value: String) {
     val data = value
       .removePrefix("\"")
@@ -520,15 +522,77 @@ class PlayerViewModel(
           setPrimaryCustomButtonTitle(it)
         }
       }
+      "seek_to_with_text" -> {
+        val (seekValue, text) = data.split("|", limit = 2)
+        seekToWithText(seekValue.toInt(), text)
+      }
+      "seek_by_with_text" -> {
+        val (seekValue, text) = data.split("|", limit = 2)
+        seekByWithText(seekValue.toInt(), text)
+      }
+      "seek_by" -> seekByWithText(value.toInt(), null)
+      "seek_to" -> seekToWithText(value.toInt(), null)
+      "toggle_button" -> {
+        fun showButton() {
+          if (_primaryButton.value == null) {
+            _primaryButton.update {
+              customButtons.value.getButtons().firstOrNull { it.id == playerPreferences.primaryCustomButtonId.get() }
+            }
+          }
+        }
+        when (data) {
+          "show" -> showButton()
+          "hide" -> _primaryButton.update { null }
+          "toggle" -> if (_primaryButton.value == null) showButton() else _primaryButton.update { null }
+        }
+      }
+      "software_keyboard" -> when (data) {
+        "show" -> forceShowSoftwareKeyboard()
+        "hide" -> forceHideSoftwareKeyboard()
+        "toggle" -> if (inputMethodManager.isActive) forceHideSoftwareKeyboard() else forceShowSoftwareKeyboard()
+      }
     }
 
     MPVLib.setPropertyString(property, "")
+  }
+
+  private val inputMethodManager = activity.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+  private fun forceShowSoftwareKeyboard() {
+    inputMethodManager.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0)
+  }
+
+  private fun forceHideSoftwareKeyboard() {
+    inputMethodManager.toggleSoftInput(InputMethodManager.SHOW_IMPLICIT, 0)
+  }
+
+  private fun seekToWithText(seekValue: Int, text: String?) {
+    _isSeekingForwards.value = seekValue > 0
+    _doubleTapSeekAmount.value = if (seekValue > 0) 1 else -1
+    _seekText.update { _ -> text }
+    seekTo(seekValue)
+    if (playerPreferences.showSeekBarWhenSeeking.get()) showSeekBar()
+  }
+
+  private fun seekByWithText(value: Int, text: String?) {
+    if (pos.value > 0) {
+      _doubleTapSeekAmount.value -= value
+    } else if (pos.value < duration.value) {
+      _doubleTapSeekAmount.value += value
+    }
+    _seekText.update { text }
+    _isSeekingForwards.value = value > 0
+    seekBy(-value, playerPreferences.preciseSeeking.get())
+    if (playerPreferences.showSeekBarWhenSeeking.get()) showSeekBar()
   }
 
   private val doubleTapToSeekDuration = gesturePreferences.doubleTapToSeekDuration.get()
 
   fun updateSeekAmount(amount: Int) {
     _doubleTapSeekAmount.update { _ -> amount }
+  }
+
+  fun updateSeekText(text: String?) {
+    _seekText.update { text }
   }
 
   fun leftSeek() {

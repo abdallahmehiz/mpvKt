@@ -216,6 +216,12 @@ class MPVView(context: Context, attributes: AttributeSet) : BaseMPVView(context,
     "user-data/mpvkt/show_panel" to MPVLib.mpvFormat.MPV_FORMAT_STRING,
     "user-data/mpvkt/set_button_title" to MPVLib.mpvFormat.MPV_FORMAT_STRING,
     "user-data/mpvkt/reset_button_title" to MPVLib.mpvFormat.MPV_FORMAT_STRING,
+    "user-data/mpvkt/toggle_button" to MPVLib.mpvFormat.MPV_FORMAT_STRING,
+    "user-data/mpvkt/seek_by" to MPVLib.mpvFormat.MPV_FORMAT_STRING,
+    "user-data/mpvkt/seek_to" to MPVLib.mpvFormat.MPV_FORMAT_STRING,
+    "user-data/mpvkt/seek_by_with_text" to MPVLib.mpvFormat.MPV_FORMAT_STRING,
+    "user-data/mpvkt/seek_to_with_text" to MPVLib.mpvFormat.MPV_FORMAT_STRING,
+    "user-data/mpvkt/software_keyboard" to MPVLib.mpvFormat.MPV_FORMAT_STRING,
   )
 
   private fun setupAudioOptions() {

@@ -1,6 +1,7 @@
 package live.mehiz.mpvkt.ui.player.controls
 
 import android.os.Build
+import androidx.activity.compose.LocalActivity
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.FiniteAnimationSpec
@@ -38,7 +39,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -49,7 +49,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shadow
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -58,6 +57,7 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
+import cafe.adriel.voyager.navigator.currentOrThrow
 import `is`.xyz.mpv.MPVLib
 import `is`.xyz.mpv.Utils
 import kotlinx.collections.immutable.toImmutableList
@@ -115,6 +115,7 @@ fun PlayerControls(
   val showSeekTime by playerPreferences.showSeekTimeWhileSeeking.collectAsState()
   var isSeeking by remember { mutableStateOf(false) }
   var resetControls by remember { mutableStateOf(true) }
+  val seekText by viewModel.seekText.collectAsState()
   val currentChapter by viewModel.currentChapter.collectAsState()
   val playerTimeToDisappear by playerPreferences.playerTimeToDisappear.collectAsState()
   val onOpenSheet: (Sheets) -> Unit = {
@@ -136,12 +137,8 @@ fun PlayerControls(
     }
   }
   val customButtons by viewModel.customButtons.collectAsState()
-  val primaryCustomButtonId by playerPreferences.primaryCustomButtonId.collectAsState()
-  val customButton by remember {
-    derivedStateOf {
-      customButtons.getButtons().firstOrNull { it.id == primaryCustomButtonId }
-    }
-  }
+  val customButton by viewModel.primaryButton.collectAsState()
+
   LaunchedEffect(
     controlsShown,
     paused,
@@ -162,7 +159,7 @@ fun PlayerControls(
     viewModel = viewModel,
     interactionSource = interactionSource,
   )
-  DoubleTapToSeekOvals(doubleTapSeekAmount, showDoubleTapOvals, showSeekIcon, showSeekTime, interactionSource)
+  DoubleTapToSeekOvals(doubleTapSeekAmount, seekText, showDoubleTapOvals, showSeekIcon, showSeekTime, interactionSource)
   CompositionLocalProvider(
     LocalRippleConfiguration provides playerRippleConfiguration,
     LocalPlayerButtonsClickEvent provides { resetControls = !resetControls },
@@ -496,7 +493,7 @@ fun PlayerControls(
             end.linkTo(seekbar.end)
           },
         ) {
-          val activity = LocalContext.current as PlayerActivity
+          val activity = LocalActivity.currentOrThrow as PlayerActivity
           BottomRightPlayerControls(
             customButton = customButton,
             customButtonTitle = customButtonTitle,
