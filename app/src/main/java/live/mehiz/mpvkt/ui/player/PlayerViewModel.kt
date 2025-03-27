@@ -530,8 +530,8 @@ class PlayerViewModel(
         val (seekValue, text) = data.split("|", limit = 2)
         seekByWithText(seekValue.toInt(), text)
       }
-      "seek_by" -> seekByWithText(value.toInt(), null)
-      "seek_to" -> seekToWithText(value.toInt(), null)
+      "seek_by" -> seekByWithText(data.toInt(), null)
+      "seek_to" -> seekToWithText(data.toInt(), null)
       "toggle_button" -> {
         fun showButton() {
           if (_primaryButton.value == null) {
@@ -567,21 +567,17 @@ class PlayerViewModel(
 
   private fun seekToWithText(seekValue: Int, text: String?) {
     _isSeekingForwards.value = seekValue > 0
-    _doubleTapSeekAmount.value = if (seekValue > 0) 1 else -1
-    _seekText.update { _ -> text }
-    seekTo(seekValue)
+    _doubleTapSeekAmount.value = seekValue - pos.value.toInt()
+    _seekText.update { text }
+    seekTo(seekValue, playerPreferences.preciseSeeking.get())
     if (playerPreferences.showSeekBarWhenSeeking.get()) showSeekBar()
   }
 
   private fun seekByWithText(value: Int, text: String?) {
-    if (pos.value > 0) {
-      _doubleTapSeekAmount.value -= value
-    } else if (pos.value < duration.value) {
-      _doubleTapSeekAmount.value += value
-    }
+    _doubleTapSeekAmount.update { if (value < 0 && it < 0 || pos.value + value > duration.value) 0 else it + value }
     _seekText.update { text }
     _isSeekingForwards.value = value > 0
-    seekBy(-value, playerPreferences.preciseSeeking.get())
+    seekBy(value, playerPreferences.preciseSeeking.get())
     if (playerPreferences.showSeekBarWhenSeeking.get()) showSeekBar()
   }
 
