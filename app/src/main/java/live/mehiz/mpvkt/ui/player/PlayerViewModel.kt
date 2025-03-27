@@ -64,7 +64,7 @@ class PlayerViewModel(
       try {
         val buttons = mpvKtDatabase.customButtonDao().getCustomButtons().first()
         buttons.firstOrNull { it.id == playerPreferences.primaryCustomButtonId.get() }?.let {
-          _primaryButton.update { it }
+          _primaryButton.update { _ -> it }
           // If the button text is not empty, it has been set buy a lua script in which
           // case we don't want to override it
           if (_primaryButtonTitle.value.isEmpty()) {
