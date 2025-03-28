@@ -1,7 +1,12 @@
 package live.mehiz.mpvkt.ui.home
 
+import android.Manifest
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.os.Build
+import android.os.Environment
+import android.provider.Settings
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
@@ -11,7 +16,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.FileOpen
 import androidx.compose.material.icons.filled.FolderOpen
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Link
@@ -36,10 +40,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.core.content.ContextCompat
 import androidx.core.net.toUri
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
-import com.github.k1rakishou.fsaf.FileManager
 import `is`.xyz.mpv.Utils.PROTOCOLS
 import live.mehiz.mpvkt.R
 import live.mehiz.mpvkt.presentation.Screen
@@ -108,31 +112,36 @@ object HomeScreen : Screen() {
             Text(text = stringResource(R.string.home_open_url))
           }
         }
-        val documentPicker = rememberLauncherForActivityResult(
-          ActivityResultContracts.OpenDocument(),
-        ) {
-          if (it == null) return@rememberLauncherForActivityResult
-          playFile(it.toString(), context)
-        }
-        OutlinedButton(
-          onClick = { documentPicker.launch(arrayOf("*/*")) },
-        ) {
-          Row(
-            horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.smaller),
-            verticalAlignment = Alignment.CenterVertically,
-          ) {
-            Icon(Icons.Default.FileOpen, null)
-            Text(text = stringResource(R.string.home_pick_file))
+        val manageStoragePermission = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+          if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R && Environment.isExternalStorageManager()) {
+            navigator.push(FilePickerScreen())
           }
         }
-        val fileManager = FileManager(context)
-        val directoryPicker = rememberLauncherForActivityResult(
-          ActivityResultContracts.OpenDocumentTree(),
-        ) {
-          if (it == null) return@rememberLauncherForActivityResult
-          navigator.push(FilePickerScreen(fileManager.fromUri(it)!!.getFullPath()))
+        val readStoragePermission = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
+          if (isGranted) {
+            navigator.push(FilePickerScreen())
+          }
         }
-        OutlinedButton(onClick = { directoryPicker.launch(null) }) {
+        OutlinedButton(onClick = {
+          if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            if (!Environment.isExternalStorageManager()) {
+              manageStoragePermission.launch(
+                Intent(
+                  Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION,
+                  "package:${context.packageName}".toUri(),
+                )
+              )
+            } else {
+              navigator.push(FilePickerScreen())
+            }
+          } else {
+            if (ContextCompat.checkSelfPermission(context, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+              readStoragePermission.launch(Manifest.permission.READ_EXTERNAL_STORAGE)
+            } else {
+              navigator.push(FilePickerScreen())
+            }
+          }
+        }) {
           Row(
             horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.smaller),
             verticalAlignment = Alignment.CenterVertically,

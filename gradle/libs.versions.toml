@@ -57,6 +57,7 @@ kotlinx-immutable-collections = { module = "org.jetbrains.kotlinx:kotlinx-collec
 
 truetype-parser = { module = "io.github.yubyf:truetypeparser-light", version = "2.1.4" }
 fsaf = { module = "com.github.K1rakishou:Fuck-Storage-Access-Framework", version = "1.1.3" }
+storage-util = { module = "com.github.hendrawd:StorageUtil", version = "1.1.0" }
 
 about-libs-core = { module = "com.mikepenz:aboutlibraries-core", version.ref = "about-libs" }
 about-libs-ui-m3 = { module = "com.mikepenz:aboutlibraries-compose-m3", version.ref = "about-libs" }
