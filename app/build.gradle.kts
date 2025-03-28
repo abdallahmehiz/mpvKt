@@ -143,6 +143,7 @@ dependencies {
   implementation(libs.kotlinx.immutable.collections)
   implementation(libs.truetype.parser)
   implementation(libs.fsaf)
+  implementation(libs.storage.util)
 }
 
 detekt {

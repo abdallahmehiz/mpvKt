@@ -1,5 +1,6 @@
 package live.mehiz.mpvkt.ui.home
 
+import android.net.Uri
 import android.os.Build
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -39,11 +40,9 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.core.net.toUri
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
-import com.github.k1rakishou.fsaf.FileManager
-import com.github.k1rakishou.fsaf.file.AbstractFile
+import hendrawd.storageutil.library.StorageUtil
 import `is`.xyz.mpv.Utils
 import live.mehiz.mpvkt.R
 import live.mehiz.mpvkt.presentation.Screen
@@ -52,21 +51,21 @@ import live.mehiz.mpvkt.ui.player.imageExtensions
 import live.mehiz.mpvkt.ui.player.videoExtensions
 import live.mehiz.mpvkt.ui.theme.spacing
 import live.mehiz.mpvkt.ui.utils.FilesComparator
-import org.koin.compose.koinInject
+import java.io.File
 import java.lang.Long.signum
 import java.text.StringCharacterIterator
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
+import java.util.Locale
 import kotlin.math.abs
 
-data class FilePickerScreen(val uri: String) : Screen() {
+data class FilePickerScreen(val path: String? = null) : Screen() {
 
   @OptIn(ExperimentalMaterial3Api::class)
   @Composable
   override fun Content() {
     val navigator = LocalNavigator.currentOrThrow
-    val fileManager = koinInject<FileManager>()
     val context = LocalContext.current
     Scaffold(
       topBar = {
@@ -80,34 +79,75 @@ data class FilePickerScreen(val uri: String) : Screen() {
         )
       },
     ) { paddingValues ->
-      FilePicker(
-        directory = fileManager.fromUri(uri.toUri())!!,
-        onNavigate = { newFile ->
-          if (fileManager.isFile(newFile)) {
-            HomeScreen.playFile(newFile.getFullPath(), context)
-            return@FilePicker
-          }
-          navigator.push(FilePickerScreen(newFile.getFullPath()))
-        },
-        modifier = Modifier
-          .fillMaxSize()
-          .padding(paddingValues),
-      )
+      if (path == null) {
+        StoragePicker(
+          onNavigate = { device -> navigator.push(FilePickerScreen(device.absolutePath)) },
+          modifier = Modifier
+            .fillMaxSize()
+            .padding(paddingValues),
+        )
+      } else {
+        FilePicker(
+          directory = File(path),
+          onNavigate = { newFile ->
+            if (newFile.isFile) {
+              HomeScreen.playFile(Uri.fromFile(newFile).toString(), context)
+              return@FilePicker
+            }
+            navigator.push(FilePickerScreen(newFile.absolutePath))
+          },
+          modifier = Modifier
+            .fillMaxSize()
+            .padding(paddingValues),
+        )
+      }
+    }
+  }
+
+  @Composable
+  fun StoragePicker(
+    modifier: Modifier = Modifier,
+    onNavigate: (File) -> Unit,
+  ) {
+    val context = LocalContext.current
+    val deviceList = StorageUtil.getStorageDirectories(context)
+      .map { File(it) }
+      .filter { it.exists() }
+
+    LazyColumn(modifier) {
+      itemsIndexed(deviceList, key = { _, file -> file.absolutePath }) { index, file ->
+        FileListing(
+          name = file.absolutePath,
+          isDirectory = true,
+          lastModified = null,
+          length = null,
+          modifier = Modifier.background(
+            if (index % 2 == 0) {
+              MaterialTheme.colorScheme.surfaceContainerLow
+            } else {
+              MaterialTheme.colorScheme.surfaceContainerHigh
+            },
+          ),
+          items = null,
+          onClick = { onNavigate(file) },
+        )
+      }
     }
   }
 
   @Composable
   fun FilePicker(
-    directory: AbstractFile,
+    directory: File,
     modifier: Modifier = Modifier,
-    onNavigate: (AbstractFile) -> Unit,
+    onNavigate: (File) -> Unit,
   ) {
     val navigator = LocalNavigator.currentOrThrow
-    val fileManager = koinInject<FileManager>()
-    val fileList = fileManager.listFiles(directory).filterNot {
-      !Utils.MEDIA_EXTENSIONS.contains(fileManager.getName(it).substringAfterLast('.')) &&
-        fileManager.isFile(it) || fileManager.getName(it).startsWith('.')
-    }.sortedWith(FilesComparator(fileManager))
+    val fileList = directory.listFiles { file ->
+      val name = file.name
+      if (name.startsWith('.')) return@listFiles false
+      if (file.isDirectory) return@listFiles true
+      file.isFile && Utils.MEDIA_EXTENSIONS.contains(name.substringAfterLast('.').lowercase(Locale.ENGLISH))
+    }?.sortedWith(FilesComparator()) ?: emptyList()
 
     LazyColumn(modifier) {
       item {
@@ -120,12 +160,12 @@ data class FilePickerScreen(val uri: String) : Screen() {
           modifier = Modifier.background(MaterialTheme.colorScheme.surfaceContainerLow),
         )
       }
-      itemsIndexed(fileList, key = { _, file -> fileManager.getName(file) }) { index, file ->
+      itemsIndexed(fileList, key = { _, file -> file.name }) { index, file ->
         FileListing(
-          name = fileManager.getName(file),
-          isDirectory = fileManager.isDirectory(file),
-          lastModified = fileManager.lastModified(file),
-          length = if (fileManager.isFile(file)) fileManager.getLength(file) else null,
+          name = file.name,
+          isDirectory = file.isDirectory,
+          lastModified = file.lastModified(),
+          length = if (file.isFile) file.length() else null,
           modifier = Modifier.background(
             if (index % 2 == 1) {
               MaterialTheme.colorScheme.surfaceContainerLow
@@ -133,7 +173,7 @@ data class FilePickerScreen(val uri: String) : Screen() {
               MaterialTheme.colorScheme.surfaceContainerHigh
             },
           ),
-          items = if (fileManager.isDirectory(file)) fileManager.listFiles(file).size else null,
+          items = if (file.isDirectory) file.listFiles()?.size else null,
           onClick = { onNavigate(file) },
         )
       }

@@ -1,19 +1,16 @@
 package live.mehiz.mpvkt.ui.utils
 
-import com.github.k1rakishou.fsaf.FileManager
-import com.github.k1rakishou.fsaf.file.AbstractFile
+import java.io.File
 
 /**
  * Sorts files/directories alphabetically while giving directories priority
  * credit goes to mpv-android
  */
-class FilesComparator(
-  private val fileManager: FileManager
-) : Comparator<AbstractFile> {
-  override fun compare(o1: AbstractFile?, o2: AbstractFile?): Int {
-    val iso1ADirectory = fileManager.isDirectory(o1!!)
-    val iso2ADirectory = fileManager.isDirectory(o2!!)
+class FilesComparator : Comparator<File> {
+  override fun compare(o1: File?, o2: File?): Int {
+    val iso1ADirectory = o1!!.isDirectory
+    val iso2ADirectory = o2!!.isDirectory
     if (iso1ADirectory != iso2ADirectory) return if (iso2ADirectory) 1 else -1
-    return fileManager.getName(o1).compareTo(fileManager.getName(o2), ignoreCase = true)
+    return o1.name.compareTo(o2.name, ignoreCase = true)
   }
 }
