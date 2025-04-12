@@ -22,28 +22,29 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
-import cafe.adriel.voyager.navigator.LocalNavigator
-import cafe.adriel.voyager.navigator.currentOrThrow
 import kotlinx.collections.immutable.toImmutableList
+import kotlinx.serialization.Serializable
 import live.mehiz.mpvkt.R
 import live.mehiz.mpvkt.preferences.GesturePreferences
 import live.mehiz.mpvkt.preferences.preference.collectAsState
 import live.mehiz.mpvkt.presentation.Screen
 import live.mehiz.mpvkt.ui.player.CustomKeyCodes
 import live.mehiz.mpvkt.ui.player.SingleActionGesture
+import live.mehiz.mpvkt.ui.utils.LocalNavController
 import me.zhanghai.compose.preference.FooterPreference
 import me.zhanghai.compose.preference.ListPreference
 import me.zhanghai.compose.preference.PreferenceCategory
 import me.zhanghai.compose.preference.ProvidePreferenceLocals
 import org.koin.compose.koinInject
 
-object GesturePreferencesScreen : Screen() {
+@Serializable
+object GesturePreferencesScreen : Screen {
   @OptIn(ExperimentalMaterial3Api::class)
   @Composable
   override fun Content() {
     val preferences = koinInject<GesturePreferences>()
     val context = LocalContext.current
-    val navigator = LocalNavigator.currentOrThrow
+    val navigator = LocalNavController.current
     Scaffold(
       topBar = {
         TopAppBar(
@@ -51,7 +52,7 @@ object GesturePreferencesScreen : Screen() {
             Text(stringResource(R.string.pref_gesture))
           },
           navigationIcon = {
-            IconButton(onClick = { navigator.pop() }) {
+            IconButton(onClick = navigator::popBackStack) {
               Icon(Icons.AutoMirrored.Default.ArrowBack, null)
             }
           },

@@ -38,12 +38,11 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.util.fastJoinToString
 import androidx.core.net.toUri
 import androidx.documentfile.provider.DocumentFile
-import cafe.adriel.voyager.navigator.LocalNavigator
-import cafe.adriel.voyager.navigator.currentOrThrow
 import com.github.k1rakishou.fsaf.FileManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.Serializable
 import live.mehiz.mpvkt.R
 import live.mehiz.mpvkt.database.MpvKtDatabase
 import live.mehiz.mpvkt.preferences.AdvancedPreferences
@@ -51,6 +50,7 @@ import live.mehiz.mpvkt.preferences.preference.collectAsState
 import live.mehiz.mpvkt.presentation.Screen
 import live.mehiz.mpvkt.presentation.components.ConfirmDialog
 import live.mehiz.mpvkt.presentation.crash.CrashActivity
+import live.mehiz.mpvkt.ui.utils.LocalNavController
 import me.zhanghai.compose.preference.Preference
 import me.zhanghai.compose.preference.ProvidePreferenceLocals
 import me.zhanghai.compose.preference.SwitchPreference
@@ -62,12 +62,13 @@ import kotlin.io.path.deleteIfExists
 import kotlin.io.path.outputStream
 import kotlin.io.path.readLines
 
-object AdvancedPreferencesScreen : Screen() {
+@Serializable
+object AdvancedPreferencesScreen : Screen {
   @OptIn(ExperimentalMaterial3Api::class)
   @Composable
   override fun Content() {
     val context = LocalContext.current
-    val navigator = LocalNavigator.currentOrThrow
+    val navigator = LocalNavController.current
     val preferences = koinInject<AdvancedPreferences>()
     val fileManager = koinInject<FileManager>()
     val scope = rememberCoroutineScope()
@@ -78,7 +79,7 @@ object AdvancedPreferencesScreen : Screen() {
             Text(stringResource(R.string.pref_advanced))
           },
           navigationIcon = {
-            IconButton(onClick = { navigator.pop() }) {
+            IconButton(onClick = navigator::popBackStack) {
               Icon(Icons.AutoMirrored.Default.ArrowBack, null)
             }
           },
@@ -212,7 +213,7 @@ object AdvancedPreferencesScreen : Screen() {
             },
             summary = { if (inputConf.isNotBlank()) Text(inputConf.lines()[0]) },
           )
-          val activity = LocalActivity.currentOrThrow
+          val activity = LocalActivity.current!!
           val clipboard = LocalClipboardManager.current
           Preference(
             title = { Text(stringResource(R.string.pref_advanced_dump_logs_title)) },

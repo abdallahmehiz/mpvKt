@@ -4,8 +4,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.LocalUriHandler
-import cafe.adriel.voyager.navigator.LocalNavigator
-import cafe.adriel.voyager.navigator.currentOrThrow
 import kotlinx.collections.immutable.toImmutableList
 import live.mehiz.mpvkt.database.entities.CustomButtonEntity
 import live.mehiz.mpvkt.preferences.PlayerPreferences
@@ -15,13 +13,14 @@ import live.mehiz.mpvkt.presentation.custombuttons.CustomButtonsScreen
 import live.mehiz.mpvkt.presentation.custombuttons.components.CustomButtonAddDialog
 import live.mehiz.mpvkt.presentation.custombuttons.components.CustomButtonDeleteDialog
 import live.mehiz.mpvkt.presentation.custombuttons.components.CustomButtonEditDialog
+import live.mehiz.mpvkt.ui.utils.LocalNavController
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
 
-object CustomButtonsScreen : Screen() {
+object CustomButtonsScreen : Screen {
   @Composable
   override fun Content() {
-    val navigator = LocalNavigator.currentOrThrow
+    val navigator = LocalNavController.current
     val uriHandler = LocalUriHandler.current
     val viewModel = koinViewModel<CustomButtonsScreenViewModel>()
     val playerPreferences = koinInject<PlayerPreferences>()
@@ -40,7 +39,7 @@ object CustomButtonsScreen : Screen() {
       onClickMoveUp = viewModel::moveUp,
       onClickMoveDown = viewModel::moveDown,
       onClickFaq = { uriHandler.openUri(CUSTOM_BUTTONS_DOC_URL) },
-      onNavigateBack = navigator::pop,
+      onNavigateBack = navigator::popBackStack,
     )
 
     when (dialog) {

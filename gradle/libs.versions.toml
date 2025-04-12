@@ -1,15 +1,16 @@
 [versions]
 agp = "8.8.2"
 kotlin = "2.1.10"
-coreKtx = "1.15.0"
+coreKtx = "1.16.0"
 lifecycleRuntimeKtx = "2.8.7"
-composeBom = "2025.03.00"
+composeBom = "2025.04.00"
 activityCompose = "1.10.1"
-koin = "4.0.2"
-voyager = "1.1.0-beta03"
-room = "2.6.1"
-detekt = "1.23.7"
+koin = "4.0.3"
+room = "2.7.0"
+detekt = "1.23.8"
 about-libs = "11.4.0"
+compose-navigation = "2.8.9"
+serialization = "1.8.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -20,7 +21,7 @@ androidx-ui = { group = "androidx.compose.ui", name = "ui" }
 androidx-ui-graphics = { group = "androidx.compose.ui", name = "ui-graphics" }
 androidx-ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling" }
 androidx-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview" }
-androidx-material3-android = { group = "androidx.compose.material3", name = "material3-android", version = "1.3.1" }
+androidx-material3-android = { group = "androidx.compose.material3", name = "material3-android", version = "1.3.2" }
 androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version = "1.7.0" }
 androidx-material3-icons-extended = { group = "androidx.compose.material", name = "material-icons-extended", version = "1.7.8" }
 androidx-compose-constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout-compose", version = "1.1.1" }
@@ -40,9 +41,6 @@ koin-compose = { module = "io.insert-koin:koin-compose" }
 koin-viewmodel = { module = "io.insert-koin:koin-compose-viewmodel" }
 koin-startup = { module = "io.insert-koin:koin-androidx-startup" }
 
-voyager-navigator = { module = "cafe.adriel.voyager:voyager-navigator", version.ref = "voyager" }
-voyager-transitions = { module = "cafe.adriel.voyager:voyager-transitions", version.ref = "voyager" }
-
 compose-prefs = { module = "me.zhanghai.compose.preference:library", version = "1.1.1" }
 
 room-runtime = { module = "androidx.room:room-runtime", version.ref = "room" }
@@ -54,6 +52,7 @@ detekt-formatter = { module = "io.gitlab.arturbosch.detekt:detekt-formatting", v
 detekt-rules-compose = { module = "io.nlopez.compose.rules:detekt", version = "0.4.10" }
 
 kotlinx-immutable-collections = { module = "org.jetbrains.kotlinx:kotlinx-collections-immutable", version = "0.3.8" }
+kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "serialization" }
 
 truetype-parser = { module = "io.github.yubyf:truetypeparser-light", version = "2.1.4" }
 fsaf = { module = "com.github.K1rakishou:Fuck-Storage-Access-Framework", version = "1.1.3" }
@@ -62,16 +61,19 @@ about-libs-core = { module = "com.mikepenz:aboutlibraries-core", version.ref = "
 about-libs-ui-m3 = { module = "com.mikepenz:aboutlibraries-compose-m3", version.ref = "about-libs" }
 simple-icons = { module = "br.com.devsrsouza.compose.icons:simple-icons", version = "1.1.1" }
 
+navigation-compose = { module = "androidx.navigation:navigation-compose", version.ref = "compose-navigation" }
+
+
 [bundles]
 koin = ["koin-core", "koin-android", "koin-compose", "koin-viewmodel", "koin-startup"]
-voyager = ["voyager-navigator", "voyager-transitions"]
 about-libs = ["about-libs-core", "about-libs-ui-m3"]
 
 [plugins]
-ksp = { id = "com.google.devtools.ksp", version = "2.1.10-1.0.29" }
+ksp = { id = "com.google.devtools.ksp", version = "2.1.10-1.0.31" }
 android-application = { id = "com.android.application", version.ref = "agp" }
 jetbrains-kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 room = { id = "androidx.room", version.ref = "room" }
 detekt = { id = "io.gitlab.arturbosch.detekt", version.ref = "detekt" }
 about-libraries = { id = "com.mikepenz.aboutlibraries.plugin", version.ref = "about-libs" }
+kotlinx-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }

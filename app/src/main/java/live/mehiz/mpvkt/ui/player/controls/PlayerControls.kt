@@ -57,7 +57,6 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
-import cafe.adriel.voyager.navigator.currentOrThrow
 import `is`.xyz.mpv.MPVLib
 import `is`.xyz.mpv.Utils
 import kotlinx.collections.immutable.toImmutableList
@@ -493,7 +492,7 @@ fun PlayerControls(
             end.linkTo(seekbar.end)
           },
         ) {
-          val activity = LocalActivity.currentOrThrow as PlayerActivity
+          val activity = LocalActivity.current!! as PlayerActivity
           BottomRightPlayerControls(
             customButton = customButton,
             customButtonTitle = customButtonTitle,
