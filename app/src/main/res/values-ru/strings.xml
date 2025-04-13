@@ -244,4 +244,9 @@
         <item quantity="one">%1$d элемент</item>
         <item quantity="other">%1$d элементы</item>
     </plurals>
+
+    <plurals name="seconds">
+        <item quantity="one">%1$d секунда</item>
+        <item quantity="other">%1$d секунд</item>
+    </plurals>
 </resources>
