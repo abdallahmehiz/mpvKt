@@ -120,7 +120,9 @@
     <string name="pref_advanced_mpv_conf_storage_location">выбрать место хранения конфигурации</string>
     <string name="pref_advanced_mpv_conf">Редактировать mpv.conf</string>
     <string name="pref_advanced_input_conf">Редактировать input.conf</string>
-    <string name="pref_advanced_verbose_logging_title">Подробное журналирование</string>
+    <string name="pref_advanced_dump_logs_title">Выгрузка логов</string>
+    <string name="pref_advanced_dump_logs_summary">Выгружает и копирует логи для передачи разработчикам</string>
+    <string name="pref_advanced_verbose_logging_title">Подробное логирование</string>
     <string name="pref_advanced_verbose_logging_summary">Помогает при отладке, но может снизить производительность</string>
     <string name="pref_advanced_clear_playback_history">Очистить историю воспроизведения</string>
     <string name="pref_advanced_clear_playback_history_confirm_title">Вы уверены, что хотите очистить историю воспроизведения?</string>
@@ -220,9 +222,9 @@
     <string name="player_aspect_stretch">Растянуть</string>
 
     <string name="crash_screen_title">Ой</string>
-    <string name="crash_screen_subtitle">Похоже %s столкнулся с неожиданной ошибкой. Рассмотрите возможность поделиться журналами сбоев в GitHub issue.</string>
-    <string name="crash_screen_logs_title">Журналы сбоев:</string>
-    <string name="crash_screen_share">Поделиться журналами сбоев</string>
+    <string name="crash_screen_subtitle">Похоже %s столкнулся с неожиданной ошибкой. Рассмотрите возможность поделиться логами сбоев в GitHub issue.</string>
+    <string name="crash_screen_logs_title">Логи сбоев:</string>
+    <string name="crash_screen_share">Поделиться логами сбоев</string>
     <string name="crash_screen_restart">Перезапустить приложение</string>
 
     <string name="timer_picker_enter_timer">Введите время</string>
@@ -235,6 +237,8 @@
     <string name="pref_player_display_reduce_player_animation">Уменьшить анимацию плеера</string>
     <string name="pref_player_display_hide_player_control_time">Время скрытия управления плеера</string>
     <string name="show_splash_ovals_on_double_tap_to_seek">Показывать пульсацию при перемотке двойным нажатием</string>
+    <string name="show_time_on_double_tap_to_seek">Показывать время перемотки</string>
+    <string name="show_icon_on_double_tap_to_seek">Показывать иконку перемотки</string>
 
     <plurals name="plural_items">
         <item quantity="one">%1$d элемент</item>
