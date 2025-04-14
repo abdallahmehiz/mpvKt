@@ -26,6 +26,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
 import live.mehiz.mpvkt.preferences.AppearancePreferences
 import live.mehiz.mpvkt.preferences.preference.collectAsState
+import live.mehiz.mpvkt.ui.custombuttons.CustomButtonsScreen
 import live.mehiz.mpvkt.ui.home.FilePickerScreen
 import live.mehiz.mpvkt.ui.home.HomeScreen
 import live.mehiz.mpvkt.ui.preferences.AboutScreen
@@ -34,6 +35,7 @@ import live.mehiz.mpvkt.ui.preferences.AppearancePreferencesScreen
 import live.mehiz.mpvkt.ui.preferences.AudioPreferencesScreen
 import live.mehiz.mpvkt.ui.preferences.DecoderPreferencesScreen
 import live.mehiz.mpvkt.ui.preferences.GesturePreferencesScreen
+import live.mehiz.mpvkt.ui.preferences.LibrariesScreen
 import live.mehiz.mpvkt.ui.preferences.PlayerPreferencesScreen
 import live.mehiz.mpvkt.ui.preferences.PreferencesScreen
 import live.mehiz.mpvkt.ui.preferences.SubtitlesPreferencesScreen
@@ -90,8 +92,10 @@ class MainActivity : ComponentActivity() {
         composable<AdvancedPreferencesScreen> { AdvancedPreferencesScreen.Content() }
         composable<AppearancePreferencesScreen> { AppearancePreferencesScreen.Content() }
         composable<AudioPreferencesScreen> { AudioPreferencesScreen.Content() }
+        composable<CustomButtonsScreen> { CustomButtonsScreen.Content() }
         composable<DecoderPreferencesScreen> { DecoderPreferencesScreen.Content() }
         composable<GesturePreferencesScreen> { DecoderPreferencesScreen.Content() }
+        composable<LibrariesScreen> { LibrariesScreen.Content() }
         composable<PlayerPreferencesScreen> { PlayerPreferencesScreen.Content() }
         composable<PreferencesScreen> { PreferencesScreen.Content() }
         composable<SubtitlesPreferencesScreen> { SubtitlesPreferencesScreen.Content() }
