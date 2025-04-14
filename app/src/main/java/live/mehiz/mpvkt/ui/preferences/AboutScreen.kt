@@ -136,6 +136,7 @@ object AboutScreen : Screen {
   }
 }
 
+@Serializable
 object LibrariesScreen : Screen {
   @OptIn(ExperimentalMaterial3Api::class)
   @Composable

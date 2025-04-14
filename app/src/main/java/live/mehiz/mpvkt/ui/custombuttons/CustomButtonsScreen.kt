@@ -5,6 +5,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.LocalUriHandler
 import kotlinx.collections.immutable.toImmutableList
+import kotlinx.serialization.Serializable
 import live.mehiz.mpvkt.database.entities.CustomButtonEntity
 import live.mehiz.mpvkt.preferences.PlayerPreferences
 import live.mehiz.mpvkt.preferences.preference.collectAsState
@@ -17,6 +18,7 @@ import live.mehiz.mpvkt.ui.utils.LocalNavController
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
 
+@Serializable
 object CustomButtonsScreen : Screen {
   @Composable
   override fun Content() {
