@@ -94,7 +94,7 @@ class MainActivity : ComponentActivity() {
         composable<AudioPreferencesScreen> { AudioPreferencesScreen.Content() }
         composable<CustomButtonsScreen> { CustomButtonsScreen.Content() }
         composable<DecoderPreferencesScreen> { DecoderPreferencesScreen.Content() }
-        composable<GesturePreferencesScreen> { DecoderPreferencesScreen.Content() }
+        composable<GesturePreferencesScreen> { GesturePreferencesScreen.Content() }
         composable<LibrariesScreen> { LibrariesScreen.Content() }
         composable<PlayerPreferencesScreen> { PlayerPreferencesScreen.Content() }
         composable<PreferencesScreen> { PreferencesScreen.Content() }
