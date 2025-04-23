@@ -197,7 +197,7 @@ class PlayerActivity : AppCompatActivity() {
 
   override fun onStart() {
     super.onStart()
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && isPipSupported) {
       setPictureInPictureParams(createPipParams())
     }
     WindowCompat.setDecorFitsSystemWindows(window, false)
