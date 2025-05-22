@@ -1,1 +1,0 @@
-A media player based on the popular commandline media player mpv.
