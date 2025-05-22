@@ -43,7 +43,6 @@ import androidx.core.net.toUri
 import com.github.k1rakishou.fsaf.FileManager
 import com.github.k1rakishou.fsaf.file.AbstractFile
 import `is`.xyz.mpv.Utils
-import kotlinx.serialization.Serializable
 import live.mehiz.mpvkt.R
 import live.mehiz.mpvkt.presentation.Screen
 import live.mehiz.mpvkt.ui.player.audioExtensions
@@ -51,7 +50,7 @@ import live.mehiz.mpvkt.ui.player.imageExtensions
 import live.mehiz.mpvkt.ui.player.videoExtensions
 import live.mehiz.mpvkt.ui.theme.spacing
 import live.mehiz.mpvkt.ui.utils.FilesComparator
-import live.mehiz.mpvkt.ui.utils.LocalNavController
+import live.mehiz.mpvkt.ui.utils.LocalBackStack
 import org.koin.compose.koinInject
 import java.lang.Long.signum
 import java.text.StringCharacterIterator
@@ -60,13 +59,12 @@ import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import kotlin.math.abs
 
-@Serializable
 data class FilePickerScreen(val uri: String) : Screen {
 
   @OptIn(ExperimentalMaterial3Api::class)
   @Composable
   override fun Content() {
-    val navigator = LocalNavController.current
+    val backstack = LocalBackStack.current
     val fileManager = koinInject<FileManager>()
     val context = LocalContext.current
     Scaffold(
@@ -76,8 +74,7 @@ data class FilePickerScreen(val uri: String) : Screen {
           navigationIcon = {
             IconButton(
               onClick = {
-                navigator.navigate(HomeScreen)
-                navigator.clearBackStack<HomeScreen>()
+                backstack.removeAll { it is FilePickerScreen }
               },
             ) {
               Icon(Icons.AutoMirrored.Default.ArrowBack, null)
@@ -93,7 +90,7 @@ data class FilePickerScreen(val uri: String) : Screen {
             HomeScreen.playFile(newFile.getFullPath(), context)
             return@FilePicker
           }
-          navigator.navigate(FilePickerScreen(newFile.getFullPath()))
+          backstack.add(FilePickerScreen(newFile.getFullPath()))
         },
         modifier = Modifier
           .fillMaxSize()
@@ -108,7 +105,7 @@ data class FilePickerScreen(val uri: String) : Screen {
     modifier: Modifier = Modifier,
     onNavigate: (AbstractFile) -> Unit,
   ) {
-    val navigator = LocalNavController.current
+    val navigator = LocalBackStack.current
     val fileManager = koinInject<FileManager>()
     val fileList = fileManager.listFiles(directory).filterNot {
       !Utils.MEDIA_EXTENSIONS.contains(fileManager.getName(it).substringAfterLast('.')) &&
@@ -122,7 +119,7 @@ data class FilePickerScreen(val uri: String) : Screen {
           isDirectory = true,
           lastModified = null,
           length = 0L,
-          onClick = { navigator.popBackStack() },
+          onClick = { navigator.removeLastOrNull() },
           modifier = Modifier.background(MaterialTheme.colorScheme.surfaceContainerLow),
         )
       }

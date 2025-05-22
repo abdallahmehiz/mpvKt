@@ -10,12 +10,11 @@ plugins {
   alias(libs.plugins.room)
   alias(libs.plugins.detekt)
   alias(libs.plugins.about.libraries)
-  alias(libs.plugins.kotlinx.serialization)
 }
 
 android {
   namespace = "live.mehiz.mpvkt"
-  compileSdk = 35
+  compileSdk = 36
 
   defaultConfig {
     applicationId = "live.mehiz.mpvkt"
@@ -114,7 +113,7 @@ dependencies {
   implementation(libs.androidx.material3.android)
   implementation(libs.androidx.ui.tooling.preview)
   debugImplementation(libs.androidx.ui.tooling)
-  implementation(libs.navigation.compose)
+  implementation(libs.bundles.compose.navigation3)
   implementation(libs.androidx.appcompat)
   implementation(libs.androidx.compose.constraintlayout)
   implementation(libs.androidx.material3.icons.extended)
@@ -122,6 +121,7 @@ dependencies {
   implementation(libs.material)
   implementation(libs.androidx.preferences.ktx)
   implementation(libs.mediasession)
+  implementation(libs.saveable)
 
   implementation(libs.mpv.lib)
 
@@ -142,7 +142,6 @@ dependencies {
   detektPlugins(libs.detekt.formatter)
 
   implementation(libs.kotlinx.immutable.collections)
-  implementation(libs.kotlinx.serialization.json)
   implementation(libs.truetype.parser)
   implementation(libs.fsaf)
 }

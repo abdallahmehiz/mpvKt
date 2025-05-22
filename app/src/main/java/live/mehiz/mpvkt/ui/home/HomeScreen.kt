@@ -39,27 +39,25 @@ import androidx.compose.ui.res.stringResource
 import androidx.core.net.toUri
 import com.github.k1rakishou.fsaf.FileManager
 import `is`.xyz.mpv.Utils.PROTOCOLS
-import kotlinx.serialization.Serializable
 import live.mehiz.mpvkt.R
 import live.mehiz.mpvkt.presentation.Screen
 import live.mehiz.mpvkt.ui.player.PlayerActivity
 import live.mehiz.mpvkt.ui.preferences.PreferencesScreen
 import live.mehiz.mpvkt.ui.theme.spacing
-import live.mehiz.mpvkt.ui.utils.LocalNavController
+import live.mehiz.mpvkt.ui.utils.LocalBackStack
 
-@Serializable
 object HomeScreen : Screen {
   @OptIn(ExperimentalMaterial3Api::class)
   @Composable
   override fun Content() {
     val context = LocalContext.current
-    val navigator = LocalNavController.current
+    val backstack = LocalBackStack.current
     Scaffold(
       topBar = {
         TopAppBar(
           title = { Text(text = stringResource(id = R.string.app_name)) },
           actions = {
-            IconButton(onClick = { navigator.navigate(PreferencesScreen) }) {
+            IconButton(onClick = { backstack.add(PreferencesScreen) }) {
               Icon(Icons.Default.Settings, null)
             }
           },
@@ -131,7 +129,7 @@ object HomeScreen : Screen {
           ActivityResultContracts.OpenDocumentTree(),
         ) {
           if (it == null) return@rememberLauncherForActivityResult
-          navigator.navigate(FilePickerScreen(fileManager.fromUri(it)!!.getFullPath()))
+          backstack.add(FilePickerScreen(fileManager.fromUri(it)!!.getFullPath()))
         }
         OutlinedButton(onClick = { directoryPicker.launch(null) }) {
           Row(

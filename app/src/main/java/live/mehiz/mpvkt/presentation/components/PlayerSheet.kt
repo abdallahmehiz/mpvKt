@@ -5,7 +5,6 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.rememberSplineBasedDecay
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.AnchoredDraggableState
@@ -57,7 +56,6 @@ import kotlin.math.roundToInt
 
 private val sheetAnimationSpec = tween<Float>(350)
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun PlayerSheet(
   onDismissRequest: () -> Unit,
@@ -174,7 +172,6 @@ fun PlayerSheet(
   }
 }
 
-@OptIn(ExperimentalFoundationApi::class)
 private fun <T> AnchoredDraggableState<T>.preUpPostDownNestedScrollConnection() = object : NestedScrollConnection {
   override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
     val delta = available.toFloat()
@@ -199,7 +196,7 @@ private fun <T> AnchoredDraggableState<T>.preUpPostDownNestedScrollConnection() 
 
   override suspend fun onPreFling(available: Velocity): Velocity {
     val toFling = available.toFloat()
-    return if (toFling < 0 && offset > anchors.minAnchor()) {
+    return if (toFling < 0 && offset > anchors.minPosition()) {
       settle(toFling)
       available
     } else {

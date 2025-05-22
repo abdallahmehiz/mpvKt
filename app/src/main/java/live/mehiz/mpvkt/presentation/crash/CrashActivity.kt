@@ -8,9 +8,11 @@ import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.background
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -38,11 +40,14 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.Dp
@@ -57,8 +62,12 @@ import kotlinx.coroutines.withContext
 import live.mehiz.mpvkt.BuildConfig
 import live.mehiz.mpvkt.MainActivity
 import live.mehiz.mpvkt.R
+import live.mehiz.mpvkt.preferences.AppearancePreferences
+import live.mehiz.mpvkt.preferences.preference.collectAsState
+import live.mehiz.mpvkt.ui.theme.DarkMode
 import live.mehiz.mpvkt.ui.theme.MpvKtTheme
 import live.mehiz.mpvkt.ui.theme.spacing
+import org.koin.android.ext.android.inject
 import java.io.BufferedReader
 import java.io.File
 import java.io.InputStreamReader
@@ -67,14 +76,22 @@ class CrashActivity : ComponentActivity() {
 
   private val clipboardManager by lazy { getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager }
   private lateinit var logcat: String
+  private val appearancePreferences: AppearancePreferences by inject()
 
   override fun onCreate(savedInstanceState: Bundle?) {
-    enableEdgeToEdge()
     super.onCreate(savedInstanceState)
     lifecycle.coroutineScope.launch {
       logcat = collectLogcat()
     }
     setContent {
+      val dark by appearancePreferences.darkMode.collectAsState()
+      val isSystemInDarkTheme = isSystemInDarkTheme()
+      enableEdgeToEdge(
+        SystemBarStyle.auto(
+          lightScrim = Color.White.toArgb(),
+          darkScrim = Color.White.toArgb(),
+        ) { dark == DarkMode.Dark || (dark == DarkMode.System && isSystemInDarkTheme) },
+      )
       MpvKtTheme {
         CrashScreen(intent.getStringExtra("exception") ?: "")
       }

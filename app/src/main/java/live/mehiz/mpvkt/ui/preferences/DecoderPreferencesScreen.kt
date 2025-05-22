@@ -17,25 +17,23 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import kotlinx.serialization.Serializable
 import live.mehiz.mpvkt.R
 import live.mehiz.mpvkt.preferences.DecoderPreferences
 import live.mehiz.mpvkt.preferences.preference.collectAsState
 import live.mehiz.mpvkt.presentation.Screen
 import live.mehiz.mpvkt.ui.player.Debanding
-import live.mehiz.mpvkt.ui.utils.LocalNavController
+import live.mehiz.mpvkt.ui.utils.LocalBackStack
 import me.zhanghai.compose.preference.ListPreference
 import me.zhanghai.compose.preference.ProvidePreferenceLocals
 import me.zhanghai.compose.preference.SwitchPreference
 import org.koin.compose.koinInject
 
-@Serializable
 object DecoderPreferencesScreen : Screen {
   @OptIn(ExperimentalMaterial3Api::class)
   @Composable
   override fun Content() {
     val preferences = koinInject<DecoderPreferences>()
-    val navigator = LocalNavController.current
+    val backstack = LocalBackStack.current
     Scaffold(
       topBar = {
         TopAppBar(
@@ -43,7 +41,7 @@ object DecoderPreferencesScreen : Screen {
             Text(stringResource(R.string.pref_decoder))
           },
           navigationIcon = {
-            IconButton(onClick = navigator::popBackStack) {
+            IconButton(onClick = backstack::removeLastOrNull) {
               Icon(Icons.AutoMirrored.Default.ArrowBack, null)
             }
           },

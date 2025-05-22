@@ -39,24 +39,23 @@ import live.mehiz.mpvkt.R
 import live.mehiz.mpvkt.presentation.Screen
 import live.mehiz.mpvkt.presentation.crash.CrashActivity.Companion.collectDeviceInfo
 import live.mehiz.mpvkt.ui.theme.spacing
-import live.mehiz.mpvkt.ui.utils.LocalNavController
+import live.mehiz.mpvkt.ui.utils.LocalBackStack
 import me.zhanghai.compose.preference.Preference
 import me.zhanghai.compose.preference.ProvidePreferenceLocals
 
-@Serializable
 object AboutScreen : Screen {
   @OptIn(ExperimentalMaterial3Api::class)
   @Composable
   override fun Content() {
     val context = LocalContext.current
     val clipboard = LocalClipboardManager.current
-    val navigator = LocalNavController.current
+    val backstack = LocalBackStack.current
     Scaffold(
       topBar = {
         TopAppBar(
           title = { Text(text = stringResource(id = R.string.pref_about_title)) },
           navigationIcon = {
-            IconButton(onClick = navigator::popBackStack) {
+            IconButton(onClick = backstack::removeLastOrNull) {
               Icon(imageVector = Icons.AutoMirrored.Default.ArrowBack, contentDescription = null)
             }
           },
@@ -103,7 +102,7 @@ object AboutScreen : Screen {
           )
           Preference(
             title = { Text(text = stringResource(id = R.string.pref_about_oss_libraries)) },
-            onClick = { navigator.navigate(LibrariesScreen) },
+            onClick = { backstack.add(LibrariesScreen) },
           )
           Preference(
             title = { Text(text = stringResource(id = R.string.pref_about_privacy_policy)) },
@@ -141,13 +140,13 @@ object LibrariesScreen : Screen {
   @OptIn(ExperimentalMaterial3Api::class)
   @Composable
   override fun Content() {
-    val navigator = LocalNavController.current
+    val backstack = LocalBackStack.current
     Scaffold(
       topBar = {
         TopAppBar(
           title = { Text(text = stringResource(R.string.pref_about_oss_libraries)) },
           navigationIcon = {
-            IconButton(onClick = navigator::popBackStack) {
+            IconButton(onClick = backstack::removeLastOrNull) {
               Icon(imageVector = Icons.AutoMirrored.Default.ArrowBack, contentDescription = null)
             }
           },
