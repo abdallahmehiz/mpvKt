@@ -24,6 +24,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import kotlinx.serialization.Serializable
 import live.mehiz.mpvkt.R
 import live.mehiz.mpvkt.preferences.SubtitlesPreferences
 import live.mehiz.mpvkt.preferences.preference.collectAsState
@@ -34,6 +35,7 @@ import me.zhanghai.compose.preference.TextFieldPreference
 import me.zhanghai.compose.preference.TwoTargetIconButtonPreference
 import org.koin.compose.koinInject
 
+@Serializable
 object SubtitlesPreferencesScreen : Screen {
   @OptIn(ExperimentalMaterial3Api::class)
   @Composable

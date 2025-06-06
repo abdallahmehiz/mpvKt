@@ -23,6 +23,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import kotlinx.serialization.Serializable
 import live.mehiz.mpvkt.R
 import live.mehiz.mpvkt.presentation.Screen
 import live.mehiz.mpvkt.ui.custombuttons.CustomButtonsScreen
@@ -30,6 +31,7 @@ import live.mehiz.mpvkt.ui.utils.LocalBackStack
 import me.zhanghai.compose.preference.ProvidePreferenceLocals
 import me.zhanghai.compose.preference.preference
 
+@Serializable
 object PreferencesScreen : Screen {
   @OptIn(ExperimentalMaterial3Api::class)
   @Composable

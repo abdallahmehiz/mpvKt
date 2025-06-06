@@ -20,6 +20,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
+import kotlinx.serialization.Serializable
 import live.mehiz.mpvkt.R
 import live.mehiz.mpvkt.preferences.PlayerPreferences
 import live.mehiz.mpvkt.preferences.preference.collectAsState
@@ -34,6 +35,7 @@ import me.zhanghai.compose.preference.SliderPreference
 import me.zhanghai.compose.preference.SwitchPreference
 import org.koin.compose.koinInject
 
+@Serializable
 object PlayerPreferencesScreen : Screen {
   @OptIn(ExperimentalMaterial3Api::class)
   @Composable

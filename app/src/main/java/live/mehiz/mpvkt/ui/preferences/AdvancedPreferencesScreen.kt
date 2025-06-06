@@ -42,6 +42,7 @@ import com.github.k1rakishou.fsaf.FileManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.Serializable
 import live.mehiz.mpvkt.R
 import live.mehiz.mpvkt.database.MpvKtDatabase
 import live.mehiz.mpvkt.preferences.AdvancedPreferences
@@ -61,6 +62,7 @@ import kotlin.io.path.deleteIfExists
 import kotlin.io.path.outputStream
 import kotlin.io.path.readLines
 
+@Serializable
 object AdvancedPreferencesScreen : Screen {
   @OptIn(ExperimentalMaterial3Api::class)
   @Composable

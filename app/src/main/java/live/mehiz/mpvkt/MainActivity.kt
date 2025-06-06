@@ -18,13 +18,12 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.unit.IntOffset
 import androidx.navigation3.runtime.NavEntry
+import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.ui.NavDisplay
 import live.mehiz.mpvkt.preferences.AppearancePreferences
 import live.mehiz.mpvkt.preferences.preference.collectAsState
@@ -55,12 +54,12 @@ class MainActivity : ComponentActivity() {
 
   @Composable
   fun Navigator() {
-    val backstack = remember { mutableStateListOf<Screen>(HomeScreen) }
+    val backstack = rememberNavBackStack<Screen>(HomeScreen)
     CompositionLocalProvider(LocalBackStack provides backstack) {
       NavDisplay(
         backStack = backstack,
         onBack = { backstack.removeLastOrNull() },
-        entryProvider = { route -> NavEntry(route) { it.Content() } },
+        entryProvider = { route -> NavEntry(route) { (it as Screen).Content() } },
         popTransitionSpec = {
           fadeIn(animationSpec = tween(220)) +
             slideIn(animationSpec = tween(220)) { IntOffset(-it.width / 2, 0) } togetherWith

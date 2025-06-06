@@ -10,6 +10,7 @@ plugins {
   alias(libs.plugins.room)
   alias(libs.plugins.detekt)
   alias(libs.plugins.about.libraries)
+  alias(libs.plugins.kotlinx.serialization)
 }
 
 android {
@@ -142,6 +143,7 @@ dependencies {
   detektPlugins(libs.detekt.formatter)
 
   implementation(libs.kotlinx.immutable.collections)
+  implementation(libs.kotlinx.serialization.json)
   implementation(libs.truetype.parser)
   implementation(libs.fsaf)
 }

@@ -43,6 +43,7 @@ import androidx.core.net.toUri
 import com.github.k1rakishou.fsaf.FileManager
 import com.github.k1rakishou.fsaf.file.AbstractFile
 import `is`.xyz.mpv.Utils
+import kotlinx.serialization.Serializable
 import live.mehiz.mpvkt.R
 import live.mehiz.mpvkt.presentation.Screen
 import live.mehiz.mpvkt.ui.player.audioExtensions
@@ -59,6 +60,7 @@ import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import kotlin.math.abs
 
+@Serializable
 data class FilePickerScreen(val uri: String) : Screen {
 
   @OptIn(ExperimentalMaterial3Api::class)

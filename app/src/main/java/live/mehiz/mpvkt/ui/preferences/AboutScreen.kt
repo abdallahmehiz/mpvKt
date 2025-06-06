@@ -43,6 +43,7 @@ import live.mehiz.mpvkt.ui.utils.LocalBackStack
 import me.zhanghai.compose.preference.Preference
 import me.zhanghai.compose.preference.ProvidePreferenceLocals
 
+@Serializable
 object AboutScreen : Screen {
   @OptIn(ExperimentalMaterial3Api::class)
   @Composable

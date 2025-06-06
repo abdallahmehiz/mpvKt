@@ -39,6 +39,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.core.net.toUri
 import com.github.k1rakishou.fsaf.FileManager
 import `is`.xyz.mpv.Utils.PROTOCOLS
+import kotlinx.serialization.Serializable
 import live.mehiz.mpvkt.R
 import live.mehiz.mpvkt.presentation.Screen
 import live.mehiz.mpvkt.ui.player.PlayerActivity
@@ -46,6 +47,7 @@ import live.mehiz.mpvkt.ui.preferences.PreferencesScreen
 import live.mehiz.mpvkt.ui.theme.spacing
 import live.mehiz.mpvkt.ui.utils.LocalBackStack
 
+@Serializable
 object HomeScreen : Screen {
   @OptIn(ExperimentalMaterial3Api::class)
   @Composable

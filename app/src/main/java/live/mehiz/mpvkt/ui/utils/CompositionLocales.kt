@@ -1,9 +1,9 @@
 package live.mehiz.mpvkt.ui.utils
 
 import androidx.compose.runtime.compositionLocalOf
-import live.mehiz.mpvkt.presentation.Screen
+import androidx.navigation3.runtime.NavBackStack
 
 @Suppress("CompositionLocalAllowlist")
-val LocalBackStack = compositionLocalOf<MutableList<Screen>> {
+val LocalBackStack = compositionLocalOf<NavBackStack> {
   error("LocalBackStack not initialized!")
 }
