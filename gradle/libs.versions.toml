@@ -1,14 +1,14 @@
 [versions]
-agp = "8.9.3"
+agp = "8.10.1"
 kotlin = "2.1.21"
 coreKtx = "1.16.0"
-lifecycleRuntimeKtx = "2.9.0"
-composeBom = "2025.05.01"
-activityCompose = "1.12.0-alpha01"
+lifecycleRuntimeKtx = "2.9.1"
+composeBom = "2025.06.00"
+activityCompose = "1.12.0-alpha02"
 koin = "4.0.3"
 room = "2.7.1"
 detekt = "1.23.8"
-about-libs = "12.1.2"
+about-libs = "12.2.1"
 navigation3 = "1.0.0-alpha03"
 kotlinx-serialization = "1.8.1"
 
@@ -17,13 +17,13 @@ androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = 
 androidx-lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycleRuntimeKtx" }
 androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activityCompose" }
 androidx-compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "composeBom" }
-saveable = { group = "androidx.compose.runtime", name = "runtime-saveable", version = "1.9.0-SNAPSHOT" }
+saveable = { group = "androidx.compose.runtime", name = "runtime-saveable", version = "1.9.0-alpha04" }
 androidx-ui = { group = "androidx.compose.ui", name = "ui" }
 androidx-ui-graphics = { group = "androidx.compose.ui", name = "ui-graphics" }
 androidx-ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling" }
 androidx-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview" }
 androidx-material3-android = { group = "androidx.compose.material3", name = "material3-android", version = "1.4.0-alpha15" }
-androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version = "1.7.0" }
+androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version = "1.7.1" }
 androidx-material3-icons-extended = { group = "androidx.compose.material", name = "material-icons-extended", version = "1.7.8" }
 androidx-compose-constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout-compose", version = "1.1.1" }
 androidx-compose-animation-graphics = { group = "androidx.compose.animation", name = "animation-graphics-android" }
@@ -31,11 +31,12 @@ androidx-preferences-ktx = { group = "androidx.preference", name = "preference-k
 mediasession = "androidx.media:media:1.7.0"
 androidx-navigation3-runtime = { module = "androidx.navigation3:navigation3-runtime", version.ref = "navigation3" }
 androidx-navigation3-ui = { module = "androidx.navigation3:navigation3-ui", version.ref = "navigation3" }
+androidx-documentfile = { group = "androidx.documentfile", name = "documentfile", version = "1.1.0" }
 
 mpv-lib = "com.github.abdallahmehiz:mpv-android:v0.1.4"
 seeker = "com.github.abdallahmehiz:seeker:2.0.1"
 
-material = "com.google.android.material:material:1.12.0"
+material = "com.google.android.material:material:1.14.0-alpha01"
 
 koin-bom = { module = "io.insert-koin:koin-bom", version.ref = "koin" }
 koin-core = { module = "io.insert-koin:koin-core" }
@@ -54,7 +55,7 @@ detekt-gradle-plugin = { module = "io.gitlab.arturbosch.detekt:detekt-gradle-plu
 detekt-formatter = { module = "io.gitlab.arturbosch.detekt:detekt-formatting", version.ref = "detekt" }
 detekt-rules-compose = { module = "io.nlopez.compose.rules:detekt", version = "0.4.10" }
 
-kotlinx-immutable-collections = { module = "org.jetbrains.kotlinx:kotlinx-collections-immutable", version = "0.3.8" }
+kotlinx-immutable-collections = { module = "org.jetbrains.kotlinx:kotlinx-collections-immutable", version = "0.4.0" }
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinx-serialization" }
 
 truetype-parser = { module = "io.github.yubyf:truetypeparser-light", version = "2.1.4" }

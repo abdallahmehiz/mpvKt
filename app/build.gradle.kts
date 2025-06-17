@@ -121,6 +121,7 @@ dependencies {
   implementation(libs.androidx.compose.animation.graphics)
   implementation(libs.material)
   implementation(libs.androidx.preferences.ktx)
+  implementation(libs.androidx.documentfile)
   implementation(libs.mediasession)
   implementation(libs.saveable)
 
