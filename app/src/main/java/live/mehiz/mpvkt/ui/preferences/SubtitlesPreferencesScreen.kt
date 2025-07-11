@@ -31,6 +31,7 @@ import live.mehiz.mpvkt.preferences.preference.collectAsState
 import live.mehiz.mpvkt.presentation.Screen
 import live.mehiz.mpvkt.ui.utils.LocalBackStack
 import me.zhanghai.compose.preference.ProvidePreferenceLocals
+import me.zhanghai.compose.preference.SwitchPreference
 import me.zhanghai.compose.preference.TextFieldPreference
 import me.zhanghai.compose.preference.TwoTargetIconButtonPreference
 import org.koin.compose.koinInject
@@ -103,6 +104,17 @@ object SubtitlesPreferencesScreen : Screen {
             iconButtonIcon = { Icon(Icons.Default.Clear, null) },
             onIconButtonClick = { preferences.fontsFolder.delete() },
             iconButtonEnabled = fontsFolder.isNotBlank()
+          )
+          val autoloadExternal by preferences.autoLoadExternal.collectAsState()
+          SwitchPreference(
+            value = autoloadExternal,
+            onValueChange = { preferences.autoLoadExternal.set(it) },
+            title = { Text(text = stringResource(id = R.string.pref_subtitles_autoload_title)) },
+            summary = {
+              Text(
+                text = stringResource(id = R.string.pref_subtitles_autoload_summary),
+              )
+            },
           )
         }
       }

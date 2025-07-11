@@ -70,6 +70,8 @@
     <string name="pref_preferred_languages">首选语言</string>
     <string name="pref_subtitles_fonts_dir">字体目录</string>
     <string name="pref_subtitles_preferred_language">在具有多个字幕的视频中，默认选择的字幕语言。支持两位或三位字母的语言代码。多个值可以用逗号分隔。</string>
+    <string name="pref_subtitles_autoload_title">自动加载字幕</string>
+    <string name="pref_subtitles_autoload_summary">自动加载同名外部字幕。当有多个文件时，默认启用第一个。（仅在使用文件选择器时有效）</string>
     <string name="pref_audio">音频</string>
     <string name="pref_audio_summary">首选语言，声道，音高修正</string>
     <string name="pref_audio_pitch_correction_title">启用自动音高修正</string>
@@ -212,5 +214,5 @@
     <string name="show_splash_ovals_on_double_tap_to_seek">双击跳转时显示涟漪效果</string>
     <string name="show_icon_on_double_tap_to_seek">显示跳转时间</string>
     <string name="show_time_on_double_tap_to_seek">显示跳转图标</string>
-    
+
 </resources>
