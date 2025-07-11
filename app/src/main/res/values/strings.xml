@@ -103,6 +103,8 @@
     <string name="pref_preferred_languages">Preferred languages</string>
     <string name="pref_subtitles_fonts_dir">Fonts directory</string>
     <string name="pref_subtitles_preferred_language">Subtitle language(s) to be selected by default on a video with multiple subtitles, Two- or three-letter languages codes work. Multiple values can be delimited by comma.</string>
+    <string name="pref_subtitles_autoload_title">Automatically load subtitles</string>
+    <string name="pref_subtitles_autoload_summary">Automatically load external subtitles with the same name. When there are multiple files, the first one is enabled by default. (Only valid when using the file picker)</string>
 
     <string name="pref_audio">Audio</string>
     <string name="pref_audio_summary">Preferred languages, audio channels, pitch correction</string>

@@ -13,6 +13,7 @@ import live.mehiz.mpvkt.preferences.preference.getEnum
 import live.mehiz.mpvkt.ui.player.controls.components.panels.SubtitlesBorderStyle
 
 class SubtitlesPreferences(preferenceStore: PreferenceStore) {
+  val autoLoadExternal = preferenceStore.getBoolean("sub_autoload", true)
   val preferredLanguages = preferenceStore.getString("sub_preferred_languages")
 
   val fontsFolder = preferenceStore.getString("sub_fonts_folder")
