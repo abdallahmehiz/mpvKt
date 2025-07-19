@@ -38,6 +38,7 @@ class PlayerPreferences(
   val savePositionOnQuit = preferenceStore.getBoolean("save_position", true)
 
   val automaticallyEnterPip = preferenceStore.getBoolean("automatic_pip")
+  val automaticBackgroundPlayback = preferenceStore.getBoolean("automatic_background_playback")
   val closeAfterReachingEndOfVideo = preferenceStore.getBoolean("close_after_eof")
 
   val rememberBrightness = preferenceStore.getBoolean("remember_rightness")

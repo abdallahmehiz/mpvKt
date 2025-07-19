@@ -261,6 +261,17 @@
     <string name="show_time_on_double_tap_to_seek">Show seek time</string>
     <string name="show_icon_on_double_tap_to_seek">Show seek icon</string>
 
+    <string name="pref_enable_background_playback">Enable background playback</string>
+    <string name="pref_enable_background_playback_summary">Continue playback when the app is in background</string>
+    <string name="notification_channel_name">Playback Controls</string>
+    <string name="notification_channel_description">Controls for the currently playing media</string>
+    <string name="notification_playing">Now playing</string>
+    <string name="notification_pause">Pause</string>
+    <string name="notification_play">Play</string>
+    <string name="notification_stop">Stop</string>
+    <string name="notification_forward">Forward</string>
+    <string name="notification_rewind">Rewind</string>
+
     <plurals name="plural_items">
         <item quantity="one">%1$d item</item>
         <item quantity="other">%1$d items</item>

@@ -3,9 +3,11 @@ package live.mehiz.mpvkt.ui.player
 import android.annotation.SuppressLint
 import android.app.PictureInPictureParams
 import android.content.BroadcastReceiver
+import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.content.ServiceConnection
 import android.content.pm.ActivityInfo
 import android.content.pm.PackageManager
 import android.content.res.Configuration
@@ -15,6 +17,7 @@ import android.media.session.PlaybackState
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.os.IBinder
 import android.provider.MediaStore
 import android.util.Log
 import android.util.Rational
@@ -77,6 +80,8 @@ class PlayerActivity : AppCompatActivity() {
   private val fileManager: FileManager by inject()
 
   private var fileName = ""
+  private var mediaPlaybackService: MediaPlaybackService? = null
+  private var serviceBound = false
 
   private var audioFocusRequest: AudioFocusRequestCompat? = null
   private var restoreAudioFocus: () -> Unit = {}
@@ -153,7 +158,10 @@ class PlayerActivity : AppCompatActivity() {
   }
 
   override fun onPause() {
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N && !isInPictureInPictureMode) {
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N &&
+      !isInPictureInPictureMode &&
+      !playerPreferences.automaticBackgroundPlayback.get()
+    ) {
       viewModel.pause()
     }
     saveVideoPlaybackState(fileName)
@@ -166,8 +174,16 @@ class PlayerActivity : AppCompatActivity() {
   }
 
   override fun onStop() {
-    viewModel.pause()
     saveVideoPlaybackState(fileName)
+    if (!serviceBound && playerPreferences.automaticBackgroundPlayback.get()) {
+      startBackgroundPlayback()
+    } else {
+      viewModel.pause()
+      if (serviceBound) {
+        unbindService(serviceConnection)
+        serviceBound = false
+      }
+    }
     window.attributes.screenBrightness.let {
       if (playerPreferences.rememberBrightness.get() && it != -1f) {
         playerPreferences.defaultBrightness.set(it)
@@ -384,6 +400,30 @@ class PlayerActivity : AppCompatActivity() {
     }
   }
 
+  private val serviceConnection = object : ServiceConnection {
+    override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
+      val binder = service as MediaPlaybackService.MediaPlaybackBinder
+      mediaPlaybackService = binder.getService()
+      serviceBound = true
+
+      fileName.let { title ->
+        val artist = MPVLib.getPropertyString("metadata/artist") ?: ""
+        mediaPlaybackService?.setMediaInfo(title = title, artist = artist, thumbnail = MPVLib.grabThumbnail(1080))
+      }
+    }
+
+    override fun onServiceDisconnected(name: ComponentName?) {
+      mediaPlaybackService = null
+      serviceBound = false
+    }
+  }
+
+  private fun startBackgroundPlayback() {
+    val intent = Intent(this, MediaPlaybackService::class.java)
+    startService(intent)
+    bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE)
+  }
+
   private fun setIntentExtras(extras: Bundle?) {
     if (extras == null) return
 
@@ -478,6 +518,7 @@ class PlayerActivity : AppCompatActivity() {
         viewModel.loadChapters()
         viewModel.updateChapter(0)
       }
+
       "track-list" -> viewModel.loadTracks()
     }
   }
@@ -721,10 +762,12 @@ class PlayerActivity : AppCompatActivity() {
         viewModel.changeVolumeBy(1)
         viewModel.displayVolumeSlider()
       }
+
       KeyEvent.KEYCODE_VOLUME_DOWN -> {
         viewModel.changeVolumeBy(-1)
         viewModel.displayVolumeSlider()
       }
+
       KeyEvent.KEYCODE_DPAD_RIGHT -> viewModel.handleLeftDoubleTap()
       KeyEvent.KEYCODE_DPAD_LEFT -> viewModel.handleRightDoubleTap()
       KeyEvent.KEYCODE_SPACE -> viewModel.pauseUnpause()
@@ -764,6 +807,7 @@ class PlayerActivity : AppCompatActivity() {
                 viewModel.unpause()
                 window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
               }
+
               SingleActionGesture.Custom -> {
                 MPVLib.command(arrayOf("keypress", CustomKeyCodes.MediaPlay.keyCode))
               }
@@ -779,6 +823,7 @@ class PlayerActivity : AppCompatActivity() {
                 viewModel.pause()
                 window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
               }
+
               SingleActionGesture.Custom -> {
                 MPVLib.command(arrayOf("keypress", CustomKeyCodes.MediaPlay.keyCode))
               }
@@ -791,9 +836,11 @@ class PlayerActivity : AppCompatActivity() {
               SingleActionGesture.Seek -> {
                 viewModel.leftSeek()
               }
+
               SingleActionGesture.PlayPause -> {
                 viewModel.pauseUnpause()
               }
+
               SingleActionGesture.Custom -> {
                 MPVLib.command(arrayOf("keypress", CustomKeyCodes.MediaPrevious.keyCode))
               }
@@ -806,9 +853,11 @@ class PlayerActivity : AppCompatActivity() {
               SingleActionGesture.Seek -> {
                 viewModel.rightSeek()
               }
+
               SingleActionGesture.PlayPause -> {
                 viewModel.pauseUnpause()
               }
+
               SingleActionGesture.Custom -> {
                 MPVLib.command(arrayOf("keypress", CustomKeyCodes.MediaNext.keyCode))
               }

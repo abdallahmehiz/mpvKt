@@ -21,6 +21,8 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Headset
+import androidx.compose.material.icons.filled.HeadsetOff
 import androidx.compose.material.icons.filled.KeyboardAlt
 import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material.icons.outlined.Schedule
@@ -29,6 +31,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconToggleButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -56,6 +59,7 @@ import live.mehiz.mpvkt.database.entities.CustomButtonEntity
 import live.mehiz.mpvkt.preferences.AdvancedPreferences
 import live.mehiz.mpvkt.preferences.AudioChannels
 import live.mehiz.mpvkt.preferences.AudioPreferences
+import live.mehiz.mpvkt.preferences.PlayerPreferences
 import live.mehiz.mpvkt.preferences.preference.collectAsState
 import live.mehiz.mpvkt.presentation.components.PlayerSheet
 import live.mehiz.mpvkt.ui.player.execute
@@ -75,6 +79,7 @@ fun MoreSheet(
 ) {
   val advancedPreferences = koinInject<AdvancedPreferences>()
   val audioPreferences = koinInject<AudioPreferences>()
+  val playerPreferences = koinInject<PlayerPreferences>()
   val statisticsPage by advancedPreferences.enabledStatisticsPage.collectAsState()
 
   PlayerSheet(
@@ -99,8 +104,17 @@ fun MoreSheet(
         )
         Row(
           verticalAlignment = Alignment.CenterVertically,
-          horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.extraSmall),
         ) {
+          val backgroundPlayback by playerPreferences.automaticBackgroundPlayback.collectAsState()
+          IconToggleButton(
+            checked = backgroundPlayback,
+            onCheckedChange = { playerPreferences.automaticBackgroundPlayback.set(it) }
+          ) {
+            Icon(
+              if (backgroundPlayback) Icons.Default.Headset else Icons.Default.HeadsetOff,
+              null
+            )
+          }
           var isSleepTimerDialogShown by remember { mutableStateOf(false) }
           TextButton(onClick = { isSleepTimerDialogShown = true }) {
             Row(
