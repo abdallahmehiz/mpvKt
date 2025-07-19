@@ -221,9 +221,9 @@ class PlayerActivity : AppCompatActivity() {
     window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
     binding.root.systemUiVisibility =
       View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY or
-        View.SYSTEM_UI_FLAG_LAYOUT_STABLE or
-        View.SYSTEM_UI_FLAG_HIDE_NAVIGATION or
-        View.SYSTEM_UI_FLAG_LOW_PROFILE
+      View.SYSTEM_UI_FLAG_LAYOUT_STABLE or
+      View.SYSTEM_UI_FLAG_HIDE_NAVIGATION or
+      View.SYSTEM_UI_FLAG_LOW_PROFILE
     windowInsetsController.hide(WindowInsetsCompat.Type.systemBars())
     windowInsetsController.hide(WindowInsetsCompat.Type.navigationBars())
     windowInsetsController.systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
@@ -362,7 +362,7 @@ class PlayerActivity : AppCompatActivity() {
     when (it) {
       AudioManager.AUDIOFOCUS_LOSS,
       AudioManager.AUDIOFOCUS_LOSS_TRANSIENT,
-        -> {
+      -> {
         val oldRestore = restoreAudioFocus
         val wasPlayerPaused = player.paused ?: false
         viewModel.pause()
