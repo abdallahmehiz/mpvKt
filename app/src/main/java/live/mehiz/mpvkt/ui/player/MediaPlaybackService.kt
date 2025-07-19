@@ -27,6 +27,7 @@ import live.mehiz.mpvkt.R
 import live.mehiz.mpvkt.preferences.GesturePreferences
 import org.koin.android.ext.android.inject
 
+@Suppress("TooManyFunctions")
 class MediaPlaybackService : MediaBrowserServiceCompat(), MPVLib.EventObserver {
   companion object {
     private const val NOTIFICATION_ID = 69420
@@ -59,6 +60,7 @@ class MediaPlaybackService : MediaBrowserServiceCompat(), MPVLib.EventObserver {
   private var audioFocusRequest: AudioFocusRequest? = null
   private var audioFocusCallback: AudioManager.OnAudioFocusChangeListener? = null
 
+  @Suppress("EmptyFunctionBlock")
   override fun eventProperty(property: String) {
   }
 
@@ -92,9 +94,11 @@ class MediaPlaybackService : MediaBrowserServiceCompat(), MPVLib.EventObserver {
     }
   }
 
+  @Suppress("EmptyFunctionBlock")
   override fun eventProperty(property: String, value: Double) {
   }
 
+  @Suppress("EmptyFunctionBlock")
   override fun event(eventId: Int) {
   }
 
