@@ -204,7 +204,7 @@
                 android:resource="@xml/provider_paths" />
         </provider>
         <service
-            android:name=".ui.player.BackgroundPlaybackService"
+            android:name=".ui.player.MediaPlaybackService"
             android:exported="false"
             android:foregroundServiceType="mediaPlayback" />
     </application>

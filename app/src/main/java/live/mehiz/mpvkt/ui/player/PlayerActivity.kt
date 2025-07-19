@@ -80,7 +80,7 @@ class PlayerActivity : AppCompatActivity() {
   private val fileManager: FileManager by inject()
 
   private var fileName = ""
-  private var backgroundPlaybackService: BackgroundPlaybackService? = null
+  private var mediaPlaybackService: MediaPlaybackService? = null
   private var serviceBound = false
 
   private var audioFocusRequest: AudioFocusRequestCompat? = null
@@ -221,9 +221,9 @@ class PlayerActivity : AppCompatActivity() {
     window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
     binding.root.systemUiVisibility =
       View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY or
-      View.SYSTEM_UI_FLAG_LAYOUT_STABLE or
-      View.SYSTEM_UI_FLAG_HIDE_NAVIGATION or
-      View.SYSTEM_UI_FLAG_LOW_PROFILE
+        View.SYSTEM_UI_FLAG_LAYOUT_STABLE or
+        View.SYSTEM_UI_FLAG_HIDE_NAVIGATION or
+        View.SYSTEM_UI_FLAG_LOW_PROFILE
     windowInsetsController.hide(WindowInsetsCompat.Type.systemBars())
     windowInsetsController.hide(WindowInsetsCompat.Type.navigationBars())
     windowInsetsController.systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
@@ -362,7 +362,7 @@ class PlayerActivity : AppCompatActivity() {
     when (it) {
       AudioManager.AUDIOFOCUS_LOSS,
       AudioManager.AUDIOFOCUS_LOSS_TRANSIENT,
-      -> {
+        -> {
         val oldRestore = restoreAudioFocus
         val wasPlayerPaused = player.paused ?: false
         viewModel.pause()
@@ -402,23 +402,24 @@ class PlayerActivity : AppCompatActivity() {
 
   private val serviceConnection = object : ServiceConnection {
     override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
-      val binder = service as BackgroundPlaybackService.MediaPlaybackBinder
-      backgroundPlaybackService = binder.getService()
+      val binder = service as MediaPlaybackService.MediaPlaybackBinder
+      mediaPlaybackService = binder.getService()
       serviceBound = true
 
       fileName.let { title ->
-        backgroundPlaybackService?.setMediaInfo(title = title, MPVLib.grabThumbnail(1080))
+        val artist = MPVLib.getPropertyString("metadata/artist") ?: ""
+        mediaPlaybackService?.setMediaInfo(title = title, artist = artist, thumbnail = MPVLib.grabThumbnail(1080))
       }
     }
 
     override fun onServiceDisconnected(name: ComponentName?) {
-      backgroundPlaybackService = null
+      mediaPlaybackService = null
       serviceBound = false
     }
   }
 
   private fun startBackgroundPlayback() {
-    val intent = Intent(this, BackgroundPlaybackService::class.java)
+    val intent = Intent(this, MediaPlaybackService::class.java)
     startService(intent)
     bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE)
   }
