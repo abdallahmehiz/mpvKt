@@ -99,8 +99,9 @@ data class FilePickerScreen(val uri: String) : Screen {
               val parentDir = fileManager.fromUri(uri.toUri())!!
               val subtitleExtensions = setOf("srt", "ass", "ssa", "vtt", "sub")
               val subtitlePaths = fileManager.listFiles(parentDir).filter { potentialSubFile ->
-                if (fileManager.isDirectory(potentialSubFile)) false
-                else {
+                if (fileManager.isDirectory(potentialSubFile)) {
+                  false
+                } else {
                   val subFileName = fileManager.getName(potentialSubFile)
                   val subFileNameWithoutExt = subFileName.substringBeforeLast('.')
                   val subFileExt = subFileName.substringAfterLast('.').lowercase()
@@ -127,8 +128,8 @@ data class FilePickerScreen(val uri: String) : Screen {
   @Composable
   fun FilePicker(
     directory: AbstractFile,
-    modifier: Modifier = Modifier,
     onNavigate: (AbstractFile) -> Unit,
+    modifier: Modifier = Modifier,
   ) {
     val navigator = LocalBackStack.current
     val fileManager = koinInject<FileManager>()

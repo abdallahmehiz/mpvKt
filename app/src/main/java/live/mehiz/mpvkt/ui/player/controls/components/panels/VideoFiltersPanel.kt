@@ -48,19 +48,19 @@ fun VideoFiltersPanel(
     val filtersCard = createRef()
 
     FiltersCard(
+      onClose = onDismissRequest,
       Modifier.constrainAs(filtersCard) {
         linkTo(parent.top, parent.bottom, bias = 0.8f)
         end.linkTo(parent.end)
       },
-      onClose = onDismissRequest,
     )
   }
 }
 
 @Composable
 fun FiltersCard(
-  modifier: Modifier = Modifier,
   onClose: () -> Unit,
+  modifier: Modifier = Modifier,
 ) {
   val decoderPreferences = koinInject<DecoderPreferences>()
   Card(

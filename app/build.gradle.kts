@@ -20,7 +20,7 @@ android {
   defaultConfig {
     applicationId = "live.mehiz.mpvkt"
     minSdk = 21
-    targetSdk = 35
+    targetSdk = 36
     versionCode = 12
     versionName = "0.1.6"
 
