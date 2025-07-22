@@ -101,6 +101,8 @@
     <string name="pref_preferred_languages">Предпочитаемые языки</string>
     <string name="pref_subtitles_fonts_dir">Директория шрифтов</string>
     <string name="pref_subtitles_preferred_language">Язык(и) субтитров которые будут выбраны по умолчанию для видео с несколькими субтитрами. Подойдут двух- или трёхбуквенные коды языков. Несколько значений можно разделить запятой.</string>
+    <string name="pref_subtitles_autoload_title">Автоматически Загружать Субтитры</string>
+    <string name="pref_subtitles_autoload_summary">Автоматически загружать внешние субтитры с одинаковыми именами. При наличии нескольких файлов по умолчанию включается первый из них. (Действует только при использовании средства выбора файлов)</string>
 
     <string name="pref_audio">Аудио</string>
     <string name="pref_audio_summary">Предпочитаемые языки, аудиоканалы, коррекция высоты</string>
@@ -239,6 +241,17 @@
     <string name="show_splash_ovals_on_double_tap_to_seek">Показывать пульсацию при перемотке двойным нажатием</string>
     <string name="show_time_on_double_tap_to_seek">Показывать время перемотки</string>
     <string name="show_icon_on_double_tap_to_seek">Показывать иконку перемотки</string>
+
+    <string name="pref_enable_background_playback">Включить фоновое воспроизведение</string>
+    <string name="pref_enable_background_playback_summary">Продолжать воспроизведение, когда приложение в фоне</string>
+    <string name="notification_channel_name">Управление воспроизведением</string>
+    <string name="notification_channel_description">Управление для играющих сейчас мультимедиа</string>
+    <string name="notification_playing">Играет сейчас</string>
+    <string name="notification_pause">Пауза</string>
+    <string name="notification_play">Играть</string>
+    <string name="notification_stop">Стоп</string>
+    <string name="notification_forward">Вперёд</string>
+    <string name="notification_rewind">Назад</string>
 
     <plurals name="plural_items">
         <item quantity="one">%1$d элемент</item>
