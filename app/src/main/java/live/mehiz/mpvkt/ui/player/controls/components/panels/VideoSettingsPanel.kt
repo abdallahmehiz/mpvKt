@@ -6,20 +6,19 @@ import live.mehiz.mpvkt.R
 import live.mehiz.mpvkt.ui.player.controls.components.panels.components.MultiCardPanel
 
 @Composable
-fun SubtitleSettingsPanel(
+fun VideoSettingsPanel(
   onDismissRequest: () -> Unit,
   modifier: Modifier = Modifier,
 ) {
   MultiCardPanel(
     onDismissRequest = onDismissRequest,
-    titleRes = R.string.player_sheets_subtitles_settings_title,
-    cardCount = 3,
+    titleRes = R.string.player_sheets_video_settings_title,
+    cardCount = 2,
     modifier = modifier,
   ) { index, cardModifier ->
     when (index) {
-      0 -> SubtitleSettingsTypographyCard(cardModifier)
-      1 -> SubtitleSettingsColorsCard(cardModifier)
-      2 -> SubtitlesMiscellaneousCard(cardModifier)
+      0 -> VideoSettingsDebandCard(cardModifier)
+      1 -> VideoSettingsFiltersCard(cardModifier)
       else -> {}
     }
   }
