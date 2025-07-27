@@ -203,6 +203,15 @@
     <string name="player_sheets_sub_delay_audio_sound_heard">Sound heard</string>
     <string name="player_sheets_sub_delay_sound_sound_spotted">Sound spotted</string>
 
+    <string name="player_sheets_video_settings_title">Video settings</string>
+    <string name="player_sheets_deband_title">Deband</string>
+    <string name="player_sheets_deband_none">None</string>
+    <string name="player_sheets_deband_cpu">CPU</string>
+    <string name="player_sheets_deband_gpu">GPU</string>
+    <string name="player_sheets_deband_iterations">Iterations</string>
+    <string name="player_sheets_deband_threshold">Threshold</string>
+    <string name="player_sheets_deband_range">Range</string>
+    <string name="player_sheets_deband_grain">Grain</string>
     <string name="player_sheets_filters_title">Filters</string>
     <string name="player_sheets_filters_brightness">Brightness</string>
     <string name="player_sheets_filters_contrast">Contrast</string>

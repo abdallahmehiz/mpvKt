@@ -94,11 +94,6 @@ class MPVView(context: Context, attributes: AttributeSet) : BaseMPVView(context,
     setVo(if (decoderPreferences.gpuNext.get()) "gpu-next" else "gpu")
     MPVLib.setOptionString("profile", "fast")
     MPVLib.setOptionString("hwdec", if (decoderPreferences.tryHWDecoding.get()) "auto" else "no")
-    when (decoderPreferences.debanding.get()) {
-      Debanding.None -> {}
-      Debanding.CPU -> MPVLib.setOptionString("vf", "gradfun=radius=12")
-      Debanding.GPU -> MPVLib.setOptionString("deband", "yes")
-    }
 
     if (decoderPreferences.useYUV420P.get()) {
       MPVLib.setOptionString("vf", "format=yuv420p")
@@ -137,6 +132,12 @@ class MPVView(context: Context, attributes: AttributeSet) : BaseMPVView(context,
   }
 
   override fun postInitOptions() {
+    when (decoderPreferences.debanding.get()) {
+      Debanding.None -> {}
+      Debanding.CPU -> MPVLib.command(arrayOf("vf", "add", "@deband:gradfun=radius=12"))
+      Debanding.GPU -> MPVLib.setOptionString("deband", "yes")
+    }
+
     advancedPreferences.enabledStatisticsPage.get().let {
       if (it != 0) {
         MPVLib.command(arrayOf("script-binding", "stats/display-stats-toggle"))
