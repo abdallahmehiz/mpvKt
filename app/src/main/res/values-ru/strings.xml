@@ -197,6 +197,15 @@
     <string name="player_sheets_sub_delay_audio_sound_heard">Звук услышан</string>
     <string name="player_sheets_sub_delay_sound_sound_spotted">Звук обнаружен</string>
 
+    <string name="player_sheets_video_settings_title">Настройки видео</string>
+    <string name="player_sheets_deband_title">Дебанд</string>
+    <string name="player_sheets_deband_none">Нет</string>
+    <string name="player_sheets_deband_cpu">CPU</string>
+    <string name="player_sheets_deband_gpu">GPU</string>
+    <string name="player_sheets_deband_iterations">Итерации</string>
+    <string name="player_sheets_deband_threshold">Порог</string>
+    <string name="player_sheets_deband_range">Радиус</string>
+    <string name="player_sheets_deband_grain">Зернистость</string>
     <string name="player_sheets_filters_title">Фильтры</string>
     <string name="player_sheets_filters_brightness">Яркость</string>
     <string name="player_sheets_filters_contrast">Контраст</string>
