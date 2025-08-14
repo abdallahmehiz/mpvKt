@@ -48,7 +48,6 @@ import `is`.xyz.mpv.Utils
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlinx.serialization.json.Json
 import live.mehiz.mpvkt.database.entities.CustomButtonEntity
 import live.mehiz.mpvkt.database.entities.PlaybackStateEntity
 import live.mehiz.mpvkt.databinding.PlayerLayoutBinding
@@ -80,7 +79,6 @@ class PlayerActivity : AppCompatActivity() {
   private val advancedPreferences: AdvancedPreferences by inject()
   private val gesturePreferences: GesturePreferences by inject()
   private val fileManager: FileManager by inject()
-  private val json: Json by inject()
 
   private var fileName = ""
   private var mediaPlaybackService: MediaPlaybackService? = null
@@ -525,11 +523,9 @@ class PlayerActivity : AppCompatActivity() {
     }
   }
 
+  @Suppress("UnusedParameter")
   internal fun onObserverEvent(property: String, value: MPVNode) {
-    when (property) {
-      "chapter-list" -> viewModel.updateChapters(json.decodeFromString(value.toJson()))
-      "track-list" -> viewModel.updateTracks(json.decodeFromString(value.toJson()))
-    }
+    if (player.isExiting) return
   }
 
   @SuppressLint("NewApi")

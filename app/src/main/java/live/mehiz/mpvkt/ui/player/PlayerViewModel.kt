@@ -15,8 +15,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
-import dev.vivvvek.seeker.Segment
 import `is`.xyz.mpv.MPVLib
+import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -25,8 +26,10 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.serialization.json.Json
 import live.mehiz.mpvkt.R
 import live.mehiz.mpvkt.database.MpvKtDatabase
 import live.mehiz.mpvkt.database.entities.CustomButtonEntity
@@ -55,6 +58,7 @@ class PlayerViewModel(
   private val gesturePreferences: GesturePreferences by inject(GesturePreferences::class.java)
   private val audioPreferences: AudioPreferences by inject(AudioPreferences::class.java)
   private val mpvKtDatabase: MpvKtDatabase by inject(MpvKtDatabase::class.java)
+  private val json: Json by inject(Json::class.java)
 
   init {
     viewModelScope.launch(Dispatchers.IO) {
@@ -92,15 +96,14 @@ class PlayerViewModel(
   val currentVolume = MutableStateFlow(activity.audioManager.getStreamVolume(AudioManager.STREAM_MUSIC))
   private var volumeBoostCap by MPVLib.propInt["volume-max"].collectAsState(viewModelScope, null)
 
-  private val _subtitleTracks = MutableStateFlow<List<TrackNode>>(emptyList())
-  val subtitleTracks = _subtitleTracks.asStateFlow()
-  private val _selectedSubtitles = MutableStateFlow(Pair(-1, -1))
-  val selectedSubtitles = _selectedSubtitles.asStateFlow()
+  val subtitleTracks = MPVLib.propNode["track-list"]
+    .map { (it?.toObject<List<TrackNode>>(json)?.filter { it.isSubtitle } ?: persistentListOf()).toImmutableList() }
 
-  private val _audioTracks = MutableStateFlow<List<TrackNode>>(emptyList())
-  val audioTracks = _audioTracks.asStateFlow()
+  val audioTracks = MPVLib.propNode["track-list"]
+    .map { (it?.toObject<List<TrackNode>>(json)?.filter { it.isAudio } ?: persistentListOf()).toImmutableList() }
 
-  var chapters: List<Segment> = listOf()
+  val chapters = MPVLib.propNode["chapter-list"]
+    .map { (it?.toObject<List<ChapterNode>>(json) ?: persistentListOf()).map { it.toSegment() }.toImmutableList() }
 
   private val _controlsShown = MutableStateFlow(true)
   val controlsShown = _controlsShown.asStateFlow()
@@ -160,21 +163,6 @@ class PlayerViewModel(
     }
   }
 
-  fun updateTracks(
-    newTracks: List<TrackNode>,
-  ) {
-    _subtitleTracks.update { newTracks.filter { it.isSubtitle } }
-    _audioTracks.update { newTracks.filter { it.isAudio } }
-  }
-
-  fun updateChapters(
-    newChapters: List<ChapterNode>,
-  ) {
-    chapters = newChapters
-      .map { it.toSegment() }
-      .sortedBy { it.start }
-  }
-
   fun addAudio(uri: Uri) {
     val url = uri.toString()
     val path = if (url.startsWith("content://")) url.toUri().openContentFd(activity) else url
@@ -188,20 +176,15 @@ class PlayerViewModel(
   }
 
   fun selectSub(id: Int) {
-    val selectedSubs = selectedSubtitles.value
-    _selectedSubtitles.update {
-      when (id) {
-        selectedSubs.first -> Pair(selectedSubs.second, -1)
-        selectedSubs.second -> Pair(selectedSubs.first, -1)
-        else -> if (selectedSubs.first != -1) Pair(selectedSubs.first, id) else Pair(id, -1)
-      }
+    val selectedSubs = Pair(MPVLib.getPropertyInt("sid"), MPVLib.getPropertyInt("secondary-sid"))
+    when (id) {
+      selectedSubs.first -> Pair(selectedSubs.second, null)
+      selectedSubs.second -> Pair(selectedSubs.first, null)
+      else -> if (selectedSubs.first != null) Pair(selectedSubs.first, id) else Pair(id, null)
+    }.let {
+      it.second?.let { MPVLib.setPropertyInt("secondary-sid", it) } ?: MPVLib.setPropertyBoolean("secondary-sid", false)
+      it.first?.let { MPVLib.setPropertyInt("sid", it) } ?: MPVLib.setPropertyBoolean("sid", false)
     }
-    activity.player.secondarySid = _selectedSubtitles.value.second
-    activity.player.sid = _selectedSubtitles.value.first
-  }
-
-  fun updateSubtitle(sid: Int, secondarySid: Int) {
-    _selectedSubtitles.update { Pair(sid, secondarySid) }
   }
 
   fun pauseUnpause() = MPVLib.command(arrayOf("cycle", "pause"))

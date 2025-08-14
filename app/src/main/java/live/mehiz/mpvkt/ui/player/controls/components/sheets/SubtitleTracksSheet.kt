@@ -29,7 +29,6 @@ import me.zhanghai.compose.preference.ProvidePreferenceLocals
 @Composable
 fun SubtitlesSheet(
   tracks: ImmutableList<TrackNode>,
-  selectedTracks: ImmutableList<Int>,
   onSelect: (Int) -> Unit,
   onAddSubtitle: () -> Unit,
   onOpenSubtitleSettings: () -> Unit,
@@ -57,7 +56,7 @@ fun SubtitlesSheet(
     track = { track ->
       SubtitleTrackRow(
         title = getTrackTitle(track),
-        selected = selectedTracks.indexOf(track.id),
+        selected = track.mainSelection?.toInt() ?: -1,
         onClick = { onSelect(track.id) },
       )
     },
