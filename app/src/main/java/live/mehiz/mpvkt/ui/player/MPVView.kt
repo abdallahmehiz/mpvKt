@@ -151,17 +151,8 @@ class MPVView(context: Context, attributes: AttributeSet) : BaseMPVView(context,
   }
 
   private val observedProps = mapOf(
-    "chapter-list" to MPVLib.mpvFormat.MPV_FORMAT_NODE,
-    "track-list" to MPVLib.mpvFormat.MPV_FORMAT_NODE,
-
     "pause" to MPVLib.mpvFormat.MPV_FORMAT_FLAG,
-
-    "sid" to MPVLib.mpvFormat.MPV_FORMAT_STRING,
-    "secondary-sid" to MPVLib.mpvFormat.MPV_FORMAT_STRING,
-    "aid" to MPVLib.mpvFormat.MPV_FORMAT_STRING,
-
     "video-params/aspect" to MPVLib.mpvFormat.MPV_FORMAT_DOUBLE,
-
     "eof-reached" to MPVLib.mpvFormat.MPV_FORMAT_FLAG,
 
     "user-data/mpvkt/show_text" to MPVLib.mpvFormat.MPV_FORMAT_STRING,

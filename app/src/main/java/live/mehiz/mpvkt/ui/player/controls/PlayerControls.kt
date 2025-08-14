@@ -60,6 +60,7 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import `is`.xyz.mpv.MPVLib
 import `is`.xyz.mpv.Utils
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.update
@@ -125,6 +126,7 @@ fun PlayerControls(
   val mpvDecoder by MPVLib.propString["hwdec-current"].collectAsState()
   val decoder by remember { derivedStateOf { getDecoderFromValue(mpvDecoder ?: "auto") } }
   val playerTimeToDisappear by playerPreferences.playerTimeToDisappear.collectAsState()
+  val chapters by viewModel.chapters.collectAsState(persistentListOf())
   val onOpenSheet: (Sheets) -> Unit = {
     viewModel.sheetShown.update { _ -> it }
     if (it == Sheets.None) {
@@ -419,7 +421,7 @@ fun PlayerControls(
             timersInverted = Pair(false, invertDuration),
             durationTimerOnCLick = { playerPreferences.invertDuration.set(!invertDuration) },
             positionTimerOnClick = {},
-            chapters = viewModel.chapters.toImmutableList(),
+            chapters = chapters,
           )
         }
         val mediaTitle by MPVLib.propString["media-title"].collectAsState()
@@ -474,7 +476,7 @@ fun PlayerControls(
             decoder = decoder,
             onDecoderClick = { viewModel.cycleDecoders() },
             onDecoderLongClick = { onOpenSheet(Sheets.Decoders) },
-            isChaptersVisible = showChaptersButton && viewModel.chapters.isNotEmpty(),
+            isChaptersVisible = showChaptersButton && chapters.isNotEmpty(),
             onChaptersClick = { onOpenSheet(Sheets.Chapters) },
             onSubtitlesClick = { onOpenSheet(Sheets.SubtitleTracks) },
             onSubtitlesLongClick = { onOpenPanel(Panels.SubtitleSettings) },
@@ -554,7 +556,7 @@ fun PlayerControls(
           BottomLeftPlayerControls(
             playbackSpeed = playbackSpeed ?: playerPreferences.defaultSpeed.get(),
             showChapterIndicator = showChapterIndicator,
-            currentChapter = viewModel.chapters.getOrNull(currentChapter ?: 0),
+            currentChapter = chapters.getOrNull(currentChapter ?: 0),
             onLockControls = viewModel::lockControls,
             onCycleRotation = viewModel::cycleScreenRotations,
             onPlaybackSpeedChange = {
@@ -567,22 +569,20 @@ fun PlayerControls(
       }
     }
     val sheetShown by viewModel.sheetShown.collectAsState()
-    val subtitles by viewModel.subtitleTracks.collectAsState()
-    val selectedSubtitles by viewModel.selectedSubtitles.collectAsState()
-    val audioTracks by viewModel.audioTracks.collectAsState()
+    val subtitles by viewModel.subtitleTracks.collectAsState(persistentListOf())
+    val audioTracks by viewModel.audioTracks.collectAsState(persistentListOf())
     val sleepTimerTimeRemaining by viewModel.remainingTime.collectAsState()
     val speedPresets by playerPreferences.speedPresets.collectAsState()
     PlayerSheets(
       sheetShown = sheetShown,
-      subtitles = subtitles.toImmutableList(),
-      selectedSubtitles = selectedSubtitles.toList().toImmutableList(),
+      subtitles = subtitles,
       onAddSubtitle = viewModel::addSubtitle,
       onSelectSubtitle = viewModel::selectSub,
-      audioTracks = audioTracks.toImmutableList(),
+      audioTracks = audioTracks,
       onAddAudio = viewModel::addAudio,
       onSelectAudio = { MPVLib.setPropertyInt("aid", it.id) },
-      chapter = viewModel.chapters.getOrNull(currentChapter ?: 0),
-      chapters = viewModel.chapters.toImmutableList(),
+      chapter = chapters.getOrNull(currentChapter ?: 0),
+      chapters = chapters,
       onSeekToChapter = {
         MPVLib.setPropertyInt("chapter", it)
         viewModel.unpause()

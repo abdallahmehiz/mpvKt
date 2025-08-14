@@ -4,7 +4,9 @@ import android.content.Context
 import android.net.Uri
 import android.os.ParcelFileDescriptor
 import android.util.Log
+import `is`.xyz.mpv.MPVNode
 import `is`.xyz.mpv.Utils
+import kotlinx.serialization.json.Json
 
 internal fun Uri.openContentFd(context: Context): String? {
   return context.contentResolver.openFileDescriptor(this, "r")?.detachFd()?.let {
@@ -52,3 +54,5 @@ internal val imageExtensions = listOf(
   "apng", "bmp", "exr", "gif", "j2c", "j2k", "jfif", "jp2", "jpc", "jpe", "jpeg", "jpg",
   "jpg2", "png", "tga", "tif", "tiff", "webp",
 )
+
+inline fun <reified T> MPVNode.toObject(json: Json): T = json.decodeFromString<T>(toJson())
