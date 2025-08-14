@@ -13,9 +13,9 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -43,15 +43,20 @@ fun AudioDelayPanel(
   ) {
     val delayControlCard = createRef()
 
-    var delay by remember { mutableIntStateOf((MPVLib.getPropertyDouble("audio-delay") * 1000).toInt()) }
-    LaunchedEffect(delay) {
-      MPVLib.setPropertyDouble("audio-delay", delay / 1000.0)
-    }
+    val delay by MPVLib.propFloat["audio-delay"].collectAsState()
+    val delayInt by remember { derivedStateOf { (delay!! * 1000).toInt() } }
     DelayCard(
-      delay = delay,
-      onDelayChange = { delay = it },
-      onApply = { preferences.defaultAudioDelay.set(delay) },
-      onReset = { delay = 0 },
+      delay = delayInt,
+      onDelayChange = {
+        MPVLib.setPropertyFloat("audio-delay", delay!! / 1000f)
+      },
+      onApply = { preferences.defaultAudioDelay.set(delayInt) },
+      onReset = {
+        MPVLib.setPropertyFloat(
+          "audio-delay",
+          preferences.defaultAudioDelay.get() / 1000f
+        )
+      },
       title = { AudioDelayCardTitle(onClose = onDismissRequest) },
       delayType = DelayType.Audio,
       modifier = Modifier.constrainAs(delayControlCard) {

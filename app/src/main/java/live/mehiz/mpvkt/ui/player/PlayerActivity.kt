@@ -43,10 +43,12 @@ import androidx.media.AudioFocusRequestCompat
 import androidx.media.AudioManagerCompat
 import com.github.k1rakishou.fsaf.FileManager
 import `is`.xyz.mpv.MPVLib
+import `is`.xyz.mpv.MPVNode
 import `is`.xyz.mpv.Utils
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.serialization.json.Json
 import live.mehiz.mpvkt.database.entities.CustomButtonEntity
 import live.mehiz.mpvkt.database.entities.PlaybackStateEntity
 import live.mehiz.mpvkt.databinding.PlayerLayoutBinding
@@ -78,6 +80,7 @@ class PlayerActivity : AppCompatActivity() {
   private val advancedPreferences: AdvancedPreferences by inject()
   private val gesturePreferences: GesturePreferences by inject()
   private val fileManager: FileManager by inject()
+  private val json: Json by inject()
 
   private var fileName = ""
   private var mediaPlaybackService: MediaPlaybackService? = null
@@ -194,7 +197,7 @@ class PlayerActivity : AppCompatActivity() {
 
   @SuppressLint("NewApi")
   override fun onUserLeaveHint() {
-    if (isPipSupported && player.paused == false && playerPreferences.automaticallyEnterPip.get()) {
+    if (isPipSupported && viewModel.paused == false && playerPreferences.automaticallyEnterPip.get()) {
       enterPictureInPictureMode()
     }
     super.onUserLeaveHint()
@@ -202,7 +205,7 @@ class PlayerActivity : AppCompatActivity() {
 
   @SuppressLint("NewApi")
   override fun onBackPressed() {
-    if (isPipSupported && player.paused == false && playerPreferences.automaticallyEnterPip.get()) {
+    if (isPipSupported && viewModel.paused == false && playerPreferences.automaticallyEnterPip.get()) {
       if (viewModel.sheetShown.value == Sheets.None && viewModel.panelShown.value == Panels.None) {
         enterPictureInPictureMode()
       }
@@ -364,7 +367,7 @@ class PlayerActivity : AppCompatActivity() {
       AudioManager.AUDIOFOCUS_LOSS_TRANSIENT,
       -> {
         val oldRestore = restoreAudioFocus
-        val wasPlayerPaused = player.paused ?: false
+        val wasPlayerPaused = viewModel.paused ?: false
         viewModel.pause()
         restoreAudioFocus = {
           oldRestore()
@@ -427,11 +430,8 @@ class PlayerActivity : AppCompatActivity() {
   private fun setIntentExtras(extras: Bundle?) {
     if (extras == null) return
 
-    extras.getString("title")?.let {
-      viewModel.mediaTitle.update { _ -> it }
-      MPVLib.setPropertyString("force-media-title", it)
-    }
-    player.timePos = extras.getInt("position", 0) / 1000
+    extras.getString("title")?.let { MPVLib.setPropertyString("force-media-title", it) }
+    MPVLib.setPropertyInt("time-pos", extras.getInt("position", 0) / 1000)
 
     // subtitles
     if (extras.containsKey("subs")) {
@@ -499,88 +499,44 @@ class PlayerActivity : AppCompatActivity() {
   }
 
   // a bunch of observers
+  @Suppress("UnusedParameter")
   internal fun onObserverEvent(property: String, value: Long) {
     if (player.isExiting) return
-    when (property) {
-      "time-pos" -> viewModel.updatePlayBackPos(value.toFloat())
-      "demuxer-cache-time" -> viewModel.updateReadAhead(value = value)
-      "volume" -> viewModel.setMPVVolume(value.toInt())
-      "volume-max" -> viewModel.volumeBoostCap = value.toInt() - 100
-      "chapter" -> viewModel.updateChapter(value)
-      "duration" -> viewModel.duration.update { value.toFloat() }
-    }
   }
 
+  @Suppress("UnusedParameter")
   internal fun onObserverEvent(property: String) {
     if (player.isExiting) return
-    when (property) {
-      "chapter-list" -> {
-        viewModel.loadChapters()
-        viewModel.updateChapter(0)
-      }
-
-      "track-list" -> viewModel.loadTracks()
-    }
   }
 
   internal fun onObserverEvent(property: String, value: Boolean) {
     if (player.isExiting) return
     when (property) {
-      "pause" -> {
-        if (value) {
-          viewModel.pause()
-          window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
-        } else {
-          viewModel.unpause()
-          window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
-        }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-          runCatching {
-            setPictureInPictureParams(createPipParams())
-          }
-        }
-      }
-
-      "paused-for-cache" -> {
-        viewModel.isLoading.update { value }
-      }
-
-      "seeking" -> {
-        viewModel.isLoading.update { value }
-      }
-
-      "eof-reached" -> {
-        if (value && playerPreferences.closeAfterReachingEndOfVideo.get()) {
-          finishAndRemoveTask()
-        }
-      }
-    }
-  }
-
-  val trackId: (String) -> Int? = {
-    when (it) {
-      "auto" -> null
-      "no" -> -1
-      else -> it.toInt()
+      "pause" if value -> window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+      "pause" -> window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+      "eof-reached" if value && playerPreferences.closeAfterReachingEndOfVideo.get() -> finishAndRemoveTask()
     }
   }
 
   internal fun onObserverEvent(property: String, value: String) {
     if (player.isExiting) return
     when (property.substringBeforeLast("/")) {
-      "aid" -> trackId(value)?.let { viewModel.updateAudio(it) }
-      "sid" -> trackId(value)?.let { viewModel.updateSubtitle(it, viewModel.selectedSubtitles.value.second) }
-      "secondary-sid" -> trackId(value)?.let { viewModel.updateSubtitle(viewModel.selectedSubtitles.value.first, it) }
-      "hwdec", "hwdec-current" -> viewModel.getDecoder()
       "user-data/mpvkt" -> viewModel.handleLuaInvocation(property, value)
     }
   }
 
+  internal fun onObserverEvent(property: String, value: MPVNode) {
+    when (property) {
+      "chapter-list" -> viewModel.updateChapters(json.decodeFromString(value.toJson()))
+      "track-list" -> viewModel.updateTracks(json.decodeFromString(value.toJson()))
+    }
+  }
+
   @SuppressLint("NewApi")
+  @Suppress("UnusedParameter")
   internal fun onObserverEvent(property: String, value: Double) {
     if (player.isExiting) return
     when (property) {
-      "speed" -> viewModel.playbackSpeed.update { value.toFloat() }
       "video-params/aspect" -> if (isPipSupported) createPipParams()
     }
   }
@@ -591,9 +547,9 @@ class PlayerActivity : AppCompatActivity() {
       MPVLib.mpvEventId.MPV_EVENT_FILE_LOADED -> {
         fileName = getFileName(intent)
         setIntentExtras(intent.extras)
-        viewModel.mediaTitle.update {
-          val mediaTitle = MPVLib.getPropertyString("media-title")
-          if (mediaTitle.isBlank() || mediaTitle.isDigitsOnly()) fileName else mediaTitle
+        val mediaTitle = MPVLib.getPropertyString("media-title")
+        if (mediaTitle.isNullOrBlank() || mediaTitle.isDigitsOnly()) {
+          MPVLib.setPropertyString("media-title", fileName)
         }
         lifecycleScope.launch(Dispatchers.IO) {
           loadVideoPlaybackState(fileName)
@@ -602,7 +558,6 @@ class PlayerActivity : AppCompatActivity() {
         viewModel.changeVideoAspect(playerPreferences.videoAspect.get())
       }
 
-      MPVLib.mpvEventId.MPV_EVENT_SEEK -> viewModel.isLoading.update { true }
       MPVLib.mpvEventId.MPV_EVENT_PLAYBACK_RESTART -> player.isExiting = false
     }
   }
@@ -616,18 +571,20 @@ class PlayerActivity : AppCompatActivity() {
         PlaybackStateEntity(
           mediaTitle = mediaTitle,
           lastPosition = if (playerPreferences.savePositionOnQuit.get()) {
-            if ((player.timePos ?: 0) < (player.duration ?: 0) - 1) player.timePos ?: 0 else 0
+            val pos = viewModel.pos ?: 0
+            val duration = viewModel.duration ?: 0
+            if (pos < duration - 1) pos else 0
           } else {
             oldState?.lastPosition ?: 0
           },
-          playbackSpeed = player.playbackSpeed ?: playerPreferences.defaultSpeed.get().toDouble(),
+          playbackSpeed = MPVLib.getPropertyDouble("speed")!!,
           sid = player.sid,
-          subDelay = ((player.subDelay ?: 0.0) * 1000).toInt(),
-          subSpeed = MPVLib.getPropertyDouble("sub-speed") ?: 1.0,
+          subDelay = (MPVLib.getPropertyDouble("sub-delay")!! * 1000).toInt(),
+          subSpeed = MPVLib.getPropertyDouble("sub-speed")!!,
           secondarySid = player.secondarySid,
-          secondarySubDelay = ((player.secondarySubDelay ?: 0.0) * 1000).toInt(),
+          secondarySubDelay = (MPVLib.getPropertyDouble("secondary-sub-delay")!! * 1000).toInt(),
           aid = player.aid,
-          audioDelay = ((MPVLib.getPropertyDouble("audio-delay") ?: 0.0) * 1000).toInt(),
+          audioDelay = (MPVLib.getPropertyDouble("audio-delay")!! * 1000).toInt(),
         ),
       )
     }
@@ -646,13 +603,13 @@ class PlayerActivity : AppCompatActivity() {
       player.sid = it.sid
       player.secondarySid = it.secondarySid
       player.aid = it.aid
-      player.subDelay = subDelay
-      player.secondarySubDelay = secondarySubDelay
-      player.playbackSpeed = it.playbackSpeed
+      MPVLib.setPropertyDouble("sub-delay", subDelay)
+      MPVLib.setPropertyDouble("sub-delay", secondarySubDelay)
+      MPVLib.setPropertyDouble("sub-delay", it.playbackSpeed)
       MPVLib.setPropertyDouble("audio-delay", audioDelay)
     }
     if (playerPreferences.savePositionOnQuit.get()) {
-      state?.lastPosition?.let { if (it != 0) player.timePos = it }
+      state?.lastPosition?.let { if (it != 0) MPVLib.setPropertyInt("time-pos", it) }
     }
     MPVLib.setPropertyDouble("sub-speed", state?.subSpeed ?: subtitlesPreferences.defaultSubSpeed.get().toDouble())
   }
@@ -662,8 +619,8 @@ class PlayerActivity : AppCompatActivity() {
     setResult(
       RESULT_OK,
       Intent(RESULT_INTENT).apply {
-        player.timePos?.let { putExtra("position", it * 1000) }
-        player.duration?.let { putExtra("duration", it * 1000) }
+        viewModel.pos?.let { putExtra("position", it * 1000) }
+        viewModel.duration?.let { putExtra("duration", it * 1000) }
       },
     )
   }
@@ -679,18 +636,16 @@ class PlayerActivity : AppCompatActivity() {
   fun createPipParams(): PictureInPictureParams {
     val builder = PictureInPictureParams.Builder()
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-      builder.setTitle(viewModel.mediaTitle.value)
+      builder.setTitle(MPVLib.getPropertyString("media-title") ?: fileName)
     }
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
       val autoEnter = playerPreferences.automaticallyEnterPip.get()
-      builder.setAutoEnterEnabled(player.paused == false && autoEnter)
-      builder.setSeamlessResizeEnabled(player.paused == false && autoEnter)
+      builder.setAutoEnterEnabled(viewModel.paused == false && autoEnter)
+      builder.setSeamlessResizeEnabled(viewModel.paused == false && autoEnter)
     }
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-      builder.setActions(createPipActions(this, player.paused ?: true))
-    }
+    builder.setActions(createPipActions(this, viewModel.paused == true))
     builder.setSourceRectHint(pipRect)
-    player.videoH?.let {
+    MPVLib.getPropertyInt("video-params/h")?.let {
       val height = it
       val width = it * player.getVideoOutAspect()!!
       val rational = Rational(height, width.toInt()).toFloat()
@@ -705,7 +660,7 @@ class PlayerActivity : AppCompatActivity() {
         unregisterReceiver(pipReceiver)
         pipReceiver = null
       }
-      super.onPictureInPictureModeChanged(isInPictureInPictureMode, newConfig)
+      super.onPictureInPictureModeChanged(false, newConfig)
       return
     }
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -735,13 +690,13 @@ class PlayerActivity : AppCompatActivity() {
     } else {
       registerReceiver(pipReceiver, IntentFilter(PIP_INTENTS_FILTER))
     }
-    super.onPictureInPictureModeChanged(isInPictureInPictureMode, newConfig)
+    super.onPictureInPictureModeChanged(true, newConfig)
   }
 
   private fun setOrientation() {
     requestedOrientation = when (playerPreferences.orientation.get()) {
       PlayerOrientation.Free -> ActivityInfo.SCREEN_ORIENTATION_SENSOR
-      PlayerOrientation.Video -> if ((player.videoAspect ?: 0.0) > 1.0) {
+      PlayerOrientation.Video -> if ((player.getVideoOutAspect() ?: 0.0) > 1.0) {
         ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
       } else {
         ActivityInfo.SCREEN_ORIENTATION_SENSOR_PORTRAIT

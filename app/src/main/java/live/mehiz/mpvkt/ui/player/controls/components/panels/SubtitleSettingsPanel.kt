@@ -33,6 +33,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
@@ -85,7 +86,7 @@ fun SubtitleSettingsPanel(
         )
         HorizontalPager(
           state = pagerState,
-          pageSize = PageSize.Fixed(LocalConfiguration.current.screenWidthDp.dp * 0.9f),
+          pageSize = PageSize.Fixed(LocalWindowInfo.current.containerSize.width.dp * 0.9f),
           verticalAlignment = Alignment.Top,
           pageSpacing = MaterialTheme.spacing.smaller,
           contentPadding = PaddingValues(horizontal = MaterialTheme.spacing.smaller),

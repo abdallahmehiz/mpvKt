@@ -25,7 +25,7 @@ import androidx.compose.ui.unit.dp
 import kotlinx.collections.immutable.ImmutableList
 import live.mehiz.mpvkt.R
 import live.mehiz.mpvkt.presentation.components.PlayerSheet
-import live.mehiz.mpvkt.ui.player.Track
+import live.mehiz.mpvkt.ui.player.TrackNode
 import live.mehiz.mpvkt.ui.theme.spacing
 
 @Composable
@@ -88,24 +88,16 @@ fun AddTrackRow(
 }
 
 @Composable
-fun getTrackTitle(track: Track): String {
+fun getTrackTitle(track: TrackNode): String {
+  val hasTitle = !track.title.isNullOrBlank()
+  val hasLang = !track.lang.isNullOrBlank()
+
   return when {
-    track.id == -1 -> {
-      track.name
-    }
-
-    track.language.isNullOrBlank() && track.name.isNotBlank() -> {
-      stringResource(R.string.player_sheets_track_title_wo_lang, track.id, track.name)
-    }
-
-    !track.language.isNullOrBlank() && track.name.isNotBlank() -> {
-      stringResource(R.string.player_sheets_track_title_w_lang, track.id, track.name, track.language)
-    }
-
-    !track.language.isNullOrBlank() && track.name.isBlank() -> {
-      stringResource(R.string.player_sheets_track_lang_wo_title, track.id, track.language)
-    }
-
-    else -> stringResource(R.string.player_sheets_track_title_wo_lang, track.id, track.name)
+    hasTitle && hasLang -> stringResource(R.string.player_sheets_track_title_w_lang, track.id, track.title, track.lang)
+    hasTitle && !hasLang -> stringResource(R.string.player_sheets_track_title_wo_lang, track.id, track.title)
+    !hasTitle && hasLang -> stringResource(R.string.player_sheets_track_lang_wo_title, track.id, track.lang)
+    track.isSubtitle -> stringResource(R.string.player_sheets_chapter_title_substitute_subtitle, track.id)
+    track.isAudio -> stringResource(R.string.player_sheets_chapter_title_substitute_subtitle, track.id)
+    else -> "" // idk what to show tbh
   }
 }

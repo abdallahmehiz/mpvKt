@@ -21,14 +21,14 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import kotlinx.collections.immutable.ImmutableList
 import live.mehiz.mpvkt.R
-import live.mehiz.mpvkt.ui.player.Track
+import live.mehiz.mpvkt.ui.player.TrackNode
 import live.mehiz.mpvkt.ui.theme.spacing
 import me.zhanghai.compose.preference.FooterPreference
 import me.zhanghai.compose.preference.ProvidePreferenceLocals
 
 @Composable
 fun SubtitlesSheet(
-  tracks: ImmutableList<Track>,
+  tracks: ImmutableList<TrackNode>,
   selectedTracks: ImmutableList<Int>,
   onSelect: (Int) -> Unit,
   onAddSubtitle: () -> Unit,
@@ -77,7 +77,7 @@ fun SubtitlesSheet(
 @Composable
 fun SubtitleTrackRow(
   title: String,
-  selected: Int, // -1 unselected, otherwise return 0 and 1 for the selected indices
+  selected: Int,
   onClick: () -> Unit,
   modifier: Modifier = Modifier,
 ) {

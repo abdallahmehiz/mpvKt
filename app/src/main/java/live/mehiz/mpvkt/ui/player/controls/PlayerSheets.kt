@@ -11,7 +11,7 @@ import live.mehiz.mpvkt.database.entities.CustomButtonEntity
 import live.mehiz.mpvkt.ui.player.Decoder
 import live.mehiz.mpvkt.ui.player.Panels
 import live.mehiz.mpvkt.ui.player.Sheets
-import live.mehiz.mpvkt.ui.player.Track
+import live.mehiz.mpvkt.ui.player.TrackNode
 import live.mehiz.mpvkt.ui.player.controls.components.sheets.AudioTracksSheet
 import live.mehiz.mpvkt.ui.player.controls.components.sheets.ChaptersSheet
 import live.mehiz.mpvkt.ui.player.controls.components.sheets.DecodersSheet
@@ -24,15 +24,14 @@ fun PlayerSheets(
   sheetShown: Sheets,
 
   // subtitles sheet
-  subtitles: ImmutableList<Track>,
+  subtitles: ImmutableList<TrackNode>,
   selectedSubtitles: ImmutableList<Int>,
   onAddSubtitle: (Uri) -> Unit,
   onSelectSubtitle: (Int) -> Unit,
   // audio sheet
-  audioTracks: ImmutableList<Track>,
-  selectedAudio: Int,
+  audioTracks: ImmutableList<TrackNode>,
   onAddAudio: (Uri) -> Unit,
-  onSelectAudio: (Int) -> Unit,
+  onSelectAudio: (TrackNode) -> Unit,
   // chapters sheet
   chapter: Segment?,
   chapters: ImmutableList<Segment>,
@@ -42,7 +41,13 @@ fun PlayerSheets(
   onUpdateDecoder: (Decoder) -> Unit,
   // Speed sheet
   speed: Float,
+  speedPresets: List<Float>,
   onSpeedChange: (Float) -> Unit,
+  onAddSpeedPreset: (Float) -> Unit,
+  onRemoveSpeedPreset: (Float) -> Unit,
+  onResetSpeedPresets: () -> Unit,
+  onMakeDefaultSpeed: (Float) -> Unit,
+  onResetDefaultSpeed: () -> Unit,
   // More sheet
   sleepTimerTimeRemaining: Int,
   onStartSleepTimer: (Int) -> Unit,
@@ -80,7 +85,6 @@ fun PlayerSheets(
       }
       AudioTracksSheet(
         tracks = audioTracks,
-        selectedId = selectedAudio,
         onSelect = onSelectAudio,
         onAddAudioTrack = { audioPicker.launch(arrayOf("*/*")) },
         onOpenDelayPanel = { onOpenPanel(Panels.AudioDelay) },
@@ -120,7 +124,13 @@ fun PlayerSheets(
       PlaybackSpeedSheet(
         speed,
         onSpeedChange = onSpeedChange,
-        onDismissRequest = onDismissRequest
+        speedPresets = speedPresets,
+        onAddSpeedPreset = onAddSpeedPreset,
+        onRemoveSpeedPreset = onRemoveSpeedPreset,
+        onResetPresets = onResetSpeedPresets,
+        onMakeDefault = onMakeDefaultSpeed,
+        onResetDefault = onResetDefaultSpeed,
+        onDismissRequest = onDismissRequest,
       )
     }
   }

@@ -30,8 +30,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -51,7 +52,6 @@ import live.mehiz.mpvkt.ui.player.controls.panelCardsColors
 import live.mehiz.mpvkt.ui.theme.spacing
 import org.koin.compose.koinInject
 import kotlin.math.round
-import kotlin.math.roundToInt
 
 @Composable
 fun SubtitleDelayPanel(
@@ -68,54 +68,36 @@ fun SubtitleDelayPanel(
     val delayControlCard = createRef()
 
     var affectedSubtitle by remember { mutableStateOf(SubtitleDelayType.Primary) }
-    var delay by remember { mutableIntStateOf((MPVLib.getPropertyDouble("sub-delay") * 1000).roundToInt()) }
-    var secondaryDelay by remember {
-      mutableIntStateOf((MPVLib.getPropertyDouble("secondary-sub-delay") * 1000).roundToInt())
-    }
-    var speed by remember { mutableFloatStateOf(MPVLib.getPropertyDouble("sub-speed").toFloat()) }
-    LaunchedEffect(speed) {
-      if (speed in 0.1f..1f) MPVLib.setPropertyDouble("sub-speed", speed.toDouble())
-    }
-    LaunchedEffect(delay, secondaryDelay) {
-      val finalDelay = (if (affectedSubtitle == SubtitleDelayType.Secondary) secondaryDelay else delay) / 1000.0
-      when (affectedSubtitle) {
-        SubtitleDelayType.Primary -> MPVLib.setPropertyDouble("sub-delay", finalDelay)
-        SubtitleDelayType.Secondary -> MPVLib.setPropertyDouble("secondary-sub-delay", finalDelay)
-        else -> {
-          MPVLib.setPropertyDouble("sub-delay", finalDelay)
-          MPVLib.setPropertyDouble("secondary-sub-delay", finalDelay)
-        }
-      }
-    }
-    LaunchedEffect(affectedSubtitle) {
-      secondaryDelay = (
-        MPVLib.getPropertyDouble(
-          if (affectedSubtitle == SubtitleDelayType.Both) "sub-delay" else "secondary-sub-delay"
-        ) * 1000
-        ).toInt()
-      delay = (MPVLib.getPropertyDouble("sub-delay") * 1000).toInt()
-    }
+    val delay by MPVLib.propDouble["sub-delay"].collectAsState()
+    val delayInt by remember { derivedStateOf { (delay!! * 1000).toInt() } }
+    val secondaryDelay by MPVLib.propDouble["secondary-sub-delay"].collectAsState()
+    val secondaryDelayInt by remember { derivedStateOf { (secondaryDelay!! * 1000).toInt() } }
+    val speed by MPVLib.propFloat["sub-speed"].collectAsState()
     SubtitleDelayCard(
-      delay = if (affectedSubtitle == SubtitleDelayType.Secondary) secondaryDelay else delay,
+      delay = if (affectedSubtitle == SubtitleDelayType.Secondary) secondaryDelayInt else delayInt,
       onDelayChange = {
-        if (affectedSubtitle == SubtitleDelayType.Secondary) {
-          secondaryDelay = it
-        } else {
-          delay = it
+        when (affectedSubtitle) {
+          SubtitleDelayType.Both -> {
+            MPVLib.setPropertyFloat("sub-delay", it / 1000f)
+            MPVLib.setPropertyFloat("secondary-sub-delay", it / 1000f)
+          }
+
+          SubtitleDelayType.Primary -> MPVLib.setPropertyFloat("sub-delay", it / 1000f)
+          else -> MPVLib.setPropertyFloat("secondary-sub-delay", it / 1000f)
         }
       },
-      speed = speed,
-      onSpeedChange = { speed = round(it * 1000) / 1000f },
+      speed = speed!!,
+      onSpeedChange = { MPVLib.setPropertyFloat("sub-speed", round(it * 1000) / 1000f) },
       affectedSubtitle = affectedSubtitle,
       onTypeChange = { affectedSubtitle = it },
       onApply = {
-        preferences.defaultSubDelay.set(delay)
-        if (speed in 0.1f..10f) preferences.defaultSubSpeed.set(speed)
+        preferences.defaultSubDelay.set(delayInt)
+        if (speed!! in 0.1f..10f) preferences.defaultSubSpeed.set(speed!!)
       },
       onReset = {
-        delay = 0
-        secondaryDelay = 0
-        speed = 1f
+        MPVLib.setPropertyFloat("sub-delay", preferences.defaultSubDelay.get() / 1000f)
+        MPVLib.setPropertyFloat("secondary-sub-delay", preferences.defaultSecondarySubDelay.get() / 1000f)
+        MPVLib.setPropertyFloat("sub-speed", preferences.defaultSubSpeed.get())
       },
       onClose = onDismissRequest,
       modifier = Modifier.constrainAs(delayControlCard) {

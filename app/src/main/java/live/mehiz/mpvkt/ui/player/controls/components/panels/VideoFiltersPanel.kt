@@ -15,6 +15,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -97,10 +98,10 @@ fun FiltersCard(
     }
     LazyColumn {
       items(VideoFilters.entries) { filter ->
-        val value by filter.preference(decoderPreferences).collectAsState()
+        val value by MPVLib.propInt[filter.mpvProperty].collectAsState()
         SliderItem(
           label = stringResource(filter.titleRes),
-          value = value,
+          value = value!!,
           valueText = value.toString(),
           onChange = {
             filter.preference(decoderPreferences).set(it)

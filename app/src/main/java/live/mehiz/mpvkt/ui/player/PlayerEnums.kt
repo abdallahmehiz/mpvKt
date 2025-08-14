@@ -1,6 +1,7 @@
 package live.mehiz.mpvkt.ui.player
 
 import androidx.annotation.StringRes
+import `is`.xyz.mpv.MPVLib
 import live.mehiz.mpvkt.R
 import live.mehiz.mpvkt.preferences.DecoderPreferences
 import live.mehiz.mpvkt.preferences.preference.Preference
@@ -44,10 +45,17 @@ enum class Decoder(val title: String, val value: String) {
   SW("SW", "no"),
   HW("HW", "mediacodec-copy"),
   HWPlus("HW+", "mediacodec"),
-}
+  ;
 
-fun getDecoderFromValue(value: String): Decoder {
-  return Decoder.entries.first { it.value == value }
+  companion object {
+    fun getDecoderFromValue(value: String): Decoder {
+      return Decoder.entries.first { it.value == value }
+    }
+
+    var current
+      get(): Decoder = MPVLib.getPropertyString("hwdec-current")?.let { getDecoderFromValue(it) } ?: Auto
+      set(value) = MPVLib.setPropertyString("hwdec-current", value.value)
+  }
 }
 
 enum class Debanding {

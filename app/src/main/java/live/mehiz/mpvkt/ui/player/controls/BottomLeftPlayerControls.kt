@@ -14,23 +14,21 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import dev.vivvvek.seeker.Segment
 import live.mehiz.mpvkt.R
-import live.mehiz.mpvkt.preferences.PlayerPreferences
 import live.mehiz.mpvkt.ui.player.Sheets
 import live.mehiz.mpvkt.ui.player.controls.components.ControlsButton
 import live.mehiz.mpvkt.ui.player.controls.components.CurrentChapter
-import org.koin.compose.koinInject
 
 @Composable
 fun BottomLeftPlayerControls(
   playbackSpeed: Float,
   currentChapter: Segment?,
+  showChapterIndicator: Boolean,
   onLockControls: () -> Unit,
   onCycleRotation: () -> Unit,
   onPlaybackSpeedChange: (Float) -> Unit,
   onOpenSheet: (Sheets) -> Unit,
   modifier: Modifier = Modifier
 ) {
-  val playerPreferences = koinInject<PlayerPreferences>()
   Row(
     modifier = modifier.fillMaxWidth(),
     verticalAlignment = Alignment.CenterVertically,
@@ -45,15 +43,11 @@ fun BottomLeftPlayerControls(
     )
     ControlsButton(
       text = stringResource(R.string.player_speed, playbackSpeed),
-      onClick = {
-        val newSpeed = if (playbackSpeed >= 2) 0.25f else playbackSpeed + 0.25f
-        onPlaybackSpeedChange(newSpeed)
-        playerPreferences.defaultSpeed.set(newSpeed)
-      },
+      onClick = { onPlaybackSpeedChange(if (playbackSpeed >= 2) 0.25f else playbackSpeed + 0.25f) },
       onLongClick = { onOpenSheet(Sheets.PlaybackSpeed) },
     )
     AnimatedVisibility(
-      currentChapter != null && playerPreferences.currentChaptersIndicator.get(),
+      showChapterIndicator && currentChapter != null,
       enter = fadeIn(),
       exit = fadeOut(),
     ) {
