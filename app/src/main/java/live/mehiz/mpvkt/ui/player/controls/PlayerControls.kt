@@ -580,7 +580,7 @@ fun PlayerControls(
       onSelectSubtitle = viewModel::selectSub,
       audioTracks = audioTracks.toImmutableList(),
       onAddAudio = viewModel::addAudio,
-      onSelectAudio = { MPVLib.setPropertyInt("sid", it.id) },
+      onSelectAudio = { MPVLib.setPropertyInt("aid", it.id) },
       chapter = viewModel.chapters.getOrNull(currentChapter ?: 0),
       chapters = viewModel.chapters.toImmutableList(),
       onSeekToChapter = {
