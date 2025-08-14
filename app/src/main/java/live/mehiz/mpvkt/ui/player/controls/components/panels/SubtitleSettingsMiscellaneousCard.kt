@@ -16,6 +16,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -66,20 +67,15 @@ fun SubtitlesMiscellaneousCard(modifier: Modifier = Modifier) {
           },
           { Text(stringResource(R.string.player_sheets_sub_override_ass)) },
         )
-        var subScale by remember {
-          mutableStateOf(MPVLib.getPropertyDouble("sub-scale").toFloat())
-        }
-        var subPos by remember {
-          mutableStateOf(MPVLib.getPropertyInt("sub-pos"))
-        }
+        val subScale by MPVLib.propFloat["sub-scale"].collectAsState()
+        val subPos by MPVLib.propInt["sub-pos"].collectAsState()
         SliderItem(
           label = stringResource(R.string.player_sheets_sub_scale),
-          value = subScale,
-          valueText = subScale.toFixed(2).toString(),
+          value = subScale!!,
+          valueText = subScale!!.toFixed(2).toString(),
           onChange = {
-            subScale = it
             preferences.subScale.set(it)
-            MPVLib.setPropertyDouble("sub-scale", it.toDouble())
+            MPVLib.setPropertyFloat("sub-scale", it)
           },
           max = 5f,
           icon = {
@@ -91,10 +87,9 @@ fun SubtitlesMiscellaneousCard(modifier: Modifier = Modifier) {
         )
         SliderItem(
           label = stringResource(R.string.player_sheets_sub_position),
-          value = subPos,
+          value = subPos ?: preferences.subPos.get(),
           valueText = subPos.toString(),
           onChange = {
-            subPos = it
             preferences.subPos.set(it)
             MPVLib.setPropertyInt("sub-pos", it)
           },
@@ -115,12 +110,10 @@ fun SubtitlesMiscellaneousCard(modifier: Modifier = Modifier) {
           TextButton(
             onClick = {
               preferences.subPos.deleteAndGet().let {
-                subPos = it
                 MPVLib.setPropertyInt("sub-pos", it)
               }
               preferences.subScale.deleteAndGet().let {
-                subScale = it
-                MPVLib.setPropertyDouble("sub-scale", it.toDouble())
+                MPVLib.setPropertyFloat("sub-scale", it)
               }
               preferences.overrideAssSubs.deleteAndGet().let { overrideAssSubs = it }
               MPVLib.setPropertyString("sub-ass-override", "scale") // mpv's default is 'scale'
