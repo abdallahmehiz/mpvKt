@@ -54,7 +54,7 @@ enum class Decoder(val title: String, val value: String) {
 
     var current
       get(): Decoder = MPVLib.getPropertyString("hwdec-current")?.let { getDecoderFromValue(it) } ?: Auto
-      set(value) = MPVLib.setPropertyString("hwdec-current", value.value)
+      set(value) = MPVLib.setPropertyString("hwdec", value.value)
   }
 }
 

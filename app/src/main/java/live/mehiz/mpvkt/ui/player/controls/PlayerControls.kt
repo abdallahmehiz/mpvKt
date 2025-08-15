@@ -72,6 +72,7 @@ import live.mehiz.mpvkt.preferences.preference.deleteAndGet
 import live.mehiz.mpvkt.preferences.preference.minusAssign
 import live.mehiz.mpvkt.preferences.preference.plusAssign
 import live.mehiz.mpvkt.ui.custombuttons.getButtons
+import live.mehiz.mpvkt.ui.player.Decoder
 import live.mehiz.mpvkt.ui.player.Decoder.Companion.getDecoderFromValue
 import live.mehiz.mpvkt.ui.player.Panels
 import live.mehiz.mpvkt.ui.player.PlayerActivity
@@ -588,8 +589,7 @@ fun PlayerControls(
         viewModel.unpause()
       },
       decoder = decoder,
-      onUpdateDecoder = { MPVLib.setPropertyString("hwdec", it.value) },
-
+      onUpdateDecoder = { Decoder.current = it },
       speed = playbackSpeed ?: playerPreferences.defaultSpeed.get(),
       onSpeedChange = { MPVLib.setPropertyFloat("speed", it.toFixed(2)) },
       onMakeDefaultSpeed = { playerPreferences.defaultSpeed.set(it.toFixed(2)) },
