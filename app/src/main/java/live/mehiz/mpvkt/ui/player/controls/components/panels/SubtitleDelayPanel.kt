@@ -74,7 +74,7 @@ fun SubtitleDelayPanel(
     val secondaryDelayInt by remember { derivedStateOf { (secondaryDelay!! * 1000).toInt() } }
     val speed by MPVLib.propFloat["sub-speed"].collectAsState()
     SubtitleDelayCard(
-      delay = if (affectedSubtitle == SubtitleDelayType.Secondary) secondaryDelayInt else delayInt,
+      delayMs = if (affectedSubtitle == SubtitleDelayType.Secondary) secondaryDelayInt else delayInt,
       onDelayChange = {
         when (affectedSubtitle) {
           SubtitleDelayType.Both -> {
@@ -110,7 +110,7 @@ fun SubtitleDelayPanel(
 
 @Composable
 fun SubtitleDelayCard(
-  delay: Int,
+  delayMs: Int,
   onDelayChange: (Int) -> Unit,
   speed: Float,
   onSpeedChange: (Float) -> Unit,
@@ -122,7 +122,7 @@ fun SubtitleDelayCard(
   modifier: Modifier = Modifier,
 ) {
   DelayCard(
-    delay = delay,
+    delayMs = delayMs,
     onDelayChange = onDelayChange,
     onApply = onApply,
     onReset = onReset,
@@ -165,7 +165,7 @@ enum class SubtitleDelayType(
 @Suppress("LambdaParameterInRestartableEffect") // Intentional
 @Composable
 fun DelayCard(
-  delay: Int,
+  delayMs: Int,
   onDelayChange: (Int) -> Unit,
   onApply: () -> Unit,
   onReset: () -> Unit,
@@ -192,7 +192,7 @@ fun DelayCard(
       title()
       OutlinedNumericChooser(
         label = { Text(stringResource(R.string.player_sheets_sub_delay_card_delay)) },
-        value = delay,
+        value = delayMs,
         onChange = onDelayChange,
         step = 50,
         min = Int.MIN_VALUE,
@@ -208,13 +208,13 @@ fun DelayCard(
         horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.smaller),
       ) {
         var timerStart by remember { mutableStateOf<Long?>(null) }
-        var finalDelay by remember { mutableIntStateOf(delay) }
+        var finalDelay by remember { mutableIntStateOf(delayMs) }
         LaunchedEffect(isDirectionPositive) {
           if (isDirectionPositive == null) {
             onDelayChange(finalDelay)
             return@LaunchedEffect
           }
-          finalDelay = delay
+          finalDelay = delayMs
           timerStart = System.currentTimeMillis()
           val startingDelay: Int = finalDelay
           while (isDirectionPositive != null && timerStart != null) {

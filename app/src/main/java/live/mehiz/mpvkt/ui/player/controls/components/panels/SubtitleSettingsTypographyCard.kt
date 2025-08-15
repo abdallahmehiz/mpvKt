@@ -126,7 +126,7 @@ fun SubtitleSettingsTypographyCard(
       val borderStyle by remember {
         derivedStateOf { SubtitlesBorderStyle.entries.first { it.value == mpvBorderStyle } }
       }
-      val borderSize by MPVLib.propInt["sub-border-size"].collectAsState()
+      val borderSize by MPVLib.propInt["sub-outline-size"].collectAsState()
       val shadowOffset by MPVLib.propInt["sub-shadow-offset"].collectAsState()
       Row(
         Modifier
@@ -248,7 +248,7 @@ fun SubtitleSettingsTypographyCard(
         valueText = borderSize.toString(),
         onChange = {
           preferences.borderSize.set(it)
-          MPVLib.setPropertyInt("sub-border-size", it)
+          MPVLib.setPropertyInt("sub-outline-size", it)
         },
         max = 100,
         icon = { Icon(Icons.Default.BorderColor, null) },
