@@ -166,6 +166,8 @@
     <string name="player_sheets_track_title_w_lang" translatable="false">#%d: %s (%s)</string>
     <string name="player_sheets_track_title_wo_lang" translatable="false">#%d: %s</string>
     <string name="player_sheets_track_lang_wo_title" translatable="false">#%d: %s</string>
+    <string name="player_sheets_chapter_title_substitute_audio">Audio #%d</string>
+    <string name="player_sheets_chapter_title_substitute_subtitle">Subtitle #%d</string>
     <string name="player_sheets_subtitles_footer_secondary_sid_no_styles">Secondary subtitles will have no ASS/SSA Styling.</string>
     <string name="player_sheets_subtitles_settings_title">Subtitles settings</string>
     <string name="player_sheets_subtitles_color_text">Text</string>

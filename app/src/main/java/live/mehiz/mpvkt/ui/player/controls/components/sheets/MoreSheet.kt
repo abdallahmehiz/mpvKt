@@ -168,12 +168,8 @@ fun MoreSheet(
               )
             },
             onClick = {
-              if ((page == 0) xor (statisticsPage == 0)) {
-                MPVLib.command(arrayOf("script-binding", "stats/display-stats-toggle"))
-              }
-              if (page != 0) {
-                MPVLib.command(arrayOf("script-binding", "stats/display-page-$page"))
-              }
+              if ((page == 0) xor (statisticsPage == 0)) MPVLib.command("script-binding", "stats/display-stats-toggle")
+              if (page != 0) MPVLib.command("script-binding", "stats/display-page-$page")
               advancedPreferences.enabledStatisticsPage.set(page)
             },
             selected = statisticsPage == page,

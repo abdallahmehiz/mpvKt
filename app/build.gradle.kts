@@ -100,6 +100,12 @@ android {
   }
 }
 
+kotlin {
+  compilerOptions {
+    freeCompilerArgs.addAll("-Xwhen-guards", "-Xcontext-parameters")
+  }
+}
+
 room {
   schemaDirectory("$projectDir/schemas")
 }

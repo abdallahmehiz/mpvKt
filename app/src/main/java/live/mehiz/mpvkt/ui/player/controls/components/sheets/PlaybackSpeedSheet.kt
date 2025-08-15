@@ -30,7 +30,6 @@ import androidx.compose.ui.res.stringResource
 import `is`.xyz.mpv.MPVLib
 import live.mehiz.mpvkt.R
 import live.mehiz.mpvkt.preferences.AudioPreferences
-import live.mehiz.mpvkt.preferences.PlayerPreferences
 import live.mehiz.mpvkt.preferences.preference.collectAsState
 import live.mehiz.mpvkt.presentation.components.PlayerSheet
 import live.mehiz.mpvkt.presentation.components.SliderItem
@@ -44,11 +43,16 @@ import kotlin.math.roundToInt
 @Composable
 fun PlaybackSpeedSheet(
   speed: Float,
+  speedPresets: List<Float>,
   onSpeedChange: (Float) -> Unit,
+  onAddSpeedPreset: (Float) -> Unit,
+  onRemoveSpeedPreset: (Float) -> Unit,
+  onResetPresets: () -> Unit,
+  onMakeDefault: (Float) -> Unit,
+  onResetDefault: () -> Unit,
   onDismissRequest: () -> Unit,
   modifier: Modifier = Modifier,
 ) {
-  val preferences = koinInject<PlayerPreferences>()
   PlayerSheet(onDismissRequest = onDismissRequest) {
     Column(
       modifier
@@ -63,7 +67,6 @@ fun PlaybackSpeedSheet(
         max = 6f,
         min = 0.01f,
       )
-      val playbackSpeedPresets by preferences.speedPresets.collectAsState()
       Row(
         modifier = Modifier
           .fillMaxWidth()
@@ -71,9 +74,7 @@ fun PlaybackSpeedSheet(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.medium),
       ) {
-        FilledTonalIconButton(onClick = {
-          preferences.speedPresets.delete()
-        }) {
+        FilledTonalIconButton(onClick = onResetPresets) {
           Icon(Icons.Default.RestartAlt, null)
         }
         LazyRow(
@@ -81,10 +82,7 @@ fun PlaybackSpeedSheet(
             .weight(1f),
           horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.extraSmall),
         ) {
-          items(
-            playbackSpeedPresets.map { it.toFloat() }.sorted(),
-            key = { it }
-          ) {
+          items(speedPresets, key = { it }) {
             InputChip(
               selected = speed == it,
               onClick = { onSpeedChange(it) },
@@ -95,18 +93,13 @@ fun PlaybackSpeedSheet(
                 Icon(
                   Icons.Default.Close,
                   null,
-                  modifier = Modifier
-                    .clickable { preferences.speedPresets.set(playbackSpeedPresets.minus(it.toFixed(2).toString())) },
+                  modifier = Modifier.clickable { onRemoveSpeedPreset(it.toFixed(2)) },
                 )
               },
             )
           }
         }
-        FilledTonalIconButton(
-          onClick = {
-            preferences.speedPresets.set(playbackSpeedPresets.plus(speed.toFixed(2).toString()))
-          },
-        ) {
+        FilledTonalIconButton(onClick = { onAddSpeedPreset(speed.toFixed(2)) }) {
           Icon(Icons.Default.Add, null)
         }
       }
@@ -130,16 +123,11 @@ fun PlaybackSpeedSheet(
       ) {
         Button(
           modifier = Modifier.weight(1f),
-          onClick = { preferences.defaultSpeed.set(speed) },
+          onClick = { onMakeDefault(speed) },
         ) {
           Text(text = stringResource(id = R.string.player_sheets_speed_make_default))
         }
-        FilledIconButton(
-          onClick = {
-            preferences.defaultSpeed.delete()
-            onSpeedChange(1f)
-          },
-        ) {
+        FilledIconButton(onClick = onResetDefault) {
           Icon(imageVector = Icons.Default.RestartAlt, contentDescription = null)
         }
       }

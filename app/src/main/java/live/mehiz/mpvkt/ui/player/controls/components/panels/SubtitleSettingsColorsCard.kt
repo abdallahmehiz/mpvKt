@@ -36,6 +36,7 @@ import androidx.core.graphics.alpha
 import androidx.core.graphics.blue
 import androidx.core.graphics.green
 import androidx.core.graphics.red
+import androidx.core.graphics.toColorInt
 import `is`.xyz.mpv.MPVLib
 import live.mehiz.mpvkt.R
 import live.mehiz.mpvkt.preferences.SubtitlesPreferences
@@ -107,7 +108,7 @@ fun SubtitleSettingsColorsCard(
         ) {
           Row(
             horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.extraSmall),
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
           ) {
             Icon(Icons.Default.FormatColorReset, null)
             Text(stringResource(R.string.generic_reset))
@@ -174,11 +175,7 @@ fun resetColors(preferences: SubtitlesPreferences, type: SubColorType) {
   }
 }
 
-val getCurrentMPVColor: (SubColorType) -> Int = { colorType ->
-  MPVLib.getPropertyString(colorType.property)?.let {
-    android.graphics.Color.parseColor(it.uppercase())
-  }!!
-}
+val getCurrentMPVColor: (SubColorType) -> Int = { MPVLib.getPropertyString(it.property)!!.uppercase().toColorInt() }
 
 @Composable
 fun SubtitlesColorPicker(

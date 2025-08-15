@@ -1,6 +1,7 @@
 package live.mehiz.mpvkt
 
 import android.app.Application
+import live.mehiz.mpvkt.di.AppModule
 import live.mehiz.mpvkt.di.DatabaseModule
 import live.mehiz.mpvkt.di.FileManagerModule
 import live.mehiz.mpvkt.di.PreferencesModule
@@ -22,6 +23,7 @@ class App : Application(), KoinStartup {
   override fun onKoinStartup() = koinConfiguration {
     androidContext(this@App)
     modules(
+      AppModule,
       PreferencesModule,
       DatabaseModule,
       FileManagerModule,

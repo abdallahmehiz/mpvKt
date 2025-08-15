@@ -9,10 +9,8 @@ import androidx.compose.material.icons.filled.Subtitles
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import live.mehiz.mpvkt.preferences.PlayerPreferences
 import live.mehiz.mpvkt.ui.player.Decoder
 import live.mehiz.mpvkt.ui.player.controls.components.ControlsButton
-import org.koin.compose.koinInject
 
 @Composable
 fun TopRightPlayerControls(
@@ -39,13 +37,12 @@ fun TopRightPlayerControls(
     modifier,
     verticalAlignment = Alignment.CenterVertically
   ) {
-    val playerPreferences = koinInject<PlayerPreferences>()
     ControlsButton(
       decoder.title,
       onClick = onDecoderClick,
       onLongClick = onDecoderLongClick,
     )
-    if (playerPreferences.showChaptersButton.get() && isChaptersVisible) {
+    if (isChaptersVisible) {
       ControlsButton(
         Icons.Default.Bookmarks,
         onClick = onChaptersClick,

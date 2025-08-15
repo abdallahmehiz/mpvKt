@@ -35,9 +35,7 @@ fun BottomRightPlayerControls(
 ) {
   Row(modifier) {
     if (customButton != null) {
-      Box(
-        modifier = Modifier.padding(end = MaterialTheme.spacing.smaller),
-      ) {
+      Box(modifier = Modifier.padding(end = MaterialTheme.spacing.smaller)) {
         Button(onClick = {}) {
           Text(text = customButtonTitle)
         }

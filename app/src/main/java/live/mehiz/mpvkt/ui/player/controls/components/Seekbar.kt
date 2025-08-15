@@ -64,14 +64,7 @@ fun SeekbarWithTimers(
       readAheadValue = readAheadValue,
       segments = chapters
         .filter { it.start in 0f..duration }
-        .let {
-          // add an extra segment at 0 if it doesn't exist.
-          if (it.isNotEmpty() && it[0].start != 0f) {
-            persistentListOf(Segment("", 0f)) + it
-          } else {
-            it
-          } + it
-        },
+        .let { (if (it.isNotEmpty() && it[0].start != 0f) persistentListOf(Segment("", 0f)) + it else it) + it },
       modifier = Modifier.weight(1f),
       colors = SeekerDefaults.seekerColors(
         progressColor = MaterialTheme.colorScheme.primary,

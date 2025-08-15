@@ -20,7 +20,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import live.mehiz.mpvkt.R
 import live.mehiz.mpvkt.ui.theme.spacing
 
@@ -61,7 +60,7 @@ fun MultipleSpeedPlayerUpdate(
       Text(
         stringResource(R.string.player_speed, currentSpeed),
         fontWeight = FontWeight.Bold,
-        fontSize = 20.sp,
+        style = MaterialTheme.typography.bodyLarge,
       )
       Icon(
         Icons.Filled.DoubleArrow,

@@ -65,8 +65,10 @@ fun GestureHandler(
   val audioPreferences = koinInject<AudioPreferences>()
   val panelShown by viewModel.panelShown.collectAsState()
   val allowGesturesInPanels by playerPreferences.allowGesturesInPanels.collectAsState()
-  val duration by viewModel.duration.collectAsState()
-  val position by viewModel.pos.collectAsState()
+  val paused by MPVLib.propBoolean["pause"].collectAsState()
+  val duration by MPVLib.propInt["duration"].collectAsState()
+  val position by MPVLib.propInt["time-pos"].collectAsState()
+  val playbackSpeed by MPVLib.propFloat["speed"].collectAsState()
   val controlsShown by viewModel.controlsShown.collectAsState()
   val areControlsLocked by viewModel.areControlsLocked.collectAsState()
   val seekAmount by viewModel.doubleTapSeekAmount.collectAsState()
@@ -89,7 +91,7 @@ fun GestureHandler(
   val showSeekbarWhenSeeking by playerPreferences.showSeekBarWhenSeeking.collectAsState()
   var isLongPressing by remember { mutableStateOf(false) }
   val currentVolume by viewModel.currentVolume.collectAsState()
-  val currentMPVVolume by viewModel.currentMPVVolume.collectAsState()
+  val currentMPVVolume by MPVLib.propInt["volume"].collectAsState()
   val currentBrightness by viewModel.currentBrightness.collectAsState()
   val volumeBoostingCap = audioPreferences.volumeBoostCap.get()
   val haptics = LocalHapticFeedback.current
@@ -98,7 +100,7 @@ fun GestureHandler(
       .fillMaxSize()
       .windowInsetsPadding(WindowInsets.safeGestures)
       .pointerInput(Unit) {
-        var originalSpeed = viewModel.playbackSpeed.value
+        var originalSpeed = MPVLib.getPropertyFloat("speed") ?: 1f
         detectTapGestures(
           onTap = {
             if (controlsShown) viewModel.hideControls() else viewModel.showControls()
@@ -141,18 +143,18 @@ fun GestureHandler(
             tryAwaitRelease()
             if (isLongPressing) {
               isLongPressing = false
-              MPVLib.setPropertyDouble("speed", originalSpeed.toDouble())
+              MPVLib.setPropertyFloat("speed", originalSpeed)
               viewModel.playerUpdate.update { PlayerUpdates.None }
             }
             interactionSource.emit(PressInteraction.Release(press))
           },
           onLongPress = {
             if (multipleSpeedGesture == 0f || areControlsLocked) return@detectTapGestures
-            if (!isLongPressing && !viewModel.paused.value) {
-              originalSpeed = viewModel.playbackSpeed.value
+            if (!isLongPressing && paused == false) {
+              originalSpeed = playbackSpeed ?: return@detectTapGestures
               haptics.performHapticFeedback(HapticFeedbackType.LongPress)
               isLongPressing = true
-              MPVLib.setPropertyDouble("speed", multipleSpeedGesture.toDouble())
+              MPVLib.setPropertyFloat("speed", multipleSpeedGesture)
               viewModel.playerUpdate.update { PlayerUpdates.MultipleSpeed }
             }
           },
@@ -160,14 +162,14 @@ fun GestureHandler(
       }
       .pointerInput(areControlsLocked) {
         if (!seekGesture || areControlsLocked) return@pointerInput
-        var startingPosition = position.toInt()
+        var startingPosition = position ?: 0
         var startingX = 0f
         var wasPlayerAlreadyPause = false
         detectHorizontalDragGestures(
           onDragStart = {
-            startingPosition = position.toInt()
+            startingPosition = position ?: 0
             startingX = it.x
-            wasPlayerAlreadyPause = viewModel.paused.value
+            wasPlayerAlreadyPause = paused ?: false
             viewModel.pause()
           },
           onDragEnd = {
@@ -176,14 +178,19 @@ fun GestureHandler(
             if (!wasPlayerAlreadyPause) viewModel.unpause()
           },
         ) { change, dragAmount ->
-          if (position <= 0f && dragAmount < 0) return@detectHorizontalDragGestures
-          if (position >= duration && dragAmount > 0) return@detectHorizontalDragGestures
-          calculateNewHorizontalGestureValue(startingPosition, startingX, change.position.x, 0.15f).let {
+          if ((position ?: 0) <= 0f && dragAmount < 0) return@detectHorizontalDragGestures
+          if ((position ?: 0) >= (duration ?: 0) && dragAmount > 0) return@detectHorizontalDragGestures
+          calculateNewHorizontalGestureValue(
+            startingPosition,
+            startingX,
+            change.position.x,
+            0.15f
+          ).let {
             viewModel.gestureSeekAmount.update { _ ->
               Pair(
                 startingPosition,
                 (it - startingPosition)
-                  .coerceIn(0 - startingPosition, (duration - startingPosition).toInt()),
+                  .coerceIn(0 - startingPosition, ((duration ?: 0) - startingPosition)),
               )
             }
             viewModel.seekTo(it, preciseSeeking)
@@ -204,11 +211,11 @@ fun GestureHandler(
         val mpvVolumeGestureSens = 0.02f
         val isIncreasingVolumeBoost: (Float) -> Boolean = {
           volumeBoostingCap > 0 && currentVolume == viewModel.maxVolume &&
-            currentMPVVolume - 100 < volumeBoostingCap && it < 0
+            (currentMPVVolume ?: 100) - 100 < volumeBoostingCap && it < 0
         }
         val isDecreasingVolumeBoost: (Float) -> Boolean = {
           volumeBoostingCap > 0 && currentVolume == viewModel.maxVolume &&
-            currentMPVVolume - 100 in 1..volumeBoostingCap && it > 0
+            (currentMPVVolume ?: 100) - 100 in 1..volumeBoostingCap && it > 0
         }
         detectVerticalDragGestures(
           onDragEnd = { startingY = 0f },
@@ -229,7 +236,7 @@ fun GestureHandler(
               }
               viewModel.changeMPVVolumeTo(
                 calculateNewVerticalGestureValue(
-                  originalMPVVolume,
+                  originalMPVVolume ?: 100,
                   mpvVolumeStartingY,
                   change.position.y,
                   mpvVolumeGestureSens,

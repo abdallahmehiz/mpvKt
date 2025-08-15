@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.FileOpen
 import androidx.compose.material.icons.filled.FolderOpen
@@ -27,6 +28,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -79,27 +81,25 @@ object HomeScreen : Screen {
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
       ) {
-        var uri by remember { mutableStateOf("") }
+        val uri = rememberTextFieldState()
         var isUrlValid by remember { mutableStateOf(true) }
+        LaunchedEffect(uri.text) {
+          isUrlValid = uri.text.isNotEmpty() || isURLValid(uri.text.toString())
+        }
         OutlinedTextField(
-          value = uri,
+          state = uri,
           label = { Text(stringResource(R.string.home_url_input_label)) },
-          onValueChange = {
-            uri = it
-            isUrlValid = it.isBlank() || isURLValid(it)
-          },
           supportingText = {
             Text(if (isUrlValid) "" else stringResource(R.string.home_invalid_protocol))
           },
           trailingIcon = {
             if (!isUrlValid) Icon(Icons.Filled.Info, null)
           },
-          isError = !isUrlValid,
-          maxLines = 5,
+          isError = !isUrlValid
         )
         Button(
-          onClick = { playFile(uri, context) },
-          enabled = uri.isNotBlank() && isUrlValid,
+          onClick = { playFile(uri.text.toString(), context) },
+          enabled = uri.text.isNotBlank() && isUrlValid,
         ) {
           Row(
             horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.smaller),
