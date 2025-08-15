@@ -33,7 +33,7 @@ androidx-navigation3-runtime = { module = "androidx.navigation3:navigation3-runt
 androidx-navigation3-ui = { module = "androidx.navigation3:navigation3-ui", version.ref = "navigation3" }
 androidx-documentfile = { group = "androidx.documentfile", name = "documentfile", version = "1.1.0" }
 
-mpv-lib = "io.github.abdallahmehiz:mpv-android-lib:0.1.8"
+mpv-lib = "io.github.abdallahmehiz:mpv-android-lib:0.1.9"
 seeker = "com.github.abdallahmehiz:seeker:2.0.1"
 
 material = "com.google.android.material:material:1.14.0-alpha03"

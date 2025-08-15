@@ -99,14 +99,14 @@ class MPVView(context: Context, attributes: AttributeSet) : BaseMPVView(context,
   override fun postInitOptions() {
     when (decoderPreferences.debanding.get()) {
       Debanding.None -> {}
-      Debanding.CPU -> MPVLib.command(arrayOf("vf", "add", "@deband:gradfun=radius=12"))
+      Debanding.CPU -> MPVLib.command("vf", "add", "@deband:gradfun=radius=12")
       Debanding.GPU -> MPVLib.setOptionString("deband", "yes")
     }
 
     advancedPreferences.enabledStatisticsPage.get().let {
       if (it != 0) {
-        MPVLib.command(arrayOf("script-binding", "stats/display-stats-toggle"))
-        MPVLib.command(arrayOf("script-binding", "stats/display-page-$it"))
+        MPVLib.command("script-binding", "stats/display-stats-toggle")
+        MPVLib.command("script-binding", "stats/display-page-$it")
       }
     }
   }
@@ -117,7 +117,7 @@ class MPVView(context: Context, attributes: AttributeSet) : BaseMPVView(context,
       return false
     }
 
-    var mapped = KeyMapping.map.get(event.keyCode)
+    var mapped = KeyMapping[event.keyCode]
     if (mapped == null) {
       // Fallback to produced glyph
       if (!event.isPrintingKey) {
@@ -146,7 +146,7 @@ class MPVView(context: Context, attributes: AttributeSet) : BaseMPVView(context,
 
     val action = if (event.action == KeyEvent.ACTION_DOWN) "keydown" else "keyup"
     mod.add(mapped)
-    MPVLib.command(arrayOf(action, mod.joinToString("+")))
+    MPVLib.command(action, mod.joinToString("+"))
 
     return true
   }

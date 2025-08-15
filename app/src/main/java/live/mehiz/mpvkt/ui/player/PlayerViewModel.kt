@@ -166,13 +166,13 @@ class PlayerViewModel(
   fun addAudio(uri: Uri) {
     val url = uri.toString()
     val path = if (url.startsWith("content://")) url.toUri().openContentFd(activity) else url
-    MPVLib.command(arrayOf("audio-add", path ?: return, "cached"))
+    MPVLib.command("audio-add", path ?: return, "cached")
   }
 
   fun addSubtitle(uri: Uri) {
     val url = uri.toString()
     val path = if (url.startsWith("content://")) url.toUri().openContentFd(activity) else url
-    MPVLib.command(arrayOf("sub-add", path ?: return, "cached"))
+    MPVLib.command("sub-add", path ?: return, "cached")
   }
 
   fun selectSub(id: Int) {
@@ -187,7 +187,7 @@ class PlayerViewModel(
     }
   }
 
-  fun pauseUnpause() = MPVLib.command(arrayOf("cycle", "pause"))
+  fun pauseUnpause() = MPVLib.command("cycle", "pause")
   fun pause() = MPVLib.setPropertyBoolean("pause", true)
   fun unpause() = MPVLib.setPropertyBoolean("pause", false)
 
@@ -221,12 +221,12 @@ class PlayerViewModel(
   }
 
   fun seekBy(offset: Int, precise: Boolean = false) {
-    MPVLib.command(arrayOf("seek", offset.toString(), if (precise) "relative+exact" else "relative"))
+    MPVLib.command("seek", offset.toString(), if (precise) "relative+exact" else "relative")
   }
 
   fun seekTo(position: Int, precise: Boolean = true) {
     if (position !in 0..(MPVLib.getPropertyInt("duration") ?: 0)) return
-    MPVLib.command(arrayOf("seek", position.toString(), if (precise) "absolute" else "absolute+keyframes"))
+    MPVLib.command("seek", position.toString(), if (precise) "absolute" else "absolute+keyframes")
   }
 
   fun changeBrightnessBy(change: Float) {
@@ -471,7 +471,7 @@ class PlayerViewModel(
       }
 
       SingleActionGesture.Custom -> {
-        MPVLib.command(arrayOf("keypress", CustomKeyCodes.DoubleTapLeft.keyCode))
+        MPVLib.command("keypress", CustomKeyCodes.DoubleTapLeft.keyCode)
       }
 
       SingleActionGesture.None -> {}
@@ -485,7 +485,7 @@ class PlayerViewModel(
       }
 
       SingleActionGesture.Custom -> {
-        MPVLib.command(arrayOf("keypress", CustomKeyCodes.DoubleTapCenter.keyCode))
+        MPVLib.command("keypress", CustomKeyCodes.DoubleTapCenter.keyCode)
       }
 
       SingleActionGesture.Seek -> {}
@@ -504,7 +504,7 @@ class PlayerViewModel(
       }
 
       SingleActionGesture.Custom -> {
-        MPVLib.command(arrayOf("keypress", CustomKeyCodes.DoubleTapRight.keyCode))
+        MPVLib.command("keypress", CustomKeyCodes.DoubleTapRight.keyCode)
       }
 
       SingleActionGesture.None -> {}
@@ -521,11 +521,11 @@ fun Float.normalize(inMin: Float, inMax: Float, outMin: Float, outMax: Float): F
 }
 
 fun CustomButtonEntity.execute() {
-  MPVLib.command(arrayOf("script-message", "call_button_$id"))
+  MPVLib.command("script-message", "call_button_$id")
 }
 
 fun CustomButtonEntity.executeLongClick() {
-  MPVLib.command(arrayOf("script-message", "call_button_${id}_long"))
+  MPVLib.command("script-message", "call_button_${id}_long")
 }
 
 fun <T> Flow<T>.collectAsState(scope: CoroutineScope, initial: T) =

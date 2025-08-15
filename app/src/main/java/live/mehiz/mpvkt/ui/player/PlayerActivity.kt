@@ -150,7 +150,7 @@ class PlayerActivity : AppCompatActivity() {
 
     player.isExiting = true
     if (isFinishing) {
-      MPVLib.command(arrayOf("stop"))
+      MPVLib.command("stop")
     }
     MPVLib.removeObserver(playerObserver)
     MPVLib.destroy()
@@ -335,7 +335,7 @@ class PlayerActivity : AppCompatActivity() {
 
     file.writeText(customButtonsContent)
 
-    MPVLib.command(arrayOf("load-script", file.absolutePath))
+    MPVLib.command("load-script", file.absolutePath)
   }
 
   private fun copyMPVFonts() {
@@ -374,9 +374,9 @@ class PlayerActivity : AppCompatActivity() {
       }
 
       AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK -> {
-        MPVLib.command(arrayOf("multiply", "volume", "0.5"))
+        MPVLib.command("multiply", "volume", "0.5")
         restoreAudioFocus = {
-          MPVLib.command(arrayOf("multiply", "volume", "2"))
+          MPVLib.command("multiply", "volume", "2")
         }
       }
 
@@ -441,7 +441,7 @@ class PlayerActivity : AppCompatActivity() {
         val flag = if (subsToEnable.any { it == suburi }) "select" else "auto"
 
         Log.v(TAG, "Adding subtitles from intent extras: $subfile")
-        MPVLib.command(arrayOf("sub-add", subfile, flag))
+        MPVLib.command("sub-add", subfile, flag)
       }
     }
 
@@ -624,7 +624,7 @@ class PlayerActivity : AppCompatActivity() {
   override fun onNewIntent(intent: Intent) {
     super.onNewIntent(intent)
 
-    getPlayableUri(intent)?.let { MPVLib.command(arrayOf("loadfile", it)) }
+    getPlayableUri(intent)?.let { MPVLib.command("loadfile", it) }
     setIntent(intent)
   }
 
@@ -760,7 +760,7 @@ class PlayerActivity : AppCompatActivity() {
               }
 
               SingleActionGesture.Custom -> {
-                MPVLib.command(arrayOf("keypress", CustomKeyCodes.MediaPlay.keyCode))
+                MPVLib.command("keypress", CustomKeyCodes.MediaPlay.keyCode)
               }
             }
           }
@@ -776,7 +776,7 @@ class PlayerActivity : AppCompatActivity() {
               }
 
               SingleActionGesture.Custom -> {
-                MPVLib.command(arrayOf("keypress", CustomKeyCodes.MediaPlay.keyCode))
+                MPVLib.command("keypress", CustomKeyCodes.MediaPlay.keyCode)
               }
             }
           }
@@ -793,7 +793,7 @@ class PlayerActivity : AppCompatActivity() {
               }
 
               SingleActionGesture.Custom -> {
-                MPVLib.command(arrayOf("keypress", CustomKeyCodes.MediaPrevious.keyCode))
+                MPVLib.command("keypress", CustomKeyCodes.MediaPrevious.keyCode)
               }
             }
           }
@@ -810,7 +810,7 @@ class PlayerActivity : AppCompatActivity() {
               }
 
               SingleActionGesture.Custom -> {
-                MPVLib.command(arrayOf("keypress", CustomKeyCodes.MediaNext.keyCode))
+                MPVLib.command("keypress", CustomKeyCodes.MediaNext.keyCode)
               }
             }
           }

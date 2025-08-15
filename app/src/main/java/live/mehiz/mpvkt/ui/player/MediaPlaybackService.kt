@@ -48,12 +48,12 @@ class MediaPlaybackService : MediaBrowserServiceCompat(), MPVLib.EventObserver {
   private var mediaArtist = ""
   private var positionMs: Long?
     get() = MPVLib.getPropertyDouble("time-pos")?.times(1000L)?.toLong()
-    set(value) = MPVLib.command(arrayOf("seek", (value!! / 1000f).toString(), "absolute"))
+    set(value) = MPVLib.command("seek", (value!! / 1000f).toString(), "absolute")
   private val durationMs: Long?
     get() = (MPVLib.getPropertyDouble("duration")?.times(1000L))?.toLong()
   private var paused: Boolean?
     get() = MPVLib.getPropertyBoolean("pause")
-    set(value) = MPVLib.command(arrayOf("set", "pause", if (value == true) "yes" else "no"))
+    set(value) = MPVLib.command("set", "pause", if (value == true) "yes" else "no")
 
   private lateinit var mediaSession: MediaSessionCompat
 
