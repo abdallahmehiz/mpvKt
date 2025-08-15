@@ -219,27 +219,27 @@ fun PlayerControls(
         AnimatedVisibility(
           isBrightnessSliderShown,
           enter =
-          if (!reduceMotion) {
-            slideInHorizontally(playerControlsEnterAnimationSpec()) {
-              if (swapVolumeAndBrightness) -it else it
-            } +
-              fadeIn(
-                playerControlsEnterAnimationSpec(),
-              )
-          } else {
-            fadeIn(playerControlsEnterAnimationSpec())
-          },
+            if (!reduceMotion) {
+              slideInHorizontally(playerControlsEnterAnimationSpec()) {
+                if (swapVolumeAndBrightness) -it else it
+              } +
+                fadeIn(
+                  playerControlsEnterAnimationSpec(),
+                )
+            } else {
+              fadeIn(playerControlsEnterAnimationSpec())
+            },
           exit =
-          if (!reduceMotion) {
-            slideOutHorizontally(playerControlsExitAnimationSpec()) {
-              if (swapVolumeAndBrightness) -it else it
-            } +
-              fadeOut(
-                playerControlsExitAnimationSpec(),
-              )
-          } else {
-            fadeOut(playerControlsExitAnimationSpec())
-          },
+            if (!reduceMotion) {
+              slideOutHorizontally(playerControlsExitAnimationSpec()) {
+                if (swapVolumeAndBrightness) -it else it
+              } +
+                fadeOut(
+                  playerControlsExitAnimationSpec(),
+                )
+            } else {
+              fadeOut(playerControlsExitAnimationSpec())
+            },
           modifier = Modifier.constrainAs(brightnessSlider) {
             if (swapVolumeAndBrightness) {
               start.linkTo(parent.start, spacing.medium)
@@ -254,27 +254,27 @@ fun PlayerControls(
         AnimatedVisibility(
           isVolumeSliderShown,
           enter =
-          if (!reduceMotion) {
-            slideInHorizontally(playerControlsEnterAnimationSpec()) {
-              if (swapVolumeAndBrightness) it else -it
-            } +
-              fadeIn(
-                playerControlsEnterAnimationSpec(),
-              )
-          } else {
-            fadeIn(playerControlsEnterAnimationSpec())
-          },
+            if (!reduceMotion) {
+              slideInHorizontally(playerControlsEnterAnimationSpec()) {
+                if (swapVolumeAndBrightness) it else -it
+              } +
+                fadeIn(
+                  playerControlsEnterAnimationSpec(),
+                )
+            } else {
+              fadeIn(playerControlsEnterAnimationSpec())
+            },
           exit =
-          if (!reduceMotion) {
-            slideOutHorizontally(playerControlsExitAnimationSpec()) {
-              if (swapVolumeAndBrightness) it else -it
-            } +
-              fadeOut(
-                playerControlsExitAnimationSpec(),
-              )
-          } else {
-            fadeOut(playerControlsExitAnimationSpec())
-          },
+            if (!reduceMotion) {
+              slideOutHorizontally(playerControlsExitAnimationSpec()) {
+                if (swapVolumeAndBrightness) it else -it
+              } +
+                fadeOut(
+                  playerControlsExitAnimationSpec(),
+                )
+            } else {
+              fadeOut(playerControlsExitAnimationSpec())
+            },
           modifier = Modifier.constrainAs(volumeSlider) {
             if (swapVolumeAndBrightness) {
               end.linkTo(parent.end, spacing.medium)
@@ -581,7 +581,10 @@ fun PlayerControls(
       onSelectSubtitle = viewModel::selectSub,
       audioTracks = audioTracks,
       onAddAudio = viewModel::addAudio,
-      onSelectAudio = { MPVLib.setPropertyInt("aid", it.id) },
+      onSelectAudio = {
+        if (MPVLib.getPropertyInt("aid") == it.id) MPVLib.setPropertyBoolean("aid", false)
+        else MPVLib.setPropertyInt("aid", it.id)
+      },
       chapter = chapters.getOrNull(currentChapter ?: 0),
       chapters = chapters,
       onSeekToChapter = {
