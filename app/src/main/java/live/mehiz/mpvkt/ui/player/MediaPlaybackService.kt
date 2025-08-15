@@ -61,6 +61,10 @@ class MediaPlaybackService : MediaBrowserServiceCompat(), MPVLib.EventObserver {
   private var audioFocusRequest: AudioFocusRequest? = null
   private var audioFocusCallback: AudioManager.OnAudioFocusChangeListener? = null
 
+  init {
+    MPVLib.addObserver(this)
+  }
+
   @Suppress("EmptyFunctionBlock")
   override fun eventProperty(property: String) {
   }
@@ -117,8 +121,17 @@ class MediaPlaybackService : MediaBrowserServiceCompat(), MPVLib.EventObserver {
   override fun onCreate() {
     super.onCreate()
 
-    audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
+    audioManager = getSystemService(AUDIO_SERVICE) as AudioManager
     MPVLib.addObserver(this)
+    mapOf(
+      "pause" to MPVLib.mpvFormat.MPV_FORMAT_FLAG,
+      "duration" to MPVLib.mpvFormat.MPV_FORMAT_DOUBLE,
+      "time-pos" to MPVLib.mpvFormat.MPV_FORMAT_DOUBLE,
+      "media-title" to MPVLib.mpvFormat.MPV_FORMAT_STRING,
+      "metadata/artist" to MPVLib.mpvFormat.MPV_FORMAT_STRING,
+    ).onEach {
+      MPVLib.observeProperty(it.key, it.value)
+    }
 
     setupMediaSession()
     setupAudioFocus()
