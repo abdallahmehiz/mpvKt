@@ -30,37 +30,6 @@ class MPVView(context: Context, attributes: AttributeSet) : BaseMPVView(context,
 
   var isExiting = false
 
-  val duration: Int?
-    get() = MPVLib.getPropertyInt("duration")
-
-  var timePos: Int?
-    get() = MPVLib.getPropertyInt("time-pos")
-    set(position) = MPVLib.setPropertyInt("time-pos", position!!)
-
-  var paused: Boolean?
-    get() = MPVLib.getPropertyBoolean("pause")
-    set(paused) = MPVLib.setPropertyBoolean("pause", paused!!)
-
-  val hwdecActive: String
-    get() = MPVLib.getPropertyString("hwdec-current") ?: "no"
-
-  var playbackSpeed: Double?
-    get() = MPVLib.getPropertyDouble("speed")
-    set(speed) = MPVLib.setPropertyDouble("speed", speed!!)
-
-  var subDelay: Double?
-    get() = MPVLib.getPropertyDouble("sub-delay")
-    set(delay) = MPVLib.setPropertyDouble("sub-delay", delay!!)
-
-  var secondarySubDelay: Double?
-    get() = MPVLib.getPropertyDouble("secondary-sub-delay")
-    set(delay) = MPVLib.setPropertyDouble("secondary-sub-delay", delay!!)
-
-  val videoH: Int?
-    get() = MPVLib.getPropertyInt("video-params/h")
-  val videoAspect: Double?
-    get() = MPVLib.getPropertyDouble("video-params/aspect")
-
   /**
    * Returns the video aspect ratio. Rotation is taken into account.
    */
@@ -78,11 +47,7 @@ class MPVView(context: Context, attributes: AttributeSet) : BaseMPVView(context,
       return v?.toIntOrNull() ?: -1
     }
     operator fun setValue(thisRef: Any?, property: KProperty<*>, value: Int) {
-      if (value == -1) {
-        MPVLib.setPropertyString(name, "no")
-      } else {
-        MPVLib.setPropertyInt(name, value)
-      }
+      if (value == -1) MPVLib.setPropertyString(name, "no") else MPVLib.setPropertyInt(name, value)
     }
   }
 
@@ -134,14 +99,14 @@ class MPVView(context: Context, attributes: AttributeSet) : BaseMPVView(context,
   override fun postInitOptions() {
     when (decoderPreferences.debanding.get()) {
       Debanding.None -> {}
-      Debanding.CPU -> MPVLib.command(arrayOf("vf", "add", "@deband:gradfun=radius=12"))
+      Debanding.CPU -> MPVLib.command("vf", "add", "@deband:gradfun=radius=12")
       Debanding.GPU -> MPVLib.setOptionString("deband", "yes")
     }
 
     advancedPreferences.enabledStatisticsPage.get().let {
       if (it != 0) {
-        MPVLib.command(arrayOf("script-binding", "stats/display-stats-toggle"))
-        MPVLib.command(arrayOf("script-binding", "stats/display-page-$it"))
+        MPVLib.command("script-binding", "stats/display-stats-toggle")
+        MPVLib.command("script-binding", "stats/display-page-$it")
       }
     }
   }
@@ -152,7 +117,7 @@ class MPVView(context: Context, attributes: AttributeSet) : BaseMPVView(context,
       return false
     }
 
-    var mapped = KeyMapping.map.get(event.keyCode)
+    var mapped = KeyMapping[event.keyCode]
     if (mapped == null) {
       // Fallback to produced glyph
       if (!event.isPrintingKey) {
@@ -181,35 +146,14 @@ class MPVView(context: Context, attributes: AttributeSet) : BaseMPVView(context,
 
     val action = if (event.action == KeyEvent.ACTION_DOWN) "keydown" else "keyup"
     mod.add(mapped)
-    MPVLib.command(arrayOf(action, mod.joinToString("+")))
+    MPVLib.command(action, mod.joinToString("+"))
 
     return true
   }
 
   private val observedProps = mapOf(
-    "chapter" to MPVLib.mpvFormat.MPV_FORMAT_INT64,
-    "chapter-list" to MPVLib.mpvFormat.MPV_FORMAT_NONE,
-    "track-list" to MPVLib.mpvFormat.MPV_FORMAT_NONE,
-
-    "time-pos" to MPVLib.mpvFormat.MPV_FORMAT_INT64,
-    "demuxer-cache-time" to MPVLib.mpvFormat.MPV_FORMAT_INT64,
-    "duration" to MPVLib.mpvFormat.MPV_FORMAT_INT64,
-    "volume" to MPVLib.mpvFormat.MPV_FORMAT_INT64,
-    "volume-max" to MPVLib.mpvFormat.MPV_FORMAT_INT64,
-
-    "sid" to MPVLib.mpvFormat.MPV_FORMAT_STRING,
-    "secondary-sid" to MPVLib.mpvFormat.MPV_FORMAT_STRING,
-    "aid" to MPVLib.mpvFormat.MPV_FORMAT_STRING,
-
-    "speed" to MPVLib.mpvFormat.MPV_FORMAT_DOUBLE,
-    "video-params/aspect" to MPVLib.mpvFormat.MPV_FORMAT_DOUBLE,
-
-    "hwdec-current" to MPVLib.mpvFormat.MPV_FORMAT_STRING,
-    "hwdec" to MPVLib.mpvFormat.MPV_FORMAT_STRING,
-
     "pause" to MPVLib.mpvFormat.MPV_FORMAT_FLAG,
-    "paused-for-cache" to MPVLib.mpvFormat.MPV_FORMAT_FLAG,
-    "seeking" to MPVLib.mpvFormat.MPV_FORMAT_FLAG,
+    "video-params/aspect" to MPVLib.mpvFormat.MPV_FORMAT_DOUBLE,
     "eof-reached" to MPVLib.mpvFormat.MPV_FORMAT_FLAG,
 
     "user-data/mpvkt/show_text" to MPVLib.mpvFormat.MPV_FORMAT_STRING,

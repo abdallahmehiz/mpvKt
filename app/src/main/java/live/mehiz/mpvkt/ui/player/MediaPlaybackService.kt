@@ -23,6 +23,7 @@ import androidx.core.app.NotificationCompat
 import androidx.media.MediaBrowserServiceCompat
 import androidx.media.session.MediaButtonReceiver
 import `is`.xyz.mpv.MPVLib
+import `is`.xyz.mpv.MPVNode
 import live.mehiz.mpvkt.R
 import live.mehiz.mpvkt.preferences.GesturePreferences
 import org.koin.android.ext.android.inject
@@ -45,20 +46,24 @@ class MediaPlaybackService : MediaBrowserServiceCompat(), MPVLib.EventObserver {
   private val binder = MediaPlaybackBinder()
   private var mediaTitle = ""
   private var mediaArtist = ""
-  private var positionMs: Long
-    get() = (MPVLib.getPropertyDouble("time-pos") * 1000L).toLong()
-    set(value) = MPVLib.command(arrayOf("seek", (value / 1000f).toString(), "absolute"))
-  private val durationMs: Long
-    get() = (MPVLib.getPropertyDouble("duration") * 1000L).toLong()
-  private var paused: Boolean
+  private var positionMs: Long?
+    get() = MPVLib.getPropertyDouble("time-pos")?.times(1000L)?.toLong()
+    set(value) = MPVLib.command("seek", (value!! / 1000f).toString(), "absolute")
+  private val durationMs: Long?
+    get() = (MPVLib.getPropertyDouble("duration")?.times(1000L))?.toLong()
+  private var paused: Boolean?
     get() = MPVLib.getPropertyBoolean("pause")
-    set(value) = MPVLib.command(arrayOf("set", "pause", if (value) "yes" else "no"))
+    set(value) = MPVLib.command("set", "pause", if (value == true) "yes" else "no")
 
   private lateinit var mediaSession: MediaSessionCompat
 
   private lateinit var audioManager: AudioManager
   private var audioFocusRequest: AudioFocusRequest? = null
   private var audioFocusCallback: AudioManager.OnAudioFocusChangeListener? = null
+
+  init {
+    MPVLib.addObserver(this)
+  }
 
   @Suppress("EmptyFunctionBlock")
   override fun eventProperty(property: String) {
@@ -86,6 +91,7 @@ class MediaPlaybackService : MediaBrowserServiceCompat(), MPVLib.EventObserver {
         updateMediaSessionMetadata()
         updateNotification()
       }
+
       "media-title" -> {
         mediaTitle = value
         updateMediaSessionMetadata()
@@ -96,6 +102,10 @@ class MediaPlaybackService : MediaBrowserServiceCompat(), MPVLib.EventObserver {
 
   @Suppress("EmptyFunctionBlock")
   override fun eventProperty(property: String, value: Double) {
+  }
+
+  @Suppress("EmptyFunctionBlock")
+  override fun eventProperty(property: String, value: MPVNode) {
   }
 
   @Suppress("EmptyFunctionBlock")
@@ -111,8 +121,17 @@ class MediaPlaybackService : MediaBrowserServiceCompat(), MPVLib.EventObserver {
   override fun onCreate() {
     super.onCreate()
 
-    audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
+    audioManager = getSystemService(AUDIO_SERVICE) as AudioManager
     MPVLib.addObserver(this)
+    mapOf(
+      "pause" to MPVLib.mpvFormat.MPV_FORMAT_FLAG,
+      "duration" to MPVLib.mpvFormat.MPV_FORMAT_DOUBLE,
+      "time-pos" to MPVLib.mpvFormat.MPV_FORMAT_DOUBLE,
+      "media-title" to MPVLib.mpvFormat.MPV_FORMAT_STRING,
+      "metadata/artist" to MPVLib.mpvFormat.MPV_FORMAT_STRING,
+    ).onEach {
+      MPVLib.observeProperty(it.key, it.value)
+    }
 
     setupMediaSession()
     setupAudioFocus()
@@ -213,7 +232,7 @@ class MediaPlaybackService : MediaBrowserServiceCompat(), MPVLib.EventObserver {
       when (focusChange) {
         AudioManager.AUDIOFOCUS_LOSS -> pauseMedia()
         AudioManager.AUDIOFOCUS_LOSS_TRANSIENT -> pauseMedia()
-        AudioManager.AUDIOFOCUS_GAIN -> if (!paused) playMedia()
+        AudioManager.AUDIOFOCUS_GAIN -> if (paused == false) playMedia()
       }
     }
 
@@ -284,11 +303,11 @@ class MediaPlaybackService : MediaBrowserServiceCompat(), MPVLib.EventObserver {
   }
 
   private fun seekForward() {
-    positionMs += gesturePreferences.doubleTapToSeekDuration.get() * 1000L
+    positionMs = positionMs?.plus(gesturePreferences.doubleTapToSeekDuration.get() * 1000L)
   }
 
   private fun seekBackward() {
-    positionMs -= gesturePreferences.doubleTapToSeekDuration.get() * 1000L
+    positionMs = positionMs?.minus(gesturePreferences.doubleTapToSeekDuration.get() * 1000L)
   }
 
   private fun updateMediaSessionMetadata() {
@@ -296,7 +315,7 @@ class MediaPlaybackService : MediaBrowserServiceCompat(), MPVLib.EventObserver {
       val metadataBuilder = MediaMetadataCompat.Builder()
         .putString(MediaMetadataCompat.METADATA_KEY_TITLE, mediaTitle)
         .putString(MediaMetadataCompat.METADATA_KEY_ARTIST, mediaArtist)
-        .putLong(MediaMetadataCompat.METADATA_KEY_DURATION, durationMs)
+        .putLong(MediaMetadataCompat.METADATA_KEY_DURATION, durationMs ?: 0L)
         .putString(MediaMetadataCompat.METADATA_KEY_DISPLAY_TITLE, mediaTitle)
         .putString(MediaMetadataCompat.METADATA_KEY_MEDIA_ID, mediaTitle.hashCode().toString())
 
@@ -316,7 +335,15 @@ class MediaPlaybackService : MediaBrowserServiceCompat(), MPVLib.EventObserver {
     try {
       val stateBuilder = PlaybackStateCompat.Builder()
         .setActions(getAvailableActions())
-        .setState(if (paused) PlaybackStateCompat.STATE_PAUSED else PlaybackStateCompat.STATE_PLAYING, positionMs, 1.0f)
+        .setState(
+          if (paused == true) {
+            PlaybackStateCompat.STATE_PAUSED
+          } else {
+            PlaybackStateCompat.STATE_PLAYING
+          },
+          positionMs ?: 0,
+          1.0f,
+        )
 
       mediaSession.setPlaybackState(stateBuilder.build())
     } catch (e: Exception) {
@@ -374,12 +401,12 @@ class MediaPlaybackService : MediaBrowserServiceCompat(), MPVLib.EventObserver {
       .setContentIntent(pendingOpenAppIntent)
       .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
       .setOnlyAlertOnce(true)
-      .setOngoing(!paused)
+      .setOngoing(paused == false)
       .addAction(R.drawable.baseline_fast_rewind_24, getString(R.string.notification_rewind), pendingSkipBackwardIntent)
       .addAction(
-        if (!paused) R.drawable.baseline_pause_24 else R.drawable.baseline_play_arrow_24,
-        if (!paused) getString(R.string.notification_pause) else getString(R.string.notification_play),
-        if (!paused) pendingPauseIntent else pendingPlayIntent,
+        if (paused == false) R.drawable.baseline_pause_24 else R.drawable.baseline_play_arrow_24,
+        if (paused == false) getString(R.string.notification_pause) else getString(R.string.notification_play),
+        if (paused == false) pendingPauseIntent else pendingPlayIntent,
       )
       .addAction(
         R.drawable.baseline_fast_forward_24,

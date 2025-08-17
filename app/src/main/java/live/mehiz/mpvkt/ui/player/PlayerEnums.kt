@@ -44,10 +44,13 @@ enum class Decoder(val title: String, val value: String) {
   SW("SW", "no"),
   HW("HW", "mediacodec-copy"),
   HWPlus("HW+", "mediacodec"),
-}
+  ;
 
-fun getDecoderFromValue(value: String): Decoder {
-  return Decoder.entries.first { it.value == value }
+  companion object {
+    fun getDecoderFromValue(value: String): Decoder {
+      return Decoder.entries.first { it.value == value }
+    }
+  }
 }
 
 enum class Debanding(@StringRes val titleRes: Int) {
