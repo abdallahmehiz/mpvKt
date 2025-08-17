@@ -154,13 +154,16 @@ class PlayerViewModel(
   }
 
   fun cycleDecoders() {
-    Decoder.current = when (Decoder.current) {
-      Decoder.HWPlus -> Decoder.HW
-      Decoder.HW -> Decoder.SW
-      Decoder.SW -> Decoder.HWPlus
-      Decoder.AutoCopy -> Decoder.SW
-      Decoder.Auto -> Decoder.SW
-    }
+    MPVLib.setPropertyString(
+      "hwdec",
+      when (Decoder.getDecoderFromValue(MPVLib.getPropertyString("hwdec-current") ?: return)) {
+        Decoder.HWPlus -> Decoder.HW.value
+        Decoder.HW -> Decoder.SW.value
+        Decoder.SW -> Decoder.HWPlus.value
+        Decoder.AutoCopy -> Decoder.SW.value
+        Decoder.Auto -> Decoder.SW.value
+      },
+    )
   }
 
   fun addAudio(uri: Uri) {
