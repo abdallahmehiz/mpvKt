@@ -160,6 +160,8 @@
     <string name="player_sheets_add_ext_audio">Добавить внешние аудиодорожки</string>
     <string name="player_sheets_tracks_off">Выкл</string>
 
+    <string name="player_sheets_chapter_title_substitute_audio">Аудио #%d</string>
+    <string name="player_sheets_chapter_title_substitute_subtitle">Субтитры #%d</string>
     <string name="player_sheets_subtitles_footer_secondary_sid_no_styles">Вторичные субтитры не будут иметь стиля ASS/SSA.</string>
     <string name="player_sheets_subtitles_settings_title">Настройки субтитров</string>
     <string name="player_sheets_subtitles_color_text">Текст</string>
