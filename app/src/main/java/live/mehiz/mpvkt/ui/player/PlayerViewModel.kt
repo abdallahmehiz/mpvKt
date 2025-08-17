@@ -537,4 +537,3 @@ fun <T> Flow<T>.collectAsState(scope: CoroutineScope, initialValue: T? = null) =
     init { scope.launch { collect { value = it } } }
     override fun getValue(thisRef: Any?, property: KProperty<*>) = value
   }
-

@@ -1,7 +1,6 @@
 package live.mehiz.mpvkt.ui.player
 
 import androidx.annotation.StringRes
-import `is`.xyz.mpv.MPVLib
 import live.mehiz.mpvkt.R
 import live.mehiz.mpvkt.preferences.DecoderPreferences
 import live.mehiz.mpvkt.preferences.preference.Preference
