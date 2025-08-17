@@ -39,7 +39,7 @@ import live.mehiz.mpvkt.preferences.PlayerPreferences
 import live.mehiz.mpvkt.ui.custombuttons.CustomButtonsUiState
 import live.mehiz.mpvkt.ui.custombuttons.getButtons
 import org.koin.java.KoinJavaComponent.inject
-import kotlin.properties.ReadWriteProperty
+import kotlin.properties.ReadOnlyProperty
 import kotlin.reflect.KProperty
 
 class PlayerViewModelProviderFactory(
@@ -88,13 +88,13 @@ class PlayerViewModel(
   private val _primaryButtonTitle = MutableStateFlow("")
   val primaryButtonTitle = _primaryButtonTitle.asStateFlow()
 
-  val paused by MPVLib.propBoolean["pause"].collectAsState(viewModelScope, null)
-  val pos by MPVLib.propInt["timePos"].collectAsState(viewModelScope, null)
-  val duration by MPVLib.propInt["duration"].collectAsState(viewModelScope, null)
-  private val currentMPVVolume by MPVLib.propInt["volume"].collectAsState(viewModelScope, null)
+  val paused by MPVLib.propBoolean["pause"].collectAsState(viewModelScope)
+  val pos by MPVLib.propInt["time-pos"].collectAsState(viewModelScope)
+  val duration by MPVLib.propInt["duration"].collectAsState(viewModelScope)
+  private val currentMPVVolume by MPVLib.propInt["volume"].collectAsState(viewModelScope)
 
   val currentVolume = MutableStateFlow(activity.audioManager.getStreamVolume(AudioManager.STREAM_MUSIC))
-  private var volumeBoostCap by MPVLib.propInt["volume-max"].collectAsState(viewModelScope, null)
+  private val volumeBoostCap by MPVLib.propInt["volume-max"].collectAsState(viewModelScope)
 
   val subtitleTracks = MPVLib.propNode["track-list"]
     .map { (it?.toObject<List<TrackNode>>(json)?.filter { it.isSubtitle } ?: persistentListOf()).toImmutableList() }
@@ -531,10 +531,10 @@ fun CustomButtonEntity.executeLongClick() {
   MPVLib.command("script-message", "call_button_${id}_long")
 }
 
-fun <T> Flow<T>.collectAsState(scope: CoroutineScope, initial: T) =
-  object : ReadWriteProperty<Any?, T> {
-    private var value = initial
+fun <T> Flow<T>.collectAsState(scope: CoroutineScope, initialValue: T? = null) =
+  object : ReadOnlyProperty<Any?, T?> {
+    private var value: T? = initialValue
     init { scope.launch { collect { value = it } } }
     override fun getValue(thisRef: Any?, property: KProperty<*>) = value
-    override fun setValue(thisRef: Any?, property: KProperty<*>, value: T) { this.value = value }
   }
+
