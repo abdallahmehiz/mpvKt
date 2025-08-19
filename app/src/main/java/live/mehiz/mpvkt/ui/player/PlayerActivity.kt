@@ -65,7 +65,7 @@ import java.io.File
 @Suppress("TooManyFunctions", "LargeClass")
 class PlayerActivity : AppCompatActivity() {
 
-  private val viewModel: PlayerViewModel by viewModels<PlayerViewModel> { PlayerViewModelProviderFactory(this) }
+  private val viewModel: PlayerViewModel by viewModels<PlayerViewModel> { PlayerViewModelProviderFactory() }
   private val binding by lazy { PlayerLayoutBinding.inflate(layoutInflater) }
   private val playerObserver by lazy { PlayerObserver(this) }
   private val playbackStateRepository: PlaybackStateRepository by inject()
@@ -239,7 +239,7 @@ class PlayerActivity : AppCompatActivity() {
 
     if (playerPreferences.rememberBrightness.get()) {
       playerPreferences.defaultBrightness.get().let {
-        if (it != -1f) viewModel.changeBrightnessTo(it)
+        if (it != -1f) viewModel.changeBrightnessTo(it, this)
       }
     }
   }
@@ -488,9 +488,9 @@ class PlayerActivity : AppCompatActivity() {
   override fun onConfigurationChanged(newConfig: Configuration) {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
       if (!isInPictureInPictureMode) {
-        viewModel.changeVideoAspect(playerPreferences.videoAspect.get())
+        viewModel.changeVideoAspect(playerPreferences.videoAspect.get(), this)
       } else {
-        viewModel.hideControls()
+        viewModel.hideControls(this)
       }
     }
     super.onConfigurationChanged(newConfig)
@@ -519,7 +519,7 @@ class PlayerActivity : AppCompatActivity() {
   internal fun onObserverEvent(property: String, value: String) {
     if (player.isExiting) return
     when (property.substringBeforeLast("/")) {
-      "user-data/mpvkt" -> viewModel.handleLuaInvocation(property, value)
+      "user-data/mpvkt" -> viewModel.handleLuaInvocation(property, value, this)
     }
   }
 
@@ -551,7 +551,7 @@ class PlayerActivity : AppCompatActivity() {
           loadVideoPlaybackState(fileName)
         }
         setOrientation()
-        viewModel.changeVideoAspect(playerPreferences.videoAspect.get())
+        viewModel.changeVideoAspect(playerPreferences.videoAspect.get(), this)
       }
 
       MPVLib.mpvEventId.MPV_EVENT_PLAYBACK_RESTART -> player.isExiting = false
@@ -662,7 +662,7 @@ class PlayerActivity : AppCompatActivity() {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
       setPictureInPictureParams(createPipParams())
     }
-    viewModel.hideControls()
+    viewModel.hideControls(this)
     viewModel.hideSeekBar()
     viewModel.isBrightnessSliderShown.update { false }
     viewModel.isVolumeSliderShown.update { false }

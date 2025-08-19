@@ -1,5 +1,6 @@
 package live.mehiz.mpvkt.ui.player
 
+import android.app.Activity
 import android.content.Context
 import android.content.pm.ActivityInfo
 import android.media.AudioManager
@@ -8,8 +9,8 @@ import android.provider.Settings
 import android.util.DisplayMetrics
 import android.util.Log
 import android.view.inputmethod.InputMethodManager
-import android.widget.Toast
 import androidx.core.net.toUri
+import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -30,7 +31,6 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
-import live.mehiz.mpvkt.R
 import live.mehiz.mpvkt.database.MpvKtDatabase
 import live.mehiz.mpvkt.database.entities.CustomButtonEntity
 import live.mehiz.mpvkt.preferences.AudioPreferences
@@ -42,23 +42,22 @@ import org.koin.java.KoinJavaComponent.inject
 import kotlin.properties.ReadOnlyProperty
 import kotlin.reflect.KProperty
 
-class PlayerViewModelProviderFactory(
-  private val activity: PlayerActivity,
-) : ViewModelProvider.Factory {
+class PlayerViewModelProviderFactory : ViewModelProvider.Factory {
   override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
-    return PlayerViewModel(activity) as T
+    return PlayerViewModel() as T
   }
 }
 
 @Suppress("TooManyFunctions")
-class PlayerViewModel(
-  private val activity: PlayerActivity,
-) : ViewModel() {
+class PlayerViewModel : ViewModel() {
   private val playerPreferences: PlayerPreferences by inject(PlayerPreferences::class.java)
   private val gesturePreferences: GesturePreferences by inject(GesturePreferences::class.java)
   private val audioPreferences: AudioPreferences by inject(AudioPreferences::class.java)
   private val mpvKtDatabase: MpvKtDatabase by inject(MpvKtDatabase::class.java)
   private val json: Json by inject(Json::class.java)
+  private val context: Context by inject(Context::class.java)
+  private val audioManager = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
+  private val inputMethodManager = context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
 
   init {
     viewModelScope.launch(Dispatchers.IO) {
@@ -70,7 +69,7 @@ class PlayerViewModel(
           // case we don't want to override it
           if (_primaryButtonTitle.value.isEmpty()) setPrimaryCustomButtonTitle(it)
         }
-        activity.setupCustomButtons(buttons)
+        // activity.setupCustomButtons(buttons) TODO
         _customButtons.update { _ -> CustomButtonsUiState.Success(buttons) }
       } catch (e: Exception) {
         Log.e(TAG, e.message ?: "Unable to fetch buttons")
@@ -93,7 +92,7 @@ class PlayerViewModel(
   val duration by MPVLib.propInt["duration"].collectAsState(viewModelScope)
   private val currentMPVVolume by MPVLib.propInt["volume"].collectAsState(viewModelScope)
 
-  val currentVolume = MutableStateFlow(activity.audioManager.getStreamVolume(AudioManager.STREAM_MUSIC))
+  val currentVolume = MutableStateFlow(audioManager.getStreamVolume(AudioManager.STREAM_MUSIC))
   private val volumeBoostCap by MPVLib.propInt["volume-max"].collectAsState(viewModelScope)
 
   val subtitleTracks = MPVLib.propNode["track-list"]
@@ -117,7 +116,7 @@ class PlayerViewModel(
   val isVolumeSliderShown = MutableStateFlow(false)
   val currentBrightness = MutableStateFlow(
     runCatching {
-      Settings.System.getFloat(activity.contentResolver, Settings.System.SCREEN_BRIGHTNESS)
+      Settings.System.getFloat(context.contentResolver, Settings.System.SCREEN_BRIGHTNESS)
         .normalize(0f, 255f, 0f, 1f)
     }.getOrElse { 0f },
   )
@@ -139,7 +138,10 @@ class PlayerViewModel(
   private val _remainingTime = MutableStateFlow(0)
   val remainingTime = _remainingTime.asStateFlow()
 
-  fun startTimer(seconds: Int) {
+  fun startTimer(
+    seconds: Int,
+    onTimerEnded: () -> Unit,
+  ) {
     timerJob?.cancel()
     _remainingTime.value = seconds
     if (seconds < 1) return
@@ -149,7 +151,7 @@ class PlayerViewModel(
         delay(1000)
       }
       MPVLib.setPropertyBoolean("pause", true)
-      Toast.makeText(activity, activity.getString(R.string.toast_sleep_timer_ended), Toast.LENGTH_SHORT).show()
+      onTimerEnded()
     }
   }
 
@@ -168,13 +170,13 @@ class PlayerViewModel(
 
   fun addAudio(uri: Uri) {
     val url = uri.toString()
-    val path = if (url.startsWith("content://")) url.toUri().openContentFd(activity) else url
+    val path = if (url.startsWith("content://")) url.toUri().openContentFd(context) else url
     MPVLib.command("audio-add", path ?: return, "cached")
   }
 
   fun addSubtitle(uri: Uri) {
     val url = uri.toString()
-    val path = if (url.startsWith("content://")) url.toUri().openContentFd(activity) else url
+    val path = if (url.startsWith("content://")) url.toUri().openContentFd(context) else url
     MPVLib.command("sub-add", path ?: return, "cached")
   }
 
@@ -195,14 +197,16 @@ class PlayerViewModel(
   fun unpause() = MPVLib.setPropertyBoolean("pause", false)
 
   private val showStatusBar = playerPreferences.showSystemStatusBar.get()
-  fun showControls() {
+  fun showControls(activity: Activity) {
+    val insetsController = WindowCompat.getInsetsController(activity.window, activity.window.decorView)
     if (sheetShown.value != Sheets.None || panelShown.value != Panels.None) return
-    if (showStatusBar) activity.windowInsetsController.show(WindowInsetsCompat.Type.statusBars())
+    if (showStatusBar) insetsController.show(WindowInsetsCompat.Type.statusBars())
     _controlsShown.update { true }
   }
 
-  fun hideControls() {
-    activity.windowInsetsController.hide(WindowInsetsCompat.Type.statusBars())
+  fun hideControls(activity: Activity) {
+    val insetsController = WindowCompat.getInsetsController(activity.window, activity.window.decorView)
+    insetsController.hide(WindowInsetsCompat.Type.statusBars())
     _controlsShown.update { false }
   }
 
@@ -232,12 +236,13 @@ class PlayerViewModel(
     MPVLib.command("seek", position.toString(), if (precise) "absolute" else "absolute+keyframes")
   }
 
-  fun changeBrightnessBy(change: Float) {
-    changeBrightnessTo(currentBrightness.value + change)
+  fun changeBrightnessBy(change: Float, activity: Activity) {
+    changeBrightnessTo(currentBrightness.value + change, activity)
   }
 
   fun changeBrightnessTo(
     brightness: Float,
+    activity: Activity
   ) {
     activity.window.attributes = activity.window.attributes.apply {
       screenBrightness = brightness.coerceIn(0f, 1f).also {
@@ -250,7 +255,7 @@ class PlayerViewModel(
     isBrightnessSliderShown.update { true }
   }
 
-  val maxVolume = activity.audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC)
+  val maxVolume = audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC)
   fun changeVolumeBy(change: Int) {
     val mpvVolume = MPVLib.getPropertyInt("volume")
     if ((volumeBoostCap ?: audioPreferences.volumeBoostCap.get()) > 0 && currentVolume.value == maxVolume) {
@@ -266,7 +271,7 @@ class PlayerViewModel(
 
   fun changeVolumeTo(volume: Int) {
     val newVolume = volume.coerceIn(0..maxVolume)
-    activity.audioManager.setStreamVolume(
+    audioManager.setStreamVolume(
       AudioManager.STREAM_MUSIC,
       newVolume,
       0,
@@ -286,7 +291,10 @@ class PlayerViewModel(
     isVolumeSliderShown.update { true }
   }
 
-  fun changeVideoAspect(aspect: VideoAspect) {
+  fun changeVideoAspect(
+    aspect: VideoAspect,
+    activity: Activity,
+  ) {
     var ratio = -1.0
     var pan = 1.0
     when (aspect) {
@@ -312,7 +320,9 @@ class PlayerViewModel(
     playerUpdate.update { PlayerUpdates.AspectRatio }
   }
 
-  fun cycleScreenRotations() {
+  fun cycleScreenRotations(
+    activity: Activity,
+  ) {
     activity.requestedOrientation = when (activity.requestedOrientation) {
       ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE,
       ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE,
@@ -330,7 +340,11 @@ class PlayerViewModel(
   }
 
   @Suppress("CyclomaticComplexMethod", "LongMethod")
-  fun handleLuaInvocation(property: String, value: String) {
+  fun handleLuaInvocation(
+    property: String,
+    value: String,
+    activity: Activity
+  ) {
     val data = value
       .removePrefix("\"")
       .removeSuffix("\"")
@@ -340,15 +354,13 @@ class PlayerViewModel(
       "show_text" -> playerUpdate.update { PlayerUpdates.ShowText(data) }
       "toggle_ui" -> {
         when (data) {
-          "show" -> showControls()
-          "toggle" -> {
-            if (controlsShown.value) hideControls() else showControls()
-          }
+          "show" -> showControls(activity)
+          "toggle" -> if (controlsShown.value) hideControls(activity) else showControls(activity)
 
           "hide" -> {
             sheetShown.update { Sheets.None }
             panelShown.update { Panels.None }
-            hideControls()
+            hideControls(activity)
           }
         }
       }
@@ -410,7 +422,6 @@ class PlayerViewModel(
     MPVLib.setPropertyString(property, "")
   }
 
-  private val inputMethodManager = activity.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
   private fun forceShowSoftwareKeyboard() {
     inputMethodManager.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0)
   }
