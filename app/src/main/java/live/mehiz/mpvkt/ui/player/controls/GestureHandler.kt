@@ -1,6 +1,5 @@
 package live.mehiz.mpvkt.ui.player.controls
 
-import androidx.activity.compose.LocalActivity
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
@@ -62,7 +61,6 @@ fun GestureHandler(
   interactionSource: MutableInteractionSource,
   modifier: Modifier = Modifier
 ) {
-  val activity = LocalActivity.current
   val playerPreferences = koinInject<PlayerPreferences>()
   val audioPreferences = koinInject<AudioPreferences>()
   val panelShown by viewModel.panelShown.collectAsState()
@@ -105,7 +103,7 @@ fun GestureHandler(
         var originalSpeed = MPVLib.getPropertyFloat("speed") ?: 1f
         detectTapGestures(
           onTap = {
-            if (controlsShown) viewModel.hideControls(activity!!) else viewModel.showControls(activity!!)
+            if (controlsShown) viewModel.hideControls() else viewModel.showControls()
           },
           onDoubleTap = {
             if (areControlsLocked || isDoubleTapSeeking) return@detectTapGestures
@@ -261,7 +259,6 @@ fun GestureHandler(
             if (startingY == 0f) startingY = change.position.y
             viewModel.changeBrightnessTo(
               calculateNewVerticalGestureValue(originalBrightness, startingY, change.position.y, brightnessGestureSens),
-              activity!!
             )
             viewModel.displayBrightnessSlider()
           }

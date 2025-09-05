@@ -1,36 +1,34 @@
 package live.mehiz.mpvkt.ui.player
 
-import android.app.Activity
 import android.content.Context
-import android.content.pm.ActivityInfo
 import android.media.AudioManager
 import android.net.Uri
 import android.provider.Settings
 import android.util.DisplayMetrics
 import android.util.Log
 import android.view.inputmethod.InputMethodManager
+import android.widget.Toast
 import androidx.core.net.toUri
-import androidx.core.view.WindowCompat
-import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.CreationExtras
 import `is`.xyz.mpv.MPVLib
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
+import live.mehiz.mpvkt.R
 import live.mehiz.mpvkt.database.MpvKtDatabase
 import live.mehiz.mpvkt.database.entities.CustomButtonEntity
 import live.mehiz.mpvkt.preferences.AudioPreferences
@@ -41,12 +39,6 @@ import live.mehiz.mpvkt.ui.custombuttons.getButtons
 import org.koin.java.KoinJavaComponent.inject
 import kotlin.properties.ReadOnlyProperty
 import kotlin.reflect.KProperty
-
-class PlayerViewModelProviderFactory : ViewModelProvider.Factory {
-  override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
-    return PlayerViewModel() as T
-  }
-}
 
 @Suppress("TooManyFunctions")
 class PlayerViewModel : ViewModel() {
@@ -68,8 +60,8 @@ class PlayerViewModel : ViewModel() {
           // If the button text is not empty, it has been set buy a lua script in which
           // case we don't want to override it
           if (_primaryButtonTitle.value.isEmpty()) setPrimaryCustomButtonTitle(it)
+          eventChannel.send(Event.SetupCustomButtons(buttons))
         }
-        // activity.setupCustomButtons(buttons) TODO
         _customButtons.update { _ -> CustomButtonsUiState.Success(buttons) }
       } catch (e: Exception) {
         Log.e(TAG, e.message ?: "Unable to fetch buttons")
@@ -77,6 +69,9 @@ class PlayerViewModel : ViewModel() {
       }
     }
   }
+
+  private val eventChannel = Channel<Event>()
+  val eventFlow = eventChannel.receiveAsFlow()
 
   private val _customButtons = MutableStateFlow<CustomButtonsUiState>(CustomButtonsUiState.Loading)
   val customButtons = _customButtons.asStateFlow()
@@ -140,7 +135,6 @@ class PlayerViewModel : ViewModel() {
 
   fun startTimer(
     seconds: Int,
-    onTimerEnded: () -> Unit,
   ) {
     timerJob?.cancel()
     _remainingTime.value = seconds
@@ -151,7 +145,7 @@ class PlayerViewModel : ViewModel() {
         delay(1000)
       }
       MPVLib.setPropertyBoolean("pause", true)
-      onTimerEnded()
+      Toast.makeText(context, context.getString(R.string.toast_sleep_timer_ended), Toast.LENGTH_SHORT).show()
     }
   }
 
@@ -196,17 +190,14 @@ class PlayerViewModel : ViewModel() {
   fun pause() = MPVLib.setPropertyBoolean("pause", true)
   fun unpause() = MPVLib.setPropertyBoolean("pause", false)
 
-  private val showStatusBar = playerPreferences.showSystemStatusBar.get()
-  fun showControls(activity: Activity) {
-    val insetsController = WindowCompat.getInsetsController(activity.window, activity.window.decorView)
+  fun showControls() {
     if (sheetShown.value != Sheets.None || panelShown.value != Panels.None) return
-    if (showStatusBar) insetsController.show(WindowInsetsCompat.Type.statusBars())
+    eventChannel.trySend(Event.SetControls(true))
     _controlsShown.update { true }
   }
 
-  fun hideControls(activity: Activity) {
-    val insetsController = WindowCompat.getInsetsController(activity.window, activity.window.decorView)
-    insetsController.hide(WindowInsetsCompat.Type.statusBars())
+  fun hideControls() {
+    eventChannel.trySend(Event.SetControls(false))
     _controlsShown.update { false }
   }
 
@@ -236,19 +227,16 @@ class PlayerViewModel : ViewModel() {
     MPVLib.command("seek", position.toString(), if (precise) "absolute" else "absolute+keyframes")
   }
 
-  fun changeBrightnessBy(change: Float, activity: Activity) {
-    changeBrightnessTo(currentBrightness.value + change, activity)
+  fun changeBrightnessBy(change: Float) {
+    changeBrightnessTo(currentBrightness.value + change)
   }
 
   fun changeBrightnessTo(
     brightness: Float,
-    activity: Activity
   ) {
-    activity.window.attributes = activity.window.attributes.apply {
-      screenBrightness = brightness.coerceIn(0f, 1f).also {
-        currentBrightness.update { _ -> it }
-      }
-    }
+    val coercedBrightness = brightness.coerceIn(0f, 1f)
+    currentBrightness.update { _ -> coercedBrightness }
+    eventChannel.trySend(Event.ChangeBrightness(coercedBrightness))
   }
 
   fun displayBrightnessSlider() {
@@ -293,7 +281,6 @@ class PlayerViewModel : ViewModel() {
 
   fun changeVideoAspect(
     aspect: VideoAspect,
-    activity: Activity,
   ) {
     var ratio = -1.0
     var pan = 1.0
@@ -309,9 +296,10 @@ class PlayerViewModel : ViewModel() {
 
       VideoAspect.Stretch -> {
         val dm = DisplayMetrics()
-        activity.windowManager.defaultDisplay.getRealMetrics(dm)
-        ratio = dm.widthPixels / dm.heightPixels.toDouble()
-        pan = 0.0
+        if (eventChannel.trySend(Event.StretchVideo(dm)).isSuccess) {
+          ratio = dm.widthPixels / dm.heightPixels.toDouble()
+          pan = 0.0
+        }
       }
     }
     MPVLib.setPropertyDouble("panscan", pan)
@@ -320,30 +308,14 @@ class PlayerViewModel : ViewModel() {
     playerUpdate.update { PlayerUpdates.AspectRatio }
   }
 
-  fun cycleScreenRotations(
-    activity: Activity,
-  ) {
-    activity.requestedOrientation = when (activity.requestedOrientation) {
-      ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE,
-      ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE,
-      ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE,
-      -> {
-        playerPreferences.orientation.set(PlayerOrientation.SensorPortrait)
-        ActivityInfo.SCREEN_ORIENTATION_SENSOR_PORTRAIT
-      }
-
-      else -> {
-        playerPreferences.orientation.set(PlayerOrientation.SensorLandscape)
-        ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
-      }
-    }
+  fun cycleScreenRotations() {
+    eventChannel.trySend(Event.CycleRotation)
   }
 
   @Suppress("CyclomaticComplexMethod", "LongMethod")
   fun handleLuaInvocation(
     property: String,
     value: String,
-    activity: Activity
   ) {
     val data = value
       .removePrefix("\"")
@@ -354,13 +326,13 @@ class PlayerViewModel : ViewModel() {
       "show_text" -> playerUpdate.update { PlayerUpdates.ShowText(data) }
       "toggle_ui" -> {
         when (data) {
-          "show" -> showControls(activity)
-          "toggle" -> if (controlsShown.value) hideControls(activity) else showControls(activity)
+          "show" -> showControls()
+          "toggle" -> if (controlsShown.value) hideControls() else showControls()
 
           "hide" -> {
             sheetShown.update { Sheets.None }
             panelShown.update { Panels.None }
-            hideControls(activity)
+            hideControls()
           }
         }
       }
@@ -527,6 +499,14 @@ class PlayerViewModel : ViewModel() {
 
   fun setPrimaryCustomButtonTitle(button: CustomButtonEntity) {
     _primaryButtonTitle.update { _ -> button.title }
+  }
+
+  sealed interface Event {
+    data object CycleRotation : Event
+    data class SetControls(val visible: Boolean) : Event
+    data class StretchVideo(val dm: DisplayMetrics) : Event
+    data class ChangeBrightness(val brightness: Float) : Event
+    data class SetupCustomButtons(val buttons: List<CustomButtonEntity>) : Event
   }
 }
 

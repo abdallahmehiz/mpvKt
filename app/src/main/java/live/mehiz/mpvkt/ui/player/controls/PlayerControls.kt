@@ -1,7 +1,6 @@
 package live.mehiz.mpvkt.ui.player.controls
 
 import android.os.Build
-import android.widget.Toast
 import androidx.activity.compose.LocalActivity
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.FastOutSlowInEasing
@@ -103,7 +102,6 @@ fun PlayerControls(
   onBackPress: () -> Unit,
   modifier: Modifier = Modifier,
 ) {
-  val activity = LocalActivity.current
   val spacing = MaterialTheme.spacing
   val playerPreferences = koinInject<PlayerPreferences>()
   val audioPreferences = koinInject<AudioPreferences>()
@@ -132,18 +130,18 @@ fun PlayerControls(
   val onOpenSheet: (Sheets) -> Unit = {
     viewModel.sheetShown.update { _ -> it }
     if (it == Sheets.None) {
-      viewModel.showControls(activity!!)
+      viewModel.showControls()
     } else {
-      viewModel.hideControls(activity!!)
+      viewModel.hideControls()
       viewModel.panelShown.update { Panels.None }
     }
   }
   val onOpenPanel: (Panels) -> Unit = {
     viewModel.panelShown.update { _ -> it }
     if (it == Panels.None) {
-      viewModel.showControls(activity!!)
+      viewModel.showControls()
     } else {
-      viewModel.hideControls(activity!!)
+      viewModel.hideControls()
       viewModel.sheetShown.update { Sheets.None }
     }
   }
@@ -158,7 +156,7 @@ fun PlayerControls(
   ) {
     if (controlsShown && paused == false && !isSeeking) {
       delay(playerTimeToDisappear.toLong())
-      viewModel.hideControls(activity!!)
+      viewModel.hideControls()
     }
   }
   val transparentOverlay by animateFloatAsState(
@@ -528,7 +526,6 @@ fun PlayerControls(
                   VideoAspect.Stretch -> VideoAspect.Crop
                   VideoAspect.Crop -> VideoAspect.Fit
                 },
-                activity!!,
               )
             },
           )
@@ -561,7 +558,7 @@ fun PlayerControls(
             showChapterIndicator = showChapterIndicator,
             currentChapter = chapters.getOrNull(currentChapter ?: 0),
             onLockControls = viewModel::lockControls,
-            onCycleRotation = { viewModel.cycleScreenRotations(activity!!) },
+            onCycleRotation = viewModel::cycleScreenRotations,
             onPlaybackSpeedChange = {
               MPVLib.setPropertyFloat("speed", it)
               playerPreferences.defaultSpeed.set(it)
@@ -610,11 +607,7 @@ fun PlayerControls(
       },
 
       sleepTimerTimeRemaining = sleepTimerTimeRemaining,
-      onStartSleepTimer = {
-        viewModel.startTimer(it) {
-          Toast.makeText(activity, R.string.toast_sleep_timer_ended, Toast.LENGTH_SHORT).show()
-        }
-      },
+      onStartSleepTimer = viewModel::startTimer,
       buttons = customButtons.getButtons().toImmutableList(),
       onOpenPanel = onOpenPanel,
       onDismissRequest = { onOpenSheet(Sheets.None) },
