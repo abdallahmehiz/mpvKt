@@ -121,6 +121,8 @@ class MediaPlaybackService : MediaBrowserServiceCompat(), MPVLib.EventObserver {
   override fun onCreate() {
     super.onCreate()
 
+    setupMediaSession()
+
     audioManager = getSystemService(AUDIO_SERVICE) as AudioManager
     MPVLib.addObserver(this)
     mapOf(
@@ -133,7 +135,6 @@ class MediaPlaybackService : MediaBrowserServiceCompat(), MPVLib.EventObserver {
       MPVLib.observeProperty(it.key, it.value)
     }
 
-    setupMediaSession()
     setupAudioFocus()
     createNotificationChannel()
   }
