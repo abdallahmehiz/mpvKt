@@ -1,7 +1,6 @@
 package live.mehiz.mpvkt.ui.player
 
 import android.content.Context
-import android.content.pm.ActivityInfo
 import android.media.AudioManager
 import android.net.Uri
 import android.provider.Settings
@@ -10,23 +9,22 @@ import android.util.Log
 import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
 import androidx.core.net.toUri
-import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.CreationExtras
 import `is`.xyz.mpv.MPVLib
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
@@ -42,23 +40,16 @@ import org.koin.java.KoinJavaComponent.inject
 import kotlin.properties.ReadOnlyProperty
 import kotlin.reflect.KProperty
 
-class PlayerViewModelProviderFactory(
-  private val activity: PlayerActivity,
-) : ViewModelProvider.Factory {
-  override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
-    return PlayerViewModel(activity) as T
-  }
-}
-
 @Suppress("TooManyFunctions")
-class PlayerViewModel(
-  private val activity: PlayerActivity,
-) : ViewModel() {
+class PlayerViewModel : ViewModel() {
   private val playerPreferences: PlayerPreferences by inject(PlayerPreferences::class.java)
   private val gesturePreferences: GesturePreferences by inject(GesturePreferences::class.java)
   private val audioPreferences: AudioPreferences by inject(AudioPreferences::class.java)
   private val mpvKtDatabase: MpvKtDatabase by inject(MpvKtDatabase::class.java)
   private val json: Json by inject(Json::class.java)
+  private val context: Context by inject(Context::class.java)
+  private val audioManager = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
+  private val inputMethodManager = context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
 
   init {
     viewModelScope.launch(Dispatchers.IO) {
@@ -69,8 +60,8 @@ class PlayerViewModel(
           // If the button text is not empty, it has been set buy a lua script in which
           // case we don't want to override it
           if (_primaryButtonTitle.value.isEmpty()) setPrimaryCustomButtonTitle(it)
+          eventChannel.send(Event.SetupCustomButtons(buttons))
         }
-        activity.setupCustomButtons(buttons)
         _customButtons.update { _ -> CustomButtonsUiState.Success(buttons) }
       } catch (e: Exception) {
         Log.e(TAG, e.message ?: "Unable to fetch buttons")
@@ -78,6 +69,9 @@ class PlayerViewModel(
       }
     }
   }
+
+  private val eventChannel = Channel<Event>()
+  val eventFlow = eventChannel.receiveAsFlow()
 
   private val _customButtons = MutableStateFlow<CustomButtonsUiState>(CustomButtonsUiState.Loading)
   val customButtons = _customButtons.asStateFlow()
@@ -93,7 +87,7 @@ class PlayerViewModel(
   val duration by MPVLib.propInt["duration"].collectAsState(viewModelScope)
   private val currentMPVVolume by MPVLib.propInt["volume"].collectAsState(viewModelScope)
 
-  val currentVolume = MutableStateFlow(activity.audioManager.getStreamVolume(AudioManager.STREAM_MUSIC))
+  val currentVolume = MutableStateFlow(audioManager.getStreamVolume(AudioManager.STREAM_MUSIC))
   private val volumeBoostCap by MPVLib.propInt["volume-max"].collectAsState(viewModelScope)
 
   val subtitleTracks = MPVLib.propNode["track-list"]
@@ -117,7 +111,7 @@ class PlayerViewModel(
   val isVolumeSliderShown = MutableStateFlow(false)
   val currentBrightness = MutableStateFlow(
     runCatching {
-      Settings.System.getFloat(activity.contentResolver, Settings.System.SCREEN_BRIGHTNESS)
+      Settings.System.getFloat(context.contentResolver, Settings.System.SCREEN_BRIGHTNESS)
         .normalize(0f, 255f, 0f, 1f)
     }.getOrElse { 0f },
   )
@@ -139,7 +133,9 @@ class PlayerViewModel(
   private val _remainingTime = MutableStateFlow(0)
   val remainingTime = _remainingTime.asStateFlow()
 
-  fun startTimer(seconds: Int) {
+  fun startTimer(
+    seconds: Int,
+  ) {
     timerJob?.cancel()
     _remainingTime.value = seconds
     if (seconds < 1) return
@@ -149,7 +145,7 @@ class PlayerViewModel(
         delay(1000)
       }
       MPVLib.setPropertyBoolean("pause", true)
-      Toast.makeText(activity, activity.getString(R.string.toast_sleep_timer_ended), Toast.LENGTH_SHORT).show()
+      Toast.makeText(context, context.getString(R.string.toast_sleep_timer_ended), Toast.LENGTH_SHORT).show()
     }
   }
 
@@ -168,13 +164,13 @@ class PlayerViewModel(
 
   fun addAudio(uri: Uri) {
     val url = uri.toString()
-    val path = if (url.startsWith("content://")) url.toUri().openContentFd(activity) else url
+    val path = if (url.startsWith("content://")) url.toUri().openContentFd(context) else url
     MPVLib.command("audio-add", path ?: return, "cached")
   }
 
   fun addSubtitle(uri: Uri) {
     val url = uri.toString()
-    val path = if (url.startsWith("content://")) url.toUri().openContentFd(activity) else url
+    val path = if (url.startsWith("content://")) url.toUri().openContentFd(context) else url
     MPVLib.command("sub-add", path ?: return, "cached")
   }
 
@@ -194,15 +190,14 @@ class PlayerViewModel(
   fun pause() = MPVLib.setPropertyBoolean("pause", true)
   fun unpause() = MPVLib.setPropertyBoolean("pause", false)
 
-  private val showStatusBar = playerPreferences.showSystemStatusBar.get()
   fun showControls() {
     if (sheetShown.value != Sheets.None || panelShown.value != Panels.None) return
-    if (showStatusBar) activity.windowInsetsController.show(WindowInsetsCompat.Type.statusBars())
+    eventChannel.trySend(Event.SetControls(true))
     _controlsShown.update { true }
   }
 
   fun hideControls() {
-    activity.windowInsetsController.hide(WindowInsetsCompat.Type.statusBars())
+    eventChannel.trySend(Event.SetControls(false))
     _controlsShown.update { false }
   }
 
@@ -239,18 +234,16 @@ class PlayerViewModel(
   fun changeBrightnessTo(
     brightness: Float,
   ) {
-    activity.window.attributes = activity.window.attributes.apply {
-      screenBrightness = brightness.coerceIn(0f, 1f).also {
-        currentBrightness.update { _ -> it }
-      }
-    }
+    val coercedBrightness = brightness.coerceIn(0f, 1f)
+    currentBrightness.update { _ -> coercedBrightness }
+    eventChannel.trySend(Event.ChangeBrightness(coercedBrightness))
   }
 
   fun displayBrightnessSlider() {
     isBrightnessSliderShown.update { true }
   }
 
-  val maxVolume = activity.audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC)
+  val maxVolume = audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC)
   fun changeVolumeBy(change: Int) {
     val mpvVolume = MPVLib.getPropertyInt("volume")
     if ((volumeBoostCap ?: audioPreferences.volumeBoostCap.get()) > 0 && currentVolume.value == maxVolume) {
@@ -266,7 +259,7 @@ class PlayerViewModel(
 
   fun changeVolumeTo(volume: Int) {
     val newVolume = volume.coerceIn(0..maxVolume)
-    activity.audioManager.setStreamVolume(
+    audioManager.setStreamVolume(
       AudioManager.STREAM_MUSIC,
       newVolume,
       0,
@@ -286,7 +279,9 @@ class PlayerViewModel(
     isVolumeSliderShown.update { true }
   }
 
-  fun changeVideoAspect(aspect: VideoAspect) {
+  fun changeVideoAspect(
+    aspect: VideoAspect,
+  ) {
     var ratio = -1.0
     var pan = 1.0
     when (aspect) {
@@ -301,9 +296,10 @@ class PlayerViewModel(
 
       VideoAspect.Stretch -> {
         val dm = DisplayMetrics()
-        activity.windowManager.defaultDisplay.getRealMetrics(dm)
-        ratio = dm.widthPixels / dm.heightPixels.toDouble()
-        pan = 0.0
+        if (eventChannel.trySend(Event.StretchVideo(dm)).isSuccess) {
+          ratio = dm.widthPixels / dm.heightPixels.toDouble()
+          pan = 0.0
+        }
       }
     }
     MPVLib.setPropertyDouble("panscan", pan)
@@ -313,24 +309,14 @@ class PlayerViewModel(
   }
 
   fun cycleScreenRotations() {
-    activity.requestedOrientation = when (activity.requestedOrientation) {
-      ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE,
-      ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE,
-      ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE,
-      -> {
-        playerPreferences.orientation.set(PlayerOrientation.SensorPortrait)
-        ActivityInfo.SCREEN_ORIENTATION_SENSOR_PORTRAIT
-      }
-
-      else -> {
-        playerPreferences.orientation.set(PlayerOrientation.SensorLandscape)
-        ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
-      }
-    }
+    eventChannel.trySend(Event.CycleRotation)
   }
 
   @Suppress("CyclomaticComplexMethod", "LongMethod")
-  fun handleLuaInvocation(property: String, value: String) {
+  fun handleLuaInvocation(
+    property: String,
+    value: String,
+  ) {
     val data = value
       .removePrefix("\"")
       .removeSuffix("\"")
@@ -341,9 +327,7 @@ class PlayerViewModel(
       "toggle_ui" -> {
         when (data) {
           "show" -> showControls()
-          "toggle" -> {
-            if (controlsShown.value) hideControls() else showControls()
-          }
+          "toggle" -> if (controlsShown.value) hideControls() else showControls()
 
           "hide" -> {
             sheetShown.update { Sheets.None }
@@ -410,7 +394,6 @@ class PlayerViewModel(
     MPVLib.setPropertyString(property, "")
   }
 
-  private val inputMethodManager = activity.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
   private fun forceShowSoftwareKeyboard() {
     inputMethodManager.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0)
   }
@@ -516,6 +499,14 @@ class PlayerViewModel(
 
   fun setPrimaryCustomButtonTitle(button: CustomButtonEntity) {
     _primaryButtonTitle.update { _ -> button.title }
+  }
+
+  sealed interface Event {
+    data object CycleRotation : Event
+    data class SetControls(val visible: Boolean) : Event
+    data class StretchVideo(val dm: DisplayMetrics) : Event
+    data class ChangeBrightness(val brightness: Float) : Event
+    data class SetupCustomButtons(val buttons: List<CustomButtonEntity>) : Event
   }
 }
 
