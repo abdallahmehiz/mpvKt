@@ -242,7 +242,12 @@ class PlayerActivity : AppCompatActivity() {
         if (it != -1f) viewModel.changeBrightnessTo(it)
       }
     }
+
+    if (serviceBound) {
+      endBackgroundPlayback()
+    }
   }
+
 
   private fun copyMPVAssets() {
     Utils.copyAssets(this@PlayerActivity)
@@ -423,6 +428,12 @@ class PlayerActivity : AppCompatActivity() {
     val intent = Intent(this, MediaPlaybackService::class.java)
     startService(intent)
     bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE)
+  }
+
+  private fun endBackgroundPlayback() {
+    stopService(Intent(this, MediaPlaybackService::class.java))
+    mediaPlaybackService = null
+    serviceBound = false
   }
 
   private fun setIntentExtras(extras: Bundle?) {
