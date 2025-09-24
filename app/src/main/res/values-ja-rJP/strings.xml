@@ -27,7 +27,7 @@
     <string name="pref_appearance_material_you_summary">ダイナミックカラーを有効にします</string>
     <string name="pref_appearance_material_you_summary_disabled">Android 12 以上でのみ使用できます。</string>
 
-    <string name="pref_player">プレイヤー</string>
+    <string name="pref_player">プレーヤー</string>
     <string name="pref_player_summary">向き、ジェスチャー、コントロール</string>
     <string name="pref_player_orientation">画面の向き</string>
     <string name="pref_player_orientation_free">自由</string>
@@ -89,14 +89,14 @@
     <string name="pref_gesture_media_next">次の項目</string>
     <string name="pref_gesture_media_custom_info">メディアコントロールを「カスタム」に設定すると、input.conf で割り当てることができます。キーコードは、前の項目が 0x10004、再生/一時停止が 0x10005、次の項目が 0x10006 です。</string>
 
-    <string name="pref_decoder">デコーダー</string>
+    <string name="pref_decoder">デコーダ</string>
     <string name="pref_decoder_summary">ハードウェアデコード、ピクセルフォーマット、デバンディング</string>
     <string name="pref_decoder_try_hw_dec_title">ハードウェアデコードを試す</string>
     <string name="pref_decoder_gpu_next_title">GPU-NEXT を使用する</string>
     <string name="pref_decoder_gpu_next_summary">新しいレンダリングバックエンド</string>
     <string name="pref_decoder_debanding_title">デバンディング</string>
     <string name="pref_decoder_yuv420p_title">YUV420P ピクセルフォーマットを使用する</string>
-    <string name="pref_decoder_yuv420p_summary">一部のビデオコーデックで黒い画面を修正し、品質を犠牲にしてパフォーマンスを向上させることもできます</string>
+    <string name="pref_decoder_yuv420p_summary">一部のビデオコーデックで発生する黒画面を修正できる可能性があり、品質を犠牲にしてパフォーマンスを向上させることもできます</string>
 
     <string name="pref_subtitles">字幕</string>
     <string name="pref_subtitles_summary">優先言語、フォント</string>
@@ -110,13 +110,13 @@
     <string name="pref_audio_summary">優先言語、オーディオチャンネル、ピッチ補正</string>
     <string name="pref_audio_pitch_correction_title">オーディオピッチ補正を有効にする</string>
     <string name="pref_audio_pitch_correction_summary">高速再生時に高音になり、低速再生時に低音になることを防ぎます</string>
-    <string name="pref_audio_channels">オーディオのチャンネル</string>
+    <string name="pref_audio_channels">オーディオチャンネル</string>
     <string name="pref_audio_channels_auto">自動</string>
     <string name="pref_audio_channels_auto_safe">自動セーフ</string>
     <string name="pref_audio_channels_mono">モノラル</string>
     <string name="pref_audio_channels_stereo">ステレオ</string>
     <string name="pref_audio_channels_stereo_reversed">リバースステレオ</string>
-    <string name="pref_audio_preferred_language">複数の音声ストリームを含む動画でデフォルトで選択される音声言語。2 文字または 3 文字の言語コードを使用できます。複数の値はカンマで区切ることができます。</string>
+    <string name="pref_audio_preferred_language">複数のオーディオストリームを含む動画でデフォルトで選択されるオーディオ言語。2 文字または 3 文字の言語コードを使用できます。複数の値はカンマで区切ることができます。</string>
     <string name="pref_audio_volume_boost_cap">音量ブースト制限</string>
 
     <string name="pref_advanced">高度な設定</string>
@@ -201,7 +201,7 @@
     <string name="player_sheets_sub_delay_subtitle_voice_heard">声が聞こえた</string>
     <string name="player_sheets_sub_delay_subtitle_text_seen">テキストが見えた</string>
     <string name="player_sheets_delay_set_as_default">既定値として設定する</string>
-    <string name="player_sheets_audio_delay_card_title">音声の遅延</string>
+    <string name="player_sheets_audio_delay_card_title">オーディオ遅延</string>
     <string name="player_sheets_sub_delay_audio_sound_heard">音が聞こえた</string>
     <string name="player_sheets_sub_delay_sound_sound_spotted">音を確認した</string>
 
@@ -268,8 +268,8 @@
     <string name="github_repo_url" translatable="false">https://github.com/abdallahmehiz/mpvKt</string>
     <string name="privacy_policy_url" translatable="false">https://abdallahmehiz.github.io/mpvKt/privacy_policy.html</string>
     <string name="swap_the_volume_and_brightness_slider">音量と明るさのスライダーを入れ替える</string>
-    <string name="pref_player_display_reduce_player_animation">プレイヤーのアニメーションを短縮する</string>
-    <string name="pref_player_display_hide_player_control_time">プレイヤーコントロールを非表示にするまでの時間</string>
+    <string name="pref_player_display_reduce_player_animation">プレーヤーのアニメーションを短縮する</string>
+    <string name="pref_player_display_hide_player_control_time">プレーヤーコントロールを非表示にするまでの時間</string>
     <string name="show_splash_ovals_on_double_tap_to_seek">ダブルタップシーク時にリップルを表示する</string>
     <string name="show_time_on_double_tap_to_seek">シーク時間を表示する</string>
     <string name="show_icon_on_double_tap_to_seek">シークアイコンを表示する</string>
