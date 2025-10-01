@@ -1,5 +1,6 @@
 package live.mehiz.mpvkt.presentation.crash
 
+import android.app.Activity
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
@@ -7,9 +8,11 @@ import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.background
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -37,11 +40,14 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.Dp
@@ -56,8 +62,12 @@ import kotlinx.coroutines.withContext
 import live.mehiz.mpvkt.BuildConfig
 import live.mehiz.mpvkt.MainActivity
 import live.mehiz.mpvkt.R
+import live.mehiz.mpvkt.preferences.AppearancePreferences
+import live.mehiz.mpvkt.preferences.preference.collectAsState
+import live.mehiz.mpvkt.ui.theme.DarkMode
 import live.mehiz.mpvkt.ui.theme.MpvKtTheme
 import live.mehiz.mpvkt.ui.theme.spacing
+import org.koin.android.ext.android.inject
 import java.io.BufferedReader
 import java.io.File
 import java.io.InputStreamReader
@@ -66,69 +76,94 @@ class CrashActivity : ComponentActivity() {
 
   private val clipboardManager by lazy { getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager }
   private lateinit var logcat: String
+  private val appearancePreferences: AppearancePreferences by inject()
 
   override fun onCreate(savedInstanceState: Bundle?) {
-    enableEdgeToEdge()
     super.onCreate(savedInstanceState)
     lifecycle.coroutineScope.launch {
       logcat = collectLogcat()
     }
     setContent {
+      val dark by appearancePreferences.darkMode.collectAsState()
+      val isSystemInDarkTheme = isSystemInDarkTheme()
+      enableEdgeToEdge(
+        SystemBarStyle.auto(
+          lightScrim = Color.White.toArgb(),
+          darkScrim = Color.White.toArgb(),
+        ) { dark == DarkMode.Dark || (dark == DarkMode.System && isSystemInDarkTheme) },
+      )
       MpvKtTheme {
         CrashScreen(intent.getStringExtra("exception") ?: "")
       }
     }
   }
 
-  private fun collectLogcat(): String {
-    val process = Runtime.getRuntime()
-    val reader = BufferedReader(InputStreamReader(process.exec("logcat -d").inputStream))
-    val logcat = StringBuilder()
-    // reader.lines() looks much nicer so why not use it on devices that support it?
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-      reader.lines().forEach(logcat::appendLine)
-    } else {
-      reader.readLines().forEach(logcat::appendLine)
+  companion object {
+    suspend fun shareLogs(
+      deviceInfo: String,
+      exceptionString: String? = null,
+      logcat: String,
+      activity: Activity,
+    ) {
+      withContext(NonCancellable) {
+        val file = File(activity.cacheDir, "mpvKt_logs.txt")
+        if (file.exists()) file.delete()
+        file.createNewFile()
+        file.appendText(concatLogs(deviceInfo, exceptionString, logcat))
+        val uri = FileProvider.getUriForFile(activity, BuildConfig.APPLICATION_ID + ".provider", file)
+        val intent = Intent(Intent.ACTION_SEND)
+        intent.putExtra(Intent.EXTRA_STREAM, uri)
+        intent.clipData = ClipData.newRawUri(null, uri)
+        intent.type = "text/plain"
+        intent.flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
+        activity.startActivity(
+          Intent.createChooser(intent, activity.getString(R.string.crash_screen_share)),
+        )
+      }
     }
-    // clear logcat so it doesn't pollute subsequent crashes
-    process.exec("logcat -c")
-    return logcat.toString()
-  }
 
-  private fun concatLogs(
-    deviceInfo: String,
-    crashLogs: String,
-    logcat: String,
-  ): String {
-    return """
-      $deviceInfo
-      
-      Exception:
-      $crashLogs
-      
-      Logcat:
-      $logcat
-    """.trimIndent()
-  }
+    fun concatLogs(
+      deviceInfo: String,
+      crashLogs: String? = null,
+      logcat: String,
+    ): String {
+      return StringBuilder().apply {
+        appendLine(deviceInfo)
+        appendLine()
+        if (!crashLogs.isNullOrBlank()) {
+          appendLine("Exception:")
+          appendLine(crashLogs)
+          appendLine()
+        }
+        appendLine("Logcat:")
+        appendLine(logcat)
+      }.toString()
+    }
 
-  private suspend fun dumpLogs(
-    exceptionString: String,
-    logcat: String,
-  ) {
-    withContext(NonCancellable) {
-      val file = File(applicationContext.cacheDir, "mpvKt_logs.txt")
-      if (file.exists()) file.delete()
-      file.createNewFile()
-      file.appendText(concatLogs(collectDeviceInfo(), exceptionString, logcat))
-      val uri = FileProvider.getUriForFile(applicationContext, BuildConfig.APPLICATION_ID + ".provider", file)
-      val intent = Intent(Intent.ACTION_SEND)
-      intent.putExtra(Intent.EXTRA_STREAM, uri)
-      intent.clipData = ClipData.newRawUri(null, uri)
-      intent.type = "text/plain"
-      intent.flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
-      this@CrashActivity.startActivity(
-        Intent.createChooser(intent, applicationContext.getString(R.string.crash_screen_share)),
-      )
+    fun collectLogcat(): String {
+      val process = Runtime.getRuntime()
+      val reader = BufferedReader(InputStreamReader(process.exec("logcat -d").inputStream))
+      val logcat = StringBuilder()
+      // reader.lines() looks much nicer so why not use it on devices that support it?
+      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+        reader.lines().forEach(logcat::appendLine)
+      } else {
+        reader.readLines().forEach(logcat::appendLine)
+      }
+      return logcat.toString()
+    }
+
+    fun collectDeviceInfo(): String {
+      return """
+      App version: ${BuildConfig.VERSION_NAME} (${BuildConfig.GIT_SHA})
+      Android version: ${Build.VERSION.RELEASE} (${Build.VERSION.SDK_INT})
+      Device brand: ${Build.BRAND}
+      Device manufacturer: ${Build.MANUFACTURER}
+      Device model: ${Build.MODEL} (${Build.DEVICE})
+      MPV version: ${Utils.VERSIONS.mpv}
+      ffmpeg version: ${Utils.VERSIONS.ffmpeg}
+      libplacebo version: ${Utils.VERSIONS.libPlacebo}
+      """.trimIndent()
     }
   }
 
@@ -162,7 +197,7 @@ class CrashActivity : ComponentActivity() {
             Button(
               onClick = {
                 scope.launch(Dispatchers.IO) {
-                  dumpLogs(exceptionString, logcat)
+                  shareLogs(collectDeviceInfo(), exceptionString, logcat, this@CrashActivity)
                 }
               },
               modifier = Modifier.weight(1f),
@@ -251,17 +286,4 @@ class CrashActivity : ComponentActivity() {
       }
     }
   }
-}
-
-fun collectDeviceInfo(): String {
-  return """
-    App version: ${BuildConfig.VERSION_NAME} (${BuildConfig.GIT_SHA})
-    Android version: ${Build.VERSION.RELEASE} (${Build.VERSION.SDK_INT})
-    Device brand: ${Build.BRAND}
-    Device manufacturer: ${Build.MANUFACTURER}
-    Device model: ${Build.MODEL} (${Build.DEVICE})
-    MPV version: ${Utils.VERSIONS.mpv}
-    ffmpeg version: ${Utils.VERSIONS.ffmpeg}
-    libplacebo version: ${Utils.VERSIONS.libPlacebo}
-  """.trimIndent()
 }

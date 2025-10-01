@@ -20,7 +20,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import live.mehiz.mpvkt.R
 import live.mehiz.mpvkt.ui.theme.spacing
 
@@ -50,7 +49,8 @@ fun TextPlayerUpdate(
 }
 
 @Composable
-fun DoubleSpeedPlayerUpdate(
+fun MultipleSpeedPlayerUpdate(
+  currentSpeed: Float,
   modifier: Modifier = Modifier
 ) {
   PlayerUpdate(modifier) {
@@ -58,9 +58,9 @@ fun DoubleSpeedPlayerUpdate(
       verticalAlignment = Alignment.Bottom,
     ) {
       Text(
-        stringResource(R.string.player_speed, 2f),
+        stringResource(R.string.player_speed, currentSpeed),
         fontWeight = FontWeight.Bold,
-        fontSize = 20.sp,
+        style = MaterialTheme.typography.bodyLarge,
       )
       Icon(
         Icons.Filled.DoubleArrow,
@@ -72,6 +72,6 @@ fun DoubleSpeedPlayerUpdate(
 
 @Composable
 @Preview
-private fun PreviewDoubleSpeedPlayerUpdate() {
-  DoubleSpeedPlayerUpdate()
+private fun PreviewMultipleSpeedPlayerUpdate() {
+  MultipleSpeedPlayerUpdate(currentSpeed = 2f)
 }

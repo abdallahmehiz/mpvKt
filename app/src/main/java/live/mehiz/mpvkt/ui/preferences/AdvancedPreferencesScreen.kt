@@ -4,6 +4,7 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Environment
 import android.widget.Toast
+import androidx.activity.compose.LocalActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Column
@@ -30,22 +31,26 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.util.fastJoinToString
+import androidx.core.net.toUri
 import androidx.documentfile.provider.DocumentFile
-import cafe.adriel.voyager.navigator.LocalNavigator
-import cafe.adriel.voyager.navigator.currentOrThrow
 import com.github.k1rakishou.fsaf.FileManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.Serializable
 import live.mehiz.mpvkt.R
 import live.mehiz.mpvkt.database.MpvKtDatabase
 import live.mehiz.mpvkt.preferences.AdvancedPreferences
 import live.mehiz.mpvkt.preferences.preference.collectAsState
 import live.mehiz.mpvkt.presentation.Screen
 import live.mehiz.mpvkt.presentation.components.ConfirmDialog
+import live.mehiz.mpvkt.presentation.crash.CrashActivity
+import live.mehiz.mpvkt.ui.utils.LocalBackStack
 import me.zhanghai.compose.preference.Preference
 import me.zhanghai.compose.preference.ProvidePreferenceLocals
 import me.zhanghai.compose.preference.SwitchPreference
@@ -57,15 +62,16 @@ import kotlin.io.path.deleteIfExists
 import kotlin.io.path.outputStream
 import kotlin.io.path.readLines
 
-object AdvancedPreferencesScreen : Screen() {
+@Serializable
+object AdvancedPreferencesScreen : Screen {
   @OptIn(ExperimentalMaterial3Api::class)
   @Composable
   override fun Content() {
     val context = LocalContext.current
-    val navigator = LocalNavigator.currentOrThrow
+    val backStack = LocalBackStack.current
     val preferences = koinInject<AdvancedPreferences>()
     val fileManager = koinInject<FileManager>()
-
+    val scope = rememberCoroutineScope()
     Scaffold(
       topBar = {
         TopAppBar(
@@ -73,7 +79,7 @@ object AdvancedPreferencesScreen : Screen() {
             Text(stringResource(R.string.pref_advanced))
           },
           navigationIcon = {
-            IconButton(onClick = { navigator.pop() }) {
+            IconButton(onClick = backStack::removeLastOrNull) {
               Icon(Icons.AutoMirrored.Default.ArrowBack, null)
             }
           },
@@ -117,7 +123,7 @@ object AdvancedPreferencesScreen : Screen() {
               runCatching {
                 val uri = DocumentFile.fromTreeUri(
                   context,
-                  Uri.parse(mpvConfStorageLocation),
+                  mpvConfStorageLocation.toUri(),
                 )!!.findFile("mpv.conf")!!.uri
                 context.contentResolver.openInputStream(uri)?.copyTo(tempFile.outputStream())
                 preferences.mpvConf.set(tempFile.readLines().fastJoinToString("\n"))
@@ -141,7 +147,7 @@ object AdvancedPreferencesScreen : Screen() {
               preferences.mpvConf.set(it)
               File(context.filesDir.path, "mpv.conf").writeText(it)
               if (mpvConfStorageLocation.isNotBlank()) {
-                val tree = DocumentFile.fromTreeUri(context, Uri.parse(mpvConfStorageLocation))!!
+                val tree = DocumentFile.fromTreeUri(context, mpvConfStorageLocation.toUri())!!
                 val uri = if (tree.findFile("mpv.conf") == null) {
                   val conf = tree.createFile("text/plain", "mpv.conf")!!
                   conf.renameTo("mpv.conf")
@@ -166,7 +172,7 @@ object AdvancedPreferencesScreen : Screen() {
               runCatching {
                 val uri = DocumentFile.fromTreeUri(
                   context,
-                  Uri.parse(mpvConfStorageLocation),
+                  mpvConfStorageLocation.toUri(),
                 )!!.findFile("input.conf")!!.uri
                 context.contentResolver.openInputStream(uri)?.copyTo(tempFile.outputStream())
                 preferences.inputConf.set(tempFile.readLines().fastJoinToString("\n"))
@@ -190,7 +196,7 @@ object AdvancedPreferencesScreen : Screen() {
               preferences.inputConf.set(it)
               File(context.filesDir.path, "input.conf").writeText(it)
               if (mpvConfStorageLocation.isNotBlank()) {
-                val tree = DocumentFile.fromTreeUri(context, Uri.parse(mpvConfStorageLocation))!!
+                val tree = DocumentFile.fromTreeUri(context, mpvConfStorageLocation.toUri())!!
                 val uri = if (tree.findFile("input.conf") == null) {
                   val conf = tree.createFile("text/plain", "input.conf")!!
                   conf.renameTo("input.conf")
@@ -207,6 +213,21 @@ object AdvancedPreferencesScreen : Screen() {
             },
             summary = { if (inputConf.isNotBlank()) Text(inputConf.lines()[0]) },
           )
+          val activity = LocalActivity.current!!
+          val clipboard = LocalClipboardManager.current
+          Preference(
+            title = { Text(stringResource(R.string.pref_advanced_dump_logs_title)) },
+            summary = { Text(stringResource(R.string.pref_advanced_dump_logs_summary)) },
+            onClick = {
+              scope.launch(Dispatchers.IO) {
+                val deviceInfo = CrashActivity.collectDeviceInfo()
+                val logcat = CrashActivity.collectLogcat()
+
+                clipboard.setText(AnnotatedString(CrashActivity.concatLogs(deviceInfo, null, logcat)))
+                CrashActivity.shareLogs(deviceInfo, null, logcat, activity)
+              }
+            },
+          )
           val verboseLogging by preferences.verboseLogging.collectAsState()
           SwitchPreference(
             value = verboseLogging,
@@ -216,7 +237,6 @@ object AdvancedPreferencesScreen : Screen() {
           )
           var isConfirmDialogShown by remember { mutableStateOf(false) }
           val mpvKtDatabase = koinInject<MpvKtDatabase>()
-          val scope = rememberCoroutineScope()
           Preference(
             title = { Text(stringResource(R.string.pref_advanced_clear_playback_history)) },
             onClick = { isConfirmDialogShown = true },

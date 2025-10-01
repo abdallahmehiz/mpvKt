@@ -24,7 +24,7 @@
     <string name="pref_appearance_darkmode_light">Light</string>
     <string name="pref_appearance_darkmode_dark">Dark</string>
     <string name="pref_appearance_material_you_title">Material You</string>
-    <string name="pref_appearance_material_you_summary">Enable Material You dynamic colors</string>
+    <string name="pref_appearance_material_you_summary">Enable dynamic colors</string>
     <string name="pref_appearance_material_you_summary_disabled">Only available for Android 12 and newer.</string>
 
     <string name="pref_player">Player</string>
@@ -56,6 +56,7 @@
     <string name="pref_player_gestures_brightness">Brightness gestures</string>
     <string name="pref_player_gestures_volume">Volume gestures</string>
     <string name="pref_player_gestures_hold_for_double_speed">Hold for 2x speed</string>
+    <string name="pref_player_gestures_hold_for_multiple_speed">Hold for multi - x speed</string>
 
     <string name="pref_player_controls">Controls</string>
     <string name="pref_player_controls_allow_gestures_in_panels">Allow gestures in panels</string>
@@ -67,7 +68,7 @@
     <string name="pref_player_display_show_status_bar">Show system status bar with controls</string>
     
     <string name="pref_player_display">Display</string>
-    <string name="pref_player_display_panel_transparency">Panel transparency</string>
+    <string name="pref_player_display_panel_opacity">Panel opacity</string>
     <string name="pref_player_display_panel_transparency_summary">%d%%</string>
 
     <string name="pref_gesture">Gestures</string>
@@ -102,6 +103,8 @@
     <string name="pref_preferred_languages">Preferred languages</string>
     <string name="pref_subtitles_fonts_dir">Fonts directory</string>
     <string name="pref_subtitles_preferred_language">Subtitle language(s) to be selected by default on a video with multiple subtitles, Two- or three-letter languages codes work. Multiple values can be delimited by comma.</string>
+    <string name="pref_subtitles_autoload_title">Automatically load subtitles</string>
+    <string name="pref_subtitles_autoload_summary">Automatically load external subtitles with the same name. When there are multiple files, the first one is enabled by default. (Only valid when using the file picker)</string>
 
     <string name="pref_audio">Audio</string>
     <string name="pref_audio_summary">Preferred languages, audio channels, pitch correction</string>
@@ -121,6 +124,8 @@
     <string name="pref_advanced_mpv_conf_storage_location">Pick configuration storage location</string>
     <string name="pref_advanced_mpv_conf">Edit mpv.conf</string>
     <string name="pref_advanced_input_conf">Edit input.conf</string>
+    <string name="pref_advanced_dump_logs_title">Dump logs</string>
+    <string name="pref_advanced_dump_logs_summary">Dumps and copies the logs to be shared with the developers</string>
     <string name="pref_advanced_verbose_logging_title">Verbose logging</string>
     <string name="pref_advanced_verbose_logging_summary">Helps in debugging but may hinder performance</string>
     <string name="pref_advanced_clear_playback_history">Clear playback history</string>
@@ -138,10 +143,13 @@
     <string name="pref_custom_button_action_add_title_text">Title</string>
     <string name="pref_custom_button_action_add_already_exists">Button already exists!</string>
     <string name="pref_custom_button_action_add_required">*required</string>
+    <string name="pref_custom_button_action_add_optional">(optional)</string>
     <string name="pref_custom_button_action_add_content_text">Lua code</string>
+    <string name="pref_custom_button_action_add_long_press_text">Lua code (on long press)</string>
     <string name="pref_custom_button_add_button">Add custom button</string>
     <string name="pref_custom_button_empty">You have no custom buttons. Tap the plus button to add custom buttons.</string>
     <string name="pref_custom_button_edit_button">Edit button</string>
+    <string name="pref_custom_button_edit_button_id">(ID: %d)</string>
     <string name="pref_custom_button_delete_button">Delete button</string>
     <string name="pref_custom_button_delete_confirmation">Do you wish to delete the button \"%s\"?</string>
 
@@ -158,6 +166,8 @@
     <string name="player_sheets_track_title_w_lang" translatable="false">#%d: %s (%s)</string>
     <string name="player_sheets_track_title_wo_lang" translatable="false">#%d: %s</string>
     <string name="player_sheets_track_lang_wo_title" translatable="false">#%d: %s</string>
+    <string name="player_sheets_chapter_title_substitute_audio">Audio #%d</string>
+    <string name="player_sheets_chapter_title_substitute_subtitle">Subtitle #%d</string>
     <string name="player_sheets_subtitles_footer_secondary_sid_no_styles">Secondary subtitles will have no ASS/SSA Styling.</string>
     <string name="player_sheets_subtitles_settings_title">Subtitles settings</string>
     <string name="player_sheets_subtitles_color_text">Text</string>
@@ -195,6 +205,15 @@
     <string name="player_sheets_sub_delay_audio_sound_heard">Sound heard</string>
     <string name="player_sheets_sub_delay_sound_sound_spotted">Sound spotted</string>
 
+    <string name="player_sheets_video_settings_title">Video settings</string>
+    <string name="player_sheets_deband_title">Deband</string>
+    <string name="player_sheets_deband_none">None</string>
+    <string name="player_sheets_deband_cpu">CPU</string>
+    <string name="player_sheets_deband_gpu">GPU</string>
+    <string name="player_sheets_deband_iterations">Iterations</string>
+    <string name="player_sheets_deband_threshold">Threshold</string>
+    <string name="player_sheets_deband_range">Range</string>
+    <string name="player_sheets_deband_grain">Grain</string>
     <string name="player_sheets_filters_title">Filters</string>
     <string name="player_sheets_filters_brightness">Brightness</string>
     <string name="player_sheets_filters_contrast">Contrast</string>
@@ -231,6 +250,8 @@
 
     <string name="timer_picker_enter_timer">Enter time</string>
     <string name="timer_picker_pick_time">Pick time</string>
+    <string name="timer_title">Sleep timer</string>
+    <string name="timer_remaining">%s remaining</string>
 
     <string name="toast_sleep_timer_ended">Sleep timer ended</string>
 
@@ -249,9 +270,28 @@
     <string name="swap_the_volume_and_brightness_slider">Swap volume and brightness slider</string>
     <string name="pref_player_display_reduce_player_animation">Reduce player animation</string>
     <string name="pref_player_display_hide_player_control_time">Hide player control time</string>
+    <string name="show_splash_ovals_on_double_tap_to_seek">Show ripple when double tap seeking</string>
+    <string name="show_time_on_double_tap_to_seek">Show seek time</string>
+    <string name="show_icon_on_double_tap_to_seek">Show seek icon</string>
+
+    <string name="pref_enable_background_playback">Enable background playback</string>
+    <string name="pref_enable_background_playback_summary">Continue playback when the app is in background</string>
+    <string name="notification_channel_name">Playback Controls</string>
+    <string name="notification_channel_description">Controls for the currently playing media</string>
+    <string name="notification_playing">Now playing</string>
+    <string name="notification_pause">Pause</string>
+    <string name="notification_play">Play</string>
+    <string name="notification_stop">Stop</string>
+    <string name="notification_forward">Forward</string>
+    <string name="notification_rewind">Rewind</string>
 
     <plurals name="plural_items">
         <item quantity="one">%1$d item</item>
         <item quantity="other">%1$d items</item>
+    </plurals>
+
+    <plurals name="seconds">
+        <item quantity="one">%1$d second</item>
+        <item quantity="other">%1$d seconds</item>
     </plurals>
 </resources>

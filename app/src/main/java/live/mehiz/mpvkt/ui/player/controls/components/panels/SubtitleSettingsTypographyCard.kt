@@ -1,7 +1,6 @@
 package live.mehiz.mpvkt.ui.player.controls.components.panels
 
 import android.annotation.SuppressLint
-import android.net.Uri
 import androidx.annotation.StringRes
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
@@ -29,6 +28,8 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -40,6 +41,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.dp
+import androidx.core.net.toUri
 import com.github.k1rakishou.fsaf.FileManager
 import com.yubyf.truetypeparser.TTFFile
 import `is`.xyz.mpv.MPVLib
@@ -86,7 +88,7 @@ fun SubtitleSettingsTypographyCard(
     withContext(Dispatchers.IO) {
       fonts.addAll(
         fileManager.listFiles(
-          fileManager.fromUri(Uri.parse(preferences.fontsFolder.get())) ?: return@withContext,
+          fileManager.fromUri(preferences.fontsFolder.get().toUri()) ?: return@withContext,
         ).filter {
           fileManager.isFile(it) && fileManager.getName(it).lowercase().matches(".*\\.[ot]tf$".toRegex())
         }.mapNotNull {
@@ -112,34 +114,20 @@ fun SubtitleSettingsTypographyCard(
     colors = panelCardsColors(),
   ) {
     Column {
-      var isBold by remember { mutableStateOf(MPVLib.getPropertyBoolean("sub-bold")) }
-      var isItalic by remember { mutableStateOf(MPVLib.getPropertyBoolean("sub-italic")) }
-      var justify by remember {
-        mutableStateOf(
-          SubtitleJustification.entries.first {
-            it.value == MPVLib.getPropertyString("sub-justify")
-          },
-        )
+      val isBold by MPVLib.propBoolean["sub-bold"].collectAsState()
+      val isItalic by MPVLib.propBoolean["sub-italic"].collectAsState()
+      val mpvJustify by MPVLib.propString["sub-justify"].collectAsState()
+      val justify by remember {
+        derivedStateOf { SubtitleJustification.entries.first { it.value == mpvJustify } }
       }
-      var font by remember { mutableStateOf(MPVLib.getPropertyString("sub-font")) }
-      var fontSize by remember {
-        mutableStateOf(MPVLib.getPropertyInt("sub-font-size"))
+      val font by MPVLib.propString["sub-font"].collectAsState()
+      val fontSize by MPVLib.propInt["sub-font-size"].collectAsState()
+      val mpvBorderStyle by MPVLib.propString["sub-border-style"].collectAsState()
+      val borderStyle by remember {
+        derivedStateOf { SubtitlesBorderStyle.entries.first { it.value == mpvBorderStyle } }
       }
-      var borderStyle by remember {
-        mutableStateOf(
-          SubtitlesBorderStyle.entries.first { it.value == MPVLib.getPropertyString("sub-border-style") }
-        )
-      }
-      var borderSize by remember {
-        mutableStateOf(
-          MPVLib.getPropertyInt("sub-border-size")
-        )
-      }
-      var shadowOffset by remember {
-        mutableStateOf(
-          MPVLib.getPropertyInt("sub-shadow-offset")
-        )
-      }
+      val borderSize by MPVLib.propInt["sub-outline-size"].collectAsState()
+      val shadowOffset by MPVLib.propInt["sub-shadow-offset"].collectAsState()
       Row(
         Modifier
           .fillMaxWidth()
@@ -148,9 +136,8 @@ fun SubtitleSettingsTypographyCard(
         verticalAlignment = Alignment.CenterVertically,
       ) {
         IconToggleButton(
-          checked = isBold,
+          checked = isBold == true,
           onCheckedChange = {
-            isBold = it
             preferences.bold.set(it)
             MPVLib.setPropertyBoolean("sub-bold", it)
           },
@@ -162,9 +149,8 @@ fun SubtitleSettingsTypographyCard(
           )
         }
         IconToggleButton(
-          checked = isItalic,
+          checked = isItalic == true,
           onCheckedChange = {
-            isItalic = it
             preferences.italic.set(it)
             MPVLib.setPropertyBoolean("sub-italic", it)
           },
@@ -179,7 +165,6 @@ fun SubtitleSettingsTypographyCard(
           IconToggleButton(
             checked = justify == justification,
             onCheckedChange = {
-              justify = justification
               MPVLib.setPropertyBoolean("sub-ass-justify", it)
               if (it) {
                 preferences.justification.set(justification)
@@ -194,20 +179,12 @@ fun SubtitleSettingsTypographyCard(
           }
         }
         Spacer(Modifier.weight(1f))
-        TextButton(onClick = {
-          resetTypography(preferences)
-          isBold = MPVLib.getPropertyBoolean("sub-bold")
-          isItalic = MPVLib.getPropertyBoolean("sub-italic")
-          justify = SubtitleJustification.entries.first { it.value == MPVLib.getPropertyString("sub-justify") }
-          font = MPVLib.getPropertyString("sub-font")
-          fontSize = MPVLib.getPropertyInt("sub-font-size")
-          borderStyle = SubtitlesBorderStyle.entries.first { it.value == MPVLib.getPropertyString("sub-border-style") }
-          borderSize = MPVLib.getPropertyInt("sub-border-size")
-          shadowOffset = MPVLib.getPropertyInt("sub-shadow-offset")
-        }) {
+        TextButton(
+          onClick = { resetTypography(preferences) },
+        ) {
           Row(
             horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.extraSmall),
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
           ) {
             Icon(Icons.Default.FormatClear, null)
             Text(stringResource(R.string.generic_reset))
@@ -225,11 +202,10 @@ fun SubtitleSettingsTypographyCard(
           modifier = Modifier.size(32.dp),
         )
         ExposedTextDropDownMenu(
-          selectedValue = font,
+          selectedValue = font!!,
           options = fonts.toImmutableList(),
           label = stringResource(R.string.player_sheets_sub_typography_font),
           onValueChangedEvent = {
-            font = it
             preferences.font.set(it)
             MPVLib.setPropertyString("sub-font", it)
           },
@@ -240,10 +216,9 @@ fun SubtitleSettingsTypographyCard(
         label = stringResource(R.string.player_sheets_sub_typography_font_size),
         max = 100,
         min = 1,
-        value = fontSize,
+        value = fontSize ?: preferences.fontSize.get(),
         valueText = fontSize.toString(),
         onChange = {
-          fontSize = it
           preferences.fontSize.set(it)
           MPVLib.setPropertyInt("sub-font-size", it)
         },
@@ -256,7 +231,6 @@ fun SubtitleSettingsTypographyCard(
         ListPreference(
           borderStyle,
           onValueChange = {
-            borderStyle = it
             preferences.borderStyle.set(it)
             MPVLib.setPropertyString("sub-border-style", it.value)
           },
@@ -270,22 +244,20 @@ fun SubtitleSettingsTypographyCard(
       }
       SliderItem(
         stringResource(R.string.player_sheets_sub_typography_border_size),
-        value = borderSize,
+        value = borderSize!!,
         valueText = borderSize.toString(),
         onChange = {
-          borderSize = it
           preferences.borderSize.set(it)
-          MPVLib.setPropertyInt("sub-border-size", it)
+          MPVLib.setPropertyInt("sub-outline-size", it)
         },
         max = 100,
         icon = { Icon(Icons.Default.BorderColor, null) },
       )
       SliderItem(
         stringResource(R.string.player_sheets_subtitles_shadow_offset),
-        value = shadowOffset,
+        value = shadowOffset!!,
         valueText = shadowOffset.toString(),
         onChange = {
-          shadowOffset = it
           preferences.shadowOffset.set(it)
           MPVLib.setPropertyInt("sub-shadow-offset", it)
         },

@@ -1,5 +1,6 @@
 package live.mehiz.mpvkt.ui.player.controls.components.sheets
 
+import android.text.format.DateUtils
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
@@ -20,6 +21,8 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Headset
+import androidx.compose.material.icons.filled.HeadsetOff
 import androidx.compose.material.icons.filled.KeyboardAlt
 import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material.icons.outlined.Schedule
@@ -37,7 +40,6 @@ import androidx.compose.material3.TimeInput
 import androidx.compose.material3.TimePicker
 import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -51,6 +53,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import `is`.xyz.mpv.MPVLib
+import kotlinx.collections.immutable.ImmutableList
 import live.mehiz.mpvkt.R
 import live.mehiz.mpvkt.database.entities.CustomButtonEntity
 import live.mehiz.mpvkt.preferences.AdvancedPreferences
@@ -59,24 +62,25 @@ import live.mehiz.mpvkt.preferences.AudioPreferences
 import live.mehiz.mpvkt.preferences.PlayerPreferences
 import live.mehiz.mpvkt.preferences.preference.collectAsState
 import live.mehiz.mpvkt.presentation.components.PlayerSheet
-import live.mehiz.mpvkt.ui.player.PlayerViewModel
+import live.mehiz.mpvkt.ui.player.execute
+import live.mehiz.mpvkt.ui.player.executeLongClick
 import live.mehiz.mpvkt.ui.theme.spacing
 import org.koin.compose.koinInject
 
 @OptIn(ExperimentalLayoutApi::class, ExperimentalFoundationApi::class)
 @Composable
 fun MoreSheet(
+  remainingTime: Int,
+  onStartTimer: (Int) -> Unit,
   onDismissRequest: () -> Unit,
   onEnterFiltersPanel: () -> Unit,
-  customButtons: List<CustomButtonEntity>,
+  customButtons: ImmutableList<CustomButtonEntity>,
   modifier: Modifier = Modifier,
 ) {
-  val viewModel = koinInject<PlayerViewModel>()
   val advancedPreferences = koinInject<AdvancedPreferences>()
-  val playerPreferences = koinInject<PlayerPreferences>()
   val audioPreferences = koinInject<AudioPreferences>()
+  val playerPreferences = koinInject<PlayerPreferences>()
   val statisticsPage by advancedPreferences.enabledStatisticsPage.collectAsState()
-  val primaryCustomButtonId by playerPreferences.primaryCustomButtonId.collectAsState()
 
   PlayerSheet(
     onDismissRequest,
@@ -85,7 +89,8 @@ fun MoreSheet(
     Column(
       modifier = Modifier
         .fillMaxWidth()
-        .padding(MaterialTheme.spacing.medium),
+        .padding(MaterialTheme.spacing.medium)
+        .verticalScroll(rememberScrollState()),
       verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.smaller),
     ) {
       Row(
@@ -99,21 +104,42 @@ fun MoreSheet(
         )
         Row(
           verticalAlignment = Alignment.CenterVertically,
-          horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.extraSmall),
         ) {
-          var isSleepTimerDialogShown by remember { mutableStateOf(false) }
-          val remainingTime by viewModel.remainingTime.collectAsState()
+          val backgroundPlayback by playerPreferences.automaticBackgroundPlayback.collectAsState()
           IconToggleButton(
-            checked = remainingTime > 0,
-            onCheckedChange = { isSleepTimerDialogShown = true },
+            checked = backgroundPlayback,
+            onCheckedChange = { playerPreferences.automaticBackgroundPlayback.set(it) }
           ) {
-            Icon(Icons.Outlined.Timer, null)
-            if (isSleepTimerDialogShown) {
-              TimePickerDialog(
-                remainingTime = remainingTime,
-                onDismissRequest = { isSleepTimerDialogShown = false },
-                onTimeSelect = viewModel::startTimer
+            Icon(
+              if (backgroundPlayback) Icons.Default.Headset else Icons.Default.HeadsetOff,
+              null
+            )
+          }
+          var isSleepTimerDialogShown by remember { mutableStateOf(false) }
+          TextButton(onClick = { isSleepTimerDialogShown = true }) {
+            Row(
+              verticalAlignment = Alignment.CenterVertically,
+              horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.extraSmall),
+            ) {
+              Icon(imageVector = Icons.Outlined.Timer, contentDescription = null)
+              Text(
+                text =
+                if (remainingTime == 0) {
+                  stringResource(R.string.timer_title)
+                } else {
+                  stringResource(
+                    R.string.timer_remaining,
+                    DateUtils.formatElapsedTime(remainingTime.toLong()),
+                  )
+                },
               )
+              if (isSleepTimerDialogShown) {
+                TimePickerDialog(
+                  remainingTime = remainingTime,
+                  onDismissRequest = { isSleepTimerDialogShown = false },
+                  onTimeSelect = onStartTimer,
+                )
+              }
             }
           }
           TextButton(onClick = onEnterFiltersPanel) {
@@ -131,7 +157,7 @@ fun MoreSheet(
       LazyRow(
         horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.smaller),
       ) {
-        items(4) { page ->
+        items(6) { page ->
           FilterChip(
             label = {
               Text(
@@ -142,12 +168,8 @@ fun MoreSheet(
               )
             },
             onClick = {
-              if ((page == 0) xor (statisticsPage == 0)) {
-                MPVLib.command(arrayOf("script-binding", "stats/display-stats-toggle"))
-              }
-              if (page != 0) {
-                MPVLib.command(arrayOf("script-binding", "stats/display-page-$page"))
-              }
+              if ((page == 0) xor (statisticsPage == 0)) MPVLib.command("script-binding", "stats/display-stats-toggle")
+              if (page != 0) MPVLib.command("script-binding", "stats/display-page-$page")
               advancedPreferences.enabledStatisticsPage.set(page)
             },
             selected = statisticsPage == page,
@@ -170,21 +192,15 @@ fun MoreSheet(
               FilterChip(
                 onClick = {},
                 label = { Text(text = button.title) },
-                selected = button.id == primaryCustomButtonId,
+                selected = false,
                 interactionSource = inputChipInteractionSource,
               )
               Box(
                 modifier = Modifier
                   .matchParentSize()
                   .combinedClickable(
-                    onClick = { viewModel.executeCustomButton(button) },
-                    onLongClick = {
-                      if (button.id == primaryCustomButtonId) {
-                        playerPreferences.primaryCustomButtonId.set(0)
-                      } else {
-                        playerPreferences.primaryCustomButtonId.set(button.id)
-                      }
-                    },
+                    onClick = button::execute,
+                    onLongClick = button::executeLongClick,
                     interactionSource = inputChipInteractionSource,
                     indication = null,
                   )

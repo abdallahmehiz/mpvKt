@@ -2,7 +2,6 @@ package live.mehiz.mpvkt.ui.home
 
 import android.content.Context
 import android.content.Intent
-import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
@@ -11,6 +10,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.FileOpen
 import androidx.compose.material.icons.filled.FolderOpen
@@ -28,6 +28,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -37,28 +38,30 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import cafe.adriel.voyager.navigator.LocalNavigator
-import cafe.adriel.voyager.navigator.currentOrThrow
+import androidx.core.net.toUri
 import com.github.k1rakishou.fsaf.FileManager
 import `is`.xyz.mpv.Utils.PROTOCOLS
+import kotlinx.serialization.Serializable
 import live.mehiz.mpvkt.R
 import live.mehiz.mpvkt.presentation.Screen
 import live.mehiz.mpvkt.ui.player.PlayerActivity
 import live.mehiz.mpvkt.ui.preferences.PreferencesScreen
 import live.mehiz.mpvkt.ui.theme.spacing
+import live.mehiz.mpvkt.ui.utils.LocalBackStack
 
-object HomeScreen : Screen() {
+@Serializable
+object HomeScreen : Screen {
   @OptIn(ExperimentalMaterial3Api::class)
   @Composable
   override fun Content() {
     val context = LocalContext.current
-    val navigator = LocalNavigator.currentOrThrow
+    val backstack = LocalBackStack.current
     Scaffold(
       topBar = {
         TopAppBar(
           title = { Text(text = stringResource(id = R.string.app_name)) },
           actions = {
-            IconButton(onClick = { navigator.push(PreferencesScreen) }) {
+            IconButton(onClick = { backstack.add(PreferencesScreen) }) {
               Icon(Icons.Default.Settings, null)
             }
           },
@@ -78,27 +81,25 @@ object HomeScreen : Screen() {
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
       ) {
-        var uri by remember { mutableStateOf("") }
+        val uri = rememberTextFieldState()
         var isUrlValid by remember { mutableStateOf(true) }
+        LaunchedEffect(uri.text) {
+          isUrlValid = uri.text.isNotEmpty() || isURLValid(uri.text.toString())
+        }
         OutlinedTextField(
-          value = uri,
+          state = uri,
           label = { Text(stringResource(R.string.home_url_input_label)) },
-          onValueChange = {
-            uri = it
-            isUrlValid = it.isBlank() || isURLValid(it)
-          },
           supportingText = {
             Text(if (isUrlValid) "" else stringResource(R.string.home_invalid_protocol))
           },
           trailingIcon = {
             if (!isUrlValid) Icon(Icons.Filled.Info, null)
           },
-          isError = !isUrlValid,
-          maxLines = 5,
+          isError = !isUrlValid
         )
         Button(
-          onClick = { playFile(uri, context) },
-          enabled = uri.isNotBlank() && isUrlValid,
+          onClick = { playFile(uri.text.toString(), context) },
+          enabled = uri.text.isNotBlank() && isUrlValid,
         ) {
           Row(
             horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.smaller),
@@ -130,7 +131,7 @@ object HomeScreen : Screen() {
           ActivityResultContracts.OpenDocumentTree(),
         ) {
           if (it == null) return@rememberLauncherForActivityResult
-          navigator.push(FilePickerScreen(fileManager.fromUri(it)!!.getFullPath()))
+          backstack.add(FilePickerScreen(fileManager.fromUri(it)!!.getFullPath()))
         }
         OutlinedButton(onClick = { directoryPicker.launch(null) }) {
           Row(
@@ -148,7 +149,7 @@ object HomeScreen : Screen() {
   // Basically a copy of:
   // https://github.com/mpv-android/mpv-android/blob/32cbff3cedea73b4616b34542cb95bf1d00504cc/app/src/main/java/is/xyz/mpv/Utils.kt#L406
   private fun isURLValid(url: String): Boolean {
-    val uri = Uri.parse(url)
+    val uri = url.toUri()
     return uri.isHierarchical && !uri.isRelative &&
       !(uri.host.isNullOrBlank() && uri.path.isNullOrBlank()) &&
       PROTOCOLS.contains(uri.scheme)
@@ -158,7 +159,7 @@ object HomeScreen : Screen() {
     filepath: String,
     context: Context,
   ) {
-    val i = Intent(Intent.ACTION_VIEW, Uri.parse(filepath))
+    val i = Intent(Intent.ACTION_VIEW, filepath.toUri())
     i.setClass(context, PlayerActivity::class.java)
     context.startActivity(i)
   }

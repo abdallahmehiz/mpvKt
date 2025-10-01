@@ -24,23 +24,25 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import cafe.adriel.voyager.navigator.LocalNavigator
-import cafe.adriel.voyager.navigator.currentOrThrow
+import kotlinx.serialization.Serializable
 import live.mehiz.mpvkt.R
 import live.mehiz.mpvkt.preferences.SubtitlesPreferences
 import live.mehiz.mpvkt.preferences.preference.collectAsState
 import live.mehiz.mpvkt.presentation.Screen
+import live.mehiz.mpvkt.ui.utils.LocalBackStack
 import me.zhanghai.compose.preference.ProvidePreferenceLocals
+import me.zhanghai.compose.preference.SwitchPreference
 import me.zhanghai.compose.preference.TextFieldPreference
 import me.zhanghai.compose.preference.TwoTargetIconButtonPreference
 import org.koin.compose.koinInject
 
-object SubtitlesPreferencesScreen : Screen() {
+@Serializable
+object SubtitlesPreferencesScreen : Screen {
   @OptIn(ExperimentalMaterial3Api::class)
   @Composable
   override fun Content() {
     val context = LocalContext.current
-    val navigator = LocalNavigator.currentOrThrow
+    val backstack = LocalBackStack.current
     val preferences = koinInject<SubtitlesPreferences>()
 
     Scaffold(
@@ -50,7 +52,7 @@ object SubtitlesPreferencesScreen : Screen() {
             Text(stringResource(R.string.pref_subtitles))
           },
           navigationIcon = {
-            IconButton(onClick = { navigator.pop() }) {
+            IconButton(onClick = backstack::removeLastOrNull) {
               Icon(Icons.AutoMirrored.Outlined.ArrowBack, null)
             }
           },
@@ -102,6 +104,17 @@ object SubtitlesPreferencesScreen : Screen() {
             iconButtonIcon = { Icon(Icons.Default.Clear, null) },
             onIconButtonClick = { preferences.fontsFolder.delete() },
             iconButtonEnabled = fontsFolder.isNotBlank()
+          )
+          val autoloadExternal by preferences.autoLoadExternal.collectAsState()
+          SwitchPreference(
+            value = autoloadExternal,
+            onValueChange = { preferences.autoLoadExternal.set(it) },
+            title = { Text(text = stringResource(id = R.string.pref_subtitles_autoload_title)) },
+            summary = {
+              Text(
+                text = stringResource(id = R.string.pref_subtitles_autoload_summary),
+              )
+            },
           )
         }
       }

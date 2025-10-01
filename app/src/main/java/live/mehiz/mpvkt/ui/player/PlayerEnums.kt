@@ -44,16 +44,19 @@ enum class Decoder(val title: String, val value: String) {
   SW("SW", "no"),
   HW("HW", "mediacodec-copy"),
   HWPlus("HW+", "mediacodec"),
+  ;
+
+  companion object {
+    fun getDecoderFromValue(value: String): Decoder {
+      return Decoder.entries.first { it.value == value }
+    }
+  }
 }
 
-fun getDecoderFromValue(value: String): Decoder {
-  return Decoder.entries.first { it.value == value }
-}
-
-enum class Debanding {
-  None,
-  CPU,
-  GPU,
+enum class Debanding(@StringRes val titleRes: Int) {
+  None(R.string.player_sheets_deband_none),
+  CPU(R.string.player_sheets_deband_cpu),
+  GPU(R.string.player_sheets_deband_gpu),
 }
 
 enum class Sheets {
@@ -74,10 +77,11 @@ enum class Panels {
   VideoFilters,
 }
 
-enum class PlayerUpdates {
-  None,
-  DoubleSpeed,
-  AspectRatio,
+sealed class PlayerUpdates {
+  data object None : PlayerUpdates()
+  data object MultipleSpeed : PlayerUpdates()
+  data object AspectRatio : PlayerUpdates()
+  data class ShowText(val value: String) : PlayerUpdates()
 }
 
 enum class VideoFilters(
@@ -110,4 +114,41 @@ enum class VideoFilters(
     { it.hueFilter },
     "hue",
   ),
+}
+
+enum class DebandSettings(
+  @StringRes val titleRes: Int,
+  val preference: (DecoderPreferences) -> Preference<Int>,
+  val mpvProperty: String,
+  val start: Int,
+  val end: Int,
+) {
+  Iterations(
+    R.string.player_sheets_deband_iterations,
+    { it.debandIterations },
+    "deband-iterations",
+    0,
+    16,
+  ),
+  Threshold(
+    R.string.player_sheets_deband_threshold,
+    { it.debandThreshold },
+    "deband-threshold",
+    0,
+    200,
+  ),
+  Range(
+    R.string.player_sheets_deband_range,
+    { it.debandRange },
+    "deband-range",
+    1,
+    64,
+  ),
+  Grain(
+    R.string.player_sheets_deband_grain,
+    { it.debandGrain },
+    "deband-grain",
+    0,
+    200,
+  )
 }

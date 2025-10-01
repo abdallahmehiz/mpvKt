@@ -1,6 +1,7 @@
 package live.mehiz.mpvkt.ui.home
 
-import android.net.Uri
+import android.content.Context
+import android.content.Intent
 import android.os.Build
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -40,18 +41,21 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import cafe.adriel.voyager.navigator.LocalNavigator
-import cafe.adriel.voyager.navigator.currentOrThrow
+import androidx.core.net.toUri
 import com.github.k1rakishou.fsaf.FileManager
 import com.github.k1rakishou.fsaf.file.AbstractFile
 import `is`.xyz.mpv.Utils
+import kotlinx.serialization.Serializable
 import live.mehiz.mpvkt.R
+import live.mehiz.mpvkt.preferences.SubtitlesPreferences
 import live.mehiz.mpvkt.presentation.Screen
+import live.mehiz.mpvkt.ui.player.PlayerActivity
 import live.mehiz.mpvkt.ui.player.audioExtensions
 import live.mehiz.mpvkt.ui.player.imageExtensions
 import live.mehiz.mpvkt.ui.player.videoExtensions
 import live.mehiz.mpvkt.ui.theme.spacing
 import live.mehiz.mpvkt.ui.utils.FilesComparator
+import live.mehiz.mpvkt.ui.utils.LocalBackStack
 import org.koin.compose.koinInject
 import java.lang.Long.signum
 import java.text.StringCharacterIterator
@@ -60,20 +64,26 @@ import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import kotlin.math.abs
 
-data class FilePickerScreen(val uri: String) : Screen() {
+@Serializable
+data class FilePickerScreen(val uri: String) : Screen {
 
   @OptIn(ExperimentalMaterial3Api::class)
   @Composable
   override fun Content() {
-    val navigator = LocalNavigator.currentOrThrow
+    val backstack = LocalBackStack.current
     val fileManager = koinInject<FileManager>()
     val context = LocalContext.current
+    val subtitlesPreferences = koinInject<SubtitlesPreferences>()
     Scaffold(
       topBar = {
         TopAppBar(
           title = { Text(text = stringResource(id = R.string.home_pick_file)) },
           navigationIcon = {
-            IconButton(onClick = { navigator.replaceAll(HomeScreen) }) {
+            IconButton(
+              onClick = {
+                backstack.removeAll { it is FilePickerScreen }
+              },
+            ) {
               Icon(Icons.AutoMirrored.Default.ArrowBack, null)
             }
           },
@@ -81,13 +91,32 @@ data class FilePickerScreen(val uri: String) : Screen() {
       },
     ) { paddingValues ->
       FilePicker(
-        directory = fileManager.fromUri(Uri.parse(uri))!!,
+        directory = fileManager.fromUri(uri.toUri())!!,
         onNavigate = { newFile ->
           if (fileManager.isFile(newFile)) {
-            HomeScreen.playFile(newFile.getFullPath(), context)
+            if (subtitlesPreferences.autoLoadExternal.get()) {
+              val videoNameWithoutExt = fileManager.getName(newFile).substringBeforeLast(".")
+              val parentDir = fileManager.fromUri(uri.toUri())!!
+              val subtitleExtensions = setOf("srt", "ass", "ssa", "vtt", "sub")
+              val subtitlePaths = fileManager.listFiles(parentDir).filter { potentialSubFile ->
+                if (fileManager.isDirectory(potentialSubFile)) {
+                  false
+                } else {
+                  val subFileName = fileManager.getName(potentialSubFile)
+                  val subFileNameWithoutExt = subFileName.substringBeforeLast('.')
+                  val subFileExt = subFileName.substringAfterLast('.').lowercase()
+                  // Matching rule: File names have the same prefix and the extension is a subtitle format
+                  subFileNameWithoutExt.startsWith(videoNameWithoutExt) && subFileExt in subtitleExtensions
+                }
+              }.map { it.getFullPath() }
+
+              playFileWithSubtitles(newFile.getFullPath(), subtitlePaths, context)
+            } else {
+              HomeScreen.playFile(newFile.getFullPath(), context)
+            }
             return@FilePicker
           }
-          navigator.push(FilePickerScreen(newFile.getFullPath()))
+          backstack.add(FilePickerScreen(newFile.getFullPath()))
         },
         modifier = Modifier
           .fillMaxSize()
@@ -99,10 +128,10 @@ data class FilePickerScreen(val uri: String) : Screen() {
   @Composable
   fun FilePicker(
     directory: AbstractFile,
-    modifier: Modifier = Modifier,
     onNavigate: (AbstractFile) -> Unit,
+    modifier: Modifier = Modifier,
   ) {
-    val navigator = LocalNavigator.currentOrThrow
+    val navigator = LocalBackStack.current
     val fileManager = koinInject<FileManager>()
     val fileList = fileManager.listFiles(directory).filterNot {
       !Utils.MEDIA_EXTENSIONS.contains(fileManager.getName(it).substringAfterLast('.')) &&
@@ -116,7 +145,7 @@ data class FilePickerScreen(val uri: String) : Screen() {
           isDirectory = true,
           lastModified = null,
           length = 0L,
-          onClick = { navigator.pop() },
+          onClick = { navigator.removeLastOrNull() },
           modifier = Modifier.background(MaterialTheme.colorScheme.surfaceContainerLow),
         )
       }
@@ -197,7 +226,7 @@ data class FilePickerScreen(val uri: String) : Screen() {
                 pluralStringResource(
                   id = R.plurals.plural_items,
                   count = items!!,
-                  items
+                  items,
                 )
               } else {
                 size!!
@@ -223,6 +252,21 @@ data class FilePickerScreen(val uri: String) : Screen() {
       in imageExtensions -> Icons.Filled.Image
       else -> Icons.AutoMirrored.Filled.InsertDriveFile
     }
+  }
+
+  fun playFileWithSubtitles(
+    filepath: String,
+    subtitlePaths: List<String>,
+    context: Context,
+  ) {
+    val i = Intent(Intent.ACTION_VIEW, filepath.toUri())
+    i.setClass(context, PlayerActivity::class.java)
+    if (subtitlePaths.isNotEmpty()) {
+      val subtitleUris = subtitlePaths.map { it.toUri() }.toTypedArray()
+      i.putExtra("subs", subtitleUris)
+      i.putExtra("subs.enable", arrayOf(subtitleUris.first()))
+    }
+    context.startActivity(i)
   }
 
   private fun Long.asHumanReadableByteCountBin(): String {

@@ -7,6 +7,7 @@ val Migrations: Array<Migration> = arrayOf(
   MIGRATION1to2,
   MIGRATION2to3,
   MIGRATION3to4,
+  MIGRATION4to5,
 )
 
 private object MIGRATION1to2 : Migration(1, 2) {
@@ -35,6 +36,16 @@ private object MIGRATION3to4 : Migration(3, 4) {
         `index` INTEGER NOT NULL, 
         PRIMARY KEY(`id`)
       )
+      """.trimIndent()
+    )
+  }
+}
+
+private object MIGRATION4to5 : Migration(4, 5) {
+  override fun migrate(db: SupportSQLiteDatabase) {
+    db.execSQL(
+      """
+        ALTER TABLE CustomButtonEntity ADD COLUMN longPressContent TEXT NOT NULL DEFAULT ''
       """.trimIndent()
     )
   }

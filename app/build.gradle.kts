@@ -10,16 +10,17 @@ plugins {
   alias(libs.plugins.room)
   alias(libs.plugins.detekt)
   alias(libs.plugins.about.libraries)
+  alias(libs.plugins.kotlinx.serialization)
 }
 
 android {
   namespace = "live.mehiz.mpvkt"
-  compileSdk = 35
+  compileSdk = 36
 
   defaultConfig {
     applicationId = "live.mehiz.mpvkt"
     minSdk = 21
-    targetSdk = 35
+    targetSdk = 36
     versionCode = 12
     versionName = "0.1.6"
 
@@ -99,13 +100,17 @@ android {
   }
 }
 
+kotlin {
+  compilerOptions {
+    freeCompilerArgs.addAll("-Xwhen-guards", "-Xcontext-parameters")
+  }
+}
+
 room {
   schemaDirectory("$projectDir/schemas")
 }
 
 dependencies {
-  implementation(libs.androidx.core.ktx)
-  implementation(libs.androidx.lifecycle.runtime.ktx)
   implementation(libs.androidx.activity.compose)
   implementation(platform(libs.androidx.compose.bom))
   implementation(libs.androidx.ui)
@@ -113,19 +118,23 @@ dependencies {
   implementation(libs.androidx.material3.android)
   implementation(libs.androidx.ui.tooling.preview)
   debugImplementation(libs.androidx.ui.tooling)
+  implementation(libs.bundles.compose.navigation3)
   implementation(libs.androidx.appcompat)
   implementation(libs.androidx.compose.constraintlayout)
   implementation(libs.androidx.material3.icons.extended)
   implementation(libs.androidx.compose.animation.graphics)
   implementation(libs.material)
   implementation(libs.androidx.preferences.ktx)
+  implementation(libs.androidx.documentfile)
   implementation(libs.mediasession)
+  implementation(libs.saveable)
 
   implementation(libs.mpv.lib)
 
-  implementation(libs.seeker)
+  implementation(platform(libs.koin.bom))
   implementation(libs.bundles.koin)
-  implementation(libs.bundles.voyager)
+
+  implementation(libs.seeker)
   implementation(libs.compose.prefs)
   implementation(libs.bundles.about.libs)
   implementation(libs.simple.icons)
@@ -139,6 +148,7 @@ dependencies {
   detektPlugins(libs.detekt.formatter)
 
   implementation(libs.kotlinx.immutable.collections)
+  implementation(libs.kotlinx.serialization.json)
   implementation(libs.truetype.parser)
   implementation(libs.fsaf)
 }
