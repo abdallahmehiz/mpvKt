@@ -130,7 +130,7 @@
     <string name="pref_advanced_verbose_logging_summary">Membantu debugging tapi bisa bikin lemot</string>
     <string name="pref_advanced_clear_playback_history">Hapus riwayat tontonan</string>
     <string name="pref_advanced_clear_playback_history_confirm_title">Yakin mau hapus riwayat tontonan kamu?</string>
-    <string name="pref_advanced_clear_playback_history_confirm_subtitle">Semua posisi terakhir nonton, pilihan subtitle & audio, serta delay dan kecepatannya akan dihapus.</string>
+    <string name="pref_advanced_clear_playback_history_confirm_subtitle">Semua posisi terakhir nonton, pilihan subtitle dan audio, serta delay dan kecepatannya akan dihapus.</string>
     <string name="pref_advanced_cleared_playback_history">Riwayat tontonan dihapus</string>
     <string name="pref_advanced_clear_fonts_cache">Hapus cache font</string>
     <string name="pref_advanced_cleared_fonts_cache">Cache font dihapus</string>
