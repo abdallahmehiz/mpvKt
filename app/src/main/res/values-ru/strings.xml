@@ -54,7 +54,7 @@
     <string name="pref_player_gestures_brightness">Жесты яркости</string>
     <string name="pref_player_gestures_volume">Жесты громкости</string>
     <string name="pref_player_gestures_hold_for_double_speed">Удерживать для 2x скорости</string>
-    <string name="pref_player_gestures_hold_for_multiple_speed">Удерживать для разной - x скорости</string>
+    <string name="pref_player_gestures_hold_for_multiple_speed">Удерживать для многократной скорости</string>
 
     <string name="pref_player_controls">Элементы управления</string>
     <string name="pref_player_controls_allow_gestures_in_panels">Разрешить жесты на панелях</string>
@@ -101,8 +101,8 @@
     <string name="pref_preferred_languages">Предпочитаемые языки</string>
     <string name="pref_subtitles_fonts_dir">Директория шрифтов</string>
     <string name="pref_subtitles_preferred_language">Язык(и) субтитров которые будут выбраны по умолчанию для видео с несколькими субтитрами. Подойдут двух- или трёхбуквенные коды языков. Несколько значений можно разделить запятой.</string>
-    <string name="pref_subtitles_autoload_title">Автоматически Загружать Субтитры</string>
-    <string name="pref_subtitles_autoload_summary">Автоматически загружать внешние субтитры с одинаковыми именами. При наличии нескольких файлов по умолчанию включается первый из них. (Действует только при использовании средства выбора файлов)</string>
+    <string name="pref_subtitles_autoload_title">Автоматически загружать субтитры</string>
+    <string name="pref_subtitles_autoload_summary">Автоматически загружает внешние субтитры с таким же именем. При наличии нескольких файлов по умолчанию включается первый. (Только при использовании выбора файлов)</string>
 
     <string name="pref_audio">Аудио</string>
     <string name="pref_audio_summary">Предпочитаемые языки, аудиоканалы, коррекция высоты</string>
@@ -206,8 +206,8 @@
     <string name="player_sheets_deband_gpu">GPU</string>
     <string name="player_sheets_deband_iterations">Итерации</string>
     <string name="player_sheets_deband_threshold">Порог</string>
-    <string name="player_sheets_deband_range">Радиус</string>
-    <string name="player_sheets_deband_grain">Зернистость</string>
+    <string name="player_sheets_deband_range">Диапазон</string>
+    <string name="player_sheets_deband_grain">Зерно</string>
     <string name="player_sheets_filters_title">Фильтры</string>
     <string name="player_sheets_filters_brightness">Яркость</string>
     <string name="player_sheets_filters_contrast">Контраст</string>
@@ -249,7 +249,7 @@
     <string name="swap_the_volume_and_brightness_slider">Поменять местами панель громкости и яркости</string>
     <string name="pref_player_display_reduce_player_animation">Уменьшить анимацию плеера</string>
     <string name="pref_player_display_hide_player_control_time">Время скрытия управления плеера</string>
-    <string name="show_splash_ovals_on_double_tap_to_seek">Показывать пульсацию при перемотке двойным нажатием</string>
+    <string name="show_splash_ovals_on_double_tap_to_seek">Показывать эффект пульсации при перемотке двойным нажатием</string>
     <string name="show_time_on_double_tap_to_seek">Показывать время перемотки</string>
     <string name="show_icon_on_double_tap_to_seek">Показывать иконку перемотки</string>
 
@@ -266,11 +266,11 @@
 
     <plurals name="plural_items">
         <item quantity="one">%1$d элемент</item>
-        <item quantity="other">%1$d элементы</item>
+        <item quantity="other">%1$d элементов</item>
     </plurals>
 
     <plurals name="seconds">
         <item quantity="one">%1$d секунда</item>
-        <item quantity="other">%1$d секунд</item>
+        <item quantity="other">%1$d секунды</item>
     </plurals>
 </resources>
