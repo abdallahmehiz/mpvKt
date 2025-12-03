@@ -408,10 +408,12 @@ fun PlayerControls(
         ) {
           val invertDuration by playerPreferences.invertDuration.collectAsState()
           val readAhead by MPVLib.propFloat["demuxer-cache-time"].collectAsState()
+          val remaining by MPVLib.propFloat["playtime-remaining"].collectAsState()
           val preciseSeeking by playerPreferences.preciseSeeking.collectAsState()
           SeekbarWithTimers(
             position = position?.toFloat() ?: 0f,
             duration = duration?.toFloat() ?: 0f,
+            remaining = remaining?.toFloat() ?: 0f,
             readAheadValue = readAhead ?: 0f,
             onValueChange = {
               isSeeking = true
