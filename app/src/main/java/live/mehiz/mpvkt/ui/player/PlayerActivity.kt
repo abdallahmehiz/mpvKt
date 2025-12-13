@@ -610,8 +610,8 @@ class PlayerActivity : AppCompatActivity() {
       player.secondarySid = it.secondarySid
       player.aid = it.aid
       MPVLib.setPropertyDouble("sub-delay", subDelay)
-      MPVLib.setPropertyDouble("sub-delay", secondarySubDelay)
-      MPVLib.setPropertyDouble("sub-delay", it.playbackSpeed)
+      MPVLib.setPropertyDouble("secondary-sub-delay", secondarySubDelay)
+      MPVLib.setPropertyDouble("speed", it.playbackSpeed)
       MPVLib.setPropertyDouble("audio-delay", audioDelay)
     }
     if (playerPreferences.savePositionOnQuit.get()) {
