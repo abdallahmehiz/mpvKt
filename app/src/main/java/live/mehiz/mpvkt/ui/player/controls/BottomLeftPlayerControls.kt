@@ -52,7 +52,7 @@ fun BottomLeftPlayerControls(
       exit = fadeOut(),
     ) {
       CurrentChapter(
-        chapter = currentChapter!!,
+        chapter = currentChapter ?: return@AnimatedVisibility,
         onClick = { onOpenSheet(Sheets.Chapters) }
       )
     }

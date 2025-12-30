@@ -46,6 +46,8 @@ import `is`.xyz.mpv.MPVLib
 import `is`.xyz.mpv.MPVNode
 import `is`.xyz.mpv.Utils
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import live.mehiz.mpvkt.database.entities.CustomButtonEntity
@@ -65,7 +67,7 @@ import java.io.File
 @Suppress("TooManyFunctions", "LargeClass")
 class PlayerActivity : AppCompatActivity() {
 
-  private val viewModel: PlayerViewModel by viewModels<PlayerViewModel> { PlayerViewModelProviderFactory(this) }
+  private val viewModel: PlayerViewModel by viewModels<PlayerViewModel>()
   private val binding by lazy { PlayerLayoutBinding.inflate(layoutInflater) }
   private val playerObserver by lazy { PlayerObserver(this) }
   private val playbackStateRepository: PlaybackStateRepository by inject()
@@ -129,6 +131,61 @@ class PlayerActivity : AppCompatActivity() {
         )
       }
     }
+
+    viewModel.eventFlow
+      .onEach { event ->
+        when (event) {
+          is PlayerViewModel.Event.SetupCustomButtons -> {
+            setupCustomButtons(event.buttons)
+          }
+          is PlayerViewModel.Event.ChangeBrightness -> {
+            changeBrightnessTo(event.brightness)
+          }
+          is PlayerViewModel.Event.StretchVideo -> {
+            windowManager.defaultDisplay.getRealMetrics(event.dm)
+          }
+          is PlayerViewModel.Event.SetControls -> {
+            setControls(event.visible)
+          }
+          PlayerViewModel.Event.CycleRotation -> {
+            cycleScreenRotations()
+          }
+        }
+      }
+      .launchIn(lifecycleScope)
+  }
+
+  private val showStatusBar = playerPreferences.showSystemStatusBar.get()
+  private fun setControls(visible: Boolean) {
+    val insetsController = WindowCompat.getInsetsController(window, window.decorView)
+    if (visible) {
+      if (showStatusBar) insetsController.show(WindowInsetsCompat.Type.statusBars())
+    } else {
+      insetsController.hide(WindowInsetsCompat.Type.statusBars())
+    }
+  }
+
+  private fun changeBrightnessTo(brightness: Float) {
+    window.attributes = window.attributes.apply {
+      screenBrightness = brightness
+    }
+  }
+
+  private fun cycleScreenRotations() {
+    requestedOrientation = when (requestedOrientation) {
+      ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE,
+      ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE,
+      ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE,
+      -> {
+        playerPreferences.orientation.set(PlayerOrientation.SensorPortrait)
+        ActivityInfo.SCREEN_ORIENTATION_SENSOR_PORTRAIT
+      }
+
+      else -> {
+        playerPreferences.orientation.set(PlayerOrientation.SensorLandscape)
+        ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
+      }
+    }
   }
 
   private fun getPlayableUri(intent: Intent): String? {
@@ -159,13 +216,17 @@ class PlayerActivity : AppCompatActivity() {
   }
 
   override fun onPause() {
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N &&
-      !isInPictureInPictureMode &&
-      !playerPreferences.automaticBackgroundPlayback.get()
-    ) {
-      viewModel.pause()
-    }
     saveVideoPlaybackState(fileName)
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N && isInPictureInPictureMode) {
+      super.onPause()
+      return
+    }
+
+    player.isExiting = true
+    if (isFinishing) {
+      MPVLib.command("stop")
+    }
+
     super.onPause()
   }
 
