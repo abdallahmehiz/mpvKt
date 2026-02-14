@@ -30,8 +30,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -42,63 +40,52 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
-import `is`.xyz.mpv.MPVLib
 import kotlinx.coroutines.delay
 import live.mehiz.mpvkt.R
-import live.mehiz.mpvkt.preferences.SubtitlesPreferences
 import live.mehiz.mpvkt.presentation.components.OutlinedNumericChooser
 import live.mehiz.mpvkt.ui.player.controls.CARDS_MAX_WIDTH
 import live.mehiz.mpvkt.ui.player.controls.panelCardsColors
 import live.mehiz.mpvkt.ui.theme.spacing
-import org.koin.compose.koinInject
 import kotlin.math.round
 
 @Composable
 fun SubtitleDelayPanel(
+  delayMs: Int,
+  secondaryDelayMs: Int,
+  speed: Double,
+  onSpeedChange: (Double) -> Unit,
+  onDelayChange: (Int) -> Unit,
+  onSecondaryDelayChange: (Int) -> Unit,
+  onApply: () -> Unit,
+  onReset: () -> Unit,
   onDismissRequest: () -> Unit,
   modifier: Modifier = Modifier,
 ) {
-  val preferences = koinInject<SubtitlesPreferences>()
-
   ConstraintLayout(
     modifier = modifier
       .fillMaxSize()
       .padding(MaterialTheme.spacing.medium),
   ) {
     val delayControlCard = createRef()
-
     var affectedSubtitle by remember { mutableStateOf(SubtitleDelayType.Primary) }
-    val delay by MPVLib.propDouble["sub-delay"].collectAsState()
-    val delayInt by remember { derivedStateOf { (delay!! * 1000).toInt() } }
-    val secondaryDelay by MPVLib.propDouble["secondary-sub-delay"].collectAsState()
-    val secondaryDelayInt by remember { derivedStateOf { (secondaryDelay!! * 1000).toInt() } }
-    val speed by MPVLib.propFloat["sub-speed"].collectAsState()
     SubtitleDelayCard(
-      delayMs = if (affectedSubtitle == SubtitleDelayType.Secondary) secondaryDelayInt else delayInt,
+      delayMs = if (affectedSubtitle == SubtitleDelayType.Secondary) secondaryDelayMs else delayMs,
       onDelayChange = {
         when (affectedSubtitle) {
           SubtitleDelayType.Both -> {
-            MPVLib.setPropertyFloat("sub-delay", it / 1000f)
-            MPVLib.setPropertyFloat("secondary-sub-delay", it / 1000f)
+            onDelayChange(it)
+            onSecondaryDelayChange(it)
           }
-
-          SubtitleDelayType.Primary -> MPVLib.setPropertyFloat("sub-delay", it / 1000f)
-          else -> MPVLib.setPropertyFloat("secondary-sub-delay", it / 1000f)
+          SubtitleDelayType.Primary -> onDelayChange(it)
+          else -> onSecondaryDelayChange(it)
         }
       },
-      speed = speed!!,
-      onSpeedChange = { MPVLib.setPropertyFloat("sub-speed", round(it * 1000) / 1000f) },
+      speed = speed.toFloat(),
+      onSpeedChange = { onSpeedChange(round(it * 1000) / 1000.0) },
       affectedSubtitle = affectedSubtitle,
       onTypeChange = { affectedSubtitle = it },
-      onApply = {
-        preferences.defaultSubDelay.set(delayInt)
-        if (speed!! in 0.1f..10f) preferences.defaultSubSpeed.set(speed!!)
-      },
-      onReset = {
-        MPVLib.setPropertyFloat("sub-delay", preferences.defaultSubDelay.get() / 1000f)
-        MPVLib.setPropertyFloat("secondary-sub-delay", preferences.defaultSecondarySubDelay.get() / 1000f)
-        MPVLib.setPropertyFloat("sub-speed", preferences.defaultSubSpeed.get())
-      },
+      onApply = onApply,
+      onReset = onReset,
       onClose = onDismissRequest,
       modifier = Modifier.constrainAs(delayControlCard) {
         linkTo(parent.top, parent.bottom, bias = 0.8f)
@@ -162,7 +149,6 @@ enum class SubtitleDelayType(
   Both(R.string.player_sheets_sub_delay_subtitle_type_primary_and_secondary),
 }
 
-@Suppress("LambdaParameterInRestartableEffect") // Intentional
 @Composable
 fun DelayCard(
   delayMs: Int,
@@ -174,6 +160,10 @@ fun DelayCard(
   modifier: Modifier = Modifier,
   extraSettings: @Composable ColumnScope.() -> Unit = {},
 ) {
+  var delay by remember { mutableStateOf(delayMs) }
+  LaunchedEffect(delay) {
+    println(delay)
+  }
   Card(
     modifier = modifier
       .widthIn(max = CARDS_MAX_WIDTH)
@@ -214,12 +204,12 @@ fun DelayCard(
             onDelayChange(finalDelay)
             return@LaunchedEffect
           }
-          finalDelay = delayMs
+          finalDelay = delay
           timerStart = System.currentTimeMillis()
           val startingDelay: Int = finalDelay
           while (isDirectionPositive != null && timerStart != null) {
             val elapsed = System.currentTimeMillis() - timerStart!!
-            finalDelay = startingDelay + (if (isDirectionPositive!!) elapsed else -elapsed).toInt()
+            delay = startingDelay + (if (isDirectionPositive!!) elapsed else -elapsed).toInt()
             // Arbitrary delay of 20ms
             delay(20)
           }

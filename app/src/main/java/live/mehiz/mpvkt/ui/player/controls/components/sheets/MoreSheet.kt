@@ -52,36 +52,31 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
-import `is`.xyz.mpv.MPVLib
 import kotlinx.collections.immutable.ImmutableList
 import live.mehiz.mpvkt.R
 import live.mehiz.mpvkt.database.entities.CustomButtonEntity
-import live.mehiz.mpvkt.preferences.AdvancedPreferences
 import live.mehiz.mpvkt.preferences.AudioChannels
-import live.mehiz.mpvkt.preferences.AudioPreferences
-import live.mehiz.mpvkt.preferences.PlayerPreferences
-import live.mehiz.mpvkt.preferences.preference.collectAsState
 import live.mehiz.mpvkt.presentation.components.PlayerSheet
-import live.mehiz.mpvkt.ui.player.execute
-import live.mehiz.mpvkt.ui.player.executeLongClick
 import live.mehiz.mpvkt.ui.theme.spacing
-import org.koin.compose.koinInject
 
 @OptIn(ExperimentalLayoutApi::class, ExperimentalFoundationApi::class)
 @Composable
 fun MoreSheet(
+  backgroundPlayback: Boolean,
+  statisticsPage: Int,
+  audioChannels: AudioChannels,
   remainingTime: Int,
   onStartTimer: (Int) -> Unit,
+  onBackgroundPlaybackChange: (Boolean) -> Unit,
+  onStatisticsPageChange: (Int) -> Unit,
+  onCustomButtonClick: (CustomButtonEntity) -> Unit,
+  onCustomButtonLongClick: (CustomButtonEntity) -> Unit,
+  onAudioChannelsChange: (AudioChannels) -> Unit,
   onDismissRequest: () -> Unit,
   onEnterFiltersPanel: () -> Unit,
   customButtons: ImmutableList<CustomButtonEntity>,
   modifier: Modifier = Modifier,
 ) {
-  val advancedPreferences = koinInject<AdvancedPreferences>()
-  val audioPreferences = koinInject<AudioPreferences>()
-  val playerPreferences = koinInject<PlayerPreferences>()
-  val statisticsPage by advancedPreferences.enabledStatisticsPage.collectAsState()
-
   PlayerSheet(
     onDismissRequest,
     modifier,
@@ -105,10 +100,9 @@ fun MoreSheet(
         Row(
           verticalAlignment = Alignment.CenterVertically,
         ) {
-          val backgroundPlayback by playerPreferences.automaticBackgroundPlayback.collectAsState()
           IconToggleButton(
             checked = backgroundPlayback,
-            onCheckedChange = { playerPreferences.automaticBackgroundPlayback.set(it) }
+            onCheckedChange = onBackgroundPlaybackChange,
           ) {
             Icon(
               if (backgroundPlayback) Icons.Default.Headset else Icons.Default.HeadsetOff,
@@ -167,11 +161,7 @@ fun MoreSheet(
                 ),
               )
             },
-            onClick = {
-              if ((page == 0) xor (statisticsPage == 0)) MPVLib.command("script-binding", "stats/display-stats-toggle")
-              if (page != 0) MPVLib.command("script-binding", "stats/display-page-$page")
-              advancedPreferences.enabledStatisticsPage.set(page)
-            },
+            onClick = { onStatisticsPageChange(page) },
             selected = statisticsPage == page,
           )
         }
@@ -199,8 +189,8 @@ fun MoreSheet(
                 modifier = Modifier
                   .matchParentSize()
                   .combinedClickable(
-                    onClick = button::execute,
-                    onLongClick = button::executeLongClick,
+                    onClick = { onCustomButtonClick(button) },
+                    onLongClick = { onCustomButtonLongClick(button) },
                     interactionSource = inputChipInteractionSource,
                     indication = null,
                   )
@@ -210,22 +200,13 @@ fun MoreSheet(
         }
       }
       Text(text = stringResource(id = R.string.pref_audio_channels))
-      val audioChannels by audioPreferences.audioChannels.collectAsState()
       LazyRow(
         horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.smaller),
       ) {
         items(AudioChannels.entries) {
           FilterChip(
             selected = audioChannels == it,
-            onClick = {
-              audioPreferences.audioChannels.set(it)
-              if (it == AudioChannels.ReverseStereo) {
-                MPVLib.setPropertyString(AudioChannels.AutoSafe.property, AudioChannels.AutoSafe.value)
-              } else {
-                MPVLib.setPropertyString(AudioChannels.ReverseStereo.property, "")
-              }
-              MPVLib.setPropertyString(it.property, it.value)
-            },
+            onClick = { onAudioChannelsChange(it) },
             label = { Text(text = stringResource(id = it.title)) },
           )
         }

@@ -20,4 +20,6 @@
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
 -dontobfuscate
--keep,allowoptimization class is.xyz.mpv.** { public protected *; }
+
+-keep class is.xyz.mpv.** { *; }
+-keepclassmembers class is.xyz.mpv.** { *; }

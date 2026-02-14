@@ -4,7 +4,6 @@ import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
-import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.Color
@@ -22,14 +21,14 @@ import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.media.MediaBrowserServiceCompat
 import androidx.media.session.MediaButtonReceiver
-import `is`.xyz.mpv.MPVLib
+import `is`.xyz.mpv.MPV
 import `is`.xyz.mpv.MPVNode
 import live.mehiz.mpvkt.R
 import live.mehiz.mpvkt.preferences.GesturePreferences
 import org.koin.android.ext.android.inject
 
 @Suppress("TooManyFunctions")
-class MediaPlaybackService : MediaBrowserServiceCompat(), MPVLib.EventObserver {
+class MediaPlaybackService : MediaBrowserServiceCompat(), MPV.EventObserver {
   companion object {
     private const val NOTIFICATION_ID = 69420
     private const val NOTIFICATION_CHANNEL_ID = "mpvkt_playback_channel"
@@ -39,21 +38,24 @@ class MediaPlaybackService : MediaBrowserServiceCompat(), MPVLib.EventObserver {
     const val ACTION_STOP = "live.mehiz.mpvkt.action.STOP"
     const val ACTION_SKIP_FORWARD = "live.mehiz.mpvkt.action.SKIP_FORWARD"
     const val ACTION_SKIP_BACKWARD = "live.mehiz.mpvkt.action.SKIP_BACKWARD"
+    var mpv: MPV? = null
   }
 
   private val gesturePreferences by inject<GesturePreferences>()
 
   private val binder = MediaPlaybackBinder()
-  private var mediaTitle = ""
-  private var mediaArtist = ""
-  private var positionMs: Long?
-    get() = MPVLib.getPropertyDouble("time-pos")?.times(1000L)?.toLong()
-    set(value) = MPVLib.command("seek", (value!! / 1000f).toString(), "absolute")
+  private val mediaTitle: String
+    get() = mpv?.prop["media-title"] ?: ""
+  private val mediaArtist: String?
+    get() = mpv?.prop["metadata/artist"]
+  private var positionMs: Long
+    get(): Long = mpv?.getPropertyLong("time-pos")?.times(1000L) ?: 0
+    set(value) = mpv!!.command("seek", (value / 1000f).toString(), "absolute")
   private val durationMs: Long?
-    get() = (MPVLib.getPropertyDouble("duration")?.times(1000L))?.toLong()
+    get() = (mpv?.getPropertyLong("duration")?.times(1000L))
   private var paused: Boolean?
-    get() = MPVLib.getPropertyBoolean("pause")
-    set(value) = MPVLib.command("set", "pause", if (value == true) "yes" else "no")
+    get() = mpv?.prop["pause"]
+    set(value) = mpv!!.command("set", "pause", if (value == true) "yes" else "no")
 
   private lateinit var mediaSession: MediaSessionCompat
 
@@ -62,7 +64,7 @@ class MediaPlaybackService : MediaBrowserServiceCompat(), MPVLib.EventObserver {
   private var audioFocusCallback: AudioManager.OnAudioFocusChangeListener? = null
 
   init {
-    MPVLib.addObserver(this)
+    mpv?.addObserver(this)
   }
 
   @Suppress("EmptyFunctionBlock")
@@ -87,13 +89,11 @@ class MediaPlaybackService : MediaBrowserServiceCompat(), MPVLib.EventObserver {
   override fun eventProperty(property: String, value: String) {
     when (property) {
       "metadata/artist" -> {
-        mediaArtist = value
         updateMediaSessionMetadata()
         updateNotification()
       }
 
       "media-title" -> {
-        mediaTitle = value
         updateMediaSessionMetadata()
         updateNotification()
       }
@@ -109,7 +109,7 @@ class MediaPlaybackService : MediaBrowserServiceCompat(), MPVLib.EventObserver {
   }
 
   @Suppress("EmptyFunctionBlock")
-  override fun event(eventId: Int) {
+  override fun event(eventId: Int, data: MPVNode) {
   }
 
   private var mediaThumbnail: Bitmap? = null
@@ -124,15 +124,15 @@ class MediaPlaybackService : MediaBrowserServiceCompat(), MPVLib.EventObserver {
     setupMediaSession()
 
     audioManager = getSystemService(AUDIO_SERVICE) as AudioManager
-    MPVLib.addObserver(this)
+    mpv?.addObserver(this)
     mapOf(
-      "pause" to MPVLib.mpvFormat.MPV_FORMAT_FLAG,
-      "duration" to MPVLib.mpvFormat.MPV_FORMAT_DOUBLE,
-      "time-pos" to MPVLib.mpvFormat.MPV_FORMAT_DOUBLE,
-      "media-title" to MPVLib.mpvFormat.MPV_FORMAT_STRING,
-      "metadata/artist" to MPVLib.mpvFormat.MPV_FORMAT_STRING,
+      "pause" to MPV.mpvFormat.MPV_FORMAT_FLAG,
+      "duration" to MPV.mpvFormat.MPV_FORMAT_DOUBLE,
+      "time-pos" to MPV.mpvFormat.MPV_FORMAT_DOUBLE,
+      "media-title" to MPV.mpvFormat.MPV_FORMAT_STRING,
+      "metadata/artist" to MPV.mpvFormat.MPV_FORMAT_STRING,
     ).onEach {
-      MPVLib.observeProperty(it.key, it.value)
+      mpv?.observeProperty(it.key, it.value)
     }
 
     setupAudioFocus()
@@ -145,6 +145,7 @@ class MediaPlaybackService : MediaBrowserServiceCompat(), MPVLib.EventObserver {
 
   override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
     MediaButtonReceiver.handleIntent(mediaSession, intent)
+    mediaThumbnail = mpv?.grabThumbnail(1080)
     handleIntent(intent)
     return START_STICKY
   }
@@ -166,15 +167,6 @@ class MediaPlaybackService : MediaBrowserServiceCompat(), MPVLib.EventObserver {
       ACTION_SKIP_FORWARD -> seekForward()
       ACTION_SKIP_BACKWARD -> seekBackward()
     }
-  }
-
-  fun setMediaInfo(title: String, artist: String, thumbnail: Bitmap? = null) {
-    mediaThumbnail = thumbnail
-    mediaTitle = title
-    mediaArtist = artist
-
-    updateMediaSessionMetadata()
-    updateNotification()
   }
 
   private fun setupMediaSession() {
@@ -304,11 +296,11 @@ class MediaPlaybackService : MediaBrowserServiceCompat(), MPVLib.EventObserver {
   }
 
   private fun seekForward() {
-    positionMs = positionMs?.plus(gesturePreferences.doubleTapToSeekDuration.get() * 1000L)
+    positionMs = positionMs.plus(gesturePreferences.doubleTapToSeekDuration.get() * 1000L)
   }
 
   private fun seekBackward() {
-    positionMs = positionMs?.minus(gesturePreferences.doubleTapToSeekDuration.get() * 1000L)
+    positionMs = positionMs.minus(gesturePreferences.doubleTapToSeekDuration.get() * 1000L)
   }
 
   private fun updateMediaSessionMetadata() {
@@ -365,7 +357,7 @@ class MediaPlaybackService : MediaBrowserServiceCompat(), MPVLib.EventObserver {
         enableVibration(false)
       }
 
-      val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+      val notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
       notificationManager.createNotificationChannel(channel)
     }
   }
@@ -396,9 +388,9 @@ class MediaPlaybackService : MediaBrowserServiceCompat(), MPVLib.EventObserver {
 
     return NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_ID)
       .setContentTitle(mediaTitle)
-      .setContentText(mediaArtist.ifBlank { getString(R.string.notification_playing) })
+      .setContentText(mediaArtist?.ifBlank { getString(R.string.notification_playing) })
       .setSmallIcon(R.drawable.ic_launcher_foreground_monochrome)
-      .setLargeIcon(mediaThumbnail)
+      .setLargeIcon(mediaThumbnail ?: mpv?.grabThumbnail(1080))
       .setContentIntent(pendingOpenAppIntent)
       .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
       .setOnlyAlertOnce(true)
@@ -431,13 +423,13 @@ class MediaPlaybackService : MediaBrowserServiceCompat(), MPVLib.EventObserver {
   }
 
   private fun updateNotification() {
-    val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+    val notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
     notificationManager.notify(NOTIFICATION_ID, createNotification())
   }
 
   override fun onDestroy() {
     try {
-      MPVLib.removeObserver(this)
+      mpv?.removeObserver(this)
       mediaSession.release()
       abandonAudioFocus()
       super.onDestroy()

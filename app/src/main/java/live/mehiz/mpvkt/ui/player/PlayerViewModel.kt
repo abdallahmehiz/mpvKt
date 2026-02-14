@@ -10,8 +10,10 @@ import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
 import androidx.core.net.toUri
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import `is`.xyz.mpv.MPVLib
+import `is`.xyz.mpv.MPV
+import `is`.xyz.mpv.MPVNode
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.CoroutineScope
@@ -37,11 +39,26 @@ import live.mehiz.mpvkt.preferences.PlayerPreferences
 import live.mehiz.mpvkt.ui.custombuttons.CustomButtonsUiState
 import live.mehiz.mpvkt.ui.custombuttons.getButtons
 import org.koin.java.KoinJavaComponent.inject
+import kotlin.getValue
 import kotlin.properties.ReadOnlyProperty
 import kotlin.reflect.KProperty
 
+class PlayerViewModelFactory(
+  private val mpv: MPV
+) : ViewModelProvider.Factory {
+  override fun <T : ViewModel> create(modelClass: Class<T>): T {
+    if (modelClass.isAssignableFrom(PlayerViewModel::class.java)) {
+      @Suppress("UNCHECKED_CAST")
+      return PlayerViewModel(mpv) as T
+    }
+    throw IllegalArgumentException("Unknown ViewModel class")
+  }
+}
+
 @Suppress("TooManyFunctions")
-class PlayerViewModel : ViewModel() {
+class PlayerViewModel(
+  val mpv: MPV
+) : ViewModel() {
   private val playerPreferences: PlayerPreferences by inject(PlayerPreferences::class.java)
   private val gesturePreferences: GesturePreferences by inject(GesturePreferences::class.java)
   private val audioPreferences: AudioPreferences by inject(AudioPreferences::class.java)
@@ -82,22 +99,27 @@ class PlayerViewModel : ViewModel() {
   private val _primaryButtonTitle = MutableStateFlow("")
   val primaryButtonTitle = _primaryButtonTitle.asStateFlow()
 
-  val paused by MPVLib.propBoolean["pause"].collectAsState(viewModelScope)
-  val pos by MPVLib.propInt["time-pos"].collectAsState(viewModelScope)
-  val duration by MPVLib.propInt["duration"].collectAsState(viewModelScope)
-  private val currentMPVVolume by MPVLib.propInt["volume"].collectAsState(viewModelScope)
-
+  var paused: Boolean? by mpv.prop("pause")
+  var pos: Int? by mpv.prop("time-pos")
+  val duration: Int? by mpv.prop("duration")
+  private val currentMPVVolume: Int? by mpv.prop("volume")
   val currentVolume = MutableStateFlow(audioManager.getStreamVolume(AudioManager.STREAM_MUSIC))
-  private val volumeBoostCap by MPVLib.propInt["volume-max"].collectAsState(viewModelScope)
+  private val volumeBoostCap: Int? by mpv.prop("volume-max")
 
-  val subtitleTracks = MPVLib.propNode["track-list"]
-    .map { (it?.toObject<List<TrackNode>>(json)?.filter { it.isSubtitle } ?: persistentListOf()).toImmutableList() }
+  val subtitleTracks by lazy {
+    mpv.propFlow.getNodeFlow("track-list")
+      .map { (it?.toObject<List<TrackNode>>(json) ?: persistentListOf()).filter { it.isSubtitle }.toImmutableList() }
+  }
 
-  val audioTracks = MPVLib.propNode["track-list"]
-    .map { (it?.toObject<List<TrackNode>>(json)?.filter { it.isAudio } ?: persistentListOf()).toImmutableList() }
+  val audioTracks by lazy {
+    mpv.propFlow<MPVNode>("track-list")
+      .map { (it?.toObject<List<TrackNode>>(json) ?: persistentListOf()).filter { it.isAudio }.toImmutableList() }
+  }
 
-  val chapters = MPVLib.propNode["chapter-list"]
-    .map { (it?.toObject<List<ChapterNode>>(json) ?: persistentListOf()).map { it.toSegment() }.toImmutableList() }
+  val chapters by lazy {
+    mpv.propFlow<MPVNode>("chapter-list")
+      .map { (it?.toObject<List<ChapterNode>>(json) ?: persistentListOf()).map { it.toSegment() }.toImmutableList() }
+  }
 
   private val _controlsShown = MutableStateFlow(true)
   val controlsShown = _controlsShown.asStateFlow()
@@ -144,15 +166,15 @@ class PlayerViewModel : ViewModel() {
         _remainingTime.value = time
         delay(1000)
       }
-      MPVLib.setPropertyBoolean("pause", true)
+      paused = true
       Toast.makeText(context, context.getString(R.string.toast_sleep_timer_ended), Toast.LENGTH_SHORT).show()
     }
   }
 
   fun cycleDecoders() {
-    MPVLib.setPropertyString(
+    mpv.setPropertyString(
       "hwdec",
-      when (Decoder.getDecoderFromValue(MPVLib.getPropertyString("hwdec-current") ?: return)) {
+      when (Decoder.getDecoderFromValue(mpv.getPropertyString("hwdec-current") ?: return)) {
         Decoder.HWPlus -> Decoder.HW.value
         Decoder.HW -> Decoder.SW.value
         Decoder.SW -> Decoder.HWPlus.value
@@ -165,30 +187,31 @@ class PlayerViewModel : ViewModel() {
   fun addAudio(uri: Uri) {
     val url = uri.toString()
     val path = if (url.startsWith("content://")) url.toUri().openContentFd(context) else url
-    MPVLib.command("audio-add", path ?: return, "cached")
+    mpv.command("audio-add", path ?: return, "cached")
   }
 
   fun addSubtitle(uri: Uri) {
     val url = uri.toString()
-    val path = if (url.startsWith("content://")) url.toUri().openContentFd(context) else url
-    MPVLib.command("sub-add", path ?: return, "cached")
+    val path = if (url.startsWith("content://")) url.toUri().openContentFd(context) ?: url else url
+    mpv.command("sub-add", path, "cached")
   }
 
   fun selectSub(id: Int) {
-    val selectedSubs = Pair(MPVLib.getPropertyInt("sid"), MPVLib.getPropertyInt("secondary-sid"))
+    var sid: Int? by mpv.prop("sid")
+    var secondarySid: Int? by mpv.prop("secondary-sid")
     when (id) {
-      selectedSubs.first -> Pair(selectedSubs.second, null)
-      selectedSubs.second -> Pair(selectedSubs.first, null)
-      else -> if (selectedSubs.first != null) Pair(selectedSubs.first, id) else Pair(id, null)
-    }.let {
-      it.second?.let { MPVLib.setPropertyInt("secondary-sid", it) } ?: MPVLib.setPropertyBoolean("secondary-sid", false)
-      it.first?.let { MPVLib.setPropertyInt("sid", it) } ?: MPVLib.setPropertyBoolean("sid", false)
+      sid -> Pair(secondarySid, null)
+      secondarySid -> Pair(sid, null)
+      else -> if (sid != null) Pair(sid, id) else Pair(id, null)
+    }.let { pair ->
+      pair.first?.let { sid = it } ?: mpv.prop("sid", false)
+      pair.second?.let { secondarySid = it } ?: mpv.prop("secondary-sid", false)
     }
   }
 
-  fun pauseUnpause() = MPVLib.command("cycle", "pause")
-  fun pause() = MPVLib.setPropertyBoolean("pause", true)
-  fun unpause() = MPVLib.setPropertyBoolean("pause", false)
+  fun pauseUnpause() = mpv.command("cycle", "pause")
+  fun pause() = mpv.prop("pause", true)
+  fun unpause() = mpv.prop("pause", false)
 
   fun showControls() {
     if (sheetShown.value != Sheets.None || panelShown.value != Panels.None) return
@@ -219,12 +242,12 @@ class PlayerViewModel : ViewModel() {
   }
 
   fun seekBy(offset: Int, precise: Boolean = false) {
-    MPVLib.command("seek", offset.toString(), if (precise) "relative+exact" else "relative")
+    mpv.command("seek", offset.toString(), if (precise) "relative+exact" else "relative")
   }
 
   fun seekTo(position: Int, precise: Boolean = true) {
-    if (position !in 0..(MPVLib.getPropertyInt("duration") ?: 0)) return
-    MPVLib.command("seek", position.toString(), if (precise) "absolute" else "absolute+keyframes")
+    if (position !in 0..(mpv.getPropertyInt("duration") ?: 0)) return
+    mpv.command("seek", position.toString(), if (precise) "absolute" else "absolute+keyframes")
   }
 
   fun changeBrightnessBy(change: Float) {
@@ -245,7 +268,7 @@ class PlayerViewModel : ViewModel() {
 
   val maxVolume = audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC)
   fun changeVolumeBy(change: Int) {
-    val mpvVolume = MPVLib.getPropertyInt("volume")
+    val mpvVolume = mpv.getPropertyInt("volume")
     if ((volumeBoostCap ?: audioPreferences.volumeBoostCap.get()) > 0 && currentVolume.value == maxVolume) {
       if (mpvVolume == 100 && change < 0) changeVolumeTo(currentVolume.value + change)
       val finalMPVVolume = (mpvVolume?.plus(change))?.coerceAtLeast(100) ?: 100
@@ -268,7 +291,7 @@ class PlayerViewModel : ViewModel() {
   }
 
   fun changeMPVVolumeTo(volume: Int) {
-    MPVLib.setPropertyInt("volume", volume)
+    mpv.prop["volume"] = volume
   }
 
   fun setMPVVolume(volume: Int) {
@@ -291,7 +314,7 @@ class PlayerViewModel : ViewModel() {
 
       VideoAspect.Fit -> {
         pan = 0.0
-        MPVLib.setPropertyDouble("panscan", 0.0)
+        mpv.prop["panscan"] = 0.0
       }
 
       VideoAspect.Stretch -> {
@@ -302,8 +325,8 @@ class PlayerViewModel : ViewModel() {
         }
       }
     }
-    MPVLib.setPropertyDouble("panscan", pan)
-    MPVLib.setPropertyDouble("video-aspect-override", ratio)
+    mpv.prop["panscan"] = pan
+    mpv.prop["video-aspect-override"] = ratio
     playerPreferences.videoAspect.set(aspect)
     playerUpdate.update { PlayerUpdates.AspectRatio }
   }
@@ -391,7 +414,7 @@ class PlayerViewModel : ViewModel() {
       }
     }
 
-    MPVLib.setPropertyString(property, "")
+    mpv.prop[property] = ""
   }
 
   private fun forceShowSoftwareKeyboard() {
@@ -457,7 +480,7 @@ class PlayerViewModel : ViewModel() {
       }
 
       SingleActionGesture.Custom -> {
-        MPVLib.command("keypress", CustomKeyCodes.DoubleTapLeft.keyCode)
+        mpv.command("keypress", CustomKeyCodes.DoubleTapLeft.keyCode)
       }
 
       SingleActionGesture.None -> {}
@@ -471,7 +494,7 @@ class PlayerViewModel : ViewModel() {
       }
 
       SingleActionGesture.Custom -> {
-        MPVLib.command("keypress", CustomKeyCodes.DoubleTapCenter.keyCode)
+        mpv.command("keypress", CustomKeyCodes.DoubleTapCenter.keyCode)
       }
 
       SingleActionGesture.Seek -> {}
@@ -490,7 +513,7 @@ class PlayerViewModel : ViewModel() {
       }
 
       SingleActionGesture.Custom -> {
-        MPVLib.command("keypress", CustomKeyCodes.DoubleTapRight.keyCode)
+        mpv.command("keypress", CustomKeyCodes.DoubleTapRight.keyCode)
       }
 
       SingleActionGesture.None -> {}
@@ -514,17 +537,21 @@ fun Float.normalize(inMin: Float, inMax: Float, outMin: Float, outMax: Float): F
   return (this - inMin) * (outMax - outMin) / (inMax - inMin) + outMin
 }
 
-fun CustomButtonEntity.execute() {
-  MPVLib.command("script-message", "call_button_$id")
+fun CustomButtonEntity.execute(mpv: MPV) {
+  mpv.command("script-message", "call_button_$id")
 }
 
-fun CustomButtonEntity.executeLongClick() {
-  MPVLib.command("script-message", "call_button_${id}_long")
+fun CustomButtonEntity.executeLongClick(mpv: MPV) {
+  mpv.command("script-message", "call_button_${id}_long")
 }
 
 fun <T> Flow<T>.collectAsState(scope: CoroutineScope, initialValue: T? = null) =
   object : ReadOnlyProperty<Any?, T?> {
     private var value: T? = initialValue
-    init { scope.launch { collect { value = it } } }
+
+    init {
+      scope.launch { collect { value = it } }
+    }
+
     override fun getValue(thisRef: Any?, property: KProperty<*>) = value
   }

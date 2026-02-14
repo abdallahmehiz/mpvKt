@@ -13,27 +13,23 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
-import `is`.xyz.mpv.MPVLib
 import live.mehiz.mpvkt.R
-import live.mehiz.mpvkt.preferences.AudioPreferences
 import live.mehiz.mpvkt.ui.theme.spacing
-import org.koin.compose.koinInject
 
 @Composable
 fun AudioDelayPanel(
+  delayMs: Int,
+  onDelayChange: (Int) -> Unit,
+  onApply: () -> Unit,
+  onReset: () -> Unit,
   onDismissRequest: () -> Unit,
   modifier: Modifier = Modifier,
 ) {
-  val preferences = koinInject<AudioPreferences>()
-
   ConstraintLayout(
     modifier = modifier
       .fillMaxSize()
@@ -41,12 +37,11 @@ fun AudioDelayPanel(
   ) {
     val delayControlCard = createRef()
 
-    val delay by MPVLib.propDouble["audio-delay"].collectAsState()
     DelayCard(
-      delayMs = (delay!! * 1000).toInt(),
-      onDelayChange = { MPVLib.setPropertyDouble("audio-delay", it / 1000.0) },
-      onApply = { preferences.defaultAudioDelay.set((delay!! * 1000).toInt()) },
-      onReset = { MPVLib.setPropertyDouble("audio-delay", (preferences.defaultAudioDelay.get() / 1000.0)) },
+      delayMs = delayMs,
+      onDelayChange = onDelayChange,
+      onApply = onApply,
+      onReset = onReset,
       title = { AudioDelayCardTitle(onClose = onDismissRequest) },
       delayType = DelayType.Audio,
       modifier = Modifier.constrainAs(delayControlCard) {

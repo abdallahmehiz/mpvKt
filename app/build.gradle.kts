@@ -1,11 +1,13 @@
 import com.android.build.api.variant.FilterConfiguration
 import io.gitlab.arturbosch.detekt.Detekt
 import org.apache.commons.io.output.ByteArrayOutputStream
+import org.gradle.kotlin.dsl.aboutLibraries
+import org.gradle.process.ExecOperations
+import javax.inject.Inject
 
 plugins {
   alias(libs.plugins.ksp)
   alias(libs.plugins.android.application)
-  alias(libs.plugins.jetbrains.kotlin.android)
   alias(libs.plugins.kotlin.compose.compiler)
   alias(libs.plugins.room)
   alias(libs.plugins.detekt)
@@ -65,12 +67,9 @@ android {
     sourceCompatibility = JavaVersion.VERSION_17
     targetCompatibility = JavaVersion.VERSION_17
   }
-  kotlinOptions {
-    jvmTarget = "17"
-  }
   buildFeatures {
     compose = true
-    viewBinding = true
+    viewBinding = false
     buildConfig = true
   }
   composeCompiler {
@@ -102,7 +101,11 @@ android {
 
 kotlin {
   compilerOptions {
-    freeCompilerArgs.addAll("-Xwhen-guards", "-Xcontext-parameters")
+    freeCompilerArgs.addAll(
+      "-Xwhen-guards",
+      "-Xcontext-parameters",
+      "-XXLanguage:+PropertyParamAnnotationDefaultTargetMode"
+    )
   }
 }
 
@@ -169,17 +172,24 @@ tasks.withType<Detekt>().configureEach {
   }
 }
 
-fun getCommitCount(): String = runCommand("git rev-list --count HEAD")
-fun getCommitSha(): String = runCommand("git rev-parse --short HEAD")
-fun runCommand(command: String): String {
+interface InjectedExecOps {
+  @get:Inject val execOps: ExecOperations
+}
+
+fun getCommitCount(): String = runCommand("git", "rev-list", "--count", "HEAD")
+fun getCommitSha(): String = runCommand("git", "rev-parse", "--short", "HEAD")
+
+fun runCommand(vararg command: String): String {
   val stdOut = ByteArrayOutputStream()
-  exec {
-    commandLine = command.split(' ')
+  val injected = project.objects.newInstance<InjectedExecOps>()
+
+  injected.execOps.exec {
+    commandLine(*command)
     standardOutput = stdOut
   }
   return String(stdOut.toByteArray()).trim()
 }
 
 aboutLibraries {
-  excludeFields = arrayOf("generated")
+  export.excludeFields.add("generated")
 }

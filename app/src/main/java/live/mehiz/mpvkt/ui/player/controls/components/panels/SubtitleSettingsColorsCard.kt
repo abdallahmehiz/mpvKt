@@ -22,9 +22,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -37,7 +35,7 @@ import androidx.core.graphics.blue
 import androidx.core.graphics.green
 import androidx.core.graphics.red
 import androidx.core.graphics.toColorInt
-import `is`.xyz.mpv.MPVLib
+import `is`.xyz.mpv.MPV
 import live.mehiz.mpvkt.R
 import live.mehiz.mpvkt.preferences.SubtitlesPreferences
 import live.mehiz.mpvkt.preferences.preference.Preference
@@ -47,13 +45,16 @@ import live.mehiz.mpvkt.presentation.components.TintedSliderItem
 import live.mehiz.mpvkt.ui.player.controls.CARDS_MAX_WIDTH
 import live.mehiz.mpvkt.ui.player.controls.panelCardsColors
 import live.mehiz.mpvkt.ui.theme.spacing
-import org.koin.compose.koinInject
 
 @Composable
 fun SubtitleSettingsColorsCard(
+  currentColor: Int,
+  currentColorType: SubColorType,
+  onColorChange: (Int) -> Unit,
+  onColorReset: (SubColorType) -> Unit,
+  onColorTypeChange: (SubColorType) -> Unit,
   modifier: Modifier = Modifier,
 ) {
-  val preferences = koinInject<SubtitlesPreferences>()
   var isExpanded by remember { mutableStateOf(true) }
   ExpandableCard(
     isExpanded = isExpanded,
@@ -70,11 +71,6 @@ fun SubtitleSettingsColorsCard(
     colors = panelCardsColors(),
   ) {
     Column {
-      var currentColorType by remember { mutableStateOf(SubColorType.Text) }
-      var currentColor by remember { mutableIntStateOf(getCurrentMPVColor(currentColorType)) }
-      LaunchedEffect(currentColorType) {
-        currentColor = getCurrentMPVColor(currentColorType)
-      }
       Row(
         horizontalArrangement = Arrangement.Center,
         verticalAlignment = Alignment.CenterVertically,
@@ -86,7 +82,7 @@ fun SubtitleSettingsColorsCard(
         SubColorType.entries.forEach { type ->
           IconToggleButton(
             checked = currentColorType == type,
-            onCheckedChange = { currentColorType = type },
+            onCheckedChange = { onColorTypeChange(type) },
           ) {
             Icon(
               when (type) {
@@ -101,10 +97,7 @@ fun SubtitleSettingsColorsCard(
         Text(stringResource(currentColorType.titleRes))
         Spacer(Modifier.weight(1f))
         TextButton(
-          onClick = {
-            resetColors(preferences, currentColorType)
-            currentColor = getCurrentMPVColor(currentColorType)
-          },
+          onClick = { onColorReset(currentColorType) },
         ) {
           Row(
             horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.extraSmall),
@@ -117,11 +110,7 @@ fun SubtitleSettingsColorsCard(
       }
       SubtitlesColorPicker(
         currentColor,
-        onColorChange = {
-          currentColor = it
-          currentColorType.preference(preferences).set(it)
-          MPVLib.setPropertyString(currentColorType.property, it.toColorHexString())
-        },
+        onColorChange = onColorChange,
       )
     }
   }
@@ -159,23 +148,34 @@ enum class SubColorType(
   )
 }
 
-fun resetColors(preferences: SubtitlesPreferences, type: SubColorType) {
+fun resetColors(
+  preferences: SubtitlesPreferences,
+  mpv: MPV?,
+  type: SubColorType
+) {
   when (type) {
     SubColorType.Text -> {
-      MPVLib.setPropertyString("sub-color", preferences.textColor.deleteAndGet().toColorHexString())
+      val textColor = preferences.textColor.deleteAndGet().toColorHexString()
+      mpv?.setPropertyString("sub-color", textColor)
     }
 
     SubColorType.Border -> {
-      MPVLib.setPropertyString("sub-border-color", preferences.borderColor.deleteAndGet().toColorHexString())
+      val borderColor = preferences.borderColor.deleteAndGet().toColorHexString()
+      mpv?.setPropertyString("sub-border-color", borderColor)
     }
 
     SubColorType.Background -> {
-      MPVLib.setPropertyString("sub-back-color", preferences.backgroundColor.deleteAndGet().toColorHexString())
+      val backgroundColor = preferences.backgroundColor.deleteAndGet().toColorHexString()
+      mpv?.setPropertyString("sub-back-color", backgroundColor)
     }
   }
 }
 
-val getCurrentMPVColor: (SubColorType) -> Int = { MPVLib.getPropertyString(it.property)!!.uppercase().toColorInt() }
+val getCurrentMPVColor: (SubColorType, MPV) -> Int = { c, m ->
+  m.getPropertyString(
+    c.property
+  )!!.uppercase().toColorInt()
+}
 
 @Composable
 fun SubtitlesColorPicker(

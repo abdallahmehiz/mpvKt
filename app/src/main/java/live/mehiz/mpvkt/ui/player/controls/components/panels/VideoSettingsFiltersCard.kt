@@ -17,11 +17,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import `is`.xyz.mpv.MPVLib
 import live.mehiz.mpvkt.R
-import live.mehiz.mpvkt.preferences.DecoderPreferences
-import live.mehiz.mpvkt.preferences.preference.collectAsState
-import live.mehiz.mpvkt.preferences.preference.deleteAndGet
 import live.mehiz.mpvkt.presentation.components.ExpandableCard
 import live.mehiz.mpvkt.presentation.components.SliderItem
 import live.mehiz.mpvkt.ui.player.VideoFilters
@@ -30,13 +26,15 @@ import live.mehiz.mpvkt.ui.player.controls.panelCardsColors
 import live.mehiz.mpvkt.ui.theme.spacing
 import me.zhanghai.compose.preference.FooterPreference
 import me.zhanghai.compose.preference.ProvidePreferenceLocals
-import org.koin.compose.koinInject
 
 @Composable
 fun VideoSettingsFiltersCard(
+  isGpuNextEnabled: Boolean,
+  filterValue: (VideoFilters) -> Int,
+  onFilterValueChange: (VideoFilters, Int) -> Unit,
+  onReset: () -> Unit,
   modifier: Modifier = Modifier,
 ) {
-  val decoderPreferences = koinInject<DecoderPreferences>()
   var isExpanded by remember { mutableStateOf(true) }
 
   ExpandableCard(
@@ -55,32 +53,23 @@ fun VideoSettingsFiltersCard(
   ) {
     ProvidePreferenceLocals {
       Column {
-        TextButton(
-          onClick = {
-            VideoFilters.entries.forEach {
-              MPVLib.setPropertyInt(it.mpvProperty, it.preference(decoderPreferences).deleteAndGet())
-            }
-          },
-        ) {
+        TextButton(onClick = onReset) {
           Text(text = stringResource(id = R.string.generic_reset))
         }
 
         VideoFilters.entries.forEach { filter ->
-          val value by filter.preference(decoderPreferences).collectAsState()
+          val value = filterValue(filter)
           SliderItem(
             label = stringResource(filter.titleRes),
             value = value,
             valueText = value.toString(),
-            onChange = {
-              filter.preference(decoderPreferences).set(it)
-              MPVLib.setPropertyInt(filter.mpvProperty, it)
-            },
+            onChange = { onFilterValueChange(filter, it) },
             max = 100,
             min = -100,
           )
         }
 
-        if (!decoderPreferences.gpuNext.get()) {
+        if (!isGpuNextEnabled) {
           FooterPreference(
             summary = {
               Text(text = stringResource(id = R.string.player_sheets_filters_warning))

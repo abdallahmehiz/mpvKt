@@ -22,27 +22,23 @@ import androidx.compose.material3.InputChip
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import `is`.xyz.mpv.MPVLib
 import live.mehiz.mpvkt.R
-import live.mehiz.mpvkt.preferences.AudioPreferences
-import live.mehiz.mpvkt.preferences.preference.collectAsState
 import live.mehiz.mpvkt.presentation.components.PlayerSheet
 import live.mehiz.mpvkt.presentation.components.SliderItem
 import live.mehiz.mpvkt.ui.theme.spacing
 import me.zhanghai.compose.preference.ProvidePreferenceLocals
 import me.zhanghai.compose.preference.SwitchPreference
-import org.koin.compose.koinInject
 import kotlin.math.pow
 import kotlin.math.roundToInt
 
 @Composable
 fun PlaybackSpeedSheet(
   speed: Float,
+  pitchCorrection: Boolean,
+  onPitchCorrectionChange: (Boolean) -> Unit,
   speedPresets: List<Float>,
   onSpeedChange: (Float) -> Unit,
   onAddSpeedPreset: (Float) -> Unit,
@@ -104,14 +100,9 @@ fun PlaybackSpeedSheet(
         }
       }
       ProvidePreferenceLocals {
-        val audioPreferences = koinInject<AudioPreferences>()
-        val pitchCorrection by audioPreferences.audioPitchCorrection.collectAsState()
         SwitchPreference(
           value = pitchCorrection,
-          onValueChange = {
-            audioPreferences.audioPitchCorrection.set(it)
-            MPVLib.setPropertyBoolean("audio-pitch-correction", it)
-          },
+          onValueChange = onPitchCorrectionChange,
           title = { Text(text = stringResource(id = R.string.pref_audio_pitch_correction_title)) },
           summary = { Text(text = stringResource(id = R.string.pref_audio_pitch_correction_summary)) },
         )

@@ -58,20 +58,28 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
-import `is`.xyz.mpv.MPVLib
+import androidx.core.graphics.toColorInt
+import dev.vivvvek.seeker.Segment
 import `is`.xyz.mpv.Utils
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.update
 import live.mehiz.mpvkt.R
+import live.mehiz.mpvkt.preferences.AdvancedPreferences
+import live.mehiz.mpvkt.preferences.AudioChannels
 import live.mehiz.mpvkt.preferences.AudioPreferences
+import live.mehiz.mpvkt.preferences.DecoderPreferences
 import live.mehiz.mpvkt.preferences.PlayerPreferences
+import live.mehiz.mpvkt.preferences.SubtitleJustification
+import live.mehiz.mpvkt.preferences.SubtitlesPreferences
 import live.mehiz.mpvkt.preferences.preference.collectAsState
 import live.mehiz.mpvkt.preferences.preference.deleteAndGet
 import live.mehiz.mpvkt.preferences.preference.minusAssign
 import live.mehiz.mpvkt.preferences.preference.plusAssign
 import live.mehiz.mpvkt.ui.custombuttons.getButtons
+import live.mehiz.mpvkt.ui.player.DebandSettings
+import live.mehiz.mpvkt.ui.player.Debanding
 import live.mehiz.mpvkt.ui.player.Decoder.Companion.getDecoderFromValue
 import live.mehiz.mpvkt.ui.player.Panels
 import live.mehiz.mpvkt.ui.player.PlayerActivity
@@ -79,17 +87,27 @@ import live.mehiz.mpvkt.ui.player.PlayerUpdates
 import live.mehiz.mpvkt.ui.player.PlayerViewModel
 import live.mehiz.mpvkt.ui.player.Sheets
 import live.mehiz.mpvkt.ui.player.VideoAspect
+import live.mehiz.mpvkt.ui.player.VideoFilters
+import live.mehiz.mpvkt.ui.player.collectAsState
 import live.mehiz.mpvkt.ui.player.controls.components.BrightnessSlider
 import live.mehiz.mpvkt.ui.player.controls.components.ControlsButton
 import live.mehiz.mpvkt.ui.player.controls.components.MultipleSpeedPlayerUpdate
 import live.mehiz.mpvkt.ui.player.controls.components.SeekbarWithTimers
 import live.mehiz.mpvkt.ui.player.controls.components.TextPlayerUpdate
 import live.mehiz.mpvkt.ui.player.controls.components.VolumeSlider
+import live.mehiz.mpvkt.ui.player.controls.components.panels.SubColorType
+import live.mehiz.mpvkt.ui.player.controls.components.panels.SubtitlesBorderStyle
+import live.mehiz.mpvkt.ui.player.controls.components.panels.resetColors
+import live.mehiz.mpvkt.ui.player.controls.components.panels.resetTypography
+import live.mehiz.mpvkt.ui.player.controls.components.panels.toColorHexString
 import live.mehiz.mpvkt.ui.player.controls.components.sheets.toFixed
+import live.mehiz.mpvkt.ui.player.execute
+import live.mehiz.mpvkt.ui.player.executeLongClick
 import live.mehiz.mpvkt.ui.theme.playerRippleConfiguration
 import live.mehiz.mpvkt.ui.theme.spacing
 import org.koin.compose.koinInject
 import kotlin.math.abs
+import kotlin.math.roundToInt
 
 @Suppress("CompositionLocalAllowlist")
 val LocalPlayerButtonsClickEvent = staticCompositionLocalOf { {} }
@@ -104,16 +122,19 @@ fun PlayerControls(
 ) {
   val spacing = MaterialTheme.spacing
   val playerPreferences = koinInject<PlayerPreferences>()
+  val advancedPreferences = koinInject<AdvancedPreferences>()
+  val subtitlesPreferences = koinInject<SubtitlesPreferences>()
+  val decoderPreferences = koinInject<DecoderPreferences>()
   val audioPreferences = koinInject<AudioPreferences>()
   val interactionSource = remember { MutableInteractionSource() }
   val controlsShown by viewModel.controlsShown.collectAsState()
   val areControlsLocked by viewModel.areControlsLocked.collectAsState()
   val seekBarShown by viewModel.seekBarShown.collectAsState()
-  val pausedForCache by MPVLib.propBoolean["paused-for-cache"].collectAsState()
-  val paused by MPVLib.propBoolean["pause"].collectAsState()
-  val duration by MPVLib.propInt["duration"].collectAsState()
-  val position by MPVLib.propInt["time-pos"].collectAsState()
-  val playbackSpeed by MPVLib.propFloat["speed"].collectAsState()
+  val pausedForCache by viewModel.mpv.propFlow<Boolean>("paused-for-cache").collectAsState()
+  val paused by viewModel.mpv.propFlow<Boolean>("pause").collectAsState()
+  val duration by viewModel.mpv.propFlow<Int>("duration").collectAsState()
+  val position by viewModel.mpv.propFlow<Int>("time-pos").collectAsState()
+  val playbackSpeed by viewModel.mpv.propFlow<Float>("speed").collectAsState()
   val gestureSeekAmount by viewModel.gestureSeekAmount.collectAsState()
   val doubleTapSeekAmount by viewModel.doubleTapSeekAmount.collectAsState()
   val showDoubleTapOvals by playerPreferences.showDoubleTapOvals.collectAsState()
@@ -122,8 +143,8 @@ fun PlayerControls(
   var isSeeking by remember { mutableStateOf(false) }
   var resetControls by remember { mutableStateOf(true) }
   val seekText by viewModel.seekText.collectAsState()
-  val currentChapter by MPVLib.propInt["chapter"].collectAsState()
-  val mpvDecoder by MPVLib.propString["hwdec-current"].collectAsState()
+  val currentChapter by viewModel.mpv.propFlow<Int>("chapter").collectAsState()
+  val mpvDecoder by viewModel.mpv.propFlow<String>("hwdec-current").collectAsState()
   val decoder by remember { derivedStateOf { getDecoderFromValue(mpvDecoder ?: "auto") } }
   val playerTimeToDisappear by playerPreferences.playerTimeToDisappear.collectAsState()
   val chapters by viewModel.chapters.collectAsState(persistentListOf())
@@ -203,7 +224,7 @@ fun PlayerControls(
         val isVolumeSliderShown by viewModel.isVolumeSliderShown.collectAsState()
         val brightness by viewModel.currentBrightness.collectAsState()
         val volume by viewModel.currentVolume.collectAsState()
-        val mpvVolume by MPVLib.propInt["volume"].collectAsState()
+        val mpvVolume by viewModel.mpv.propFlow<Int>("volume").collectAsState()
         val swapVolumeAndBrightness by playerPreferences.swapVolumeAndBrightness.collectAsState()
         val reduceMotion by playerPreferences.reduceMotion.collectAsState()
 
@@ -407,26 +428,29 @@ fun PlayerControls(
           },
         ) {
           val invertDuration by playerPreferences.invertDuration.collectAsState()
-          val readAhead by MPVLib.propFloat["demuxer-cache-time"].collectAsState()
-          val remaining by MPVLib.propFloat["playtime-remaining"].collectAsState()
+          val readAhead by viewModel.mpv.propFlow<Float>("demuxer-cache-duration").collectAsState()
           val preciseSeeking by playerPreferences.preciseSeeking.collectAsState()
           SeekbarWithTimers(
             position = position?.toFloat() ?: 0f,
             duration = duration?.toFloat() ?: 0f,
-            remaining = remaining?.toFloat() ?: 0f,
             readAheadValue = readAhead ?: 0f,
             onValueChange = {
               isSeeking = true
-              viewModel.seekTo(it.toInt(), preciseSeeking)
+              viewModel.seekTo(it.roundToInt(), preciseSeeking)
             },
             onValueChangeFinished = { isSeeking = false },
             timersInverted = Pair(false, invertDuration),
             durationTimerOnCLick = { playerPreferences.invertDuration.set(!invertDuration) },
             positionTimerOnClick = {},
-            chapters = chapters,
+            chapters = chapters.map {
+              Segment(
+                name = it.name,
+                start = it.start,
+              )
+            }.toImmutableList(),
           )
         }
-        val mediaTitle by MPVLib.propString["media-title"].collectAsState()
+        val mediaTitle by viewModel.mpv.propFlow<String>("media-title").collectAsState()
         AnimatedVisibility(
           controlsShown && !areControlsLocked,
           enter = if (!reduceMotion) {
@@ -521,6 +545,12 @@ fun PlayerControls(
                 activity.enterPictureInPictureMode()
               }
             },
+            onCustomButtonClick = {
+              customButton?.execute(viewModel.mpv)
+            },
+            onCustomButtonLongClick = {
+              customButton?.executeLongClick(viewModel.mpv)
+            },
             onAspectClick = {
               viewModel.changeVideoAspect(
                 when (aspectRatio) {
@@ -562,7 +592,7 @@ fun PlayerControls(
             onLockControls = viewModel::lockControls,
             onCycleRotation = viewModel::cycleScreenRotations,
             onPlaybackSpeedChange = {
-              MPVLib.setPropertyFloat("speed", it)
+              viewModel.mpv.prop["speed"] = it
               playerPreferences.defaultSpeed.set(it)
             },
             onOpenSheet = onOpenSheet,
@@ -575,6 +605,12 @@ fun PlayerControls(
     val audioTracks by viewModel.audioTracks.collectAsState(persistentListOf())
     val sleepTimerTimeRemaining by viewModel.remainingTime.collectAsState()
     val speedPresets by playerPreferences.speedPresets.collectAsState()
+    val backgroundPlayback by playerPreferences.automaticBackgroundPlayback.collectAsState()
+    val statisticsPage by advancedPreferences.enabledStatisticsPage.collectAsState()
+    val audioChannels by audioPreferences.audioChannels.collectAsState()
+    val pitchCorrection by audioPreferences.audioPitchCorrection.collectAsState()
+    val mpvAudioPitchCorrection by viewModel.mpv.propFlow<Boolean>("audio-pitch-correction").collectAsState()
+
     PlayerSheets(
       sheetShown = sheetShown,
       subtitles = subtitles,
@@ -583,41 +619,267 @@ fun PlayerControls(
       audioTracks = audioTracks,
       onAddAudio = viewModel::addAudio,
       onSelectAudio = {
-        if (MPVLib.getPropertyInt("aid") == it.id) {
-          MPVLib.setPropertyBoolean("aid", false)
+        if (it.id == viewModel.mpv.getPropertyInt("aid")) {
+          viewModel.mpv.prop["aid"] = false
         } else {
-          MPVLib.setPropertyInt("aid", it.id)
+          viewModel.mpv.prop["aid"] = it.id
         }
       },
       chapter = chapters.getOrNull(currentChapter ?: 0),
       chapters = chapters,
       onSeekToChapter = {
-        MPVLib.setPropertyInt("chapter", it)
+        viewModel.mpv.prop["chapter"] = it
         viewModel.unpause()
       },
       decoder = decoder,
-      onUpdateDecoder = { MPVLib.setPropertyString("hwdec", it.value) },
+      onUpdateDecoder = { viewModel.mpv.prop["hwdec"] = it.value },
       speed = playbackSpeed ?: playerPreferences.defaultSpeed.get(),
-      onSpeedChange = { MPVLib.setPropertyFloat("speed", it.toFixed(2)) },
+      onSpeedChange = { viewModel.mpv.prop["speed"] = it.toFixed(2) },
       onMakeDefaultSpeed = { playerPreferences.defaultSpeed.set(it.toFixed(2)) },
       onAddSpeedPreset = { playerPreferences.speedPresets += it.toFixed(2).toString() },
       onRemoveSpeedPreset = { playerPreferences.speedPresets -= it.toFixed(2).toString() },
       onResetSpeedPresets = playerPreferences.speedPresets::delete,
       speedPresets = speedPresets.map { it.toFloat() }.sorted(),
       onResetDefaultSpeed = {
-        MPVLib.setPropertyFloat("speed", playerPreferences.defaultSpeed.deleteAndGet().toFixed(2))
+        viewModel.mpv.prop["speed"] = playerPreferences.defaultSpeed.deleteAndGet().toFixed(2)
       },
-
+      // More sheet state
+      backgroundPlayback = backgroundPlayback,
+      statisticsPage = statisticsPage,
+      audioChannels = audioChannels,
       sleepTimerTimeRemaining = sleepTimerTimeRemaining,
       onStartSleepTimer = viewModel::startTimer,
+      onBackgroundPlaybackChange = playerPreferences.automaticBackgroundPlayback::set,
+      onStatisticsPageChange = { page ->
+        if ((page == 0) xor (statisticsPage == 0)) viewModel.mpv.command("script-binding", "stats/display-stats-toggle")
+        if (page != 0) viewModel.mpv.command("script-binding", "stats/display-page-$page")
+        advancedPreferences.enabledStatisticsPage.set(page)
+      },
+      onAudioChannelsChange = {
+        audioPreferences.audioChannels.set(it)
+        if (it == AudioChannels.ReverseStereo) {
+          viewModel.mpv.prop[AudioChannels.AutoSafe.property] = AudioChannels.AutoSafe.value
+        } else {
+          viewModel.mpv.prop[AudioChannels.ReverseStereo.property] = ""
+        }
+        viewModel.mpv.prop[it.property] = it.value
+      },
+      onCustomButtonClick = { it.execute(viewModel.mpv) },
+      onCustomButtonLongClick = { it.executeLongClick(viewModel.mpv) },
       buttons = customButtons.getButtons().toImmutableList(),
       onOpenPanel = onOpenPanel,
+      onPitchCorrectionChange = {
+        audioPreferences.audioPitchCorrection.set(it)
+        viewModel.mpv.prop["audio-pitch-correction"] = it
+      },
+      pitchCorrection = pitchCorrection || mpvAudioPitchCorrection == true,
       onDismissRequest = { onOpenSheet(Sheets.None) },
     )
     val panel by viewModel.panelShown.collectAsState()
+    val subDelayPref by subtitlesPreferences.defaultSubDelay.collectAsState()
+    val subDelay by viewModel.mpv.propFlow<Double>("sub-delay").collectAsState()
+    val subDelaySecondary by viewModel.mpv.propFlow<Double>("secondary-sub-delay").collectAsState()
+    val subDelaySecondaryPref by subtitlesPreferences.defaultSecondarySubDelay.collectAsState()
+    val subSpeed by viewModel.mpv.propFlow<Double>("sub-speed").collectAsState()
+    val audioDelay by viewModel.mpv.propFlow<Double>("audio-delay").collectAsState()
+    val isBold by viewModel.mpv.propFlow<Boolean>("sub-bold").collectAsState()
+    val isItalic by viewModel.mpv.propFlow<Boolean>("sub-italic").collectAsState()
+    val subJustify by viewModel.mpv.propFlow<String>("sub-justify").collectAsState()
+    val subFont by viewModel.mpv.propFlow<String>("sub-font").collectAsState()
+    val subFontSize by viewModel.mpv.propFlow<Int>("sub-font-size").collectAsState()
+    val subBorderStyle by viewModel.mpv.propFlow<String>("sub-border-style").collectAsState()
+    val subBorderSize by viewModel.mpv.propFlow<Int>("sub-border-size").collectAsState()
+    val subShadowOffset by viewModel.mpv.propFlow<Int>("sub-shadow-offset").collectAsState()
+    val subColor by viewModel.mpv.propFlow<String>("sub-color").collectAsState()
+    val subBorderColor by viewModel.mpv.propFlow<String>("sub-border-color").collectAsState()
+    val subBackgroundColor by viewModel.mpv.propFlow<String>("sub-background-color").collectAsState()
+    val overrideAssSubs by viewModel.mpv.propFlow<Boolean>("sub-ass-override").collectAsState()
+    val subScale by viewModel.mpv.propFlow<Float>("sub-scale").collectAsState()
+    val subPos by viewModel.mpv.propFlow<Int>("sub-pos").collectAsState()
+    val deband by decoderPreferences.debanding.collectAsState()
+    val mpvGpuNext by viewModel.mpv.propFlow<String>("vo").collectAsState()
+    val debandSettingsMap = DebandSettings.entries.associateWith { setting ->
+      viewModel.mpv.propFlow<Int>(setting.mpvProperty).collectAsState().value ?: 0
+    }
+    val filterValuesMap = VideoFilters.entries.associateWith { filter ->
+      viewModel.mpv.propFlow<Int>(filter.mpvProperty).collectAsState().value ?: 0
+    }
+    var subtitleColorType by remember { mutableStateOf(SubColorType.Text) }
+
     PlayerPanels(
       panelShown = panel,
       onDismissRequest = { onOpenPanel(Panels.None) },
+      // Subtitle settings panel state
+      isBold = isBold ?: subtitlesPreferences.bold.get(),
+      isItalic = isItalic ?: subtitlesPreferences.italic.get(),
+      subJustify = subJustify?.let { SubtitleJustification.byValue(it) } ?: subtitlesPreferences.justification.get(),
+      subFont = subFont ?: subtitlesPreferences.font.get(),
+      subFontSize = subFontSize ?: subtitlesPreferences.fontSize.get(),
+      subBorderStyle = subBorderStyle?.let { SubtitlesBorderStyle.byValue(it) }
+        ?: subtitlesPreferences.borderStyle.get(),
+      subBorderSize = subBorderSize ?: subtitlesPreferences.borderSize.get(),
+      subShadowOffset = subShadowOffset ?: subtitlesPreferences.shadowOffset.get(),
+      subColor = subtitleColorType,
+      currentSubtitleColor = when (subtitleColorType) {
+        SubColorType.Text -> subColor?.toColorInt() ?: subtitlesPreferences.textColor.get()
+        SubColorType.Border -> subBorderColor?.toColorInt() ?: subtitlesPreferences.borderColor.get()
+        SubColorType.Background -> subBackgroundColor?.toColorInt() ?: subtitlesPreferences.backgroundColor.get()
+      },
+      overrideAssSubs = overrideAssSubs ?: subtitlesPreferences.overrideAssSubs.get(),
+      subScale = subScale ?: subtitlesPreferences.subScale.get(),
+      subPos = subPos ?: subtitlesPreferences.subPos.get(),
+      onSubBoldChange = {
+        viewModel.mpv.prop["sub-bold"] = it
+        subtitlesPreferences.bold.set(it)
+      },
+      onSubItalicChange = {
+        viewModel.mpv.prop["sub-italic"] = it
+        subtitlesPreferences.italic.set(it)
+      },
+      onSubJustifyChange = {
+        viewModel.mpv.prop["sub-justify"] = it.value
+        subtitlesPreferences.justification.set(it)
+      },
+      onSubFontChange = {
+        viewModel.mpv.prop["sub-font"] = it
+        subtitlesPreferences.font.set(it)
+      },
+      onSubFontSizeChange = {
+        viewModel.mpv.prop["sub-font-size"] = it
+        subtitlesPreferences.fontSize.set(it)
+      },
+      onSubBorderStyleChange = {
+        viewModel.mpv.prop["sub-border-style"] = it
+        subtitlesPreferences.borderStyle.set(it)
+      },
+      onSubBorderSizeChange = {
+        viewModel.mpv.prop["sub-border-size"] = it
+        subtitlesPreferences.borderSize.set(it)
+      },
+      onSubShadowOffsetChange = {
+        viewModel.mpv.prop["sub-shadow-offset"] = it
+        subtitlesPreferences.shadowOffset.set(it)
+      },
+      onSubColorChange = {
+        when (subtitleColorType) {
+          SubColorType.Text -> {
+            viewModel.mpv.prop["sub-color"] = it.toColorHexString()
+            subtitlesPreferences.textColor.set(it)
+          }
+
+          SubColorType.Border -> {
+            viewModel.mpv.prop["sub-border-color"] = it.toColorHexString()
+            subtitlesPreferences.borderColor.set(it)
+          }
+
+          SubColorType.Background -> {
+            viewModel.mpv.prop["sub-background-color"] = it.toColorHexString()
+            subtitlesPreferences.backgroundColor.set(it)
+          }
+        }
+      },
+      onOverrideAssSubsChange = {
+        viewModel.mpv.prop["sub-ass-override"] = it
+        subtitlesPreferences.overrideAssSubs.set(it)
+      },
+      onSubScaleChange = {
+        viewModel.mpv.prop["sub-scale"] = it
+        subtitlesPreferences.subScale.set(it)
+      },
+      onSubPosChange = {
+        viewModel.mpv.prop["sub-pos"] = it
+        subtitlesPreferences.subPos.set(it)
+      },
+      onSubColorTypeChange = { subtitleColorType = it },
+      onSubColorReset = {
+        resetColors(subtitlesPreferences, viewModel.mpv, subtitleColorType)
+      },
+      onSubtitleSettingsReset = {
+        resetTypography(viewModel.mpv, subtitlesPreferences)
+      },
+      onSubtitleMiscReset = {
+        subtitlesPreferences.subPos.deleteAndGet().let {
+          viewModel.mpv.prop["sub-pos"] = it
+        }
+        subtitlesPreferences.subScale.deleteAndGet().let {
+          viewModel.mpv.prop["sub-scale"] = it
+        }
+        subtitlesPreferences.overrideAssSubs.delete()
+        viewModel.mpv.prop["sub-ass-override"] = "scale"
+      },
+      subDelayMsPrimary = subDelay?.times(1000)?.roundToInt() ?: subDelayPref,
+      subDelayMsSecondary = subDelaySecondary?.times(1000)?.roundToInt() ?: subDelaySecondaryPref,
+      subSpeed = subSpeed ?: subtitlesPreferences.defaultSubSpeed.get().toDouble(),
+      onSubDelayPrimaryChange = {
+        viewModel.mpv.prop["sub-delay"] = it / 1000.0
+      },
+      onSubDelaySecondaryChange = {
+        viewModel.mpv.prop["secondary-sub-delay"] = it / 1000.0
+      },
+      onSubSpeedChange = {
+        viewModel.mpv.prop["sub-speed"] = it
+      },
+      onSubDelayApply = {
+        subtitlesPreferences.defaultSubDelay.set((subDelay?.times(1000)?.roundToInt()) ?: 0)
+        subtitlesPreferences.defaultSecondarySubDelay.set((subDelaySecondary?.times(1000)?.roundToInt()) ?: 0)
+      },
+      onSubDelayReset = {
+        viewModel.mpv.prop["sub-delay"] = subtitlesPreferences.defaultSubDelay.get() / 1000.0
+        viewModel.mpv.prop["secondary-sub-delay"] = subtitlesPreferences.defaultSecondarySubDelay.get() / 1000.0
+        viewModel.mpv.prop["sub-speed"] = subtitlesPreferences.defaultSubSpeed.get().toDouble()
+      },
+      audioDelayMs = (audioDelay?.times(1000))?.roundToInt() ?: audioPreferences.defaultAudioDelay.get(),
+      onAudioDelayChange = { viewModel.mpv.prop["audio-delay"] = it / 1000.0 },
+      onAudioDelayApply = {
+        audioPreferences.defaultAudioDelay.set((audioDelay?.times(1000)?.roundToInt()) ?: 0)
+      },
+      onAudioDelayReset = {
+        viewModel.mpv.prop["audio-delay"] = audioPreferences.defaultAudioDelay.get() / 1000.0
+      },
+      onDebandChange = {
+        decoderPreferences.debanding.set(it)
+        when (it) {
+          Debanding.None -> {
+            viewModel.mpv.prop["deband"] = "no"
+            viewModel.mpv.command("vf", "remove", "@deband")
+          }
+
+          Debanding.CPU -> {
+            viewModel.mpv.prop["deband"] = "no"
+            viewModel.mpv.command("vf", "add", "@deband:gradfun=radius=12")
+          }
+
+          Debanding.GPU -> {
+            viewModel.mpv.prop["deband"] = "yes"
+            viewModel.mpv.command("vf", "remove", "@deband")
+          }
+        }
+      },
+      onDebandReset = {
+        viewModel.mpv.prop["deband"] = "no"
+        viewModel.mpv.command("vf", "remove", "@deband")
+        DebandSettings.entries.forEach {
+          viewModel.mpv.prop[it.mpvProperty] = it.preference(decoderPreferences).deleteAndGet()
+        }
+      },
+      onDebandSettingsChange = { setting, value ->
+        setting.preference(decoderPreferences).set(value)
+        viewModel.mpv.prop[setting.mpvProperty] = value
+      },
+      onVideoFilterChange = { filter, value ->
+        filter.preference(decoderPreferences).set(value)
+        viewModel.mpv.prop[filter.mpvProperty] = value
+      },
+      onFilterReset = {
+        VideoFilters.entries.forEach {
+          viewModel.mpv.prop[it.mpvProperty] = it.preference(decoderPreferences).deleteAndGet()
+        }
+      },
+      deband = deband,
+      isGpuNextEnabled = mpvGpuNext == "gpu-next",
+      filterValue = { filterValuesMap[it] ?: 0 },
+      debandSettings = { debandSettingsMap[it] ?: 0 },
+      modifier = Modifier,
     )
   }
 }

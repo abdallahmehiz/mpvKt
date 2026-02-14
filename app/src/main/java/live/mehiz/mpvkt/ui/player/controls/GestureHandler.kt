@@ -38,7 +38,6 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.sp
-import `is`.xyz.mpv.MPVLib
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.update
 import live.mehiz.mpvkt.R
@@ -65,10 +64,10 @@ fun GestureHandler(
   val audioPreferences = koinInject<AudioPreferences>()
   val panelShown by viewModel.panelShown.collectAsState()
   val allowGesturesInPanels by playerPreferences.allowGesturesInPanels.collectAsState()
-  val paused by MPVLib.propBoolean["pause"].collectAsState()
-  val duration by MPVLib.propInt["duration"].collectAsState()
-  val position by MPVLib.propInt["time-pos"].collectAsState()
-  val playbackSpeed by MPVLib.propFloat["speed"].collectAsState()
+  val paused by viewModel.mpv.propFlow<Boolean>("pause").collectAsState()
+  val duration by viewModel.mpv.propFlow<Int>("duration").collectAsState()
+  val position by viewModel.mpv.propFlow<Int>("time-pos").collectAsState()
+  val playbackSpeed by viewModel.mpv.propFlow<Float>("speed").collectAsState()
   val controlsShown by viewModel.controlsShown.collectAsState()
   val areControlsLocked by viewModel.areControlsLocked.collectAsState()
   val seekAmount by viewModel.doubleTapSeekAmount.collectAsState()
@@ -91,7 +90,7 @@ fun GestureHandler(
   val showSeekbarWhenSeeking by playerPreferences.showSeekBarWhenSeeking.collectAsState()
   var isLongPressing by remember { mutableStateOf(false) }
   val currentVolume by viewModel.currentVolume.collectAsState()
-  val currentMPVVolume by MPVLib.propInt["volume"].collectAsState()
+  val currentMPVVolume by viewModel.mpv.propFlow<Int>("volume").collectAsState()
   val currentBrightness by viewModel.currentBrightness.collectAsState()
   val volumeBoostingCap = audioPreferences.volumeBoostCap.get()
   val haptics = LocalHapticFeedback.current
@@ -100,7 +99,7 @@ fun GestureHandler(
       .fillMaxSize()
       .windowInsetsPadding(WindowInsets.safeGestures)
       .pointerInput(Unit) {
-        var originalSpeed = MPVLib.getPropertyFloat("speed") ?: 1f
+        var originalSpeed = viewModel.mpv.getPropertyFloat("speed") ?: 1f
         detectTapGestures(
           onTap = {
             if (controlsShown) viewModel.hideControls() else viewModel.showControls()
@@ -143,7 +142,7 @@ fun GestureHandler(
             tryAwaitRelease()
             if (isLongPressing) {
               isLongPressing = false
-              MPVLib.setPropertyFloat("speed", originalSpeed)
+              viewModel.mpv.setPropertyFloat("speed", originalSpeed)
               viewModel.playerUpdate.update { PlayerUpdates.None }
             }
             interactionSource.emit(PressInteraction.Release(press))
@@ -154,7 +153,7 @@ fun GestureHandler(
               originalSpeed = playbackSpeed ?: return@detectTapGestures
               haptics.performHapticFeedback(HapticFeedbackType.LongPress)
               isLongPressing = true
-              MPVLib.setPropertyFloat("speed", multipleSpeedGesture)
+              viewModel.mpv.setPropertyFloat("speed", multipleSpeedGesture)
               viewModel.playerUpdate.update { PlayerUpdates.MultipleSpeed }
             }
           },

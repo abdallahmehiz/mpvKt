@@ -43,10 +43,22 @@ class SubtitlesPreferences(preferenceStore: PreferenceStore) {
 
 enum class SubtitleJustification(
   val value: String,
-  val icon: ImageVector
+  val icon: ImageVector,
 ) {
   Left("left", Icons.AutoMirrored.Default.FormatAlignLeft),
   Center("center", Icons.Default.FormatAlignCenter),
   Right("right", Icons.AutoMirrored.Default.FormatAlignRight),
   Auto("auto", Icons.Default.FormatAlignJustify)
+  ;
+
+  companion object {
+    fun byValue(value: String): SubtitleJustification {
+      return when (value) {
+        "left" -> SubtitleJustification.Left
+        "center" -> SubtitleJustification.Center
+        "right" -> SubtitleJustification.Right
+        else -> SubtitleJustification.Auto
+      }
+    }
+  }
 }

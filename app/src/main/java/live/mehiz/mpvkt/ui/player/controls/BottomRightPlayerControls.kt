@@ -18,8 +18,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import live.mehiz.mpvkt.database.entities.CustomButtonEntity
 import live.mehiz.mpvkt.ui.player.controls.components.ControlsButton
-import live.mehiz.mpvkt.ui.player.execute
-import live.mehiz.mpvkt.ui.player.executeLongClick
 import live.mehiz.mpvkt.ui.theme.spacing
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -29,6 +27,8 @@ fun BottomRightPlayerControls(
   customButton: CustomButtonEntity?,
   customButtonTitle: String,
   isPipAvailable: Boolean,
+  onCustomButtonClick: () -> Unit,
+  onCustomButtonLongClick: () -> Unit,
   onAspectClick: () -> Unit,
   onPipClick: () -> Unit,
   modifier: Modifier = Modifier,
@@ -43,8 +43,8 @@ fun BottomRightPlayerControls(
           modifier = Modifier
             .matchParentSize()
             .combinedClickable(
-              onClick = customButton::execute,
-              onLongClick = customButton::executeLongClick,
+              onClick = onCustomButtonClick,
+              onLongClick = onCustomButtonLongClick,
               interactionSource = remember { MutableInteractionSource() },
               indication = null,
             ),
