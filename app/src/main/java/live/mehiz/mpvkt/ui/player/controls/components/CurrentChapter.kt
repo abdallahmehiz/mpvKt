@@ -4,11 +4,12 @@ import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.SizeTransform
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -24,11 +25,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import dev.vivvvek.seeker.Segment
+import `is`.xyz.mpv.MPVLib
 import `is`.xyz.mpv.Utils
 import live.mehiz.mpvkt.ui.theme.spacing
 
@@ -43,17 +46,41 @@ fun CurrentChapter(
       .clip(RoundedCornerShape(25))
       .background(MaterialTheme.colorScheme.background.copy(alpha = 0.6F))
       .clickable(onClick = onClick)
+      .pointerInput(Unit) {
+        var totalDrag = 0f
+        val swipeThreshold = 100f
+        detectHorizontalDragGestures(
+          onHorizontalDrag = { change, dragAmount ->
+            change.consume()
+            totalDrag += dragAmount
+          },
+          onDragEnd = {
+            val current = MPVLib.getPropertyInt("chapter") ?: 0
+            when {
+              totalDrag > swipeThreshold -> {
+                // Previous chapter
+                MPVLib.setPropertyInt("chapter", (current - 1).coerceAtLeast(0))
+              }
+              totalDrag < -swipeThreshold -> {
+                // Next chapter
+                MPVLib.setPropertyInt("chapter", (current + 1))
+              }
+            }
+            totalDrag = 0f
+          }
+        )
+      }
       .padding(horizontal = MaterialTheme.spacing.small, vertical = MaterialTheme.spacing.smaller),
   ) {
     AnimatedContent(
       targetState = chapter,
       transitionSpec = {
         if (targetState.start > initialState.start) {
-          (slideInVertically { height -> height } + fadeIn())
-            .togetherWith(slideOutVertically { height -> -height } + fadeOut())
+          (slideInHorizontally { width -> width } + fadeIn())
+            .togetherWith(slideOutHorizontally { width -> -width } + fadeOut())
         } else {
-          (slideInVertically { height -> -height } + fadeIn())
-            .togetherWith(slideOutVertically { height -> height } + fadeOut())
+          (slideInHorizontally { width -> -width } + fadeIn())
+            .togetherWith(slideOutHorizontally { width -> width } + fadeOut())
         }.using(
           SizeTransform(clip = false),
         )

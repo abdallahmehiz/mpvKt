@@ -28,6 +28,7 @@ import live.mehiz.mpvkt.presentation.Screen
 import live.mehiz.mpvkt.ui.player.PlayerOrientation
 import live.mehiz.mpvkt.ui.player.controls.components.sheets.toFixed
 import live.mehiz.mpvkt.ui.utils.LocalBackStack
+import me.zhanghai.compose.preference.FooterPreference
 import me.zhanghai.compose.preference.ListPreference
 import me.zhanghai.compose.preference.PreferenceCategory
 import me.zhanghai.compose.preference.ProvidePreferenceLocals
@@ -222,6 +223,9 @@ object PlayerPreferencesScreen : Screen {
             onValueChange = preferences.currentChaptersIndicator::set,
             title = { Text(stringResource(R.string.pref_player_controls_show_chapter_indicator)) },
             summary = { Text(stringResource(R.string.pref_player_controls_show_chapters_summary)) },
+          )
+          FooterPreference(
+            { Text(stringResource(R.string.pref_player_controls_chapter_indicator_gestures)) },
           )
 
           PreferenceCategory(
