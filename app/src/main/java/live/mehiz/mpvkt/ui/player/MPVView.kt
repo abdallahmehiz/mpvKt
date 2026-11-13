@@ -7,6 +7,7 @@ import android.util.AttributeSet
 import android.util.Log
 import android.view.KeyCharacterMap
 import android.view.KeyEvent
+import android.view.SurfaceHolder
 import `is`.xyz.mpv.BaseMPVView
 import `is`.xyz.mpv.KeyMapping
 import `is`.xyz.mpv.MPV
@@ -35,6 +36,19 @@ class MPVView(context: Context, attributes: AttributeSet?) :
   private val subtitlesPreferences: SubtitlesPreferences by inject()
 
   var isExiting = false
+
+  private var vid: String? = null
+
+  override fun surfaceDestroyed(holder: SurfaceHolder) {
+    vid = mpv.getPropertyString("vid")
+    mpv.setPropertyString("vid", "no")
+    super.surfaceDestroyed(holder)
+  }
+
+  override fun surfaceCreated(holder: SurfaceHolder) {
+    super.surfaceCreated(holder)
+    vid?.let { mpv.setPropertyString("vid", it) }
+  }
 
   /**
    * Returns the video aspect ratio. Rotation is taken into account.
