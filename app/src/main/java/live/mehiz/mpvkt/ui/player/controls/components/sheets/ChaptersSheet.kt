@@ -21,11 +21,11 @@ import live.mehiz.mpvkt.ui.theme.spacing
 
 @Composable
 fun ChaptersSheet(
-    chapters: ImmutableList<Segment>,
-    currentChapter: Segment,
-    onClick: (Segment) -> Unit,
-    onDismissRequest: () -> Unit,
-    modifier: Modifier = Modifier,
+  chapters: ImmutableList<Segment>,
+  currentChapter: Segment,
+  onClick: (Segment) -> Unit,
+  onDismissRequest: () -> Unit,
+  modifier: Modifier = Modifier,
 ) {
   GenericTracksSheet(
     chapters,

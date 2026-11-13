@@ -29,12 +29,12 @@ import live.mehiz.mpvkt.ui.theme.spacing
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun ControlsButton(
-    icon: ImageVector,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier,
-    onLongClick: () -> Unit = {},
-    title: String? = null,
-    color: Color = Color.White,
+  icon: ImageVector,
+  onClick: () -> Unit,
+  modifier: Modifier = Modifier,
+  onLongClick: () -> Unit = {},
+  title: String? = null,
+  color: Color = Color.White,
 ) {
   val interactionSource = remember { MutableInteractionSource() }
 
@@ -70,11 +70,11 @@ fun ControlsButton(
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun ControlsButton(
-    text: String,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier,
-    onLongClick: () -> Unit = {},
-    color: Color = Color.White,
+  text: String,
+  onClick: () -> Unit,
+  modifier: Modifier = Modifier,
+  onLongClick: () -> Unit = {},
+  color: Color = Color.White,
 ) {
   val interactionSource = remember { MutableInteractionSource() }
 

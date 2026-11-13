@@ -5,7 +5,7 @@ import android.content.Intent
 import kotlin.system.exitProcess
 
 class GlobalExceptionHandler(private val context: Context, private val activity: Class<*>) :
-    Thread.UncaughtExceptionHandler {
+  Thread.UncaughtExceptionHandler {
 
   override fun uncaughtException(t: Thread, e: Throwable) {
     val intent = Intent(context, activity)

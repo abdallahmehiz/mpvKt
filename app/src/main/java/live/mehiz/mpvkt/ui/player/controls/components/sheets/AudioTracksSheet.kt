@@ -25,12 +25,12 @@ import live.mehiz.mpvkt.ui.theme.spacing
 
 @Composable
 fun AudioTracksSheet(
-    tracks: ImmutableList<TrackNode>,
-    onSelect: (TrackNode) -> Unit,
-    onAddAudioTrack: () -> Unit,
-    onOpenDelayPanel: () -> Unit,
-    onDismissRequest: () -> Unit,
-    modifier: Modifier = Modifier,
+  tracks: ImmutableList<TrackNode>,
+  onSelect: (TrackNode) -> Unit,
+  onAddAudioTrack: () -> Unit,
+  onOpenDelayPanel: () -> Unit,
+  onDismissRequest: () -> Unit,
+  modifier: Modifier = Modifier,
 ) {
   GenericTracksSheet(
     tracks,

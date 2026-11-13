@@ -43,7 +43,7 @@ fun createPipActions(context: Context, isPaused: Boolean): ArrayList<RemoteActio
 
 @RequiresApi(O)
 fun createPipAction(context: Context, title: String, @DrawableRes icon: Int, actionCode: Int): RemoteAction =
-    RemoteAction(
+  RemoteAction(
     Icon.createWithResource(context, icon),
     title,
     title,

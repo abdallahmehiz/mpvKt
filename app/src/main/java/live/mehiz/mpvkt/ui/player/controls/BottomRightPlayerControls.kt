@@ -24,14 +24,14 @@ import live.mehiz.mpvkt.ui.theme.spacing
 @SuppressLint("NewApi")
 @Composable
 fun BottomRightPlayerControls(
-    customButton: CustomButtonEntity?,
-    customButtonTitle: String,
-    isPipAvailable: Boolean,
-    onCustomButtonClick: () -> Unit,
-    onCustomButtonLongClick: () -> Unit,
-    onAspectClick: () -> Unit,
-    onPipClick: () -> Unit,
-    modifier: Modifier = Modifier,
+  customButton: CustomButtonEntity?,
+  customButtonTitle: String,
+  isPipAvailable: Boolean,
+  onCustomButtonClick: () -> Unit,
+  onCustomButtonLongClick: () -> Unit,
+  onAspectClick: () -> Unit,
+  onPipClick: () -> Unit,
+  modifier: Modifier = Modifier,
 ) {
   Row(modifier) {
     if (customButton != null) {

@@ -34,12 +34,9 @@ import androidx.core.graphics.alpha
 import androidx.core.graphics.blue
 import androidx.core.graphics.green
 import androidx.core.graphics.red
-import androidx.core.graphics.toColorInt
-import `is`.xyz.mpv.MPV
 import live.mehiz.mpvkt.R
 import live.mehiz.mpvkt.preferences.SubtitlesPreferences
 import live.mehiz.mpvkt.preferences.preference.Preference
-import live.mehiz.mpvkt.preferences.preference.deleteAndGet
 import live.mehiz.mpvkt.presentation.components.ExpandableCard
 import live.mehiz.mpvkt.presentation.components.TintedSliderItem
 import live.mehiz.mpvkt.ui.player.controls.CARDS_MAX_WIDTH
@@ -48,12 +45,12 @@ import live.mehiz.mpvkt.ui.theme.spacing
 
 @Composable
 fun SubtitleSettingsColorsCard(
-    currentColor: Int,
-    currentColorType: SubColorType,
-    onColorChange: (Int) -> Unit,
-    onColorReset: (SubColorType) -> Unit,
-    onColorTypeChange: (SubColorType) -> Unit,
-    modifier: Modifier = Modifier,
+  currentColor: Int,
+  currentColorType: SubColorType,
+  onColorChange: (Int) -> Unit,
+  onColorReset: (SubColorType) -> Unit,
+  onColorTypeChange: (SubColorType) -> Unit,
+  modifier: Modifier = Modifier,
 ) {
   var isExpanded by remember { mutableStateOf(true) }
   ExpandableCard(
@@ -117,7 +114,7 @@ fun SubtitleSettingsColorsCard(
 }
 
 fun Int.copyAsArgb(alpha: Int = this.alpha, red: Int = this.red, green: Int = this.green, blue: Int = this.blue) =
-    (alpha shl 24) or (red shl 16) or (green shl 8) or blue
+  (alpha shl 24) or (red shl 16) or (green shl 8) or blue
 
 @OptIn(ExperimentalStdlibApi::class)
 fun Int.toColorHexString() = "#" + this.toHexString().uppercase()
@@ -142,31 +139,6 @@ enum class SubColorType(
     "sub-back-color",
     preference = SubtitlesPreferences::backgroundColor,
   ),
-}
-
-fun resetColors(preferences: SubtitlesPreferences, mpv: MPV?, type: SubColorType) {
-  when (type) {
-    SubColorType.Text -> {
-      val textColor = preferences.textColor.deleteAndGet().toColorHexString()
-      mpv?.setPropertyString("sub-color", textColor)
-    }
-
-    SubColorType.Border -> {
-      val borderColor = preferences.borderColor.deleteAndGet().toColorHexString()
-      mpv?.setPropertyString("sub-border-color", borderColor)
-    }
-
-    SubColorType.Background -> {
-      val backgroundColor = preferences.backgroundColor.deleteAndGet().toColorHexString()
-      mpv?.setPropertyString("sub-back-color", backgroundColor)
-    }
-  }
-}
-
-val getCurrentMPVColor: (SubColorType, MPV) -> Int = { c, m ->
-  m.getPropertyString(
-    c.property,
-  )!!.uppercase().toColorInt()
 }
 
 @Composable

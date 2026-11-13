@@ -21,11 +21,11 @@ import live.mehiz.mpvkt.ui.theme.spacing
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ConfirmDialog(
-    title: String,
-    subtitle: String,
-    onConfirm: () -> Unit,
-    onCancel: () -> Unit,
-    modifier: Modifier = Modifier,
+  title: String,
+  subtitle: String,
+  onConfirm: () -> Unit,
+  onCancel: () -> Unit,
+  modifier: Modifier = Modifier,
 ) {
   BasicAlertDialog(
     onCancel,

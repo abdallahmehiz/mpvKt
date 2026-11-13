@@ -281,4 +281,4 @@ object AdvancedPreferencesScreen : Screen {
 }
 
 fun getSimplifiedPathFromUri(uri: String): String =
-    Environment.getExternalStorageDirectory().canonicalPath + "/" + Uri.decode(uri).substringAfterLast(":")
+  Environment.getExternalStorageDirectory().canonicalPath + "/" + Uri.decode(uri).substringAfterLast(":")

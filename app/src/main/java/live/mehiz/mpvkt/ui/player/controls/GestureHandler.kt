@@ -16,7 +16,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.safeGestures
 import androidx.compose.foundation.layout.windowInsetsPadding
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.LocalRippleConfiguration
 import androidx.compose.material3.Text
 import androidx.compose.material3.ripple
@@ -38,7 +37,6 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.sp
-import `is`.xyz.mpv.propFlow
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.update
 import live.mehiz.mpvkt.App
@@ -55,18 +53,17 @@ import live.mehiz.mpvkt.ui.theme.playerRippleConfiguration
 @Suppress("CyclomaticComplexMethod", "MultipleEmitters")
 @Composable
 fun GestureHandler(
-    viewModel: PlayerViewModel,
-    interactionSource: MutableInteractionSource,
-    modifier: Modifier = Modifier,
+  viewModel: PlayerViewModel,
+  interactionSource: MutableInteractionSource,
+  modifier: Modifier = Modifier,
 ) {
   val playerPreferences = App.graph.playerPreferences
   val audioPreferences = App.graph.audioPreferences
   val panelShown by viewModel.panelShown.collectAsState()
   val allowGesturesInPanels by playerPreferences.allowGesturesInPanels.collectAsState()
-  val paused by viewModel.mpv.propFlow<Boolean>("pause").collectAsState()
-  val duration by viewModel.mpv.propFlow<Int>("duration").collectAsState()
-  val position by viewModel.mpv.propFlow<Int>("time-pos").collectAsState()
-  val playbackSpeed by viewModel.mpv.propFlow<Float>("speed").collectAsState()
+  val playback = viewModel.playerManager.playback
+  val duration by playback.duration.collectAsState()
+  val position by playback.position.collectAsState()
   val controlsShown by viewModel.controlsShown.collectAsState()
   val areControlsLocked by viewModel.areControlsLocked.collectAsState()
   val seekAmount by viewModel.doubleTapSeekAmount.collectAsState()
@@ -89,7 +86,7 @@ fun GestureHandler(
   val showSeekbarWhenSeeking by playerPreferences.showSeekBarWhenSeeking.collectAsState()
   var isLongPressing by remember { mutableStateOf(false) }
   val currentVolume by viewModel.currentVolume.collectAsState()
-  val currentMPVVolume by viewModel.mpv.propFlow<Int>("volume").collectAsState()
+  val currentMPVVolume by viewModel.playerManager.audio.mpvVolume.collectAsState()
   val currentBrightness by viewModel.currentBrightness.collectAsState()
   val volumeBoostingCap = audioPreferences.volumeBoostCap.get()
   val haptics = LocalHapticFeedback.current
@@ -98,7 +95,6 @@ fun GestureHandler(
       .fillMaxSize()
       .windowInsetsPadding(WindowInsets.safeGestures)
       .pointerInput(Unit) {
-        var originalSpeed = viewModel.mpv.getPropertyFloat("speed") ?: 1f
         detectTapGestures(
           onTap = {
             if (controlsShown) viewModel.hideControls() else viewModel.showControls()
@@ -141,18 +137,17 @@ fun GestureHandler(
             tryAwaitRelease()
             if (isLongPressing) {
               isLongPressing = false
-              viewModel.mpv.setPropertyFloat("speed", originalSpeed)
+              playback.releaseHeldSpeed()
               viewModel.playerUpdate.update { PlayerUpdates.None }
             }
             interactionSource.emit(PressInteraction.Release(press))
           },
           onLongPress = {
             if (multipleSpeedGesture == 0f || areControlsLocked) return@detectTapGestures
-            if (!isLongPressing && paused == false) {
-              originalSpeed = playbackSpeed ?: return@detectTapGestures
+            if (!isLongPressing && !playback.paused.value) {
               haptics.performHapticFeedback(HapticFeedbackType.LongPress)
               isLongPressing = true
-              viewModel.mpv.setPropertyFloat("speed", multipleSpeedGesture)
+              playback.holdSpeed(multipleSpeedGesture)
               viewModel.playerUpdate.update { PlayerUpdates.MultipleSpeed }
             }
           },
@@ -160,14 +155,14 @@ fun GestureHandler(
       }
       .pointerInput(areControlsLocked) {
         if (!seekGesture || areControlsLocked) return@pointerInput
-        var startingPosition = position ?: 0
+        var startingPosition = position
         var startingX = 0f
         var wasPlayerAlreadyPause = false
         detectHorizontalDragGestures(
           onDragStart = {
-            startingPosition = position ?: 0
+            startingPosition = position
             startingX = it.x
-            wasPlayerAlreadyPause = paused ?: false
+            wasPlayerAlreadyPause = playback.paused.value
             viewModel.pause()
           },
           onDragEnd = {
@@ -176,8 +171,8 @@ fun GestureHandler(
             if (!wasPlayerAlreadyPause) viewModel.unpause()
           },
         ) { change, dragAmount ->
-          if ((position ?: 0) <= 0f && dragAmount < 0) return@detectHorizontalDragGestures
-          if ((position ?: 0) >= (duration ?: 0) && dragAmount > 0) return@detectHorizontalDragGestures
+          if (position <= 0f && dragAmount < 0) return@detectHorizontalDragGestures
+          if (position >= duration && dragAmount > 0) return@detectHorizontalDragGestures
           calculateNewHorizontalGestureValue(
             startingPosition,
             startingX,
@@ -188,7 +183,7 @@ fun GestureHandler(
               Pair(
                 startingPosition,
                 (it - startingPosition)
-                  .coerceIn(0 - startingPosition, ((duration ?: 0) - startingPosition)),
+                  .coerceIn(0 - startingPosition, (duration - startingPosition)),
               )
             }
             viewModel.seekTo(it, preciseSeeking)
@@ -209,11 +204,11 @@ fun GestureHandler(
         val mpvVolumeGestureSens = 0.02f
         val isIncreasingVolumeBoost: (Float) -> Boolean = {
           volumeBoostingCap > 0 && currentVolume == viewModel.maxVolume &&
-            (currentMPVVolume ?: 100) - 100 < volumeBoostingCap && it < 0
+            currentMPVVolume - 100 < volumeBoostingCap && it < 0
         }
         val isDecreasingVolumeBoost: (Float) -> Boolean = {
           volumeBoostingCap > 0 && currentVolume == viewModel.maxVolume &&
-            (currentMPVVolume ?: 100) - 100 in 1..volumeBoostingCap && it > 0
+            currentMPVVolume - 100 in 1..volumeBoostingCap && it > 0
         }
         detectVerticalDragGestures(
           onDragEnd = { startingY = 0f },
@@ -234,7 +229,7 @@ fun GestureHandler(
               }
               viewModel.changeMPVVolumeTo(
                 calculateNewVerticalGestureValue(
-                  originalMPVVolume ?: 100,
+                  originalMPVVolume,
                   mpvVolumeStartingY,
                   change.position.y,
                   mpvVolumeGestureSens,
@@ -281,16 +276,15 @@ fun GestureHandler(
   )
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DoubleTapToSeekOvals(
-    amount: Int,
-    text: String?,
-    showOvals: Boolean,
-    showSeekIcon: Boolean,
-    showSeekTime: Boolean,
-    interactionSource: MutableInteractionSource,
-    modifier: Modifier = Modifier,
+  amount: Int,
+  text: String?,
+  showOvals: Boolean,
+  showSeekIcon: Boolean,
+  showSeekTime: Boolean,
+  interactionSource: MutableInteractionSource,
+  modifier: Modifier = Modifier,
 ) {
   val alpha by animateFloatAsState(if (amount == 0) 0f else 0.2f, label = "double_tap_animation_alpha")
   Box(
@@ -334,13 +328,13 @@ fun DoubleTapToSeekOvals(
 }
 
 fun calculateNewVerticalGestureValue(originalValue: Int, startingY: Float, newY: Float, sensitivity: Float): Int =
-    originalValue + ((startingY - newY) * sensitivity).toInt()
+  originalValue + ((startingY - newY) * sensitivity).toInt()
 
 fun calculateNewVerticalGestureValue(originalValue: Float, startingY: Float, newY: Float, sensitivity: Float): Float =
-    originalValue + ((startingY - newY) * sensitivity)
+  originalValue + ((startingY - newY) * sensitivity)
 
 fun calculateNewHorizontalGestureValue(originalValue: Int, startingX: Float, newX: Float, sensitivity: Float): Int =
-    originalValue + ((newX - startingX) * sensitivity).toInt()
+  originalValue + ((newX - startingX) * sensitivity).toInt()
 
 fun calculateNewHorizontalGestureValue(originalValue: Float, startingX: Float, newX: Float, sensitivity: Float): Float =
-    originalValue + ((newX - startingX) * sensitivity)
+  originalValue + ((newX - startingX) * sensitivity)

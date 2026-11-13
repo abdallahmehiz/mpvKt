@@ -28,13 +28,13 @@ import me.zhanghai.compose.preference.ProvidePreferenceLocals
 
 @Composable
 fun SubtitlesSheet(
-    tracks: ImmutableList<TrackNode>,
-    onSelect: (Int) -> Unit,
-    onAddSubtitle: () -> Unit,
-    onOpenSubtitleSettings: () -> Unit,
-    onOpenSubtitleDelay: () -> Unit,
-    onDismissRequest: () -> Unit,
-    modifier: Modifier = Modifier,
+  tracks: ImmutableList<TrackNode>,
+  onSelect: (Int) -> Unit,
+  onAddSubtitle: () -> Unit,
+  onOpenSubtitleSettings: () -> Unit,
+  onOpenSubtitleDelay: () -> Unit,
+  onDismissRequest: () -> Unit,
+  modifier: Modifier = Modifier,
 ) {
   GenericTracksSheet(
     tracks,

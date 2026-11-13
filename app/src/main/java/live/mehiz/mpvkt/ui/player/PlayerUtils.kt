@@ -6,10 +6,15 @@ import android.os.ParcelFileDescriptor
 import android.util.Log
 import `is`.xyz.mpv.MPVNode
 import `is`.xyz.mpv.Utils
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.serialization.json.Json
 
 internal fun Uri.openContentFd(context: Context): String? =
-    context.contentResolver.openFileDescriptor(this, "r")?.detachFd()?.let {
+  context.contentResolver.openFileDescriptor(this, "r")?.detachFd()?.let {
     Utils.findRealPath(it)?.also { _ ->
       ParcelFileDescriptor.adoptFd(it).close()
     } ?: "fd://$it"
@@ -55,3 +60,12 @@ internal val imageExtensions = listOf(
 )
 
 inline fun <reified T> MPVNode.toObject(json: Json): T = json.decodeFromString<T>(toJson())
+
+internal fun <T : Any, R> StateFlow<T?>.mapState(
+  scope: CoroutineScope,
+  default: () -> R,
+  transform: (T) -> R,
+): StateFlow<R> {
+  fun convert(value: T?): R = value?.let { runCatching { transform(it) }.getOrNull() } ?: default()
+  return map(::convert).stateIn(scope, SharingStarted.Eagerly, convert(value))
+}

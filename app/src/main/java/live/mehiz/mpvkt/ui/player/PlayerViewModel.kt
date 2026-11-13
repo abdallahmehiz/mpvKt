@@ -1,76 +1,82 @@
 package live.mehiz.mpvkt.ui.player
 
-import android.content.Context
-import android.media.AudioManager
-import android.net.Uri
-import android.provider.Settings
-import android.util.DisplayMetrics
 import android.util.Log
-import android.view.inputmethod.InputMethodManager
-import android.widget.Toast
-import androidx.core.net.toUri
+import androidx.compose.runtime.Stable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import `is`.xyz.mpv.MPV
-import `is`.xyz.mpv.MPVNode
-import `is`.xyz.mpv.prop
-import `is`.xyz.mpv.propFlow
-import kotlinx.collections.immutable.persistentListOf
-import kotlinx.collections.immutable.toImmutableList
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlinx.serialization.json.Json
 import live.mehiz.mpvkt.App
-import live.mehiz.mpvkt.R
-import live.mehiz.mpvkt.database.MpvKtDatabase
 import live.mehiz.mpvkt.database.entities.CustomButtonEntity
-import live.mehiz.mpvkt.preferences.AudioPreferences
+import live.mehiz.mpvkt.domain.custombuttons.repository.CustomButtonRepository
 import live.mehiz.mpvkt.preferences.GesturePreferences
 import live.mehiz.mpvkt.preferences.PlayerPreferences
 import live.mehiz.mpvkt.ui.custombuttons.CustomButtonsUiState
 import live.mehiz.mpvkt.ui.custombuttons.getButtons
-import kotlin.getValue
-import kotlin.properties.ReadOnlyProperty
-import kotlin.reflect.KProperty
+import live.mehiz.mpvkt.ui.player.manager.LuaManager
+import live.mehiz.mpvkt.ui.player.manager.PlayerManager
 
-class PlayerViewModelFactory(private val mpv: MPV) : ViewModelProvider.Factory {
+class PlayerViewModelFactory(private val playerManager: PlayerManager, private val initialBrightness: Float) :
+  ViewModelProvider.Factory {
   override fun <T : ViewModel> create(modelClass: Class<T>): T {
-    if (modelClass.isAssignableFrom(PlayerViewModel::class.java)) {
-      @Suppress("UNCHECKED_CAST")
-      return PlayerViewModel(mpv) as T
-    }
-    throw IllegalArgumentException("Unknown ViewModel class")
+    require(modelClass.isAssignableFrom(PlayerViewModel::class.java)) { "Unknown ViewModel class" }
+    @Suppress("UNCHECKED_CAST")
+    return PlayerViewModel(
+      playerManager = playerManager,
+      customButtonRepository = App.graph.customButtonRepository,
+      playerPreferences = App.graph.playerPreferences,
+      gesturePreferences = App.graph.gesturePreferences,
+      initialBrightness = initialBrightness,
+    ) as T
   }
 }
 
 @Suppress("TooManyFunctions")
-class PlayerViewModel(val mpv: MPV) : ViewModel() {
-  private val playerPreferences = App.graph.playerPreferences
-  private val gesturePreferences = App.graph.gesturePreferences
-  private val audioPreferences = App.graph.audioPreferences
-  private val mpvKtDatabase = App.graph.database
-  private val json: Json = App.graph.json
-  private val context: Context = App.graph.context
-  private val audioManager = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
-  private val inputMethodManager = context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+@Stable // none of the values in the viewmodel change randomly, ig
+class PlayerViewModel(
+  val playerManager: PlayerManager,
+  private val customButtonRepository: CustomButtonRepository,
+  private val playerPreferences: PlayerPreferences,
+  private val gesturePreferences: GesturePreferences,
+  initialBrightness: Float,
+) : ViewModel() {
+  private val playback = playerManager.playback
+
+  private val eventChannel = Channel<Event>(Channel.BUFFERED)
+  val eventFlow = eventChannel.receiveAsFlow()
+
+  private val _customButtons = MutableStateFlow<CustomButtonsUiState>(CustomButtonsUiState.Loading)
+  val customButtons = _customButtons.asStateFlow()
+
+  private val _primaryButton = MutableStateFlow<CustomButtonEntity?>(null)
+  val primaryButton = _primaryButton.asStateFlow()
+
+  private val _primaryButtonTitle = MutableStateFlow("")
+  val primaryButtonTitle = _primaryButtonTitle.asStateFlow()
 
   init {
+    playerManager.lua.events
+      .onEach { event ->
+        when (event) {
+          is LuaManager.Event.Seek -> showLuaSeek(event)
+          is LuaManager.Event.Ui -> handleLuaCommand(event.command, event.data)
+        }
+      }
+      .launchIn(viewModelScope)
+
     viewModelScope.launch(Dispatchers.IO) {
       try {
-        val buttons = mpvKtDatabase.customButtonDao().getCustomButtons().first()
-        buttons.firstOrNull { it.id == playerPreferences.primaryCustomButtonId.get() }?.let {
+        val buttons = customButtonRepository.getCustomButtons().first()
+        primaryCustomButton(buttons)?.let {
           _primaryButton.update { _ -> it }
           // If the button text is not empty, it has been set buy a lua script in which
           // case we don't want to override it
@@ -85,38 +91,11 @@ class PlayerViewModel(val mpv: MPV) : ViewModel() {
     }
   }
 
-  private val eventChannel = Channel<Event>()
-  val eventFlow = eventChannel.receiveAsFlow()
+  private fun primaryCustomButton(buttons: List<CustomButtonEntity>) =
+    buttons.firstOrNull { it.id == playerPreferences.primaryCustomButtonId.get() }
 
-  private val _customButtons = MutableStateFlow<CustomButtonsUiState>(CustomButtonsUiState.Loading)
-  val customButtons = _customButtons.asStateFlow()
-
-  private val _primaryButton = MutableStateFlow<CustomButtonEntity?>(null)
-  val primaryButton = _primaryButton.asStateFlow()
-
-  private val _primaryButtonTitle = MutableStateFlow("")
-  val primaryButtonTitle = _primaryButtonTitle.asStateFlow()
-
-  var paused: Boolean? by mpv.prop("pause")
-  var pos: Int? by mpv.prop("time-pos")
-  val duration: Int? by mpv.prop("duration")
-  private val currentMPVVolume: Int? by mpv.prop("volume")
-  val currentVolume = MutableStateFlow(audioManager.getStreamVolume(AudioManager.STREAM_MUSIC))
-  private val volumeBoostCap: Int? by mpv.prop("volume-max")
-
-  val subtitleTracks by lazy {
-    mpv.propFlow<MPVNode>("track-list")
-      .map { (it?.toObject<List<TrackNode>>(json) ?: persistentListOf()).filter { it.isSubtitle }.toImmutableList() }
-  }
-
-  val audioTracks by lazy {
-    mpv.propFlow<MPVNode>("track-list")
-      .map { (it?.toObject<List<TrackNode>>(json) ?: persistentListOf()).filter { it.isAudio }.toImmutableList() }
-  }
-
-  val chapters by lazy {
-    mpv.propFlow<MPVNode>("chapter-list")
-      .map { (it?.toObject<List<ChapterNode>>(json) ?: persistentListOf()).map { it.toSegment() }.toImmutableList() }
+  fun setPrimaryCustomButtonTitle(button: CustomButtonEntity) {
+    _primaryButtonTitle.update { _ -> button.title }
   }
 
   private val _controlsShown = MutableStateFlow(true)
@@ -127,87 +106,8 @@ class PlayerViewModel(val mpv: MPV) : ViewModel() {
   val areControlsLocked = _areControlsLocked.asStateFlow()
 
   val playerUpdate = MutableStateFlow<PlayerUpdates>(PlayerUpdates.None)
-  val isBrightnessSliderShown = MutableStateFlow(false)
-  val isVolumeSliderShown = MutableStateFlow(false)
-  val currentBrightness = MutableStateFlow(
-    runCatching {
-      Settings.System.getFloat(context.contentResolver, Settings.System.SCREEN_BRIGHTNESS)
-        .normalize(0f, 255f, 0f, 1f)
-    }.getOrElse { 0f },
-  )
-
   val sheetShown = MutableStateFlow(Sheets.None)
   val panelShown = MutableStateFlow(Panels.None)
-
-  // Pair(startingPosition, seekAmount)
-  val gestureSeekAmount = MutableStateFlow<Pair<Int, Int>?>(null)
-
-  private val _seekText = MutableStateFlow<String?>(null)
-  val seekText = _seekText.asStateFlow()
-  private val _doubleTapSeekAmount = MutableStateFlow(0)
-  val doubleTapSeekAmount = _doubleTapSeekAmount.asStateFlow()
-  private val _isSeekingForwards = MutableStateFlow(false)
-  val isSeekingForwards = _isSeekingForwards.asStateFlow()
-
-  private var timerJob: Job? = null
-  private val _remainingTime = MutableStateFlow(0)
-  val remainingTime = _remainingTime.asStateFlow()
-
-  fun startTimer(seconds: Int) {
-    timerJob?.cancel()
-    _remainingTime.value = seconds
-    if (seconds < 1) return
-    timerJob = viewModelScope.launch {
-      for (time in seconds downTo 0) {
-        _remainingTime.value = time
-        delay(1000)
-      }
-      paused = true
-      Toast.makeText(context, context.getString(R.string.toast_sleep_timer_ended), Toast.LENGTH_SHORT).show()
-    }
-  }
-
-  fun cycleDecoders() {
-    mpv.setPropertyString(
-      "hwdec",
-      when (Decoder.getDecoderFromValue(mpv.getPropertyString("hwdec-current") ?: return)) {
-        Decoder.HWPlus -> Decoder.HW.value
-        Decoder.HW -> Decoder.SW.value
-        Decoder.SW -> Decoder.HWPlus.value
-        Decoder.AutoCopy -> Decoder.SW.value
-        Decoder.Auto -> Decoder.SW.value
-      },
-    )
-  }
-
-  fun addAudio(uri: Uri) {
-    val url = uri.toString()
-    val path = if (url.startsWith("content://")) url.toUri().openContentFd(context) else url
-    mpv.command("audio-add", path ?: return, "cached")
-  }
-
-  fun addSubtitle(uri: Uri) {
-    val url = uri.toString()
-    val path = if (url.startsWith("content://")) url.toUri().openContentFd(context) ?: url else url
-    mpv.command("sub-add", path, "cached")
-  }
-
-  fun selectSub(id: Int) {
-    var sid: Int? by mpv.prop("sid")
-    var secondarySid: Int? by mpv.prop("secondary-sid")
-    when (id) {
-      sid -> Pair(secondarySid, null)
-      secondarySid -> Pair(sid, null)
-      else -> if (sid != null) Pair(sid, id) else Pair(id, null)
-    }.let { pair ->
-      pair.first?.let { sid = it } ?: mpv.prop("sid", false)
-      pair.second?.let { secondarySid = it } ?: mpv.prop("secondary-sid", false)
-    }
-  }
-
-  fun pauseUnpause() = mpv.command("cycle", "pause")
-  fun pause() = mpv.prop("pause", true)
-  fun unpause() = mpv.prop("pause", false)
 
   fun showControls() {
     if (sheetShown.value != Sheets.None || panelShown.value != Panels.None) return
@@ -237,14 +137,15 @@ class PlayerViewModel(val mpv: MPV) : ViewModel() {
     _areControlsLocked.update { false }
   }
 
-  fun seekBy(offset: Int, precise: Boolean = false) {
-    mpv.command("seek", offset.toString(), if (precise) "relative+exact" else "relative")
-  }
+  fun pauseUnpause() = playback.togglePause()
+  fun pause() = playback.setPaused(true)
+  fun unpause() = playback.setPaused(false)
 
-  fun seekTo(position: Int, precise: Boolean = true) {
-    if (position !in 0..(mpv.getPropertyInt("duration") ?: 0)) return
-    mpv.command("seek", position.toString(), if (precise) "absolute" else "absolute+keyframes")
-  }
+  fun seekTo(position: Int, precise: Boolean = true) = playback.seekTo(position, precise)
+
+  val isBrightnessSliderShown = MutableStateFlow(false)
+  val isVolumeSliderShown = MutableStateFlow(false)
+  val currentBrightness = MutableStateFlow(initialBrightness)
 
   fun changeBrightnessBy(change: Float) {
     changeBrightnessTo(currentBrightness.value + change)
@@ -260,66 +161,19 @@ class PlayerViewModel(val mpv: MPV) : ViewModel() {
     isBrightnessSliderShown.update { true }
   }
 
-  val maxVolume = audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC)
-  fun changeVolumeBy(change: Int) {
-    val mpvVolume = mpv.getPropertyInt("volume")
-    if ((volumeBoostCap ?: audioPreferences.volumeBoostCap.get()) > 0 && currentVolume.value == maxVolume) {
-      if (mpvVolume == 100 && change < 0) changeVolumeTo(currentVolume.value + change)
-      val finalMPVVolume = (mpvVolume?.plus(change))?.coerceAtLeast(100) ?: 100
-      if (finalMPVVolume in 100..(volumeBoostCap ?: audioPreferences.volumeBoostCap.get()) + 100) {
-        changeMPVVolumeTo(finalMPVVolume)
-        return
-      }
-    }
-    changeVolumeTo(currentVolume.value + change)
-  }
+  val currentVolume = playerManager.audio.streamVolume
+  val maxVolume = playerManager.audio.maxVolume
 
-  fun changeVolumeTo(volume: Int) {
-    val newVolume = volume.coerceIn(0..maxVolume)
-    audioManager.setStreamVolume(
-      AudioManager.STREAM_MUSIC,
-      newVolume,
-      0,
-    )
-    currentVolume.update { newVolume }
-  }
-
-  fun changeMPVVolumeTo(volume: Int) {
-    mpv.prop["volume"] = volume
-  }
-
-  fun setMPVVolume(volume: Int) {
-    if (volume != currentMPVVolume) displayVolumeSlider()
-  }
+  fun changeVolumeBy(change: Int) = playerManager.audio.changeVolumeBy(change)
+  fun changeVolumeTo(volume: Int) = playerManager.audio.setStreamVolume(volume)
+  fun changeMPVVolumeTo(volume: Int) = playerManager.audio.setMpvVolume(volume)
 
   fun displayVolumeSlider() {
     isVolumeSliderShown.update { true }
   }
 
   fun changeVideoAspect(aspect: VideoAspect) {
-    var ratio = -1.0
-    var pan = 1.0
-    when (aspect) {
-      VideoAspect.Crop -> {
-        pan = 1.0
-      }
-
-      VideoAspect.Fit -> {
-        pan = 0.0
-        mpv.prop["panscan"] = 0.0
-      }
-
-      VideoAspect.Stretch -> {
-        val dm = DisplayMetrics()
-        if (eventChannel.trySend(Event.StretchVideo(dm)).isSuccess) {
-          ratio = dm.widthPixels / dm.heightPixels.toDouble()
-          pan = 0.0
-        }
-      }
-    }
-    mpv.prop["panscan"] = pan
-    mpv.prop["video-aspect-override"] = ratio
-    playerPreferences.videoAspect.set(aspect)
+    eventChannel.trySend(Event.ApplyVideoAspect(aspect))
     playerUpdate.update { PlayerUpdates.AspectRatio }
   }
 
@@ -327,114 +181,15 @@ class PlayerViewModel(val mpv: MPV) : ViewModel() {
     eventChannel.trySend(Event.CycleRotation)
   }
 
-  @Suppress("CyclomaticComplexMethod", "LongMethod")
-  fun handleLuaInvocation(property: String, value: String) {
-    val data = value
-      .removePrefix("\"")
-      .removeSuffix("\"")
-      .ifEmpty { return }
+  // Pair(startingPosition, seekAmount)
+  val gestureSeekAmount = MutableStateFlow<Pair<Int, Int>?>(null)
 
-    when (property.substringAfterLast("/")) {
-      "show_text" -> playerUpdate.update { PlayerUpdates.ShowText(data) }
-
-      "toggle_ui" -> {
-        when (data) {
-          "show" -> showControls()
-
-          "toggle" -> if (controlsShown.value) hideControls() else showControls()
-
-          "hide" -> {
-            sheetShown.update { Sheets.None }
-            panelShown.update { Panels.None }
-            hideControls()
-          }
-        }
-      }
-
-      "show_panel" -> {
-        when (data) {
-          "subtitle_settings" -> panelShown.update { Panels.SubtitleSettings }
-          "subtitle_delay" -> panelShown.update { Panels.SubtitleDelay }
-          "audio_delay" -> panelShown.update { Panels.AudioDelay }
-          "video_filters" -> panelShown.update { Panels.VideoFilters }
-        }
-      }
-
-      "set_button_title" -> {
-        _primaryButtonTitle.update { _ -> data }
-      }
-
-      "reset_button_title" -> {
-        _customButtons.value.getButtons().firstOrNull { it.id == playerPreferences.primaryCustomButtonId.get() }?.let {
-          setPrimaryCustomButtonTitle(it)
-        }
-      }
-
-      "seek_to_with_text" -> {
-        val (seekValue, text) = data.split("|", limit = 2)
-        seekToWithText(seekValue.toInt(), text)
-      }
-
-      "seek_by_with_text" -> {
-        val (seekValue, text) = data.split("|", limit = 2)
-        seekByWithText(seekValue.toInt(), text)
-      }
-
-      "seek_by" -> seekByWithText(data.toInt(), null)
-
-      "seek_to" -> seekToWithText(data.toInt(), null)
-
-      "toggle_button" -> {
-        fun showButton() {
-          if (_primaryButton.value == null) {
-            _primaryButton.update {
-              customButtons.value.getButtons().firstOrNull { it.id == playerPreferences.primaryCustomButtonId.get() }
-            }
-          }
-        }
-        when (data) {
-          "show" -> showButton()
-          "toggle" if _primaryButton.value != null -> showButton()
-          else -> _primaryButton.update { null }
-        }
-      }
-
-      "software_keyboard" -> when (data) {
-        "show" -> forceShowSoftwareKeyboard()
-        "hide" -> forceHideSoftwareKeyboard()
-        "toggle" if !inputMethodManager.isActive -> forceShowSoftwareKeyboard()
-        else -> forceHideSoftwareKeyboard()
-      }
-    }
-
-    mpv.prop[property] = ""
-  }
-
-  private fun forceShowSoftwareKeyboard() {
-    inputMethodManager.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0)
-  }
-
-  private fun forceHideSoftwareKeyboard() {
-    inputMethodManager.toggleSoftInput(InputMethodManager.SHOW_IMPLICIT, 0)
-  }
-
-  private fun seekToWithText(seekValue: Int, text: String?) {
-    _isSeekingForwards.value = seekValue > 0
-    _doubleTapSeekAmount.value = seekValue - (pos ?: return)
-    _seekText.update { text }
-    seekTo(seekValue, playerPreferences.preciseSeeking.get())
-    if (playerPreferences.showSeekBarWhenSeeking.get()) showSeekBar()
-  }
-
-  private fun seekByWithText(value: Int, text: String?) {
-    _doubleTapSeekAmount.update {
-      if (value < 0 && it < 0 || (pos ?: return) + value > (duration ?: return)) 0 else it + value
-    }
-    _seekText.update { text }
-    _isSeekingForwards.value = value > 0
-    seekBy(value, playerPreferences.preciseSeeking.get())
-    if (playerPreferences.showSeekBarWhenSeeking.get()) showSeekBar()
-  }
+  private val _seekText = MutableStateFlow<String?>(null)
+  val seekText = _seekText.asStateFlow()
+  private val _doubleTapSeekAmount = MutableStateFlow(0)
+  val doubleTapSeekAmount = _doubleTapSeekAmount.asStateFlow()
+  private val _isSeekingForwards = MutableStateFlow(false)
+  val isSeekingForwards = _isSeekingForwards.asStateFlow()
 
   private val doubleTapToSeekDuration = gesturePreferences.doubleTapToSeekDuration.get()
 
@@ -446,104 +201,119 @@ class PlayerViewModel(val mpv: MPV) : ViewModel() {
     _seekText.update { text }
   }
 
-  fun leftSeek() {
-    if ((pos ?: return) > 0) _doubleTapSeekAmount.value -= doubleTapToSeekDuration
-    _isSeekingForwards.value = false
-    seekBy(-doubleTapToSeekDuration, playerPreferences.preciseSeeking.get())
+  private fun afterSeek() {
     if (playerPreferences.showSeekBarWhenSeeking.get()) showSeekBar()
+  }
+
+  private fun showLuaSeek(seek: LuaManager.Event.Seek) {
+    _isSeekingForwards.value = seek.offset > 0
+    _doubleTapSeekAmount.update {
+      when {
+        seek.absolute -> seek.offset
+        (seek.offset < 0 && it < 0) || playback.position.value + seek.offset > playback.duration.value -> 0
+        else -> it + seek.offset
+      }
+    }
+    _seekText.update { seek.text }
+    afterSeek()
+  }
+
+  fun leftSeek() {
+    if (playback.position.value > 0) _doubleTapSeekAmount.value -= doubleTapToSeekDuration
+    _isSeekingForwards.value = false
+    playback.seekBy(-doubleTapToSeekDuration, playerPreferences.preciseSeeking.get())
+    afterSeek()
   }
 
   fun rightSeek() {
-    if ((pos ?: return) < (duration ?: return)) {
-      _doubleTapSeekAmount.value += doubleTapToSeekDuration
-    }
+    if (playback.position.value < playback.duration.value) _doubleTapSeekAmount.value += doubleTapToSeekDuration
     _isSeekingForwards.value = true
-    seekBy(doubleTapToSeekDuration, playerPreferences.preciseSeeking.get())
-    if (playerPreferences.showSeekBarWhenSeeking.get()) showSeekBar()
+    playback.seekBy(doubleTapToSeekDuration, playerPreferences.preciseSeeking.get())
+    afterSeek()
   }
 
-  fun handleLeftDoubleTap() {
-    when (gesturePreferences.leftSingleActionGesture.get()) {
-      SingleActionGesture.Seek -> {
-        leftSeek()
-      }
-
-      SingleActionGesture.PlayPause -> {
-        pauseUnpause()
-      }
-
-      SingleActionGesture.Custom -> {
-        mpv.command("keypress", CustomKeyCodes.DoubleTapLeft.keyCode)
-      }
-
+  private fun runGesture(gesture: SingleActionGesture, seek: () -> Unit, key: CustomKeyCodes) {
+    when (gesture) {
+      SingleActionGesture.Seek -> seek()
+      SingleActionGesture.PlayPause -> pauseUnpause()
+      SingleActionGesture.Custom -> playerManager.keypress(key.keyCode)
       SingleActionGesture.None -> {}
     }
   }
 
-  fun handleCenterDoubleTap() {
-    when (gesturePreferences.centerSingleActionGesture.get()) {
-      SingleActionGesture.PlayPause -> {
-        pauseUnpause()
+  fun handleLeftDoubleTap() =
+    runGesture(gesturePreferences.leftSingleActionGesture.get(), ::leftSeek, CustomKeyCodes.DoubleTapLeft)
+
+  fun handleCenterDoubleTap() =
+    runGesture(gesturePreferences.centerSingleActionGesture.get(), {}, CustomKeyCodes.DoubleTapCenter)
+
+  fun handleRightDoubleTap() =
+    runGesture(gesturePreferences.rightSingleActionGesture.get(), ::rightSeek, CustomKeyCodes.DoubleTapRight)
+
+  @Suppress("CyclomaticComplexMethod")
+  private fun handleLuaCommand(command: String, data: String) {
+    when (command) {
+      "show_text" -> playerUpdate.update { PlayerUpdates.ShowText(data) }
+
+      "toggle_ui" -> when (data) {
+        "show" -> showControls()
+
+        "toggle" -> if (controlsShown.value) hideControls() else showControls()
+
+        "hide" -> {
+          sheetShown.update { Sheets.None }
+          panelShown.update { Panels.None }
+          hideControls()
+        }
       }
 
-      SingleActionGesture.Custom -> {
-        mpv.command("keypress", CustomKeyCodes.DoubleTapCenter.keyCode)
+      "show_panel" -> when (data) {
+        "subtitle_settings" -> panelShown.update { Panels.SubtitleSettings }
+        "subtitle_delay" -> panelShown.update { Panels.SubtitleDelay }
+        "audio_delay" -> panelShown.update { Panels.AudioDelay }
+        "video_filters" -> panelShown.update { Panels.VideoFilters }
       }
 
-      SingleActionGesture.Seek -> {}
+      "set_button_title" -> _primaryButtonTitle.update { _ -> data }
 
-      SingleActionGesture.None -> {}
+      "reset_button_title" -> primaryCustomButton(customButtons.value.getButtons())?.let(::setPrimaryCustomButtonTitle)
+
+      "toggle_button" -> {
+        fun showButton() {
+          if (_primaryButton.value == null) {
+            _primaryButton.update {
+              primaryCustomButton(
+                customButtons.value.getButtons(),
+              )
+            }
+          }
+        }
+        when (data) {
+          "show" -> showButton()
+          "toggle" if _primaryButton.value != null -> showButton()
+          else -> _primaryButton.update { null }
+        }
+      }
+
+      "software_keyboard" -> when (data) {
+        "show" -> eventChannel.trySend(Event.SoftwareKeyboard(KeyboardAction.Show))
+        "hide" -> eventChannel.trySend(Event.SoftwareKeyboard(KeyboardAction.Hide))
+        "toggle" -> eventChannel.trySend(Event.SoftwareKeyboard(KeyboardAction.Toggle))
+      }
     }
   }
 
-  fun handleRightDoubleTap() {
-    when (gesturePreferences.rightSingleActionGesture.get()) {
-      SingleActionGesture.Seek -> {
-        rightSeek()
-      }
-
-      SingleActionGesture.PlayPause -> {
-        pauseUnpause()
-      }
-
-      SingleActionGesture.Custom -> {
-        mpv.command("keypress", CustomKeyCodes.DoubleTapRight.keyCode)
-      }
-
-      SingleActionGesture.None -> {}
-    }
-  }
-
-  fun setPrimaryCustomButtonTitle(button: CustomButtonEntity) {
-    _primaryButtonTitle.update { _ -> button.title }
-  }
+  enum class KeyboardAction { Show, Hide, Toggle }
 
   sealed interface Event {
     data object CycleRotation : Event
     data class SetControls(val visible: Boolean) : Event
-    data class StretchVideo(val dm: DisplayMetrics) : Event
+    data class ApplyVideoAspect(val aspect: VideoAspect) : Event
     data class ChangeBrightness(val brightness: Float) : Event
     data class SetupCustomButtons(val buttons: List<CustomButtonEntity>) : Event
+    data class SoftwareKeyboard(val action: KeyboardAction) : Event
   }
 }
 
 fun Float.normalize(inMin: Float, inMax: Float, outMin: Float, outMax: Float): Float =
-    (this - inMin) * (outMax - outMin) / (inMax - inMin) + outMin
-
-fun CustomButtonEntity.execute(mpv: MPV) {
-  mpv.command("script-message", "call_button_$id")
-}
-
-fun CustomButtonEntity.executeLongClick(mpv: MPV) {
-  mpv.command("script-message", "call_button_${id}_long")
-}
-
-fun <T> Flow<T>.collectAsState(scope: CoroutineScope, initialValue: T? = null) = object : ReadOnlyProperty<Any?, T?> {
-    private var value: T? = initialValue
-
-    init {
-      scope.launch { collect { value = it } }
-    }
-
-    override fun getValue(thisRef: Any?, property: KProperty<*>) = value
-  }
+  (this - inMin) * (outMax - outMin) / (inMax - inMin) + outMin

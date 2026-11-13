@@ -41,15 +41,12 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
 import com.yubyf.truetypeparser.TTFFile
-import `is`.xyz.mpv.MPV
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import live.mehiz.mpvkt.App
 import live.mehiz.mpvkt.R
 import live.mehiz.mpvkt.preferences.SubtitleJustification
-import live.mehiz.mpvkt.preferences.SubtitlesPreferences
-import live.mehiz.mpvkt.preferences.preference.deleteAndGet
 import live.mehiz.mpvkt.presentation.components.ExpandableCard
 import live.mehiz.mpvkt.presentation.components.ExposedTextDropDownMenu
 import live.mehiz.mpvkt.presentation.components.SliderItem
@@ -64,24 +61,24 @@ import me.zhanghai.compose.preference.preferenceTheme
 @SuppressLint("MutableCollectionMutableState")
 @Composable
 fun SubtitleSettingsTypographyCard(
-    isBold: Boolean,
-    isItalic: Boolean,
-    justify: SubtitleJustification,
-    font: String,
-    fontSize: Int,
-    borderStyle: SubtitlesBorderStyle,
-    borderSize: Int,
-    shadowOffset: Int,
-    onIsBoldChange: (Boolean) -> Unit,
-    onIsItalicChange: (Boolean) -> Unit,
-    onJustificationChange: (SubtitleJustification) -> Unit,
-    onFontChange: (String) -> Unit,
-    onFontSizeChange: (Int) -> Unit,
-    onBorderStyleChange: (SubtitlesBorderStyle) -> Unit,
-    onBorderSizeChange: (Int) -> Unit,
-    onShadowOffsetChange: (Int) -> Unit,
-    onReset: () -> Unit,
-    modifier: Modifier = Modifier,
+  isBold: Boolean,
+  isItalic: Boolean,
+  justify: SubtitleJustification,
+  font: String,
+  fontSize: Int,
+  borderStyle: SubtitlesBorderStyle,
+  borderSize: Int,
+  shadowOffset: Int,
+  onIsBoldChange: (Boolean) -> Unit,
+  onIsItalicChange: (Boolean) -> Unit,
+  onJustificationChange: (SubtitleJustification) -> Unit,
+  onFontChange: (String) -> Unit,
+  onFontSizeChange: (Int) -> Unit,
+  onBorderStyleChange: (SubtitlesBorderStyle) -> Unit,
+  onBorderSizeChange: (Int) -> Unit,
+  onShadowOffsetChange: (Int) -> Unit,
+  onReset: () -> Unit,
+  modifier: Modifier = Modifier,
 ) {
   val context = LocalContext.current
   val preferences = App.graph.subtitlesPreferences
@@ -250,31 +247,18 @@ fun SubtitleSettingsTypographyCard(
   }
 }
 
-fun resetTypography(mpv: MPV, preferences: SubtitlesPreferences) {
-  mpv.setPropertyBoolean("sub-bold", preferences.bold.deleteAndGet())
-  mpv.setPropertyBoolean("sub-italic", preferences.italic.deleteAndGet())
-  mpv.setPropertyBoolean("sub-ass-justify", preferences.overrideAssSubs.deleteAndGet())
-  mpv.setPropertyString("sub-justify", preferences.justification.deleteAndGet().value)
-  mpv.setPropertyString("sub-font", preferences.font.deleteAndGet())
-  mpv.setPropertyInt("sub-font-size", preferences.fontSize.deleteAndGet())
-  mpv.setPropertyInt("sub-border-size", preferences.borderSize.deleteAndGet())
-  mpv.setPropertyInt("sub-shadow-offset", preferences.shadowOffset.deleteAndGet())
-  mpv.setPropertyString("sub-border-style", preferences.borderStyle.deleteAndGet().value)
-}
-
 enum class SubtitlesBorderStyle(val value: String, @StringRes val titleRes: Int) {
   OutlineAndShadow("outline-and-shadow", R.string.player_sheets_subtitles_border_style_outline_and_shadow),
   OpaqueBox("opaque-box", R.string.player_sheets_subtitles_border_style_opaque_box),
-  BackgroundBox("background-box", R.string.player_sheets_subtitles_border_style_background_box)
-  ,
+  BackgroundBox("background-box", R.string.player_sheets_subtitles_border_style_background_box),
   ;
 
-    companion object {
+  companion object {
     fun byValue(value: String): SubtitlesBorderStyle = when (value) {
-        "outline-and-shadow" -> SubtitlesBorderStyle.OutlineAndShadow
-        "opaque-box" -> SubtitlesBorderStyle.OpaqueBox
-        "background-box" -> SubtitlesBorderStyle.BackgroundBox
-        else -> throw IllegalArgumentException("This border style is unsupported")
-      }
+      "outline-and-shadow" -> SubtitlesBorderStyle.OutlineAndShadow
+      "opaque-box" -> SubtitlesBorderStyle.OpaqueBox
+      "background-box" -> SubtitlesBorderStyle.BackgroundBox
+      else -> throw IllegalArgumentException("This border style is unsupported")
+    }
   }
 }

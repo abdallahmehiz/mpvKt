@@ -100,6 +100,6 @@ sealed interface CustomButtonsUiState {
 }
 
 fun CustomButtonsUiState.getButtons(): List<CustomButtonEntity> = when (this) {
-    is CustomButtonsUiState.Success -> this.buttons
-    else -> emptyList()
-  }
+  is CustomButtonsUiState.Success -> this.buttons
+  else -> emptyList()
+}

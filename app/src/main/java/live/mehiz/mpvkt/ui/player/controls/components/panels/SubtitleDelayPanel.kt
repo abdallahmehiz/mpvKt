@@ -34,6 +34,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -50,16 +51,16 @@ import kotlin.math.round
 
 @Composable
 fun SubtitleDelayPanel(
-    delayMs: Int,
-    secondaryDelayMs: Int,
-    speed: Double,
-    onSpeedChange: (Double) -> Unit,
-    onDelayChange: (Int) -> Unit,
-    onSecondaryDelayChange: (Int) -> Unit,
-    onApply: () -> Unit,
-    onReset: () -> Unit,
-    onDismissRequest: () -> Unit,
-    modifier: Modifier = Modifier,
+  delayMs: Int,
+  secondaryDelayMs: Int,
+  speed: Double,
+  onSpeedChange: (Double) -> Unit,
+  onDelayChange: (Int) -> Unit,
+  onSecondaryDelayChange: (Int) -> Unit,
+  onApply: () -> Unit,
+  onReset: () -> Unit,
+  onDismissRequest: () -> Unit,
+  modifier: Modifier = Modifier,
 ) {
   ConstraintLayout(
     modifier = modifier
@@ -99,16 +100,16 @@ fun SubtitleDelayPanel(
 
 @Composable
 fun SubtitleDelayCard(
-    delayMs: Int,
-    onDelayChange: (Int) -> Unit,
-    speed: Float,
-    onSpeedChange: (Float) -> Unit,
-    affectedSubtitle: SubtitleDelayType,
-    onTypeChange: (SubtitleDelayType) -> Unit,
-    onApply: () -> Unit,
-    onReset: () -> Unit,
-    onClose: () -> Unit,
-    modifier: Modifier = Modifier,
+  delayMs: Int,
+  onDelayChange: (Int) -> Unit,
+  speed: Float,
+  onSpeedChange: (Float) -> Unit,
+  affectedSubtitle: SubtitleDelayType,
+  onTypeChange: (SubtitleDelayType) -> Unit,
+  onApply: () -> Unit,
+  onReset: () -> Unit,
+  onClose: () -> Unit,
+  modifier: Modifier = Modifier,
 ) {
   DelayCard(
     delayMs = delayMs,
@@ -151,19 +152,17 @@ enum class SubtitleDelayType(@StringRes val title: Int) {
 
 @Composable
 fun DelayCard(
-    delayMs: Int,
-    onDelayChange: (Int) -> Unit,
-    onApply: () -> Unit,
-    onReset: () -> Unit,
-    title: @Composable () -> Unit,
-    delayType: DelayType,
-    modifier: Modifier = Modifier,
-    extraSettings: @Composable ColumnScope.() -> Unit = {},
+  delayMs: Int,
+  onDelayChange: (Int) -> Unit,
+  onApply: () -> Unit,
+  onReset: () -> Unit,
+  title: @Composable () -> Unit,
+  delayType: DelayType,
+  modifier: Modifier = Modifier,
+  extraSettings: @Composable ColumnScope.() -> Unit = {},
 ) {
-  var delay by remember { mutableStateOf(delayMs) }
-  LaunchedEffect(delay) {
-    println(delay)
-  }
+  var delay by remember { mutableIntStateOf(delayMs) }
+  val currentOnDelayChange by rememberUpdatedState(onDelayChange)
   Card(
     modifier = modifier
       .widthIn(max = CARDS_MAX_WIDTH)
@@ -201,7 +200,7 @@ fun DelayCard(
         var finalDelay by remember { mutableIntStateOf(delayMs) }
         LaunchedEffect(isDirectionPositive) {
           if (isDirectionPositive == null) {
-            onDelayChange(finalDelay)
+            currentOnDelayChange(finalDelay)
             return@LaunchedEffect
           }
           finalDelay = delay
@@ -272,10 +271,10 @@ fun DelayCard(
 
 @Composable
 fun SubtitleDelayTitle(
-    affectedSubtitle: SubtitleDelayType,
-    onClose: () -> Unit,
-    onTypeChange: (SubtitleDelayType) -> Unit,
-    modifier: Modifier = Modifier,
+  affectedSubtitle: SubtitleDelayType,
+  onClose: () -> Unit,
+  onTypeChange: (SubtitleDelayType) -> Unit,
+  modifier: Modifier = Modifier,
 ) {
   Row(
     verticalAlignment = Alignment.Bottom,
@@ -322,5 +321,5 @@ fun SubtitleDelayTitle(
 
 enum class DelayType {
   Audio,
-    Subtitle,
+  Subtitle,
 }

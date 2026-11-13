@@ -85,7 +85,7 @@ fun PlayerPanels(
   isGpuNextEnabled: Boolean,
   filterValue: (VideoFilters) -> Int,
   onFilterReset: () -> Unit,
-  modifier: Modifier,
+  modifier: Modifier = Modifier,
 ) {
   AnimatedContent(
     targetState = panelShown,

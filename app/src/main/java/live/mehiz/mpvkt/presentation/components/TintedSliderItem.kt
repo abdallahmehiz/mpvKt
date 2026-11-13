@@ -24,15 +24,15 @@ import kotlin.math.min
 
 @Composable
 fun TintedSliderItem(
-    label: String,
-    value: Int,
-    valueText: String,
-    onChange: (Int) -> Unit,
-    max: Int,
-    tint: Color,
-    modifier: Modifier = Modifier,
-    min: Int = 0,
-    icon: @Composable () -> Unit = {},
+  label: String,
+  value: Int,
+  valueText: String,
+  onChange: (Int) -> Unit,
+  max: Int,
+  tint: Color,
+  modifier: Modifier = Modifier,
+  min: Int = 0,
+  icon: @Composable () -> Unit = {},
 ) {
   val haptic = LocalHapticFeedback.current
 
@@ -74,15 +74,15 @@ fun TintedSliderItem(
 
 @Composable
 fun TintedSlider(
-    value: Float,
-    onValueChange: (Float) -> Unit,
-    modifier: Modifier = Modifier,
-    enabled: Boolean = true,
-    valueRange: ClosedFloatingPointRange<Float> = 0f..1f,
-    @IntRange steps: Int = 0,
-    onValueChangeFinished: (() -> Unit)? = null,
-    tint: Color = MaterialTheme.colorScheme.primaryContainer,
-    interactionSource: MutableInteractionSource = MutableInteractionSource(),
+  value: Float,
+  onValueChange: (Float) -> Unit,
+  modifier: Modifier = Modifier,
+  enabled: Boolean = true,
+  valueRange: ClosedFloatingPointRange<Float> = 0f..1f,
+  @IntRange steps: Int = 0,
+  onValueChangeFinished: (() -> Unit)? = null,
+  tint: Color = MaterialTheme.colorScheme.primaryContainer,
+  interactionSource: MutableInteractionSource = MutableInteractionSource(),
 ) {
   Slider(
     value = value,

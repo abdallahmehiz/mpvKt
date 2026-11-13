@@ -15,7 +15,7 @@ class PlaybackStateRepositoryImpl(private val database: MpvKtDatabase) : Playbac
   }
 
   override suspend fun getVideoDataByTitle(mediaTitle: String): PlaybackStateEntity? =
-      database.videoDataDao().getVideoDataByTitle(mediaTitle)
+    database.videoDataDao().getVideoDataByTitle(mediaTitle)
 
   override suspend fun clearAllPlaybackStates() {
     database.videoDataDao().clearAllPlaybackStates()

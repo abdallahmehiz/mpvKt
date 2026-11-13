@@ -63,7 +63,6 @@ import live.mehiz.mpvkt.App
 import live.mehiz.mpvkt.BuildConfig
 import live.mehiz.mpvkt.MainActivity
 import live.mehiz.mpvkt.R
-import live.mehiz.mpvkt.preferences.AppearancePreferences
 import live.mehiz.mpvkt.preferences.preference.collectAsState
 import live.mehiz.mpvkt.ui.theme.DarkMode
 import live.mehiz.mpvkt.ui.theme.MpvKtTheme
@@ -118,16 +117,16 @@ class CrashActivity : ComponentActivity() {
     }
 
     fun concatLogs(deviceInfo: String, crashLogs: String? = null, logcat: String): String = StringBuilder().apply {
-        appendLine(deviceInfo)
+      appendLine(deviceInfo)
+      appendLine()
+      if (!crashLogs.isNullOrBlank()) {
+        appendLine("Exception:")
+        appendLine(crashLogs)
         appendLine()
-        if (!crashLogs.isNullOrBlank()) {
-          appendLine("Exception:")
-          appendLine(crashLogs)
-          appendLine()
-        }
-        appendLine("Logcat:")
-        appendLine(logcat)
-      }.toString()
+      }
+      appendLine("Logcat:")
+      appendLine(logcat)
+    }.toString()
 
     fun collectLogcat(): String {
       val process = Runtime.getRuntime()
@@ -151,7 +150,7 @@ class CrashActivity : ComponentActivity() {
       MPV version: ${Utils.VERSIONS.mpv}
       ffmpeg version: ${Utils.VERSIONS.ffmpeg}
       libplacebo version: ${Utils.VERSIONS.libPlacebo}
-      """.trimIndent()
+    """.trimIndent()
   }
 
   @Composable

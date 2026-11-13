@@ -36,18 +36,18 @@ import kotlin.math.roundToInt
 
 @Composable
 fun PlaybackSpeedSheet(
-    speed: Float,
-    pitchCorrection: Boolean,
-    onPitchCorrectionChange: (Boolean) -> Unit,
-    speedPresets: List<Float>,
-    onSpeedChange: (Float) -> Unit,
-    onAddSpeedPreset: (Float) -> Unit,
-    onRemoveSpeedPreset: (Float) -> Unit,
-    onResetPresets: () -> Unit,
-    onMakeDefault: (Float) -> Unit,
-    onResetDefault: () -> Unit,
-    onDismissRequest: () -> Unit,
-    modifier: Modifier = Modifier,
+  speed: Float,
+  pitchCorrection: Boolean,
+  onPitchCorrectionChange: (Boolean) -> Unit,
+  speedPresets: List<Float>,
+  onSpeedChange: (Float) -> Unit,
+  onAddSpeedPreset: (Float) -> Unit,
+  onRemoveSpeedPreset: (Float) -> Unit,
+  onResetPresets: () -> Unit,
+  onMakeDefault: (Float) -> Unit,
+  onResetDefault: () -> Unit,
+  onDismissRequest: () -> Unit,
+  modifier: Modifier = Modifier,
 ) {
   PlayerSheet(onDismissRequest = onDismissRequest) {
     Column(

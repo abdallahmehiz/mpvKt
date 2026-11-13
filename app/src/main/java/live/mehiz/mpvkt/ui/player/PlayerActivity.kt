@@ -11,19 +11,17 @@ import android.content.ServiceConnection
 import android.content.pm.ActivityInfo
 import android.content.pm.PackageManager
 import android.content.res.Configuration
-import android.media.AudioManager
-import android.media.session.MediaSession
-import android.media.session.PlaybackState
-import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.IBinder
-import android.provider.MediaStore
+import android.provider.Settings
+import android.util.DisplayMetrics
 import android.util.Log
 import android.util.Rational
 import android.view.KeyEvent
 import android.view.View
 import android.view.WindowManager
+import android.view.inputmethod.InputMethodManager
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
@@ -36,95 +34,72 @@ import androidx.compose.ui.graphics.toAndroidRect
 import androidx.compose.ui.layout.boundsInWindow
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.viewinterop.AndroidView
-import androidx.core.net.toUri
-import androidx.core.text.isDigitsOnly
+import androidx.core.content.ContextCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
-import androidx.media.AudioAttributesCompat
-import androidx.media.AudioFocusRequestCompat
-import androidx.media.AudioManagerCompat
-import com.github.k1rakishou.fsaf.FileManager
+import androidx.lifecycle.repeatOnLifecycle
 import `is`.xyz.mpv.MPV
-import `is`.xyz.mpv.MPVNode
-import `is`.xyz.mpv.Utils
-import kotlinx.coroutines.Dispatchers
+import `is`.xyz.mpv.propFlow
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import live.mehiz.mpvkt.App
-import live.mehiz.mpvkt.database.entities.CustomButtonEntity
-import live.mehiz.mpvkt.database.entities.PlaybackStateEntity
-import live.mehiz.mpvkt.domain.playbackstate.repository.PlaybackStateRepository
-import live.mehiz.mpvkt.preferences.AdvancedPreferences
-import live.mehiz.mpvkt.preferences.AudioPreferences
-import live.mehiz.mpvkt.preferences.GesturePreferences
-import live.mehiz.mpvkt.preferences.PlayerPreferences
-import live.mehiz.mpvkt.preferences.SubtitlesPreferences
 import live.mehiz.mpvkt.ui.player.controls.PlayerControls
 import live.mehiz.mpvkt.ui.theme.MpvKtTheme
-import java.io.File
 
-@Suppress("TooManyFunctions", "LargeClass")
+@Suppress("TooManyFunctions")
 class PlayerActivity : AppCompatActivity() {
 
-  private val player by lazy { MPVView(this, null) }
-  private val mpv by lazy { player.mpv }
-
+  private var service: MediaPlaybackService? = null
+  private lateinit var player: MPVView
+  private val mpv get() = player.mpv
   private val viewModel: PlayerViewModel by viewModels {
-    PlayerViewModelFactory(mpv)
+    PlayerViewModelFactory(service!!.playerManager, initialBrightness())
   }
+  private val playerManager get() = service!!.playerManager
 
-  private val playerObserver by lazy { PlayerObserver(this) }
-  private val playbackStateRepository: PlaybackStateRepository = App.graph.playbackStateRepository
   val windowInsetsController by lazy { WindowCompat.getInsetsController(window, window.decorView) }
-  val audioManager by lazy { getSystemService(AUDIO_SERVICE) as AudioManager }
-  private var mediaSession: MediaSession? = null
-  private val playerPreferences: PlayerPreferences = App.graph.playerPreferences
-  private val audioPreferences: AudioPreferences = App.graph.audioPreferences
-  private val subtitlesPreferences: SubtitlesPreferences = App.graph.subtitlesPreferences
-  private val advancedPreferences: AdvancedPreferences = App.graph.advancedPreferences
-  private val gesturePreferences: GesturePreferences = App.graph.gesturePreferences
-  private val fileManager: FileManager = App.graph.fileManager
+  private val playerPreferences = App.graph.playerPreferences
 
-  private var fileName = ""
-  private var mediaPlaybackService: MediaPlaybackService? = null
-  private var serviceBound = false
-  private var audioFocusRequest: AudioFocusRequestCompat? = null
-  private var restoreAudioFocus: () -> Unit = {}
-
+  private var loadIntentOnConnect = false
   private var pipRect: android.graphics.Rect? = null
-  val isPipSupported by lazy {
-    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N) {
-      false
-    } else {
-      packageManager.hasSystemFeature(PackageManager.FEATURE_PICTURE_IN_PICTURE)
-    }
-  }
+  val isPipSupported by lazy { packageManager.hasSystemFeature(PackageManager.FEATURE_PICTURE_IN_PICTURE) }
   private var pipReceiver: BroadcastReceiver? = null
 
-  private val noisyReceiver = object : BroadcastReceiver() {
-    var initialized = false
-    override fun onReceive(context: Context?, intent: Intent?) {
-      if (intent?.action == AudioManager.ACTION_AUDIO_BECOMING_NOISY) {
-        viewModel.pause()
-        window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
-      }
+  private val serviceConnection = object : ServiceConnection {
+    override fun onServiceConnected(name: ComponentName?, binder: IBinder?) {
+      val service = (binder as MediaPlaybackService.MediaPlaybackBinder).service
+      this@PlayerActivity.service = service
+      player = MPVView(this@PlayerActivity, service)
+      if (loadIntentOnConnect) service.play(intent)
+      loadIntentOnConnect = false
+      onPlayerReady(service)
+    }
+
+    // only on a service crash; the activity has nothing to show without it
+    override fun onServiceDisconnected(name: ComponentName?) {
+      service = null
+      finish()
     }
   }
 
   override fun onCreate(savedInstanceState: Bundle?) {
     enableEdgeToEdge()
     super.onCreate(savedInstanceState)
+    loadIntentOnConnect = savedInstanceState == null
+    val serviceIntent = Intent(this, MediaPlaybackService::class.java)
+    startService(serviceIntent)
+    bindService(serviceIntent, serviceConnection, BIND_AUTO_CREATE)
+  }
 
-    setupMPV()
-    setupAudio()
-    setupMediaSession()
-    getPlayableUri(intent)?.let(player::playFile)
+  private fun onPlayerReady(service: MediaPlaybackService) {
     setOrientation()
-
     setContent {
       MpvKtTheme {
         Box(modifier = Modifier.fillMaxSize()) {
@@ -142,34 +117,77 @@ class PlayerActivity : AppCompatActivity() {
       }
     }
 
-    getPlayableUri(intent)?.let(player::playFile)
-    setOrientation()
-
     viewModel.eventFlow
       .onEach { event ->
         when (event) {
-          is PlayerViewModel.Event.SetupCustomButtons -> {
-            setupCustomButtons(event.buttons)
-          }
+          is PlayerViewModel.Event.SetupCustomButtons -> service.setupCustomButtons(event.buttons)
 
-          is PlayerViewModel.Event.ChangeBrightness -> {
-            changeBrightnessTo(event.brightness)
-          }
+          is PlayerViewModel.Event.ChangeBrightness -> changeBrightnessTo(event.brightness)
 
-          is PlayerViewModel.Event.StretchVideo -> {
-            windowManager.defaultDisplay.getRealMetrics(event.dm)
-          }
+          is PlayerViewModel.Event.ApplyVideoAspect -> service.playerManager.video.setAspect(
+            event.aspect,
+            displayRatio(),
+          )
 
-          is PlayerViewModel.Event.SetControls -> {
-            setControls(event.visible)
-          }
+          is PlayerViewModel.Event.SetControls -> setControls(event.visible)
 
-          PlayerViewModel.Event.CycleRotation -> {
-            cycleScreenRotations()
-          }
+          is PlayerViewModel.Event.SoftwareKeyboard -> setSoftwareKeyboard(event.action)
+
+          PlayerViewModel.Event.CycleRotation -> cycleScreenRotations()
         }
       }
       .launchIn(lifecycleScope)
+
+    service.closeRequests
+      .onEach { finishAndRemoveTask() }
+      .launchIn(lifecycleScope)
+
+    observePlayer()
+    restoreBrightness()
+    if (lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED)) {
+      service.exitBackground()
+      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && isPipSupported) {
+        setPictureInPictureParams(createPipParams())
+      }
+    }
+  }
+
+  // replaces the mpv observer: state comes in as flows, collected only while the UI is visible
+  @SuppressLint("NewApi")
+  private fun observePlayer() {
+    lifecycleScope.launch {
+      repeatOnLifecycle(Lifecycle.State.STARTED) {
+        mpv.propFlow<Boolean>("pause")
+          .filterNotNull()
+          .onEach {
+            if (it) {
+              window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+            } else {
+              window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+            }
+          }
+          .launchIn(this)
+
+        mpv.propFlow<Boolean>("eof-reached")
+          .filter { it == true && playerPreferences.closeAfterReachingEndOfVideo.get() }
+          .onEach { finishAndRemoveTask() }
+          .launchIn(this)
+
+        mpv.propFlow<Double>("video-params/aspect")
+          .filterNotNull()
+          .filter { isPipSupported && Build.VERSION.SDK_INT >= Build.VERSION_CODES.O }
+          .onEach { setPictureInPictureParams(createPipParams()) }
+          .launchIn(this)
+
+        mpv.eventFlow
+          .filter { (eventId, _) -> eventId == MPV.mpvEvent.MPV_EVENT_FILE_LOADED }
+          .onEach {
+            setOrientation()
+            viewModel.changeVideoAspect(playerManager.video.aspect.value)
+          }
+          .launchIn(this)
+      }
+    }
   }
 
   private val showStatusBar = playerPreferences.showSystemStatusBar.get()
@@ -182,9 +200,37 @@ class PlayerActivity : AppCompatActivity() {
     }
   }
 
+  private fun initialBrightness(): Float = runCatching {
+    Settings.System.getFloat(contentResolver, Settings.System.SCREEN_BRIGHTNESS).normalize(0f, 255f, 0f, 1f)
+  }.getOrElse { 0f }
+
+  @Suppress("DEPRECATION")
+  private fun displayRatio(): Double {
+    val metrics = DisplayMetrics().also { windowManager.defaultDisplay.getRealMetrics(it) }
+    return metrics.widthPixels / metrics.heightPixels.toDouble()
+  }
+
+  @Suppress("DEPRECATION")
+  private fun setSoftwareKeyboard(action: PlayerViewModel.KeyboardAction) {
+    val imm = getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
+    val show = when (action) {
+      PlayerViewModel.KeyboardAction.Show -> true
+      PlayerViewModel.KeyboardAction.Hide -> false
+      PlayerViewModel.KeyboardAction.Toggle -> !imm.isActive
+    }
+    imm.toggleSoftInput(if (show) InputMethodManager.SHOW_FORCED else InputMethodManager.SHOW_IMPLICIT, 0)
+  }
+
   private fun changeBrightnessTo(brightness: Float) {
     window.attributes = window.attributes.apply {
       screenBrightness = brightness
+    }
+  }
+
+  private fun restoreBrightness() {
+    if (!playerPreferences.rememberBrightness.get()) return
+    playerPreferences.defaultBrightness.get().let {
+      if (it != -1f) viewModel.changeBrightnessTo(it)
     }
   }
 
@@ -205,44 +251,12 @@ class PlayerActivity : AppCompatActivity() {
     }
   }
 
-  private fun getPlayableUri(intent: Intent): String? {
-    val uri = parsePathFromIntent(intent)
-    return if (uri?.startsWith("content://") == true) uri.toUri().openContentFd(this) else uri
-  }
-
   override fun onDestroy() {
     Log.d(TAG, "Exiting")
-    audioFocusRequest?.let {
-      AudioManagerCompat.abandonAudioFocusRequest(audioManager, it)
-    }
-    audioFocusRequest = null
-    mediaSession?.release()
-    if (noisyReceiver.initialized) {
-      unregisterReceiver(noisyReceiver)
-      noisyReceiver.initialized = false
-    }
-
-    player.isExiting = true
-    if (isFinishing) mpv.command("stop")
-    mpv.removeObserver(playerObserver)
-    mpv.destroySession()
-
+    if (isFinishing) service?.stopPlayback()
+    unbindService(serviceConnection)
+    service = null
     super.onDestroy()
-  }
-
-  override fun onPause() {
-    saveVideoPlaybackState(fileName)
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N && isInPictureInPictureMode) {
-      super.onPause()
-      return
-    }
-
-    player.isExiting = true
-    if (isFinishing) {
-      mpv.command("stop")
-    }
-
-    super.onPause()
   }
 
   override fun finish() {
@@ -250,52 +264,10 @@ class PlayerActivity : AppCompatActivity() {
     super.finish()
   }
 
-  override fun onStop() {
-    saveVideoPlaybackState(fileName)
-    if (!serviceBound && playerPreferences.automaticBackgroundPlayback.get()) {
-      startBackgroundPlayback()
-    } else {
-      viewModel.pause()
-      if (serviceBound) {
-        unbindService(serviceConnection)
-        serviceBound = false
-      }
-    }
-    window.attributes.screenBrightness.let {
-      if (playerPreferences.rememberBrightness.get() && it != -1f) {
-        playerPreferences.defaultBrightness.set(it)
-      }
-    }
-    super.onStop()
-  }
-
-  @SuppressLint("NewApi")
-  override fun onUserLeaveHint() {
-    if (isPipSupported && viewModel.paused == false && playerPreferences.automaticallyEnterPip.get()) {
-      enterPictureInPictureMode()
-    }
-    super.onUserLeaveHint()
-  }
-
-  @SuppressLint("NewApi")
-  override fun onBackPressed() {
-    if (isPipSupported && viewModel.paused == false && playerPreferences.automaticallyEnterPip.get()) {
-      if (viewModel.sheetShown.value == Sheets.None && viewModel.panelShown.value == Panels.None) {
-        enterPictureInPictureMode()
-      }
-    } else {
-      super.onBackPressed()
-    }
-  }
-
   override fun onStart() {
     super.onStart()
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && isPipSupported) {
-      setPictureInPictureParams(createPipParams())
-    }
     WindowCompat.setDecorFitsSystemWindows(window, false)
     window.setFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS, WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS)
-    window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
     @Suppress("DEPRECATION")
     window.decorView.systemUiVisibility =
       View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY or
@@ -314,263 +286,63 @@ class PlayerActivity : AppCompatActivity() {
       }
     }
 
-    if (playerPreferences.rememberBrightness.get()) {
-      playerPreferences.defaultBrightness.get().let {
-        if (it != -1f) viewModel.changeBrightnessTo(it)
-      }
-    }
-
-    if (serviceBound) {
-      endBackgroundPlayback()
+    service?.exitBackground() ?: return
+    restoreBrightness()
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && isPipSupported) {
+      setPictureInPictureParams(createPipParams())
     }
   }
 
-  private fun copyMPVAssets() {
-    Utils.copyAssets(this@PlayerActivity)
-    copyMPVScripts()
-    copyMPVConfigFiles()
-    // fonts can be lazily loaded
-    lifecycleScope.launch(Dispatchers.IO) {
-      copyMPVFonts()
-    }
-  }
-
-  private fun setupMPV() {
-    copyMPVAssets()
-    player.initialize(filesDir.path, cacheDir.path)
-    mpv.addObserver(playerObserver)
-    MediaPlaybackService.mpv = mpv
-  }
-
-  private fun setupAudio() {
-    audioPreferences.audioChannels.get().let { mpv.setPropertyString(it.property, it.value) }
-
-    val request = AudioFocusRequestCompat.Builder(AudioManagerCompat.AUDIOFOCUS_GAIN).also {
-      it.setAudioAttributes(
-        AudioAttributesCompat.Builder().setUsage(AudioAttributesCompat.USAGE_MEDIA)
-          .setContentType(AudioAttributesCompat.CONTENT_TYPE_MUSIC).build(),
-      )
-      it.setOnAudioFocusChangeListener(audioFocusChangeListener)
-    }.build()
-    AudioManagerCompat.requestAudioFocus(audioManager, request).let {
-      if (it == AudioManager.AUDIOFOCUS_REQUEST_FAILED) return@let
-      audioFocusRequest = request
-    }
-  }
-
-  private fun copyMPVConfigFiles() {
-    val applicationPath = filesDir.path
-    try {
-      val mpvConf = fileManager.fromUri(advancedPreferences.mpvConfStorageUri.get().toUri())
-        ?: error("User hasn't set any mpvConfig directory")
-      if (!fileManager.exists(mpvConf)) error("Couldn't access mpv configuration directory")
-      fileManager.copyDirectoryWithContent(mpvConf, fileManager.fromPath(applicationPath), true)
-    } catch (e: Exception) {
-      File("$applicationPath/mpv.conf")
-        .also { if (!it.exists()) it.createNewFile() }
-        .writeText(advancedPreferences.mpvConf.get())
-      File("$applicationPath/input.conf")
-        .also { if (!it.exists()) it.createNewFile() }
-        .writeText(advancedPreferences.inputConf.get())
-      Log.e("PlayerActivity", "Couldn't copy mpv configuration files: ${e.message}")
-    }
-  }
-
-  private fun copyMPVScripts() {
-    val mpvktLua = assets.open("mpvkt.lua")
-    val applicationPath = filesDir.path
-
-    val scriptsDir = fileManager.createDir(fileManager.fromPath(applicationPath), "scripts")!!
-
-    fileManager.deleteContent(scriptsDir)
-
-    File("$scriptsDir/mpvkt.lua")
-      .also { if (!it.exists()) it.createNewFile() }
-      .writeText(mpvktLua.bufferedReader().readText())
-  }
-
-  fun setupCustomButtons(buttons: List<CustomButtonEntity>) {
-    val applicationPath = filesDir.path
-
-    val scriptsDir = fileManager.createDir(fileManager.fromPath(applicationPath), "scripts")!!
-
-    val customButtonsContent = buildString {
-      appendLine("local lua_modules = mp.find_config_file('scripts')")
-      appendLine("if lua_modules then")
-      appendLine("package.path = package.path .. ';' .. lua_modules .. '/?.lua;' .. lua_modules .. '/?/init.lua'")
-      appendLine("end")
-      appendLine("local mpvkt = require 'mpvkt'")
-      buttons.forEach { button ->
-        appendLine("function button${button.id}()")
-        appendLine(button.content)
-        appendLine("end")
-        appendLine("mp.register_script_message('call_button_${button.id}', button${button.id})")
-        appendLine("function button${button.id}long()")
-        appendLine(button.longPressContent)
-        appendLine("end")
-        appendLine("mp.register_script_message('call_button_${button.id}_long', button${button.id}long)")
+  override fun onStop() {
+    window.attributes.screenBrightness.let {
+      if (playerPreferences.rememberBrightness.get() && it != -1f) {
+        playerPreferences.defaultBrightness.set(it)
       }
     }
-
-    val file = File("$scriptsDir/custombuttons.lua")
-      .also { if (!it.exists()) it.createNewFile() }
-
-    file.writeText(customButtonsContent)
-
-    mpv.command("load-script", file.absolutePath)
-  }
-
-  private fun copyMPVFonts() {
-    try {
-      val cachePath = cacheDir.path
-      val fontsDir = fileManager.fromUri(subtitlesPreferences.fontsFolder.get().toUri())
-        ?: error("User hasn't set any fonts directory")
-      if (!fileManager.exists(fontsDir)) error("Couldn't access fonts directory")
-
-      val destDir = fileManager.fromPath("$cachePath/fonts")
-      if (!fileManager.exists(destDir)) fileManager.createDir(fileManager.fromPath(cachePath), "fonts")
-
-      if (fileManager.findFile(destDir, "subfont.ttf") == null) {
-        resources.assets.open("subfont.ttf")
-          .copyTo(File("$cachePath/fonts/subfont.ttf").outputStream())
+    service?.let { service ->
+      service.saveState()
+      if (!isFinishing) {
+        if (playerPreferences.automaticBackgroundPlayback.get()) service.enterBackground() else viewModel.pause()
       }
-
-      fileManager.copyDirectoryWithContent(fontsDir, destDir, false)
-    } catch (e: Exception) {
-      Log.e("PlayerActivity", "Couldn't copy fonts to application directory: ${e.message}")
     }
+    super.onStop()
   }
 
-  private val audioFocusChangeListener = AudioManager.OnAudioFocusChangeListener {
-    when (it) {
-      AudioManager.AUDIOFOCUS_LOSS,
-      AudioManager.AUDIOFOCUS_LOSS_TRANSIENT,
-      -> {
-        val oldRestore = restoreAudioFocus
-        val wasPlayerPaused = viewModel.paused ?: false
-        viewModel.pause()
-        restoreAudioFocus = {
-          oldRestore()
-          if (!wasPlayerPaused) viewModel.unpause()
-        }
-      }
+  private val shouldEnterPip: Boolean
+    get() = service != null &&
+      isPipSupported &&
+      !playerManager.playback.paused.value &&
+      playerPreferences.automaticallyEnterPip.get()
 
-      AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK -> {
-        mpv.command("multiply", "volume", "0.5")
-        restoreAudioFocus = {
-          mpv.command("multiply", "volume", "2")
-        }
-      }
+  @SuppressLint("NewApi")
+  override fun onUserLeaveHint() {
+    if (shouldEnterPip) enterPictureInPictureMode()
+    super.onUserLeaveHint()
+  }
 
-      AudioManager.AUDIOFOCUS_GAIN -> {
-        restoreAudioFocus()
-        restoreAudioFocus = {}
+  @SuppressLint("NewApi")
+  @Deprecated("Deprecated in Java")
+  override fun onBackPressed() {
+    if (shouldEnterPip) {
+      if (viewModel.sheetShown.value == Sheets.None && viewModel.panelShown.value == Panels.None) {
+        enterPictureInPictureMode()
       }
-
-      AudioManager.AUDIOFOCUS_REQUEST_FAILED -> {
-        Log.d("PlayerActivity", "didn't get audio focus")
-      }
+    } else {
+      @Suppress("DEPRECATION")
+      super.onBackPressed()
     }
   }
 
   override fun onResume() {
     super.onResume()
-
-    viewModel.currentVolume.update {
-      audioManager.getStreamVolume(AudioManager.STREAM_MUSIC).also {
-        if (it < viewModel.maxVolume) viewModel.changeMPVVolumeTo(100)
-      }
-    }
-  }
-
-  private val serviceConnection = object : ServiceConnection {
-    override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
-      val binder = service as MediaPlaybackService.MediaPlaybackBinder
-      mediaPlaybackService = binder.getService()
-      serviceBound = true
-    }
-
-    override fun onServiceDisconnected(name: ComponentName?) {
-      mediaPlaybackService = null
-      serviceBound = false
-    }
-  }
-
-  private fun startBackgroundPlayback() {
-    val intent = Intent(this, MediaPlaybackService::class.java)
-    startService(intent)
-    bindService(intent, serviceConnection, BIND_AUTO_CREATE)
-  }
-
-  private fun endBackgroundPlayback() {
-    stopService(Intent(this, MediaPlaybackService::class.java))
-    mediaPlaybackService = null
-    serviceBound = false
-  }
-
-  private fun setIntentExtras(extras: Bundle?) {
-    if (extras == null) return
-
-    extras.getString("title")?.let { mpv.setPropertyString("force-media-title", it) }
-    mpv.setPropertyInt("time-pos", extras.getInt("position", 0) / 1000)
-
-    // subtitles
-    if (extras.containsKey("subs")) {
-      val subList = Utils.getParcelableArray<Uri>(extras, "subs")
-      val subsToEnable = Utils.getParcelableArray<Uri>(extras, "subs.enable")
-
-      for (suburi in subList) {
-        val subfile = suburi.resolveUri(this) ?: continue
-        val flag = if (subsToEnable.any { it == suburi }) "select" else "auto"
-
-        Log.v(TAG, "Adding subtitles from intent extras: $subfile")
-        mpv.command("sub-add", subfile, flag)
-      }
-    }
-
-    extras.getStringArray("headers")?.let { headers ->
-      if (headers[0].startsWith("User-Agent", true)) mpv.setPropertyString("user-agent", headers[1])
-      val headersString = headers.asSequence().drop(2).chunked(2).associate { it[0] to it[1] }
-        .map { "${it.key}: ${it.value.replace(",", "\\,")}" }.joinToString(",")
-      mpv.setPropertyString("http-header-fields", headersString)
-    }
-  }
-
-  @Suppress("NestedBlockDepth")
-  private fun parsePathFromIntent(intent: Intent): String? = when (intent.action) {
-      Intent.ACTION_VIEW -> intent.data?.resolveUri(this)
-
-      Intent.ACTION_SEND -> {
-        if (intent.hasExtra(Intent.EXTRA_STREAM)) {
-          intent.getParcelableExtra<Uri>(Intent.EXTRA_STREAM)!!.resolveUri(this)
-        } else {
-          intent.getStringExtra(Intent.EXTRA_TEXT)?.let {
-            val uri = it.trim().toUri()
-            if (uri.isHierarchical && !uri.isRelative) uri.resolveUri(this) else null
-          }
-        }
-      }
-
-      else -> intent.getStringExtra("uri")
-    }
-
-  private fun getFileName(intent: Intent): String {
-    val uri = if (intent.type == "text/plain") {
-      intent.getStringExtra(Intent.EXTRA_TEXT)!!.toUri()
-    } else {
-      (intent.data ?: intent.getParcelableExtra(Intent.EXTRA_STREAM))
-    }
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && uri != null) {
-      val cursor = contentResolver.query(uri, arrayOf(MediaStore.MediaColumns.DISPLAY_NAME), null, null)
-      if (cursor?.moveToFirst() == true) return cursor.getString(0).also { cursor.close() }
-    }
-    return uri?.lastPathSegment?.substringAfterLast("/") ?: uri?.path ?: ""
+    if (service == null) return
+    playerManager.audio.refreshStreamVolume()
   }
 
   override fun onConfigurationChanged(newConfig: Configuration) {
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+    if (service != null) {
       if (!isInPictureInPictureMode) {
-        viewModel.changeVideoAspect(playerPreferences.videoAspect.get())
+        viewModel.changeVideoAspect(playerManager.video.aspect.value)
       } else {
         viewModel.hideControls()
       }
@@ -578,151 +350,40 @@ class PlayerActivity : AppCompatActivity() {
     super.onConfigurationChanged(newConfig)
   }
 
-  // a bunch of observers
-  @Suppress("UnusedParameter")
-  internal fun onObserverEvent(property: String, value: Long) {
-    if (player.isExiting) return
-  }
-
-  @Suppress("UnusedParameter")
-  internal fun onObserverEvent(property: String) {
-    if (player.isExiting) return
-  }
-
-  internal fun onObserverEvent(property: String, value: Boolean) {
-    if (player.isExiting) return
-    when (property) {
-      "pause" if value -> window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
-      "pause" -> window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
-      "eof-reached" if value && playerPreferences.closeAfterReachingEndOfVideo.get() -> finishAndRemoveTask()
-    }
-  }
-
-  internal fun onObserverEvent(property: String, value: String) {
-    if (player.isExiting) return
-    when (property.substringBeforeLast("/")) {
-      "user-data/mpvkt" -> viewModel.handleLuaInvocation(property, value)
-    }
-  }
-
-  @Suppress("UnusedParameter")
-  internal fun onObserverEvent(property: String, value: MPVNode) {
-    if (player.isExiting) return
-  }
-
-  @SuppressLint("NewApi")
-  @Suppress("UnusedParameter")
-  internal fun onObserverEvent(property: String, value: Double) {
-    if (player.isExiting) return
-    when (property) {
-      "video-params/aspect" -> if (isPipSupported) createPipParams()
-    }
-  }
-
-  @Suppress("UnusedParameter")
-  internal fun event(eventId: Int, node: MPVNode?) {
-    if (player.isExiting) return
-    when (eventId) {
-      MPV.mpvEvent.MPV_EVENT_FILE_LOADED -> {
-        fileName = getFileName(intent)
-        setIntentExtras(intent.extras)
-        val mediaTitle = mpv.getPropertyString("media-title")
-        if (mediaTitle.isNullOrBlank() || mediaTitle.isDigitsOnly()) mpv.setPropertyString("media-title", fileName)
-        lifecycleScope.launch(Dispatchers.IO) { loadVideoPlaybackState(fileName) }
-        setOrientation()
-        viewModel.changeVideoAspect(playerPreferences.videoAspect.get())
-      }
-
-      MPV.mpvEvent.MPV_EVENT_PLAYBACK_RESTART -> player.isExiting = false
-    }
-  }
-
-  private fun saveVideoPlaybackState(mediaTitle: String) {
-    if (mediaTitle.isBlank()) return
-    lifecycleScope.launch(Dispatchers.IO) {
-      val oldState = playbackStateRepository.getVideoDataByTitle(fileName)
-      Log.d(TAG, "Saving playback state")
-      playbackStateRepository.upsert(
-        PlaybackStateEntity(
-          mediaTitle = mediaTitle,
-          lastPosition = if (playerPreferences.savePositionOnQuit.get()) {
-            val pos = viewModel.pos ?: 0
-            val duration = viewModel.duration ?: 0
-            if (pos < duration - 1) pos else 0
-          } else {
-            oldState?.lastPosition ?: 0
-          },
-          playbackSpeed = mpv.getPropertyDouble("speed")!!,
-          sid = mpv.getPropertyInt("sid") ?: 0,
-          subDelay = (mpv.getPropertyDouble("sub-delay")!! * 1000).toInt(),
-          subSpeed = mpv.getPropertyDouble("sub-speed")!!,
-          secondarySid = mpv.getPropertyInt("secondary-sid") ?: 0,
-          secondarySubDelay = (mpv.getPropertyDouble("secondary-sub-delay")!! * 1000).toInt(),
-          aid = mpv.getPropertyInt("aid") ?: 0,
-          audioDelay = (mpv.getPropertyDouble("audio-delay")!! * 1000).toInt(),
-        ),
-      )
-    }
-  }
-
-  private suspend fun loadVideoPlaybackState(mediaTitle: String) {
-    if (mediaTitle.isBlank()) return
-    val state = playbackStateRepository.getVideoDataByTitle(mediaTitle)
-    val getDelay: (Int, Int?) -> Double = { preferenceDelay, stateDelay ->
-      (stateDelay ?: preferenceDelay) / 1000.0
-    }
-    val subDelay = getDelay(subtitlesPreferences.defaultSubDelay.get(), state?.subDelay)
-    val secondarySubDelay = getDelay(subtitlesPreferences.defaultSecondarySubDelay.get(), state?.secondarySubDelay)
-    val audioDelay = getDelay(audioPreferences.defaultAudioDelay.get(), state?.audioDelay)
-    state?.let {
-      mpv.setPropertyInt("sid", it.sid)
-      mpv.setPropertyInt("secondary-sid", it.secondarySid)
-      mpv.setPropertyInt("aid", it.aid)
-      mpv.setPropertyDouble("sub-delay", subDelay)
-      mpv.setPropertyDouble("sub-delay", secondarySubDelay)
-      mpv.setPropertyDouble("sub-delay", it.playbackSpeed)
-      mpv.setPropertyDouble("audio-delay", audioDelay)
-    }
-    if (playerPreferences.savePositionOnQuit.get()) {
-      state?.lastPosition?.let { if (it != 0) mpv.setPropertyInt("time-pos", it) }
-    }
-    mpv.setPropertyDouble("sub-speed", state?.subSpeed ?: subtitlesPreferences.defaultSubSpeed.get().toDouble())
-  }
-
   private fun setReturnIntent() {
+    if (service == null) return
     Log.d(TAG, "setting return intent")
     setResult(
       RESULT_OK,
       Intent(RESULT_INTENT).apply {
-        viewModel.pos?.let { putExtra("position", it * 1000) }
-        viewModel.duration?.let { putExtra("duration", it * 1000) }
+        putExtra("position", playerManager.playback.position.value * 1000)
+        putExtra("duration", playerManager.playback.duration.value * 1000)
       },
     )
   }
 
   override fun onNewIntent(intent: Intent) {
     super.onNewIntent(intent)
-
-    getPlayableUri(intent)?.let { mpv.command("loadfile", it) }
     setIntent(intent)
+    service?.play(intent)
   }
 
   @RequiresApi(Build.VERSION_CODES.O)
   fun createPipParams(): PictureInPictureParams {
     val builder = PictureInPictureParams.Builder()
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-      builder.setTitle(mpv.getPropertyString("media-title") ?: fileName)
+      builder.setTitle(mpv.getPropertyString("media-title") ?: service?.fileName)
     }
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
       val autoEnter = playerPreferences.automaticallyEnterPip.get()
-      builder.setAutoEnterEnabled(viewModel.paused == false && autoEnter)
-      builder.setSeamlessResizeEnabled(viewModel.paused == false && autoEnter)
+      val playing = !playerManager.playback.paused.value
+      builder.setAutoEnterEnabled(playing && autoEnter)
+      builder.setSeamlessResizeEnabled(playing && autoEnter)
     }
-    builder.setActions(createPipActions(this, viewModel.paused == true))
+    builder.setActions(createPipActions(this, playerManager.playback.paused.value))
     builder.setSourceRectHint(pipRect)
-    mpv.getPropertyInt("video-params/h")?.let {
-      val height = it
-      val width = it * player.getVideoOutAspect()!!
+    mpv.getPropertyInt("video-params/h")?.let { height ->
+      val width = height * (player.getVideoOutAspect() ?: return@let)
       val rational = Rational(height, width.toInt()).toFloat()
       if (rational in 0.42..2.38) builder.setAspectRatio(Rational(width.toInt(), height))
     }
@@ -732,10 +393,14 @@ class PlayerActivity : AppCompatActivity() {
   override fun onPictureInPictureModeChanged(isInPictureInPictureMode: Boolean, newConfig: Configuration) {
     if (!isInPictureInPictureMode) {
       pipReceiver?.let {
-        unregisterReceiver(pipReceiver)
+        unregisterReceiver(it)
         pipReceiver = null
       }
       super.onPictureInPictureModeChanged(false, newConfig)
+      return
+    }
+    if (service == null) {
+      super.onPictureInPictureModeChanged(true, newConfig)
       return
     }
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -760,11 +425,12 @@ class PlayerActivity : AppCompatActivity() {
         }
       }
     }
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-      registerReceiver(pipReceiver, IntentFilter(PIP_INTENTS_FILTER), RECEIVER_NOT_EXPORTED)
-    } else {
-      registerReceiver(pipReceiver, IntentFilter(PIP_INTENTS_FILTER))
-    }
+    ContextCompat.registerReceiver(
+      this,
+      pipReceiver,
+      IntentFilter(PIP_INTENTS_FILTER),
+      ContextCompat.RECEIVER_NOT_EXPORTED,
+    )
     super.onPictureInPictureModeChanged(true, newConfig)
   }
 
@@ -793,6 +459,7 @@ class PlayerActivity : AppCompatActivity() {
   }
 
   override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
+    if (service == null) return super.onKeyDown(keyCode, event)
     when (keyCode) {
       KeyEvent.KEYCODE_VOLUME_UP -> {
         viewModel.changeVolumeBy(1)
@@ -825,116 +492,8 @@ class PlayerActivity : AppCompatActivity() {
     return true
   }
 
-  override fun onKeyUp(keyCode: Int, event: KeyEvent?): Boolean {
-    if (player.onKey(event!!)) return true
-    return super.onKeyUp(keyCode, event)
-  }
-
-  private fun setupMediaSession() {
-    val previousAction = gesturePreferences.mediaPreviousGesture.get()
-    val playAction = gesturePreferences.mediaPlayGesture.get()
-    val nextAction = gesturePreferences.mediaNextGesture.get()
-
-    mediaSession = MediaSession(this, "PlayerActivity").apply {
-      setCallback(
-        object : MediaSession.Callback() {
-          override fun onPlay() {
-            when (playAction) {
-              SingleActionGesture.None -> {}
-
-              SingleActionGesture.Seek -> {}
-
-              SingleActionGesture.PlayPause -> {
-                super.onPlay()
-                viewModel.unpause()
-                window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
-              }
-
-              SingleActionGesture.Custom -> {
-                mpv.command("keypress", CustomKeyCodes.MediaPlay.keyCode)
-              }
-            }
-          }
-
-          override fun onPause() {
-            when (playAction) {
-              SingleActionGesture.None -> {}
-
-              SingleActionGesture.Seek -> {}
-
-              SingleActionGesture.PlayPause -> {
-                super.onPause()
-                viewModel.pause()
-                window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
-              }
-
-              SingleActionGesture.Custom -> {
-                mpv.command("keypress", CustomKeyCodes.MediaPlay.keyCode)
-              }
-            }
-          }
-
-          override fun onSkipToPrevious() {
-            when (previousAction) {
-              SingleActionGesture.None -> {}
-
-              SingleActionGesture.Seek -> {
-                viewModel.leftSeek()
-              }
-
-              SingleActionGesture.PlayPause -> {
-                viewModel.pauseUnpause()
-              }
-
-              SingleActionGesture.Custom -> {
-                mpv.command("keypress", CustomKeyCodes.MediaPrevious.keyCode)
-              }
-            }
-          }
-
-          override fun onSkipToNext() {
-            when (nextAction) {
-              SingleActionGesture.None -> {}
-
-              SingleActionGesture.Seek -> {
-                viewModel.rightSeek()
-              }
-
-              SingleActionGesture.PlayPause -> {
-                viewModel.pauseUnpause()
-              }
-
-              SingleActionGesture.Custom -> {
-                mpv.command("keypress", CustomKeyCodes.MediaNext.keyCode)
-              }
-            }
-          }
-
-          override fun onStop() {
-            super.onStop()
-            isActive = false
-            this@PlayerActivity.onStop()
-          }
-        },
-      )
-      setPlaybackState(
-        PlaybackState.Builder()
-          .setActions(
-            PlaybackState.ACTION_PLAY or
-              PlaybackState.ACTION_PAUSE or
-              PlaybackState.ACTION_STOP or
-              PlaybackState.ACTION_SKIP_TO_PREVIOUS or
-              PlaybackState.ACTION_SKIP_TO_NEXT,
-          )
-          .build(),
-      )
-      isActive = true
-    }
-
-    val filter = IntentFilter().apply { addAction(AudioManager.ACTION_AUDIO_BECOMING_NOISY) }
-    registerReceiver(noisyReceiver, filter)
-    noisyReceiver.initialized = true
-  }
+  override fun onKeyUp(keyCode: Int, event: KeyEvent?): Boolean =
+    (service != null && event != null && player.onKey(event)) || super.onKeyUp(keyCode, event)
 
   companion object {
     // action of result intent

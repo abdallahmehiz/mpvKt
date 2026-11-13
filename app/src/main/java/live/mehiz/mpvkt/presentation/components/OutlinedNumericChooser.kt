@@ -25,14 +25,14 @@ import live.mehiz.mpvkt.ui.theme.spacing
 
 @Composable
 fun OutlinedNumericChooser(
-    value: Int,
-    onChange: (Int) -> Unit,
-    max: Int,
-    step: Int,
-    modifier: Modifier = Modifier,
-    min: Int = 0,
-    suffix: (@Composable () -> Unit)? = null,
-    label: (@Composable () -> Unit)? = null,
+  value: Int,
+  onChange: (Int) -> Unit,
+  max: Int,
+  step: Int,
+  modifier: Modifier = Modifier,
+  min: Int = 0,
+  suffix: (@Composable () -> Unit)? = null,
+  label: (@Composable () -> Unit)? = null,
 ) {
   assert(max > min) { "min can't be larger than max ($min > $max)" }
   Row(
@@ -79,14 +79,14 @@ fun OutlinedNumericChooser(
 
 @Composable
 fun OutlinedNumericChooser(
-    value: Float,
-    onChange: (Float) -> Unit,
-    max: Float,
-    step: Float,
-    modifier: Modifier = Modifier,
-    min: Float = 0f,
-    suffix: (@Composable () -> Unit)? = null,
-    label: (@Composable () -> Unit)? = null,
+  value: Float,
+  onChange: (Float) -> Unit,
+  max: Float,
+  step: Float,
+  modifier: Modifier = Modifier,
+  min: Float = 0f,
+  suffix: (@Composable () -> Unit)? = null,
+  label: (@Composable () -> Unit)? = null,
 ) {
   assert(max > min) { "min can't be larger than max ($min > $max)" }
   Row(
