@@ -54,6 +54,7 @@
     <string name="pref_player_gestures_brightness">Жесты яркости</string>
     <string name="pref_player_gestures_volume">Жесты громкости</string>
     <string name="pref_player_gestures_hold_for_double_speed">Удерживать для 2x скорости</string>
+    <string name="pref_player_gestures_hold_for_multiple_speed">Удерживать для многократной скорости</string>
 
     <string name="pref_player_controls">Элементы управления</string>
     <string name="pref_player_controls_allow_gestures_in_panels">Разрешить жесты на панелях</string>
@@ -100,6 +101,8 @@
     <string name="pref_preferred_languages">Предпочитаемые языки</string>
     <string name="pref_subtitles_fonts_dir">Директория шрифтов</string>
     <string name="pref_subtitles_preferred_language">Язык(и) субтитров которые будут выбраны по умолчанию для видео с несколькими субтитрами. Подойдут двух- или трёхбуквенные коды языков. Несколько значений можно разделить запятой.</string>
+    <string name="pref_subtitles_autoload_title">Автоматически загружать субтитры</string>
+    <string name="pref_subtitles_autoload_summary">Автоматически загружает внешние субтитры с таким же именем. При наличии нескольких файлов по умолчанию включается первый. (Только при использовании выбора файлов)</string>
 
     <string name="pref_audio">Аудио</string>
     <string name="pref_audio_summary">Предпочитаемые языки, аудиоканалы, коррекция высоты</string>
@@ -119,7 +122,9 @@
     <string name="pref_advanced_mpv_conf_storage_location">выбрать место хранения конфигурации</string>
     <string name="pref_advanced_mpv_conf">Редактировать mpv.conf</string>
     <string name="pref_advanced_input_conf">Редактировать input.conf</string>
-    <string name="pref_advanced_verbose_logging_title">Подробное журналирование</string>
+    <string name="pref_advanced_dump_logs_title">Выгрузка логов</string>
+    <string name="pref_advanced_dump_logs_summary">Выгружает и копирует логи для передачи разработчикам</string>
+    <string name="pref_advanced_verbose_logging_title">Подробное логирование</string>
     <string name="pref_advanced_verbose_logging_summary">Помогает при отладке, но может снизить производительность</string>
     <string name="pref_advanced_clear_playback_history">Очистить историю воспроизведения</string>
     <string name="pref_advanced_clear_playback_history_confirm_title">Вы уверены, что хотите очистить историю воспроизведения?</string>
@@ -155,6 +160,8 @@
     <string name="player_sheets_add_ext_audio">Добавить внешние аудиодорожки</string>
     <string name="player_sheets_tracks_off">Выкл</string>
 
+    <string name="player_sheets_chapter_title_substitute_audio">Аудио #%d</string>
+    <string name="player_sheets_chapter_title_substitute_subtitle">Субтитры #%d</string>
     <string name="player_sheets_subtitles_footer_secondary_sid_no_styles">Вторичные субтитры не будут иметь стиля ASS/SSA.</string>
     <string name="player_sheets_subtitles_settings_title">Настройки субтитров</string>
     <string name="player_sheets_subtitles_color_text">Текст</string>
@@ -192,6 +199,15 @@
     <string name="player_sheets_sub_delay_audio_sound_heard">Звук услышан</string>
     <string name="player_sheets_sub_delay_sound_sound_spotted">Звук обнаружен</string>
 
+    <string name="player_sheets_video_settings_title">Настройки видео</string>
+    <string name="player_sheets_deband_title">Дебанд</string>
+    <string name="player_sheets_deband_none">Нет</string>
+    <string name="player_sheets_deband_cpu">CPU</string>
+    <string name="player_sheets_deband_gpu">GPU</string>
+    <string name="player_sheets_deband_iterations">Итерации</string>
+    <string name="player_sheets_deband_threshold">Порог</string>
+    <string name="player_sheets_deband_range">Диапазон</string>
+    <string name="player_sheets_deband_grain">Зерно</string>
     <string name="player_sheets_filters_title">Фильтры</string>
     <string name="player_sheets_filters_brightness">Яркость</string>
     <string name="player_sheets_filters_contrast">Контраст</string>
@@ -219,9 +235,9 @@
     <string name="player_aspect_stretch">Растянуть</string>
 
     <string name="crash_screen_title">Ой</string>
-    <string name="crash_screen_subtitle">Похоже %s столкнулся с неожиданной ошибкой. Рассмотрите возможность поделиться журналами сбоев в GitHub issue.</string>
-    <string name="crash_screen_logs_title">Журналы сбоев:</string>
-    <string name="crash_screen_share">Поделиться журналами сбоев</string>
+    <string name="crash_screen_subtitle">Похоже %s столкнулся с неожиданной ошибкой. Рассмотрите возможность поделиться логами сбоев в GitHub issue.</string>
+    <string name="crash_screen_logs_title">Логи сбоев:</string>
+    <string name="crash_screen_share">Поделиться логами сбоев</string>
     <string name="crash_screen_restart">Перезапустить приложение</string>
 
     <string name="timer_picker_enter_timer">Введите время</string>
@@ -233,9 +249,28 @@
     <string name="swap_the_volume_and_brightness_slider">Поменять местами панель громкости и яркости</string>
     <string name="pref_player_display_reduce_player_animation">Уменьшить анимацию плеера</string>
     <string name="pref_player_display_hide_player_control_time">Время скрытия управления плеера</string>
+    <string name="show_splash_ovals_on_double_tap_to_seek">Показывать эффект пульсации при перемотке двойным нажатием</string>
+    <string name="show_time_on_double_tap_to_seek">Показывать время перемотки</string>
+    <string name="show_icon_on_double_tap_to_seek">Показывать иконку перемотки</string>
+
+    <string name="pref_enable_background_playback">Включить фоновое воспроизведение</string>
+    <string name="pref_enable_background_playback_summary">Продолжать воспроизведение, когда приложение в фоне</string>
+    <string name="notification_channel_name">Управление воспроизведением</string>
+    <string name="notification_channel_description">Управление для играющих сейчас мультимедиа</string>
+    <string name="notification_playing">Играет сейчас</string>
+    <string name="notification_pause">Пауза</string>
+    <string name="notification_play">Играть</string>
+    <string name="notification_stop">Стоп</string>
+    <string name="notification_forward">Вперёд</string>
+    <string name="notification_rewind">Назад</string>
 
     <plurals name="plural_items">
         <item quantity="one">%1$d элемент</item>
-        <item quantity="other">%1$d элементы</item>
+        <item quantity="other">%1$d элементов</item>
+    </plurals>
+
+    <plurals name="seconds">
+        <item quantity="one">%1$d секунда</item>
+        <item quantity="other">%1$d секунды</item>
     </plurals>
 </resources>
