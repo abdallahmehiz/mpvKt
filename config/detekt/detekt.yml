@@ -20,7 +20,7 @@ naming:
 style:
   MagicNumber:
     active: false
-  UnusedPrivateMember:
+  UnusedPrivateFunction:
     ignoreAnnotated:
       - "Preview"
 
@@ -36,6 +36,6 @@ empty-blocks:
   EmptyCatchBlock:
     active: false
 
-formatting:
+ktlint:
   Indentation:
     indentSize: 2

@@ -21,12 +21,10 @@ import org.koin.core.component.inject
 import kotlin.collections.component2
 import kotlin.collections.iterator
 
-class MPVView(
-  context: Context,
-  attributes: AttributeSet?
-) : BaseMPVView(
+class MPVView(context: Context, attributes: AttributeSet?) :
+    BaseMPVView(
   context,
-  attributes
+  attributes,
 ),
   KoinComponent {
 
@@ -178,7 +176,7 @@ class MPVView(
     mpv.setOptionString("sub-speed", subtitlesPreferences.defaultSubSpeed.get().toString())
     mpv.setOptionString(
       "secondary-sub-delay",
-      (subtitlesPreferences.defaultSecondarySubDelay.get() / 1000.0).toString()
+      (subtitlesPreferences.defaultSecondarySubDelay.get() / 1000.0).toString(),
     )
 
     mpv.setOptionString("sub-font", subtitlesPreferences.font.get())

@@ -65,24 +65,24 @@ import org.koin.compose.koinInject
 @SuppressLint("MutableCollectionMutableState")
 @Composable
 fun SubtitleSettingsTypographyCard(
-  isBold: Boolean,
-  isItalic: Boolean,
-  justify: SubtitleJustification,
-  font: String,
-  fontSize: Int,
-  borderStyle: SubtitlesBorderStyle,
-  borderSize: Int,
-  shadowOffset: Int,
-  onIsBoldChange: (Boolean) -> Unit,
-  onIsItalicChange: (Boolean) -> Unit,
-  onJustificationChange: (SubtitleJustification) -> Unit,
-  onFontChange: (String) -> Unit,
-  onFontSizeChange: (Int) -> Unit,
-  onBorderStyleChange: (SubtitlesBorderStyle) -> Unit,
-  onBorderSizeChange: (Int) -> Unit,
-  onShadowOffsetChange: (Int) -> Unit,
-  onReset: () -> Unit,
-  modifier: Modifier = Modifier,
+    isBold: Boolean,
+    isItalic: Boolean,
+    justify: SubtitleJustification,
+    font: String,
+    fontSize: Int,
+    borderStyle: SubtitlesBorderStyle,
+    borderSize: Int,
+    shadowOffset: Int,
+    onIsBoldChange: (Boolean) -> Unit,
+    onIsItalicChange: (Boolean) -> Unit,
+    onJustificationChange: (SubtitleJustification) -> Unit,
+    onFontChange: (String) -> Unit,
+    onFontSizeChange: (Int) -> Unit,
+    onBorderStyleChange: (SubtitlesBorderStyle) -> Unit,
+    onBorderSizeChange: (Int) -> Unit,
+    onShadowOffsetChange: (Int) -> Unit,
+    onReset: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
   val context = LocalContext.current
   val preferences = koinInject<SubtitlesPreferences>()
@@ -138,7 +138,7 @@ fun SubtitleSettingsTypographyCard(
       ) {
         IconToggleButton(
           checked = isBold,
-          onCheckedChange = onIsBoldChange
+          onCheckedChange = onIsBoldChange,
         ) {
           Icon(
             Icons.Default.FormatBold,
@@ -148,7 +148,7 @@ fun SubtitleSettingsTypographyCard(
         }
         IconToggleButton(
           checked = isItalic,
-          onCheckedChange = onIsItalicChange
+          onCheckedChange = onIsItalicChange,
         ) {
           Icon(
             Icons.Default.FormatItalic,
@@ -251,10 +251,7 @@ fun SubtitleSettingsTypographyCard(
   }
 }
 
-fun resetTypography(
-  mpv: MPV,
-  preferences: SubtitlesPreferences
-) {
+fun resetTypography(mpv: MPV, preferences: SubtitlesPreferences) {
   mpv.setPropertyBoolean("sub-bold", preferences.bold.deleteAndGet())
   mpv.setPropertyBoolean("sub-italic", preferences.italic.deleteAndGet())
   mpv.setPropertyBoolean("sub-ass-justify", preferences.overrideAssSubs.deleteAndGet())
@@ -266,23 +263,19 @@ fun resetTypography(
   mpv.setPropertyString("sub-border-style", preferences.borderStyle.deleteAndGet().value)
 }
 
-enum class SubtitlesBorderStyle(
-  val value: String,
-  @StringRes val titleRes: Int,
-) {
+enum class SubtitlesBorderStyle(val value: String, @StringRes val titleRes: Int) {
   OutlineAndShadow("outline-and-shadow", R.string.player_sheets_subtitles_border_style_outline_and_shadow),
   OpaqueBox("opaque-box", R.string.player_sheets_subtitles_border_style_opaque_box),
   BackgroundBox("background-box", R.string.player_sheets_subtitles_border_style_background_box)
+  ,
   ;
 
-  companion object {
-    fun byValue(value: String): SubtitlesBorderStyle {
-      return when (value) {
+    companion object {
+    fun byValue(value: String): SubtitlesBorderStyle = when (value) {
         "outline-and-shadow" -> SubtitlesBorderStyle.OutlineAndShadow
         "opaque-box" -> SubtitlesBorderStyle.OpaqueBox
         "background-box" -> SubtitlesBorderStyle.BackgroundBox
         else -> throw IllegalArgumentException("This border style is unsupported")
       }
-    }
   }
 }

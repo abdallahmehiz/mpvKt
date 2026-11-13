@@ -14,6 +14,8 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import `is`.xyz.mpv.MPV
 import `is`.xyz.mpv.MPVNode
+import `is`.xyz.mpv.prop
+import `is`.xyz.mpv.propFlow
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.CoroutineScope
@@ -43,9 +45,7 @@ import kotlin.getValue
 import kotlin.properties.ReadOnlyProperty
 import kotlin.reflect.KProperty
 
-class PlayerViewModelFactory(
-  private val mpv: MPV
-) : ViewModelProvider.Factory {
+class PlayerViewModelFactory(private val mpv: MPV) : ViewModelProvider.Factory {
   override fun <T : ViewModel> create(modelClass: Class<T>): T {
     if (modelClass.isAssignableFrom(PlayerViewModel::class.java)) {
       @Suppress("UNCHECKED_CAST")
@@ -56,9 +56,7 @@ class PlayerViewModelFactory(
 }
 
 @Suppress("TooManyFunctions")
-class PlayerViewModel(
-  val mpv: MPV
-) : ViewModel() {
+class PlayerViewModel(val mpv: MPV) : ViewModel() {
   private val playerPreferences: PlayerPreferences by inject(PlayerPreferences::class.java)
   private val gesturePreferences: GesturePreferences by inject(GesturePreferences::class.java)
   private val audioPreferences: AudioPreferences by inject(AudioPreferences::class.java)
@@ -107,7 +105,7 @@ class PlayerViewModel(
   private val volumeBoostCap: Int? by mpv.prop("volume-max")
 
   val subtitleTracks by lazy {
-    mpv.propFlow.getNodeFlow("track-list")
+    mpv.propFlow<MPVNode>("track-list")
       .map { (it?.toObject<List<TrackNode>>(json) ?: persistentListOf()).filter { it.isSubtitle }.toImmutableList() }
   }
 
@@ -155,9 +153,7 @@ class PlayerViewModel(
   private val _remainingTime = MutableStateFlow(0)
   val remainingTime = _remainingTime.asStateFlow()
 
-  fun startTimer(
-    seconds: Int,
-  ) {
+  fun startTimer(seconds: Int) {
     timerJob?.cancel()
     _remainingTime.value = seconds
     if (seconds < 1) return
@@ -254,9 +250,7 @@ class PlayerViewModel(
     changeBrightnessTo(currentBrightness.value + change)
   }
 
-  fun changeBrightnessTo(
-    brightness: Float,
-  ) {
+  fun changeBrightnessTo(brightness: Float) {
     val coercedBrightness = brightness.coerceIn(0f, 1f)
     currentBrightness.update { _ -> coercedBrightness }
     eventChannel.trySend(Event.ChangeBrightness(coercedBrightness))
@@ -302,9 +296,7 @@ class PlayerViewModel(
     isVolumeSliderShown.update { true }
   }
 
-  fun changeVideoAspect(
-    aspect: VideoAspect,
-  ) {
+  fun changeVideoAspect(aspect: VideoAspect) {
     var ratio = -1.0
     var pan = 1.0
     when (aspect) {
@@ -336,10 +328,7 @@ class PlayerViewModel(
   }
 
   @Suppress("CyclomaticComplexMethod", "LongMethod")
-  fun handleLuaInvocation(
-    property: String,
-    value: String,
-  ) {
+  fun handleLuaInvocation(property: String, value: String) {
     val data = value
       .removePrefix("\"")
       .removeSuffix("\"")
@@ -347,9 +336,11 @@ class PlayerViewModel(
 
     when (property.substringAfterLast("/")) {
       "show_text" -> playerUpdate.update { PlayerUpdates.ShowText(data) }
+
       "toggle_ui" -> {
         when (data) {
           "show" -> showControls()
+
           "toggle" -> if (controlsShown.value) hideControls() else showControls()
 
           "hide" -> {
@@ -390,7 +381,9 @@ class PlayerViewModel(
       }
 
       "seek_by" -> seekByWithText(data.toInt(), null)
+
       "seek_to" -> seekToWithText(data.toInt(), null)
+
       "toggle_button" -> {
         fun showButton() {
           if (_primaryButton.value == null) {
@@ -498,6 +491,7 @@ class PlayerViewModel(
       }
 
       SingleActionGesture.Seek -> {}
+
       SingleActionGesture.None -> {}
     }
   }
@@ -533,9 +527,8 @@ class PlayerViewModel(
   }
 }
 
-fun Float.normalize(inMin: Float, inMax: Float, outMin: Float, outMax: Float): Float {
-  return (this - inMin) * (outMax - outMin) / (inMax - inMin) + outMin
-}
+fun Float.normalize(inMin: Float, inMax: Float, outMin: Float, outMax: Float): Float =
+    (this - inMin) * (outMax - outMin) / (inMax - inMin) + outMin
 
 fun CustomButtonEntity.execute(mpv: MPV) {
   mpv.command("script-message", "call_button_$id")
@@ -545,8 +538,7 @@ fun CustomButtonEntity.executeLongClick(mpv: MPV) {
   mpv.command("script-message", "call_button_${id}_long")
 }
 
-fun <T> Flow<T>.collectAsState(scope: CoroutineScope, initialValue: T? = null) =
-  object : ReadOnlyProperty<Any?, T?> {
+fun <T> Flow<T>.collectAsState(scope: CoroutineScope, initialValue: T? = null) = object : ReadOnlyProperty<Any?, T?> {
     private var value: T? = initialValue
 
     init {

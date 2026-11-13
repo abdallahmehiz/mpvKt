@@ -101,16 +101,16 @@ object PlayerPreferencesScreen : Screen {
           SwitchPreference(
             value = closeAtEOF,
             onValueChange = preferences.closeAfterReachingEndOfVideo::set,
-            title = { Text(text = stringResource(id = R.string.pref_player_close_after_eof)) }
+            title = { Text(text = stringResource(id = R.string.pref_player_close_after_eof)) },
           )
           val rememberBrightness by preferences.rememberBrightness.collectAsState()
           SwitchPreference(
             value = rememberBrightness,
             onValueChange = preferences.rememberBrightness::set,
-            title = { Text(text = stringResource(R.string.pref_player_remember_brightness)) }
+            title = { Text(text = stringResource(R.string.pref_player_remember_brightness)) },
           )
           PreferenceCategory(
-            title = { Text(stringResource(R.string.pref_player_seeking_title)) }
+            title = { Text(stringResource(R.string.pref_player_seeking_title)) },
           )
           val horizontalSeekGesture by preferences.horizontalSeekGesture.collectAsState()
           SwitchPreference(
@@ -122,14 +122,14 @@ object PlayerPreferencesScreen : Screen {
           SwitchPreference(
             value = showSeekbarWhenSeeking,
             onValueChange = preferences.showSeekBarWhenSeeking::set,
-            title = { Text(stringResource(R.string.pref_player_show_seekbar_when_seeking)) }
+            title = { Text(stringResource(R.string.pref_player_show_seekbar_when_seeking)) },
           )
           val preciseSeeking by preferences.preciseSeeking.collectAsState()
           SwitchPreference(
             value = preciseSeeking,
             onValueChange = preferences.preciseSeeking::set,
             title = { Text(stringResource(R.string.pref_player_precise_seeking_title)) },
-            summary = { Text(stringResource(R.string.pref_player_precise_seeking_summary)) }
+            summary = { Text(stringResource(R.string.pref_player_precise_seeking_summary)) },
           )
           val showDoubleTapOvals by preferences.showDoubleTapOvals.collectAsState()
           SwitchPreference(
@@ -207,7 +207,7 @@ object PlayerPreferencesScreen : Screen {
           SwitchPreference(
             value = showLoadingCircle,
             onValueChange = preferences.showLoadingCircle::set,
-            title = { Text(stringResource(R.string.pref_player_controls_show_loading_circle)) }
+            title = { Text(stringResource(R.string.pref_player_controls_show_loading_circle)) },
           )
           val showChaptersButton by preferences.showChaptersButton.collectAsState()
           SwitchPreference(

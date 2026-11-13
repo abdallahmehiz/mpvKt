@@ -20,14 +20,14 @@ import live.mehiz.mpvkt.ui.player.controls.components.CurrentChapter
 
 @Composable
 fun BottomLeftPlayerControls(
-  playbackSpeed: Float,
-  currentChapter: Segment?,
-  showChapterIndicator: Boolean,
-  onLockControls: () -> Unit,
-  onCycleRotation: () -> Unit,
-  onPlaybackSpeedChange: (Float) -> Unit,
-  onOpenSheet: (Sheets) -> Unit,
-  modifier: Modifier = Modifier
+    playbackSpeed: Float,
+    currentChapter: Segment?,
+    showChapterIndicator: Boolean,
+    onLockControls: () -> Unit,
+    onCycleRotation: () -> Unit,
+    onPlaybackSpeedChange: (Float) -> Unit,
+    onOpenSheet: (Sheets) -> Unit,
+    modifier: Modifier = Modifier,
 ) {
   Row(
     modifier = modifier.fillMaxWidth(),
@@ -39,7 +39,7 @@ fun BottomLeftPlayerControls(
     )
     ControlsButton(
       icon = Icons.Default.ScreenRotation,
-      onClick = onCycleRotation
+      onClick = onCycleRotation,
     )
     ControlsButton(
       text = stringResource(R.string.player_speed, playbackSpeed),
@@ -53,7 +53,7 @@ fun BottomLeftPlayerControls(
     ) {
       CurrentChapter(
         chapter = currentChapter ?: return@AnimatedVisibility,
-        onClick = { onOpenSheet(Sheets.Chapters) }
+        onClick = { onOpenSheet(Sheets.Chapters) },
       )
     }
   }

@@ -33,21 +33,19 @@ import live.mehiz.mpvkt.ui.theme.spacing
 import kotlin.math.abs
 import kotlin.math.roundToInt
 
-fun percentage(value: Float, range: ClosedFloatingPointRange<Float>): Float {
-  return ((value - range.start) / (range.endInclusive - range.start)).coerceIn(0f, 1f)
-}
+fun percentage(value: Float, range: ClosedFloatingPointRange<Float>): Float =
+    ((value - range.start) / (range.endInclusive - range.start)).coerceIn(0f, 1f)
 
-fun percentage(value: Int, range: ClosedRange<Int>): Float {
-  return ((value - range.start - 0f) / (range.endInclusive - range.start)).coerceIn(0f, 1f)
-}
+fun percentage(value: Int, range: ClosedRange<Int>): Float =
+    ((value - range.start - 0f) / (range.endInclusive - range.start)).coerceIn(0f, 1f)
 
 @Composable
 fun VerticalSlider(
-  value: Float,
-  range: ClosedFloatingPointRange<Float>,
-  modifier: Modifier = Modifier,
-  overflowValue: Float? = null,
-  overflowRange: ClosedFloatingPointRange<Float>? = null,
+    value: Float,
+    range: ClosedFloatingPointRange<Float>,
+    modifier: Modifier = Modifier,
+    overflowValue: Float? = null,
+    overflowRange: ClosedFloatingPointRange<Float>? = null,
 ) {
   require(range.contains(value)) { "Value must be within the provided range" }
   Box(
@@ -82,11 +80,11 @@ fun VerticalSlider(
 
 @Composable
 fun VerticalSlider(
-  value: Int,
-  range: ClosedRange<Int>,
-  modifier: Modifier = Modifier,
-  overflowValue: Int? = null,
-  overflowRange: ClosedRange<Int>? = null,
+    value: Int,
+    range: ClosedRange<Int>,
+    modifier: Modifier = Modifier,
+    overflowValue: Int? = null,
+    overflowRange: ClosedRange<Int>? = null,
 ) {
   require(range.contains(value)) { "Value must be within the provided range" }
   Box(
@@ -120,11 +118,7 @@ fun VerticalSlider(
 }
 
 @Composable
-fun BrightnessSlider(
-  brightness: Float,
-  range: ClosedFloatingPointRange<Float>,
-  modifier: Modifier = Modifier,
-) {
+fun BrightnessSlider(brightness: Float, range: ClosedFloatingPointRange<Float>, modifier: Modifier = Modifier) {
   Column(
     modifier = modifier,
     horizontalAlignment = Alignment.CenterHorizontally,
@@ -152,12 +146,12 @@ fun BrightnessSlider(
 
 @Composable
 fun VolumeSlider(
-  volume: Int,
-  mpvVolume: Int,
-  range: ClosedRange<Int>,
-  boostRange: ClosedRange<Int>?,
-  modifier: Modifier = Modifier,
-  displayAsPercentage: Boolean = false,
+    volume: Int,
+    mpvVolume: Int,
+    range: ClosedRange<Int>,
+    boostRange: ClosedRange<Int>?,
+    modifier: Modifier = Modifier,
+    displayAsPercentage: Boolean = false,
 ) {
   val percentage = (percentage(volume, range) * 100).roundToInt()
   Column(

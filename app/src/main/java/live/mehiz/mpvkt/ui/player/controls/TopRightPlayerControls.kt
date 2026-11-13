@@ -31,11 +31,11 @@ fun TopRightPlayerControls(
   onMoreClick: () -> Unit,
   onMoreLongClick: () -> Unit,
 
-  modifier: Modifier = Modifier
+  modifier: Modifier = Modifier,
 ) {
   Row(
     modifier,
-    verticalAlignment = Alignment.CenterVertically
+    verticalAlignment = Alignment.CenterVertically,
   ) {
     ControlsButton(
       decoder.title,

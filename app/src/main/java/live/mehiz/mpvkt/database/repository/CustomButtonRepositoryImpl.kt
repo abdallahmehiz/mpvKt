@@ -5,12 +5,8 @@ import live.mehiz.mpvkt.database.MpvKtDatabase
 import live.mehiz.mpvkt.database.entities.CustomButtonEntity
 import live.mehiz.mpvkt.domain.custombuttons.repository.CustomButtonRepository
 
-class CustomButtonRepositoryImpl(
-  private val database: MpvKtDatabase,
-) : CustomButtonRepository {
-  override fun getCustomButtons(): Flow<List<CustomButtonEntity>> {
-    return database.customButtonDao().getCustomButtons()
-  }
+class CustomButtonRepositoryImpl(private val database: MpvKtDatabase) : CustomButtonRepository {
+  override fun getCustomButtons(): Flow<List<CustomButtonEntity>> = database.customButtonDao().getCustomButtons()
 
   override suspend fun upsert(customButtonEntity: CustomButtonEntity) {
     database.customButtonDao().upsert(customButtonEntity)

@@ -3,9 +3,7 @@ package live.mehiz.mpvkt.ui.player
 import `is`.xyz.mpv.MPV
 import `is`.xyz.mpv.MPVNode
 
-class PlayerObserver(
-  private val activity: PlayerActivity
-) : MPV.EventObserver {
+class PlayerObserver(private val activity: PlayerActivity) : MPV.EventObserver {
   override fun eventProperty(property: String) {
     activity.runOnUiThread { activity.onObserverEvent(property) }
   }

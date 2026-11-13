@@ -70,6 +70,7 @@ fun SubtitleSettingsPanel(
         onReset = onTypographyReset,
         modifier = cardModifier,
       )
+
       1 -> {
         SubtitleSettingsColorsCard(
           currentColor = currentSubtitleColor,
@@ -80,6 +81,7 @@ fun SubtitleSettingsPanel(
           modifier = cardModifier,
         )
       }
+
       2 -> SubtitlesMiscellaneousCard(
         overrideAssSubs = overrideAssSubs,
         subScale = subScale,
@@ -90,6 +92,7 @@ fun SubtitleSettingsPanel(
         onReset = onMiscReset,
         modifier = cardModifier,
       )
+
       else -> {}
     }
   }

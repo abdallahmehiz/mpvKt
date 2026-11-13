@@ -58,10 +58,10 @@ private val sheetAnimationSpec = tween<Float>(350)
 
 @Composable
 fun PlayerSheet(
-  onDismissRequest: () -> Unit,
-  modifier: Modifier = Modifier,
-  tonalElevation: Dp = 1.dp,
-  content: @Composable () -> Unit,
+    onDismissRequest: () -> Unit,
+    modifier: Modifier = Modifier,
+    tonalElevation: Dp = 1.dp,
+    content: @Composable () -> Unit,
 ) {
   val scope = rememberCoroutineScope()
   val density = LocalDensity.current
@@ -77,7 +77,7 @@ fun PlayerSheet(
   val alpha by animateFloatAsState(
     backgroundAlpha,
     animationSpec = sheetAnimationSpec,
-    label = "alpha"
+    label = "alpha",
   )
 
   val decayAnimationSpec = rememberSplineBasedDecay<Float>()
@@ -182,17 +182,12 @@ private fun <T> AnchoredDraggableState<T>.preUpPostDownNestedScrollConnection() 
     }
   }
 
-  override fun onPostScroll(
-    consumed: Offset,
-    available: Offset,
-    source: NestedScrollSource,
-  ): Offset {
-    return if (source == NestedScrollSource.UserInput) {
+  override fun onPostScroll(consumed: Offset, available: Offset, source: NestedScrollSource): Offset =
+      if (source == NestedScrollSource.UserInput) {
       dispatchRawDelta(available.toFloat()).toOffset()
     } else {
       Offset.Zero
     }
-  }
 
   override suspend fun onPreFling(available: Velocity): Velocity {
     val toFling = available.toFloat()

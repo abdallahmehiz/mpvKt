@@ -23,12 +23,12 @@ import live.mehiz.mpvkt.ui.theme.spacing
 
 @Composable
 fun AudioDelayPanel(
-  delayMs: Int,
-  onDelayChange: (Int) -> Unit,
-  onApply: () -> Unit,
-  onReset: () -> Unit,
-  onDismissRequest: () -> Unit,
-  modifier: Modifier = Modifier,
+    delayMs: Int,
+    onDelayChange: (Int) -> Unit,
+    onApply: () -> Unit,
+    onReset: () -> Unit,
+    onDismissRequest: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
   ConstraintLayout(
     modifier = modifier
@@ -53,10 +53,7 @@ fun AudioDelayPanel(
 }
 
 @Composable
-fun AudioDelayCardTitle(
-  onClose: () -> Unit,
-  modifier: Modifier = Modifier,
-) {
+fun AudioDelayCardTitle(onClose: () -> Unit, modifier: Modifier = Modifier) {
   Row(
     modifier = modifier.fillMaxWidth(),
     horizontalArrangement = Arrangement.SpaceBetween,

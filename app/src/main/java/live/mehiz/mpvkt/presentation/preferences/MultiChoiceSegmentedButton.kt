@@ -14,10 +14,10 @@ import live.mehiz.mpvkt.ui.theme.spacing
 
 @Composable
 fun MultiChoiceSegmentedButton(
-  choices: ImmutableList<String>,
-  selectedIndices: ImmutableList<Int>,
-  onClick: (Int) -> Unit,
-  modifier: Modifier = Modifier,
+    choices: ImmutableList<String>,
+    selectedIndices: ImmutableList<Int>,
+    onClick: (Int) -> Unit,
+    modifier: Modifier = Modifier,
 ) {
   MultiChoiceSegmentedButtonRow(
     modifier = modifier

@@ -30,16 +30,16 @@ import live.mehiz.mpvkt.ui.theme.spacing
 
 @Composable
 fun SeekbarWithTimers(
-  position: Float,
-  duration: Float,
-  readAheadValue: Float,
-  onValueChange: (Float) -> Unit,
-  onValueChangeFinished: () -> Unit,
-  timersInverted: Pair<Boolean, Boolean>,
-  positionTimerOnClick: () -> Unit,
-  durationTimerOnCLick: () -> Unit,
-  chapters: ImmutableList<Segment>,
-  modifier: Modifier = Modifier,
+    position: Float,
+    duration: Float,
+    readAheadValue: Float,
+    onValueChange: (Float) -> Unit,
+    onValueChangeFinished: () -> Unit,
+    timersInverted: Pair<Boolean, Boolean>,
+    positionTimerOnClick: () -> Unit,
+    durationTimerOnCLick: () -> Unit,
+    chapters: ImmutableList<Segment>,
+    modifier: Modifier = Modifier,
 ) {
   val clickEvent = LocalPlayerButtonsClickEvent.current
   Row(
@@ -86,12 +86,7 @@ fun SeekbarWithTimers(
 }
 
 @Composable
-fun VideoTimer(
-  value: Float,
-  isInverted: Boolean,
-  modifier: Modifier = Modifier,
-  onClick: () -> Unit = {},
-) {
+fun VideoTimer(value: Float, isInverted: Boolean, modifier: Modifier = Modifier, onClick: () -> Unit = {}) {
   val interactionSource = remember { MutableInteractionSource() }
   Text(
     modifier = modifier
@@ -120,6 +115,6 @@ private fun PreviewSeekBar() {
     Pair(false, true),
     {},
     {},
-    persistentListOf<Segment>()
+    persistentListOf<Segment>(),
   )
 }

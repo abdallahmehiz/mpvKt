@@ -126,11 +126,7 @@ data class FilePickerScreen(val uri: String) : Screen {
   }
 
   @Composable
-  fun FilePicker(
-    directory: AbstractFile,
-    onNavigate: (AbstractFile) -> Unit,
-    modifier: Modifier = Modifier,
-  ) {
+  fun FilePicker(directory: AbstractFile, onNavigate: (AbstractFile) -> Unit, modifier: Modifier = Modifier) {
     val navigator = LocalBackStack.current
     val fileManager = koinInject<FileManager>()
     val fileList = fileManager.listFiles(directory).filterNot {
@@ -171,13 +167,13 @@ data class FilePickerScreen(val uri: String) : Screen {
 
   @Composable
   fun FileListing(
-    name: String,
-    isDirectory: Boolean,
-    lastModified: Long?,
-    length: Long?,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier,
-    items: Int? = null,
+      name: String,
+      isDirectory: Boolean,
+      lastModified: Long?,
+      length: Long?,
+      onClick: () -> Unit,
+      modifier: Modifier = Modifier,
+      items: Int? = null,
   ) {
     var size: String? by remember { mutableStateOf(null) }
     var time: String? by remember { mutableStateOf(null) }
@@ -241,10 +237,7 @@ data class FilePickerScreen(val uri: String) : Screen {
   }
 
   @Composable
-  fun fileIcon(
-    isDirectory: Boolean,
-    fileExtension: String,
-  ): ImageVector {
+  fun fileIcon(isDirectory: Boolean, fileExtension: String): ImageVector {
     if (isDirectory) return Icons.Filled.Folder
     return when (fileExtension) {
       in videoExtensions -> Icons.Filled.Movie
@@ -254,11 +247,7 @@ data class FilePickerScreen(val uri: String) : Screen {
     }
   }
 
-  fun playFileWithSubtitles(
-    filepath: String,
-    subtitlePaths: List<String>,
-    context: Context,
-  ) {
+  fun playFileWithSubtitles(filepath: String, subtitlePaths: List<String>, context: Context) {
     val i = Intent(Intent.ACTION_VIEW, filepath.toUri())
     i.setClass(context, PlayerActivity::class.java)
     if (subtitlePaths.isNotEmpty()) {

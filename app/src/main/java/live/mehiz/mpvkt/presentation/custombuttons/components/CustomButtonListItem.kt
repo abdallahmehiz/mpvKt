@@ -30,16 +30,16 @@ import live.mehiz.mpvkt.ui.theme.spacing
 
 @Composable
 fun CustomButtonListItem(
-  customButton: CustomButtonEntity,
-  isPrimary: Boolean,
-  canMoveUp: Boolean,
-  canMoveDown: Boolean,
-  onMoveUp: (CustomButtonEntity) -> Unit,
-  onMoveDown: (CustomButtonEntity) -> Unit,
-  onRename: () -> Unit,
-  onDelete: () -> Unit,
-  onTogglePrimary: () -> Unit,
-  modifier: Modifier = Modifier,
+    customButton: CustomButtonEntity,
+    isPrimary: Boolean,
+    canMoveUp: Boolean,
+    canMoveDown: Boolean,
+    onMoveUp: (CustomButtonEntity) -> Unit,
+    onMoveDown: (CustomButtonEntity) -> Unit,
+    onRename: () -> Unit,
+    onDelete: () -> Unit,
+    onTogglePrimary: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
   ElevatedCard(
     modifier = modifier,
@@ -71,7 +71,7 @@ fun CustomButtonListItem(
       modifier = Modifier
         .padding(
           top = MaterialTheme.spacing.smaller,
-          start = MaterialTheme.spacing.medium
+          start = MaterialTheme.spacing.medium,
         ),
     )
     Row {

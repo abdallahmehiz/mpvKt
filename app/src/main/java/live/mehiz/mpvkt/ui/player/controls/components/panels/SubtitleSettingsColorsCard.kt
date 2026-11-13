@@ -48,12 +48,12 @@ import live.mehiz.mpvkt.ui.theme.spacing
 
 @Composable
 fun SubtitleSettingsColorsCard(
-  currentColor: Int,
-  currentColorType: SubColorType,
-  onColorChange: (Int) -> Unit,
-  onColorReset: (SubColorType) -> Unit,
-  onColorTypeChange: (SubColorType) -> Unit,
-  modifier: Modifier = Modifier,
+    currentColor: Int,
+    currentColorType: SubColorType,
+    onColorChange: (Int) -> Unit,
+    onColorReset: (SubColorType) -> Unit,
+    onColorTypeChange: (SubColorType) -> Unit,
+    modifier: Modifier = Modifier,
 ) {
   var isExpanded by remember { mutableStateOf(true) }
   ExpandableCard(
@@ -116,12 +116,8 @@ fun SubtitleSettingsColorsCard(
   }
 }
 
-fun Int.copyAsArgb(
-  alpha: Int = this.alpha,
-  red: Int = this.red,
-  green: Int = this.green,
-  blue: Int = this.blue,
-) = (alpha shl 24) or (red shl 16) or (green shl 8) or blue
+fun Int.copyAsArgb(alpha: Int = this.alpha, red: Int = this.red, green: Int = this.green, blue: Int = this.blue) =
+    (alpha shl 24) or (red shl 16) or (green shl 8) or blue
 
 @OptIn(ExperimentalStdlibApi::class)
 fun Int.toColorHexString() = "#" + this.toHexString().uppercase()
@@ -145,14 +141,10 @@ enum class SubColorType(
     R.string.player_sheets_subtitles_color_background,
     "sub-back-color",
     preference = SubtitlesPreferences::backgroundColor,
-  )
+  ),
 }
 
-fun resetColors(
-  preferences: SubtitlesPreferences,
-  mpv: MPV?,
-  type: SubColorType
-) {
+fun resetColors(preferences: SubtitlesPreferences, mpv: MPV?, type: SubColorType) {
   when (type) {
     SubColorType.Text -> {
       val textColor = preferences.textColor.deleteAndGet().toColorHexString()
@@ -173,16 +165,12 @@ fun resetColors(
 
 val getCurrentMPVColor: (SubColorType, MPV) -> Int = { c, m ->
   m.getPropertyString(
-    c.property
+    c.property,
   )!!.uppercase().toColorInt()
 }
 
 @Composable
-fun SubtitlesColorPicker(
-  color: Int,
-  onColorChange: (Int) -> Unit,
-  modifier: Modifier = Modifier,
-) {
+fun SubtitlesColorPicker(color: Int, onColorChange: (Int) -> Unit, modifier: Modifier = Modifier) {
   Column(modifier) {
     TintedSliderItem(
       stringResource(R.string.player_sheets_sub_color_red),

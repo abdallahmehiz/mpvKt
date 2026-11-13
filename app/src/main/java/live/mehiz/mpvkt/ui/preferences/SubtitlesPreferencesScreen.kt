@@ -89,7 +89,7 @@ object SubtitlesPreferencesScreen : Screen {
                 TextField(
                   value,
                   onValueChange,
-                  modifier = Modifier.fillMaxWidth()
+                  modifier = Modifier.fillMaxWidth(),
                 )
               }
             },
@@ -103,7 +103,7 @@ object SubtitlesPreferencesScreen : Screen {
             },
             iconButtonIcon = { Icon(Icons.Default.Clear, null) },
             onIconButtonClick = { preferences.fontsFolder.delete() },
-            iconButtonEnabled = fontsFolder.isNotBlank()
+            iconButtonEnabled = fontsFolder.isNotBlank(),
           )
           val autoloadExternal by preferences.autoLoadExternal.collectAsState()
           SwitchPreference(

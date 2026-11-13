@@ -99,12 +99,7 @@ class CrashActivity : ComponentActivity() {
   }
 
   companion object {
-    suspend fun shareLogs(
-      deviceInfo: String,
-      exceptionString: String? = null,
-      logcat: String,
-      activity: Activity,
-    ) {
+    suspend fun shareLogs(deviceInfo: String, exceptionString: String? = null, logcat: String, activity: Activity) {
       withContext(NonCancellable) {
         val file = File(activity.cacheDir, "mpvKt_logs.txt")
         if (file.exists()) file.delete()
@@ -122,12 +117,7 @@ class CrashActivity : ComponentActivity() {
       }
     }
 
-    fun concatLogs(
-      deviceInfo: String,
-      crashLogs: String? = null,
-      logcat: String,
-    ): String {
-      return StringBuilder().apply {
+    fun concatLogs(deviceInfo: String, crashLogs: String? = null, logcat: String): String = StringBuilder().apply {
         appendLine(deviceInfo)
         appendLine()
         if (!crashLogs.isNullOrBlank()) {
@@ -138,7 +128,6 @@ class CrashActivity : ComponentActivity() {
         appendLine("Logcat:")
         appendLine(logcat)
       }.toString()
-    }
 
     fun collectLogcat(): String {
       val process = Runtime.getRuntime()
@@ -153,8 +142,7 @@ class CrashActivity : ComponentActivity() {
       return logcat.toString()
     }
 
-    fun collectDeviceInfo(): String {
-      return """
+    fun collectDeviceInfo(): String = """
       App version: ${BuildConfig.VERSION_NAME} (${BuildConfig.GIT_SHA})
       Android version: ${Build.VERSION.RELEASE} (${Build.VERSION.SDK_INT})
       Device brand: ${Build.BRAND}
@@ -164,14 +152,10 @@ class CrashActivity : ComponentActivity() {
       ffmpeg version: ${Utils.VERSIONS.ffmpeg}
       libplacebo version: ${Utils.VERSIONS.libPlacebo}
       """.trimIndent()
-    }
   }
 
   @Composable
-  fun CrashScreen(
-    exceptionString: String,
-    modifier: Modifier = Modifier,
-  ) {
+  fun CrashScreen(exceptionString: String, modifier: Modifier = Modifier) {
     val scope = rememberCoroutineScope()
     Scaffold(
       modifier = modifier.fillMaxSize(),
@@ -265,10 +249,7 @@ class CrashActivity : ComponentActivity() {
   }
 
   @Composable
-  fun LogsContainer(
-    logs: String,
-    modifier: Modifier = Modifier,
-  ) {
+  fun LogsContainer(logs: String, modifier: Modifier = Modifier) {
     LazyRow(
       modifier = modifier
         .clip(RoundedCornerShape(16.dp))

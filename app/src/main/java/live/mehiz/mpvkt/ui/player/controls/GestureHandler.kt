@@ -38,6 +38,7 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.sp
+import `is`.xyz.mpv.propFlow
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.update
 import live.mehiz.mpvkt.R
@@ -56,9 +57,9 @@ import org.koin.compose.koinInject
 @Suppress("CyclomaticComplexMethod", "MultipleEmitters")
 @Composable
 fun GestureHandler(
-  viewModel: PlayerViewModel,
-  interactionSource: MutableInteractionSource,
-  modifier: Modifier = Modifier
+    viewModel: PlayerViewModel,
+    interactionSource: MutableInteractionSource,
+    modifier: Modifier = Modifier,
 ) {
   val playerPreferences = koinInject<PlayerPreferences>()
   val audioPreferences = koinInject<AudioPreferences>()
@@ -183,7 +184,7 @@ fun GestureHandler(
             startingPosition,
             startingX,
             change.position.x,
-            0.15f
+            0.15f,
           ).let {
             viewModel.gestureSeekAmount.update { _ ->
               Pair(
@@ -271,8 +272,10 @@ fun GestureHandler(
             }
 
             brightnessGesture -> changeBrightness()
+
             // it's not always true, AS is drunk
             volumeGesture -> changeVolume()
+
             else -> {}
           }
         }
@@ -283,13 +286,13 @@ fun GestureHandler(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DoubleTapToSeekOvals(
-  amount: Int,
-  text: String?,
-  showOvals: Boolean,
-  showSeekIcon: Boolean,
-  showSeekTime: Boolean,
-  interactionSource: MutableInteractionSource,
-  modifier: Modifier = Modifier,
+    amount: Int,
+    text: String?,
+    showOvals: Boolean,
+    showSeekIcon: Boolean,
+    showSeekTime: Boolean,
+    interactionSource: MutableInteractionSource,
+    modifier: Modifier = Modifier,
 ) {
   val alpha by animateFloatAsState(if (amount == 0) 0f else 0.2f, label = "double_tap_animation_alpha")
   Box(
@@ -332,18 +335,14 @@ fun DoubleTapToSeekOvals(
   }
 }
 
-fun calculateNewVerticalGestureValue(originalValue: Int, startingY: Float, newY: Float, sensitivity: Float): Int {
-  return originalValue + ((startingY - newY) * sensitivity).toInt()
-}
+fun calculateNewVerticalGestureValue(originalValue: Int, startingY: Float, newY: Float, sensitivity: Float): Int =
+    originalValue + ((startingY - newY) * sensitivity).toInt()
 
-fun calculateNewVerticalGestureValue(originalValue: Float, startingY: Float, newY: Float, sensitivity: Float): Float {
-  return originalValue + ((startingY - newY) * sensitivity)
-}
+fun calculateNewVerticalGestureValue(originalValue: Float, startingY: Float, newY: Float, sensitivity: Float): Float =
+    originalValue + ((startingY - newY) * sensitivity)
 
-fun calculateNewHorizontalGestureValue(originalValue: Int, startingX: Float, newX: Float, sensitivity: Float): Int {
-  return originalValue + ((newX - startingX) * sensitivity).toInt()
-}
+fun calculateNewHorizontalGestureValue(originalValue: Int, startingX: Float, newX: Float, sensitivity: Float): Int =
+    originalValue + ((newX - startingX) * sensitivity).toInt()
 
-fun calculateNewHorizontalGestureValue(originalValue: Float, startingX: Float, newX: Float, sensitivity: Float): Float {
-  return originalValue + ((newX - startingX) * sensitivity)
-}
+fun calculateNewHorizontalGestureValue(originalValue: Float, startingX: Float, newX: Float, sensitivity: Float): Float =
+    originalValue + ((newX - startingX) * sensitivity)

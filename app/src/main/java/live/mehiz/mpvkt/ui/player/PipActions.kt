@@ -11,10 +11,7 @@ import androidx.annotation.RequiresApi
 import live.mehiz.mpvkt.R
 
 @RequiresApi(O)
-fun createPipActions(
-  context: Context,
-  isPaused: Boolean,
-): ArrayList<RemoteAction> = arrayListOf(
+fun createPipActions(context: Context, isPaused: Boolean): ArrayList<RemoteAction> = arrayListOf(
   createPipAction(
     context,
     "fast rewind",
@@ -40,18 +37,13 @@ fun createPipActions(
     context,
     "fast forward",
     R.drawable.baseline_fast_forward_24,
-    PIP_FF
-  )
+    PIP_FF,
+  ),
 )
 
 @RequiresApi(O)
-fun createPipAction(
-  context: Context,
-  title: String,
-  @DrawableRes icon: Int,
-  actionCode: Int,
-): RemoteAction {
-  return RemoteAction(
+fun createPipAction(context: Context, title: String, @DrawableRes icon: Int, actionCode: Int): RemoteAction =
+    RemoteAction(
     Icon.createWithResource(context, icon),
     title,
     title,
@@ -62,7 +54,6 @@ fun createPipAction(
       PendingIntent.FLAG_IMMUTABLE,
     ),
   )
-}
 
 const val PIP_INTENTS_FILTER = "pip_control"
 const val PIP_INTENT_ACTION = "media_control"

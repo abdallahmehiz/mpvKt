@@ -46,6 +46,7 @@ object CustomButtonsScreen : Screen {
 
     when (dialog) {
       is CustomButtonDialog.None -> {}
+
       is CustomButtonDialog.Create -> {
         CustomButtonAddDialog(
           onDismissRequest = viewModel::dismissDialog,
@@ -53,13 +54,14 @@ object CustomButtonsScreen : Screen {
           buttonNames = customButtons.map { it.title }.toImmutableList(),
         )
       }
+
       is CustomButtonDialog.Edit -> {
         val button = (dialog as CustomButtonDialog.Edit).customButton
         CustomButtonEditDialog(
           onDismissRequest = viewModel::dismissDialog,
           onEdit = { title, content, longPressContent ->
             viewModel.editButton(
-              button.copy(title = title, content = content, longPressContent = longPressContent)
+              button.copy(title = title, content = content, longPressContent = longPressContent),
             )
           },
           buttonNames = customButtons.filter { it.title != button.title }
@@ -68,6 +70,7 @@ object CustomButtonsScreen : Screen {
           initialState = button,
         )
       }
+
       is CustomButtonDialog.Delete -> {
         val button = (dialog as CustomButtonDialog.Delete).customButton
         CustomButtonDeleteDialog(

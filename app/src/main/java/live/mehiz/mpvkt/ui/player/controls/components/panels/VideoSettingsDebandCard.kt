@@ -39,12 +39,12 @@ import me.zhanghai.compose.preference.ProvidePreferenceLocals
 
 @Composable
 fun VideoSettingsDebandCard(
-  deband: Debanding,
-  onDebandingChange: (Debanding) -> Unit,
-  debandSettingsValue: (DebandSettings) -> Int,
-  onDebandingSettingsChange: (DebandSettings, Int) -> Unit,
-  onReset: () -> Unit,
-  modifier: Modifier = Modifier
+    deband: Debanding,
+    onDebandingChange: (Debanding) -> Unit,
+    debandSettingsValue: (DebandSettings) -> Int,
+    onDebandingSettingsChange: (DebandSettings, Int) -> Unit,
+    onReset: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
   var isExpanded by remember { mutableStateOf(true) }
 
@@ -86,11 +86,11 @@ fun VideoSettingsDebandCard(
 
           Spacer(Modifier.weight(1f))
           TextButton(
-            onClick = onReset
+            onClick = onReset,
           ) {
             Row(
               horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.extraSmall),
-              verticalAlignment = Alignment.CenterVertically
+              verticalAlignment = Alignment.CenterVertically,
             ) {
               Icon(painterResource(R.drawable.reset_iso_24px), null)
               Text(stringResource(R.string.generic_reset))

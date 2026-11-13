@@ -34,15 +34,15 @@ import live.mehiz.mpvkt.ui.theme.spacing
 @SuppressLint("UnrememberedMutableState")
 @Composable
 fun ExpandableCard(
-  isExpanded: Boolean,
-  title: @Composable (Boolean) -> Unit,
-  onExpand: (Boolean) -> Unit,
-  modifier: Modifier = Modifier,
-  colors: CardColors = CardDefaults.cardColors(),
-  shape: Shape = CardDefaults.shape,
-  border: BorderStroke? = null,
-  elevation: CardElevation = CardDefaults.cardElevation(),
-  content: @Composable () -> Unit,
+    isExpanded: Boolean,
+    title: @Composable (Boolean) -> Unit,
+    onExpand: (Boolean) -> Unit,
+    modifier: Modifier = Modifier,
+    colors: CardColors = CardDefaults.cardColors(),
+    shape: Shape = CardDefaults.shape,
+    border: BorderStroke? = null,
+    elevation: CardElevation = CardDefaults.cardElevation(),
+    content: @Composable () -> Unit,
 ) {
   val rotationState by animateFloatAsState(if (isExpanded) 0f else 180f, label = "card_rotation")
   Card(

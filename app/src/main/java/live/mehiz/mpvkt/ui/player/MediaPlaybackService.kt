@@ -23,12 +23,15 @@ import androidx.media.MediaBrowserServiceCompat
 import androidx.media.session.MediaButtonReceiver
 import `is`.xyz.mpv.MPV
 import `is`.xyz.mpv.MPVNode
+import `is`.xyz.mpv.prop
 import live.mehiz.mpvkt.R
 import live.mehiz.mpvkt.preferences.GesturePreferences
 import org.koin.android.ext.android.inject
 
 @Suppress("TooManyFunctions")
-class MediaPlaybackService : MediaBrowserServiceCompat(), MPV.EventObserver {
+class MediaPlaybackService :
+    MediaBrowserServiceCompat(),
+    MPV.EventObserver {
   companion object {
     private const val NOTIFICATION_ID = 69420
     private const val NOTIFICATION_CHANNEL_ID = "mpvkt_playback_channel"
@@ -44,18 +47,22 @@ class MediaPlaybackService : MediaBrowserServiceCompat(), MPV.EventObserver {
   private val gesturePreferences by inject<GesturePreferences>()
 
   private val binder = MediaPlaybackBinder()
-  private val mediaTitle: String
-    get() = mpv?.prop["media-title"] ?: ""
+  private val mediaTitle: String?
+    get() = mpv?.prop["media-title"]
   private val mediaArtist: String?
     get() = mpv?.prop["metadata/artist"]
   private var positionMs: Long
-    get(): Long = mpv?.getPropertyLong("time-pos")?.times(1000L) ?: 0
-    set(value) = mpv!!.command("seek", (value / 1000f).toString(), "absolute")
+    get(): Long = mpv?.getPropertyLong("time-pos")?.times(1000L) ?: 0L
+    set(value) {
+        mpv?.command("seek", (value / 1000f).toString(), "absolute")
+    }
   private val durationMs: Long?
     get() = (mpv?.getPropertyLong("duration")?.times(1000L))
   private var paused: Boolean?
     get() = mpv?.prop["pause"]
-    set(value) = mpv!!.command("set", "pause", if (value == true) "yes" else "no")
+    set(value) {
+        mpv!!.command("set", "pause", if (value == true) "yes" else "no")
+    }
 
   private lateinit var mediaSession: MediaSessionCompat
 
@@ -138,9 +145,7 @@ class MediaPlaybackService : MediaBrowserServiceCompat(), MPV.EventObserver {
     createNotificationChannel()
   }
 
-  override fun onBind(intent: Intent): IBinder {
-    return binder
-  }
+  override fun onBind(intent: Intent): IBinder = binder
 
   override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
     MediaButtonReceiver.handleIntent(mediaSession, intent)
@@ -209,15 +214,13 @@ class MediaPlaybackService : MediaBrowserServiceCompat(), MPV.EventObserver {
     }
   }
 
-  private fun getAvailableActions(): Long {
-    return PlaybackStateCompat.ACTION_PLAY or
+  private fun getAvailableActions(): Long = PlaybackStateCompat.ACTION_PLAY or
       PlaybackStateCompat.ACTION_PAUSE or
       PlaybackStateCompat.ACTION_PLAY_PAUSE or
       PlaybackStateCompat.ACTION_SKIP_TO_NEXT or
       PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS or
       PlaybackStateCompat.ACTION_STOP or
       PlaybackStateCompat.ACTION_SEEK_TO
-  }
 
   private fun setupAudioFocus() {
     audioFocusCallback = AudioManager.OnAudioFocusChangeListener { focusChange ->
@@ -242,8 +245,7 @@ class MediaPlaybackService : MediaBrowserServiceCompat(), MPV.EventObserver {
     }
   }
 
-  private fun requestAudioFocus(): Boolean {
-    return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+  private fun requestAudioFocus(): Boolean = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
       audioFocusRequest?.let {
         val result = audioManager.requestAudioFocus(it)
         result == AudioManager.AUDIOFOCUS_REQUEST_GRANTED
@@ -256,7 +258,6 @@ class MediaPlaybackService : MediaBrowserServiceCompat(), MPV.EventObserver {
       )
       result == AudioManager.AUDIOFOCUS_REQUEST_GRANTED
     }
-  }
 
   private fun abandonAudioFocus() {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {

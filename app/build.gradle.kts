@@ -1,5 +1,5 @@
 import com.android.build.api.variant.FilterConfiguration
-import io.gitlab.arturbosch.detekt.Detekt
+import dev.detekt.gradle.Detekt
 import org.apache.commons.io.output.ByteArrayOutputStream
 import org.gradle.kotlin.dsl.aboutLibraries
 import org.gradle.process.ExecOperations
@@ -17,11 +17,11 @@ plugins {
 
 android {
   namespace = "live.mehiz.mpvkt"
-  compileSdk = 36
+  compileSdk = 37
 
   defaultConfig {
     applicationId = "live.mehiz.mpvkt"
-    minSdk = 21
+    minSdk = 24
     targetSdk = 36
     versionCode = 12
     versionName = "0.1.6"
@@ -97,6 +97,10 @@ android {
   androidResources {
     generateLocaleConfig = true
   }
+  // Compose Preview (AGP 9) renders from the unit-test resource APK
+  testOptions {
+    unitTests.isIncludeAndroidResources = true
+  }
 }
 
 kotlin {
@@ -104,7 +108,7 @@ kotlin {
     freeCompilerArgs.addAll(
       "-Xwhen-guards",
       "-Xcontext-parameters",
-      "-XXLanguage:+PropertyParamAnnotationDefaultTargetMode"
+      "-XXLanguage:+PropertyParamAnnotationDefaultTargetMode",
     )
   }
 }
@@ -166,11 +170,13 @@ detekt {
 }
 
 tasks.withType<Detekt>().configureEach {
+  // detekt's bundled compiler rejects very new host JDKs as the default target
+  jvmTarget = "17"
   setSource(files(project.projectDir))
   exclude("**/build/**")
   reports {
     html.required.set(true)
-    md.required.set(true)
+    markdown.required.set(true)
   }
 }
 

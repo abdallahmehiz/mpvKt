@@ -37,8 +37,9 @@ fun VideoSettingsPanel(
         debandSettingsValue = debandSettings,
         onDebandingSettingsChange = onDebandSettingsChange,
         onReset = onDebandReset,
-        modifier = cardModifier
+        modifier = cardModifier,
       )
+
       1 -> VideoSettingsFiltersCard(
         isGpuNextEnabled = isGpuNextEnabled,
         filterValue = filterValue,
@@ -46,6 +47,7 @@ fun VideoSettingsPanel(
         onReset = onFilterReset,
         modifier = cardModifier,
       )
+
       else -> {}
     }
   }

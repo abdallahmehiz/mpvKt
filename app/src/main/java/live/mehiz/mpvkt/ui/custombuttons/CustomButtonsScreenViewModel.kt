@@ -16,7 +16,7 @@ import live.mehiz.mpvkt.preferences.PlayerPreferences
 
 class CustomButtonsScreenViewModel(
   private val customButtonsRepository: CustomButtonRepository,
-  private val playerPreferences: PlayerPreferences
+  private val playerPreferences: PlayerPreferences,
 ) : ViewModel() {
   private val _dialog = MutableStateFlow<CustomButtonDialog>(CustomButtonDialog.None)
   val dialog = _dialog.asStateFlow()
@@ -36,7 +36,7 @@ class CustomButtonsScreenViewModel(
           content = content,
           longPressContent = longPressContent,
           index = customButtons.value.size,
-        )
+        ),
       )
     }
   }
@@ -92,9 +92,7 @@ sealed interface CustomButtonsUiState {
   data class Error(val message: String) : CustomButtonsUiState
 }
 
-fun CustomButtonsUiState.getButtons(): List<CustomButtonEntity> {
-  return when (this) {
+fun CustomButtonsUiState.getButtons(): List<CustomButtonEntity> = when (this) {
     is CustomButtonsUiState.Success -> this.buttons
     else -> emptyList()
   }
-}
