@@ -250,18 +250,6 @@ fun SubtitleSettingsTypographyCard(
   }
 }
 
-fun resetTypography(mpv: MPV, preferences: SubtitlesPreferences) {
-  mpv.setPropertyBoolean("sub-bold", preferences.bold.deleteAndGet())
-  mpv.setPropertyBoolean("sub-italic", preferences.italic.deleteAndGet())
-  mpv.setPropertyBoolean("sub-ass-justify", preferences.overrideAssSubs.deleteAndGet())
-  mpv.setPropertyString("sub-justify", preferences.justification.deleteAndGet().value)
-  mpv.setPropertyString("sub-font", preferences.font.deleteAndGet())
-  mpv.setPropertyInt("sub-font-size", preferences.fontSize.deleteAndGet())
-  mpv.setPropertyInt("sub-border-size", preferences.borderSize.deleteAndGet())
-  mpv.setPropertyInt("sub-shadow-offset", preferences.shadowOffset.deleteAndGet())
-  mpv.setPropertyString("sub-border-style", preferences.borderStyle.deleteAndGet().value)
-}
-
 enum class SubtitlesBorderStyle(val value: String, @StringRes val titleRes: Int) {
   OutlineAndShadow("outline-and-shadow", R.string.player_sheets_subtitles_border_style_outline_and_shadow),
   OpaqueBox("opaque-box", R.string.player_sheets_subtitles_border_style_opaque_box),

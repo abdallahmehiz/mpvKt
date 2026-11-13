@@ -11,15 +11,17 @@ import android.content.ServiceConnection
 import android.content.pm.ActivityInfo
 import android.content.pm.PackageManager
 import android.content.res.Configuration
-import android.media.AudioManager
 import android.os.Build
 import android.os.Bundle
 import android.os.IBinder
+import android.provider.Settings
+import android.util.DisplayMetrics
 import android.util.Log
 import android.util.Rational
 import android.view.KeyEvent
 import android.view.View
 import android.view.WindowManager
+import android.view.inputmethod.InputMethodManager
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
@@ -41,7 +43,6 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import `is`.xyz.mpv.MPV
 import `is`.xyz.mpv.propFlow
-import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.launchIn
@@ -57,10 +58,12 @@ class PlayerActivity : AppCompatActivity() {
   private var service: MediaPlaybackService? = null
   private lateinit var player: MPVView
   private val mpv get() = player.mpv
-  private val viewModel: PlayerViewModel by viewModels { PlayerViewModelFactory(service!!.mpv) }
+  private val viewModel: PlayerViewModel by viewModels {
+    PlayerViewModelFactory(service!!.playerManager, initialBrightness())
+  }
+  private val playerManager get() = service!!.playerManager
 
   val windowInsetsController by lazy { WindowCompat.getInsetsController(window, window.decorView) }
-  val audioManager by lazy { getSystemService(AUDIO_SERVICE) as AudioManager }
   private val playerPreferences = App.graph.playerPreferences
 
   private var loadIntentOnConnect = false
@@ -118,8 +121,9 @@ class PlayerActivity : AppCompatActivity() {
         when (event) {
           is PlayerViewModel.Event.SetupCustomButtons -> service.setupCustomButtons(event.buttons)
           is PlayerViewModel.Event.ChangeBrightness -> changeBrightnessTo(event.brightness)
-          is PlayerViewModel.Event.StretchVideo -> windowManager.defaultDisplay.getRealMetrics(event.dm)
+          is PlayerViewModel.Event.ApplyVideoAspect -> service.playerManager.video.setAspect(event.aspect, displayRatio())
           is PlayerViewModel.Event.SetControls -> setControls(event.visible)
+          is PlayerViewModel.Event.SoftwareKeyboard -> setSoftwareKeyboard(event.action)
           PlayerViewModel.Event.CycleRotation -> cycleScreenRotations()
         }
       }
@@ -163,19 +167,11 @@ class PlayerActivity : AppCompatActivity() {
           .onEach { setPictureInPictureParams(createPipParams()) }
           .launchIn(this)
 
-        LUA_PROPERTIES.forEach { property ->
-          mpv.propFlow<String>(property)
-            .drop(1)
-            .filterNotNull()
-            .onEach { viewModel.handleLuaInvocation(property, it) }
-            .launchIn(this)
-        }
-
         mpv.eventFlow
           .filter { (eventId, _) -> eventId == MPV.mpvEvent.MPV_EVENT_FILE_LOADED }
           .onEach {
             setOrientation()
-            viewModel.changeVideoAspect(playerPreferences.videoAspect.get())
+            viewModel.changeVideoAspect(playerManager.video.aspect.value)
           }
           .launchIn(this)
       }
@@ -190,6 +186,27 @@ class PlayerActivity : AppCompatActivity() {
     } else {
       insetsController.hide(WindowInsetsCompat.Type.statusBars())
     }
+  }
+
+  private fun initialBrightness(): Float = runCatching {
+    Settings.System.getFloat(contentResolver, Settings.System.SCREEN_BRIGHTNESS).normalize(0f, 255f, 0f, 1f)
+  }.getOrElse { 0f }
+
+  @Suppress("DEPRECATION")
+  private fun displayRatio(): Double {
+    val metrics = DisplayMetrics().also { windowManager.defaultDisplay.getRealMetrics(it) }
+    return metrics.widthPixels / metrics.heightPixels.toDouble()
+  }
+
+  @Suppress("DEPRECATION")
+  private fun setSoftwareKeyboard(action: PlayerViewModel.KeyboardAction) {
+    val imm = getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
+    val show = when (action) {
+      PlayerViewModel.KeyboardAction.Show -> true
+      PlayerViewModel.KeyboardAction.Hide -> false
+      PlayerViewModel.KeyboardAction.Toggle -> !imm.isActive
+    }
+    imm.toggleSoftInput(if (show) InputMethodManager.SHOW_FORCED else InputMethodManager.SHOW_IMPLICIT, 0)
   }
 
   private fun changeBrightnessTo(brightness: Float) {
@@ -282,7 +299,7 @@ class PlayerActivity : AppCompatActivity() {
   private val shouldEnterPip: Boolean
     get() = service != null &&
       isPipSupported &&
-      viewModel.paused == false &&
+      !playerManager.playback.paused.value &&
       playerPreferences.automaticallyEnterPip.get()
 
   @SuppressLint("NewApi")
@@ -307,17 +324,13 @@ class PlayerActivity : AppCompatActivity() {
   override fun onResume() {
     super.onResume()
     if (service == null) return
-    viewModel.currentVolume.update {
-      audioManager.getStreamVolume(AudioManager.STREAM_MUSIC).also {
-        if (it < viewModel.maxVolume) viewModel.changeMPVVolumeTo(100)
-      }
-    }
+    playerManager.audio.refreshStreamVolume()
   }
 
   override fun onConfigurationChanged(newConfig: Configuration) {
     if (service != null) {
       if (!isInPictureInPictureMode) {
-        viewModel.changeVideoAspect(playerPreferences.videoAspect.get())
+        viewModel.changeVideoAspect(playerManager.video.aspect.value)
       } else {
         viewModel.hideControls()
       }
@@ -331,8 +344,8 @@ class PlayerActivity : AppCompatActivity() {
     setResult(
       RESULT_OK,
       Intent(RESULT_INTENT).apply {
-        viewModel.pos?.let { putExtra("position", it * 1000) }
-        viewModel.duration?.let { putExtra("duration", it * 1000) }
+        putExtra("position", playerManager.playback.position.value * 1000)
+        putExtra("duration", playerManager.playback.duration.value * 1000)
       },
     )
   }
@@ -351,10 +364,11 @@ class PlayerActivity : AppCompatActivity() {
     }
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
       val autoEnter = playerPreferences.automaticallyEnterPip.get()
-      builder.setAutoEnterEnabled(viewModel.paused == false && autoEnter)
-      builder.setSeamlessResizeEnabled(viewModel.paused == false && autoEnter)
+      val playing = !playerManager.playback.paused.value
+      builder.setAutoEnterEnabled(playing && autoEnter)
+      builder.setSeamlessResizeEnabled(playing && autoEnter)
     }
-    builder.setActions(createPipActions(this, viewModel.paused == true))
+    builder.setActions(createPipActions(this, playerManager.playback.paused.value))
     builder.setSourceRectHint(pipRect)
     mpv.getPropertyInt("video-params/h")?.let { height ->
       val width = height * (player.getVideoOutAspect() ?: return@let)
@@ -467,27 +481,12 @@ class PlayerActivity : AppCompatActivity() {
   }
 
   override fun onKeyUp(keyCode: Int, event: KeyEvent?): Boolean {
-    if (service != null && event != null && player.onKey(event)) return true
-    return super.onKeyUp(keyCode, event)
+    return service != null && event != null && player.onKey(event) || super.onKeyUp(keyCode, event)
   }
 
   companion object {
     // action of result intent
     private const val RESULT_INTENT = "live.mehiz.mpvkt.ui.player.PlayerActivity.result"
-
-    private val LUA_PROPERTIES = listOf(
-      "show_text",
-      "toggle_ui",
-      "show_panel",
-      "set_button_title",
-      "reset_button_title",
-      "toggle_button",
-      "seek_by",
-      "seek_to",
-      "seek_by_with_text",
-      "seek_to_with_text",
-      "software_keyboard",
-    ).map { "user-data/mpvkt/$it" }
   }
 }
 

@@ -144,30 +144,6 @@ enum class SubColorType(
   ),
 }
 
-fun resetColors(preferences: SubtitlesPreferences, mpv: MPV?, type: SubColorType) {
-  when (type) {
-    SubColorType.Text -> {
-      val textColor = preferences.textColor.deleteAndGet().toColorHexString()
-      mpv?.setPropertyString("sub-color", textColor)
-    }
-
-    SubColorType.Border -> {
-      val borderColor = preferences.borderColor.deleteAndGet().toColorHexString()
-      mpv?.setPropertyString("sub-border-color", borderColor)
-    }
-
-    SubColorType.Background -> {
-      val backgroundColor = preferences.backgroundColor.deleteAndGet().toColorHexString()
-      mpv?.setPropertyString("sub-back-color", backgroundColor)
-    }
-  }
-}
-
-val getCurrentMPVColor: (SubColorType, MPV) -> Int = { c, m ->
-  m.getPropertyString(
-    c.property,
-  )!!.uppercase().toColorInt()
-}
 
 @Composable
 fun SubtitlesColorPicker(color: Int, onColorChange: (Int) -> Unit, modifier: Modifier = Modifier) {

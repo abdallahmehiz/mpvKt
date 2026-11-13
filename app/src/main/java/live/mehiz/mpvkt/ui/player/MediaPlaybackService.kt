@@ -51,6 +51,7 @@ import live.mehiz.mpvkt.App
 import live.mehiz.mpvkt.R
 import live.mehiz.mpvkt.database.entities.CustomButtonEntity
 import live.mehiz.mpvkt.database.entities.PlaybackStateEntity
+import live.mehiz.mpvkt.ui.player.manager.PlayerManager
 import live.mehiz.mpvkt.ui.player.controls.components.panels.toColorHexString
 import java.io.File
 
@@ -87,6 +88,9 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
   private val ioScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
   lateinit var mpv: MPV
+    private set
+
+  lateinit var playerManager: PlayerManager
     private set
 
   private val _closeRequests = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
@@ -284,6 +288,7 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
     // could mess up VO init before a surface is attached
     mpv.setOptionString("force-window", "no")
     audioPreferences.audioChannels.get().let { mpv.setPropertyString(it.property, it.value) }
+    playerManager = PlayerManager(mpv, this, App.graph, scope)
   }
 
   private fun initOptions() {
