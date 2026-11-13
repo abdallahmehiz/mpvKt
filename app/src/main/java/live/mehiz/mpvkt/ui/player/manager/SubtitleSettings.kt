@@ -1,7 +1,5 @@
 package live.mehiz.mpvkt.ui.player.manager
 
-import live.mehiz.mpvkt.ui.player.mapState
-import live.mehiz.mpvkt.preferences.preference.deleteAndGet
 import androidx.core.graphics.toColorInt
 import `is`.xyz.mpv.MPV
 import `is`.xyz.mpv.prop
@@ -10,17 +8,15 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.StateFlow
 import live.mehiz.mpvkt.preferences.SubtitleJustification
 import live.mehiz.mpvkt.preferences.SubtitlesPreferences
+import live.mehiz.mpvkt.preferences.preference.deleteAndGet
 import live.mehiz.mpvkt.ui.player.controls.components.panels.SubColorType
 import live.mehiz.mpvkt.ui.player.controls.components.panels.SubtitlesBorderStyle
 import live.mehiz.mpvkt.ui.player.controls.components.panels.toColorHexString
+import live.mehiz.mpvkt.ui.player.mapState
 import kotlin.math.roundToInt
 
 @Suppress("TooManyFunctions")
-class SubtitleSettings(
-  private val mpv: MPV,
-  private val preferences: SubtitlesPreferences,
-  scope: CoroutineScope,
-) {
+class SubtitleSettings(private val mpv: MPV, private val preferences: SubtitlesPreferences, scope: CoroutineScope) {
   val bold: StateFlow<Boolean> = mpv.propFlow("sub-bold", preferences.bold.get())
   val italic: StateFlow<Boolean> = mpv.propFlow("sub-italic", preferences.italic.get())
   val justification: StateFlow<SubtitleJustification> = mpv.propFlow<String>("sub-justify")

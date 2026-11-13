@@ -6,12 +6,7 @@ import kotlinx.coroutines.CoroutineScope
 import live.mehiz.mpvkt.database.entities.CustomButtonEntity
 import live.mehiz.mpvkt.di.AppGraph
 
-class PlayerManager(
-  private val mpv: MPV,
-  context: Context,
-  graph: AppGraph,
-  scope: CoroutineScope,
-) {
+class PlayerManager(private val mpv: MPV, context: Context, graph: AppGraph, scope: CoroutineScope) {
   val playback = PlaybackState(mpv, context, graph.playerPreferences, graph.json, scope)
   val tracks = TracksState(mpv, context, graph.json, scope)
   val subtitles = SubtitleSettings(mpv, graph.subtitlesPreferences, scope)

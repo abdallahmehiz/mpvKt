@@ -10,10 +10,9 @@ import android.view.SurfaceView
 import `is`.xyz.mpv.KeyMapping
 
 @SuppressLint("ViewConstructor")
-class MPVView(
-  context: Context,
-  private val service: MediaPlaybackService
-) : SurfaceView(context), SurfaceHolder.Callback {
+class MPVView(context: Context, private val service: MediaPlaybackService) :
+  SurfaceView(context),
+  SurfaceHolder.Callback {
 
   val mpv
     get() = service.mpv

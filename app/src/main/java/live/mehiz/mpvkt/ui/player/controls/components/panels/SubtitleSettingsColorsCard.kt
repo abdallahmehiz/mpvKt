@@ -34,12 +34,9 @@ import androidx.core.graphics.alpha
 import androidx.core.graphics.blue
 import androidx.core.graphics.green
 import androidx.core.graphics.red
-import androidx.core.graphics.toColorInt
-import `is`.xyz.mpv.MPV
 import live.mehiz.mpvkt.R
 import live.mehiz.mpvkt.preferences.SubtitlesPreferences
 import live.mehiz.mpvkt.preferences.preference.Preference
-import live.mehiz.mpvkt.preferences.preference.deleteAndGet
 import live.mehiz.mpvkt.presentation.components.ExpandableCard
 import live.mehiz.mpvkt.presentation.components.TintedSliderItem
 import live.mehiz.mpvkt.ui.player.controls.CARDS_MAX_WIDTH
@@ -117,7 +114,7 @@ fun SubtitleSettingsColorsCard(
 }
 
 fun Int.copyAsArgb(alpha: Int = this.alpha, red: Int = this.red, green: Int = this.green, blue: Int = this.blue) =
-    (alpha shl 24) or (red shl 16) or (green shl 8) or blue
+  (alpha shl 24) or (red shl 16) or (green shl 8) or blue
 
 @OptIn(ExperimentalStdlibApi::class)
 fun Int.toColorHexString() = "#" + this.toHexString().uppercase()
@@ -143,7 +140,6 @@ enum class SubColorType(
     preference = SubtitlesPreferences::backgroundColor,
   ),
 }
-
 
 @Composable
 fun SubtitlesColorPicker(color: Int, onColorChange: (Int) -> Unit, modifier: Modifier = Modifier) {

@@ -34,10 +34,10 @@ import kotlin.math.abs
 import kotlin.math.roundToInt
 
 fun percentage(value: Float, range: ClosedFloatingPointRange<Float>): Float =
-    ((value - range.start) / (range.endInclusive - range.start)).coerceIn(0f, 1f)
+  ((value - range.start) / (range.endInclusive - range.start)).coerceIn(0f, 1f)
 
 fun percentage(value: Int, range: ClosedRange<Int>): Float =
-    ((value - range.start - 0f) / (range.endInclusive - range.start)).coerceIn(0f, 1f)
+  ((value - range.start - 0f) / (range.endInclusive - range.start)).coerceIn(0f, 1f)
 
 @Composable
 fun VerticalSlider(

@@ -1,6 +1,5 @@
 package live.mehiz.mpvkt.ui.player.manager
 
-import live.mehiz.mpvkt.ui.player.mapState
 import android.content.Context
 import android.media.AudioManager
 import `is`.xyz.mpv.MPV
@@ -15,6 +14,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import live.mehiz.mpvkt.preferences.AudioChannels
 import live.mehiz.mpvkt.preferences.AudioPreferences
+import live.mehiz.mpvkt.ui.player.mapState
 import kotlin.math.roundToInt
 
 class AudioSettings(

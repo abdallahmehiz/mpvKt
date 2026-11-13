@@ -328,13 +328,13 @@ fun DoubleTapToSeekOvals(
 }
 
 fun calculateNewVerticalGestureValue(originalValue: Int, startingY: Float, newY: Float, sensitivity: Float): Int =
-    originalValue + ((startingY - newY) * sensitivity).toInt()
+  originalValue + ((startingY - newY) * sensitivity).toInt()
 
 fun calculateNewVerticalGestureValue(originalValue: Float, startingY: Float, newY: Float, sensitivity: Float): Float =
-    originalValue + ((startingY - newY) * sensitivity)
+  originalValue + ((startingY - newY) * sensitivity)
 
 fun calculateNewHorizontalGestureValue(originalValue: Int, startingX: Float, newX: Float, sensitivity: Float): Int =
-    originalValue + ((newX - startingX) * sensitivity).toInt()
+  originalValue + ((newX - startingX) * sensitivity).toInt()
 
 fun calculateNewHorizontalGestureValue(originalValue: Float, startingX: Float, newX: Float, sensitivity: Float): Float =
-    originalValue + ((newX - startingX) * sensitivity)
+  originalValue + ((newX - startingX) * sensitivity)

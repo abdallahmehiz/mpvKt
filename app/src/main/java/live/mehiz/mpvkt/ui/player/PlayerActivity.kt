@@ -53,6 +53,7 @@ import live.mehiz.mpvkt.App
 import live.mehiz.mpvkt.ui.player.controls.PlayerControls
 import live.mehiz.mpvkt.ui.theme.MpvKtTheme
 
+@Suppress("TooManyFunctions")
 class PlayerActivity : AppCompatActivity() {
 
   private var service: MediaPlaybackService? = null
@@ -120,10 +121,18 @@ class PlayerActivity : AppCompatActivity() {
       .onEach { event ->
         when (event) {
           is PlayerViewModel.Event.SetupCustomButtons -> service.setupCustomButtons(event.buttons)
+
           is PlayerViewModel.Event.ChangeBrightness -> changeBrightnessTo(event.brightness)
-          is PlayerViewModel.Event.ApplyVideoAspect -> service.playerManager.video.setAspect(event.aspect, displayRatio())
+
+          is PlayerViewModel.Event.ApplyVideoAspect -> service.playerManager.video.setAspect(
+            event.aspect,
+            displayRatio(),
+          )
+
           is PlayerViewModel.Event.SetControls -> setControls(event.visible)
+
           is PlayerViewModel.Event.SoftwareKeyboard -> setSoftwareKeyboard(event.action)
+
           PlayerViewModel.Event.CycleRotation -> cycleScreenRotations()
         }
       }
@@ -151,8 +160,11 @@ class PlayerActivity : AppCompatActivity() {
         mpv.propFlow<Boolean>("pause")
           .filterNotNull()
           .onEach {
-            if (it) window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
-            else window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+            if (it) {
+              window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+            } else {
+              window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+            }
           }
           .launchIn(this)
 
@@ -480,9 +492,8 @@ class PlayerActivity : AppCompatActivity() {
     return true
   }
 
-  override fun onKeyUp(keyCode: Int, event: KeyEvent?): Boolean {
-    return service != null && event != null && player.onKey(event) || super.onKeyUp(keyCode, event)
-  }
+  override fun onKeyUp(keyCode: Int, event: KeyEvent?): Boolean =
+    (service != null && event != null && player.onKey(event)) || super.onKeyUp(keyCode, event)
 
   companion object {
     // action of result intent

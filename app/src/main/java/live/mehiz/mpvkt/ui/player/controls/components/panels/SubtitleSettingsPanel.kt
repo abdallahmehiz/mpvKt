@@ -41,7 +41,7 @@ fun SubtitleSettingsPanel(
   onSubScaleChange: (Float) -> Unit,
   onSubPosChange: (Int) -> Unit,
   onMiscReset: () -> Unit,
-  modifier: Modifier,
+  modifier: Modifier = Modifier,
 ) {
   MultiCardPanel(
     onDismissRequest = onDismissRequest,

@@ -57,6 +57,7 @@ import kotlin.math.roundToInt
 private val sheetAnimationSpec = tween<Float>(350)
 
 @Composable
+@Suppress("ModifierNotUsedAtRoot")
 fun PlayerSheet(
     onDismissRequest: () -> Unit,
     modifier: Modifier = Modifier,
@@ -183,7 +184,7 @@ private fun <T> AnchoredDraggableState<T>.preUpPostDownNestedScrollConnection() 
   }
 
   override fun onPostScroll(consumed: Offset, available: Offset, source: NestedScrollSource): Offset =
-      if (source == NestedScrollSource.UserInput) {
+    if (source == NestedScrollSource.UserInput) {
       dispatchRawDelta(available.toFloat()).toOffset()
     } else {
       Offset.Zero

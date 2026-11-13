@@ -1,7 +1,5 @@
 package live.mehiz.mpvkt.ui.player.manager
 
-import live.mehiz.mpvkt.ui.player.mapState
-import live.mehiz.mpvkt.ui.player.toObject
 import android.content.Context
 import android.net.Uri
 import `is`.xyz.mpv.MPV
@@ -15,14 +13,11 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.serialization.json.Json
 import live.mehiz.mpvkt.ui.player.TrackNode
+import live.mehiz.mpvkt.ui.player.mapState
 import live.mehiz.mpvkt.ui.player.openContentFd
+import live.mehiz.mpvkt.ui.player.toObject
 
-class TracksState(
-  private val mpv: MPV,
-  private val context: Context,
-  json: Json,
-  scope: CoroutineScope,
-) {
+class TracksState(private val mpv: MPV, private val context: Context, json: Json, scope: CoroutineScope) {
   private val trackList: StateFlow<List<TrackNode>> = mpv.propFlow<MPVNode>("track-list")
     .mapState(scope, { emptyList() }) { it.toObject<List<TrackNode>>(json) }
 

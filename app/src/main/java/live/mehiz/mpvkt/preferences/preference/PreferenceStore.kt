@@ -25,14 +25,14 @@ interface PreferenceStore {
 }
 
 inline fun <reified T : Enum<T>> PreferenceStore.getEnum(key: String, defaultValue: T): Preference<T> = getObject(
-    key = key,
-    defaultValue = defaultValue,
-    serializer = { it.name },
-    deserializer = {
-      try {
-        enumValueOf(it)
-      } catch (e: IllegalArgumentException) {
-        defaultValue
-      }
-    },
-  )
+  key = key,
+  defaultValue = defaultValue,
+  serializer = { it.name },
+  deserializer = {
+    try {
+      enumValueOf(it)
+    } catch (e: IllegalArgumentException) {
+      defaultValue
+    }
+  },
+)

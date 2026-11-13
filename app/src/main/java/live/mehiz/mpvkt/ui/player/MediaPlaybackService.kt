@@ -51,8 +51,8 @@ import live.mehiz.mpvkt.App
 import live.mehiz.mpvkt.R
 import live.mehiz.mpvkt.database.entities.CustomButtonEntity
 import live.mehiz.mpvkt.database.entities.PlaybackStateEntity
-import live.mehiz.mpvkt.ui.player.manager.PlayerManager
 import live.mehiz.mpvkt.ui.player.controls.components.panels.toColorHexString
+import live.mehiz.mpvkt.ui.player.manager.PlayerManager
 import java.io.File
 
 @Suppress("TooManyFunctions", "LargeClass")
@@ -110,14 +110,18 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
 
   private var paused: Boolean
     get() = mpv.prop["pause"] ?: true
-    set(value) { mpv.prop("pause", value) }
+    set(value) {
+      mpv.prop("pause", value)
+    }
 
   private val mediaTitle: String? get() = mpv.prop["media-title"]
   private val mediaArtist: String? get() = mpv.prop["metadata/artist"]
   private val durationMs: Long get() = (mpv.getPropertyLong("duration") ?: 0L) * 1000L
   private var positionMs: Long
     get() = (mpv.prop["time-pos"] ?: 0L) * 1000L
-    set(value) { mpv.command("seek", (value / 1000f).toString(), "absolute") }
+    set(value) {
+      mpv.command("seek", (value / 1000f).toString(), "absolute")
+    }
 
   private lateinit var mediaSession: MediaSessionCompat
   private var mediaThumbnail: Bitmap? = null
@@ -660,7 +664,9 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
             runGesture(gesturePreferences.mediaNextGesture.get(), 1, CustomKeyCodes.MediaNext)
 
           override fun onStop() = stopPlayback(fromOutside = true)
-          override fun onSeekTo(pos: Long) { positionMs = pos }
+          override fun onSeekTo(pos: Long) {
+            positionMs = pos
+          }
         },
       )
       setSessionToken(sessionToken)
@@ -765,7 +771,7 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
       .addAction(
         R.drawable.sharp_shadow_24,
         getString(R.string.notification_stop),
-        serviceIntent(ACTION_STOP, 5)
+        serviceIntent(ACTION_STOP, 5),
       )
       .setStyle(
         androidx.media.app.NotificationCompat.MediaStyle()

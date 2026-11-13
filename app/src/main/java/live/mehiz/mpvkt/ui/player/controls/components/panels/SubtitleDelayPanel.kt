@@ -34,6 +34,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -160,10 +161,8 @@ fun DelayCard(
     modifier: Modifier = Modifier,
     extraSettings: @Composable ColumnScope.() -> Unit = {},
 ) {
-  var delay by remember { mutableStateOf(delayMs) }
-  LaunchedEffect(delay) {
-    println(delay)
-  }
+  var delay by remember { mutableIntStateOf(delayMs) }
+  val currentOnDelayChange by rememberUpdatedState(onDelayChange)
   Card(
     modifier = modifier
       .widthIn(max = CARDS_MAX_WIDTH)
@@ -201,7 +200,7 @@ fun DelayCard(
         var finalDelay by remember { mutableIntStateOf(delayMs) }
         LaunchedEffect(isDirectionPositive) {
           if (isDirectionPositive == null) {
-            onDelayChange(finalDelay)
+            currentOnDelayChange(finalDelay)
             return@LaunchedEffect
           }
           finalDelay = delay
@@ -322,5 +321,5 @@ fun SubtitleDelayTitle(
 
 enum class DelayType {
   Audio,
-    Subtitle,
+  Subtitle,
 }

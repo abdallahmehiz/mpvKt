@@ -1,7 +1,5 @@
 package live.mehiz.mpvkt.ui.player.manager
 
-import live.mehiz.mpvkt.ui.player.mapState
-import live.mehiz.mpvkt.preferences.preference.deleteAndGet
 import `is`.xyz.mpv.MPV
 import `is`.xyz.mpv.prop
 import `is`.xyz.mpv.propFlow
@@ -10,11 +8,13 @@ import kotlinx.coroutines.flow.StateFlow
 import live.mehiz.mpvkt.preferences.AdvancedPreferences
 import live.mehiz.mpvkt.preferences.DecoderPreferences
 import live.mehiz.mpvkt.preferences.PlayerPreferences
+import live.mehiz.mpvkt.preferences.preference.deleteAndGet
 import live.mehiz.mpvkt.ui.player.DebandSettings
 import live.mehiz.mpvkt.ui.player.Debanding
 import live.mehiz.mpvkt.ui.player.Decoder
 import live.mehiz.mpvkt.ui.player.VideoAspect
 import live.mehiz.mpvkt.ui.player.VideoFilters
+import live.mehiz.mpvkt.ui.player.mapState
 
 class VideoSettings(
   private val mpv: MPV,
@@ -29,7 +29,12 @@ class VideoSettings(
   val debanding: StateFlow<Debanding> = decoderPreferences.debanding.stateIn(scope)
   val debandSettings: Map<DebandSettings, StateFlow<Int>> =
     DebandSettings.entries.associateWith { mpv.propFlow(it.mpvProperty, 0) }
-  val filters: Map<VideoFilters, StateFlow<Int>> = VideoFilters.entries.associateWith { mpv.propFlow(it.mpvProperty, 0) }
+  val filters: Map<VideoFilters, StateFlow<Int>> = VideoFilters.entries.associateWith {
+    mpv.propFlow(
+      it.mpvProperty,
+      0,
+    )
+  }
   val statisticsPage: StateFlow<Int> = advancedPreferences.enabledStatisticsPage.stateIn(scope)
   val aspect: StateFlow<VideoAspect> = playerPreferences.videoAspect.stateIn(scope)
 

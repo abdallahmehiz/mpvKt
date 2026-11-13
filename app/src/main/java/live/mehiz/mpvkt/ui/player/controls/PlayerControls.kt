@@ -1,7 +1,5 @@
 package live.mehiz.mpvkt.ui.player.controls
 
-import live.mehiz.mpvkt.ui.player.Decoder
-import kotlinx.collections.immutable.ImmutableList
 import android.os.Build
 import androidx.activity.compose.LocalActivity
 import androidx.compose.animation.AnimatedVisibility
@@ -59,6 +57,7 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import dev.vivvvek.seeker.Segment
 import `is`.xyz.mpv.Utils
+import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.update
@@ -68,6 +67,7 @@ import live.mehiz.mpvkt.preferences.preference.collectAsState
 import live.mehiz.mpvkt.preferences.preference.minusAssign
 import live.mehiz.mpvkt.preferences.preference.plusAssign
 import live.mehiz.mpvkt.ui.custombuttons.getButtons
+import live.mehiz.mpvkt.ui.player.Decoder
 import live.mehiz.mpvkt.ui.player.Panels
 import live.mehiz.mpvkt.ui.player.PlayerActivity
 import live.mehiz.mpvkt.ui.player.PlayerUpdates
@@ -328,7 +328,7 @@ fun PlayerControls(viewModel: PlayerViewModel, onBackPress: () -> Unit, modifier
           )
         }
         AnimatedVisibility(
-          visible = (controlsShown && !areControlsLocked || gestureSeekAmount != null) || pausedForCache,
+          visible = ((controlsShown && !areControlsLocked) || gestureSeekAmount != null) || pausedForCache,
           enter = fadeIn(playerControlsEnterAnimationSpec()),
           exit = fadeOut(playerControlsExitAnimationSpec()),
           modifier = Modifier.constrainAs(playerPauseButton) {
@@ -570,13 +570,13 @@ fun PlayerControls(viewModel: PlayerViewModel, onBackPress: () -> Unit, modifier
 @Composable
 @Suppress("ViewModelForwarding")
 private fun PlayerSheetsHost(
-  viewModel: PlayerViewModel,
-  chapters: ImmutableList<Segment>,
-  currentChapter: Int,
-  decoder: Decoder,
-  playbackSpeed: Float,
-  onOpenSheet: (Sheets) -> Unit,
-  onOpenPanel: (Panels) -> Unit,
+    viewModel: PlayerViewModel,
+    chapters: ImmutableList<Segment>,
+    currentChapter: Int,
+    decoder: Decoder,
+    playbackSpeed: Float,
+    onOpenSheet: (Sheets) -> Unit,
+    onOpenPanel: (Panels) -> Unit,
 ) {
   val playerPreferences = App.graph.playerPreferences
   val playerManager = viewModel.playerManager

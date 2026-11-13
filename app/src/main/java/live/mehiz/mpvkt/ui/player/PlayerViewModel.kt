@@ -25,10 +25,8 @@ import live.mehiz.mpvkt.ui.custombuttons.getButtons
 import live.mehiz.mpvkt.ui.player.manager.LuaManager
 import live.mehiz.mpvkt.ui.player.manager.PlayerManager
 
-class PlayerViewModelFactory(
-  private val playerManager: PlayerManager,
-  private val initialBrightness: Float,
-) : ViewModelProvider.Factory {
+class PlayerViewModelFactory(private val playerManager: PlayerManager, private val initialBrightness: Float) :
+  ViewModelProvider.Factory {
   override fun <T : ViewModel> create(modelClass: Class<T>): T {
     require(modelClass.isAssignableFrom(PlayerViewModel::class.java)) { "Unknown ViewModel class" }
     @Suppress("UNCHECKED_CAST")
@@ -212,7 +210,7 @@ class PlayerViewModel(
     _doubleTapSeekAmount.update {
       when {
         seek.absolute -> seek.offset
-        seek.offset < 0 && it < 0 || playback.position.value + seek.offset > playback.duration.value -> 0
+        (seek.offset < 0 && it < 0) || playback.position.value + seek.offset > playback.duration.value -> 0
         else -> it + seek.offset
       }
     }
@@ -259,7 +257,9 @@ class PlayerViewModel(
 
       "toggle_ui" -> when (data) {
         "show" -> showControls()
+
         "toggle" -> if (controlsShown.value) hideControls() else showControls()
+
         "hide" -> {
           sheetShown.update { Sheets.None }
           panelShown.update { Panels.None }
@@ -280,7 +280,13 @@ class PlayerViewModel(
 
       "toggle_button" -> {
         fun showButton() {
-          if (_primaryButton.value == null) _primaryButton.update { primaryCustomButton(customButtons.value.getButtons()) }
+          if (_primaryButton.value == null) {
+            _primaryButton.update {
+              primaryCustomButton(
+                customButtons.value.getButtons(),
+              )
+            }
+          }
         }
         when (data) {
           "show" -> showButton()

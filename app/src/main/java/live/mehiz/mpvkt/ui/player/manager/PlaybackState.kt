@@ -1,8 +1,5 @@
 package live.mehiz.mpvkt.ui.player.manager
 
-import live.mehiz.mpvkt.ui.player.mapState
-import live.mehiz.mpvkt.ui.player.toObject
-import live.mehiz.mpvkt.preferences.preference.deleteAndGet
 import android.content.Context
 import android.widget.Toast
 import dev.vivvvek.seeker.Segment
@@ -23,7 +20,10 @@ import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 import live.mehiz.mpvkt.R
 import live.mehiz.mpvkt.preferences.PlayerPreferences
+import live.mehiz.mpvkt.preferences.preference.deleteAndGet
 import live.mehiz.mpvkt.ui.player.ChapterNode
+import live.mehiz.mpvkt.ui.player.mapState
+import live.mehiz.mpvkt.ui.player.toObject
 import kotlin.time.Duration.Companion.milliseconds
 
 class PlaybackState(

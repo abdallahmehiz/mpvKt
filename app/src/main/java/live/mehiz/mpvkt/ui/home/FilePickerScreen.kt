@@ -21,7 +21,6 @@ import androidx.compose.material.icons.filled.Audiotrack
 import androidx.compose.material.icons.filled.Folder
 import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.Movie
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -127,8 +126,10 @@ data class FilePickerScreen(val uri: String) : Screen {
     val navigator = LocalBackStack.current
     val fileManager = App.graph.fileManager
     val fileList = fileManager.listFiles(directory).filterNot {
-      !Utils.MEDIA_EXTENSIONS.contains(fileManager.getName(it).substringAfterLast('.')) &&
-        fileManager.isFile(it) || fileManager.getName(it).startsWith('.')
+      (
+        !Utils.MEDIA_EXTENSIONS.contains(fileManager.getName(it).substringAfterLast('.')) &&
+          fileManager.isFile(it)
+        ) || fileManager.getName(it).startsWith('.')
     }.sortedWith(FilesComparator(fileManager))
 
     LazyColumn(modifier) {
