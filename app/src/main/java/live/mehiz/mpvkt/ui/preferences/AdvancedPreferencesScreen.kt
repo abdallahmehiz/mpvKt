@@ -16,7 +16,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Clear
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
@@ -38,14 +37,12 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.util.fastJoinToString
 import androidx.core.net.toUri
 import androidx.documentfile.provider.DocumentFile
-import com.github.k1rakishou.fsaf.FileManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
+import live.mehiz.mpvkt.App
 import live.mehiz.mpvkt.R
-import live.mehiz.mpvkt.database.MpvKtDatabase
-import live.mehiz.mpvkt.preferences.AdvancedPreferences
 import live.mehiz.mpvkt.preferences.preference.collectAsState
 import live.mehiz.mpvkt.presentation.Screen
 import live.mehiz.mpvkt.presentation.components.ConfirmDialog
@@ -56,7 +53,6 @@ import me.zhanghai.compose.preference.ProvidePreferenceLocals
 import me.zhanghai.compose.preference.SwitchPreference
 import me.zhanghai.compose.preference.TextFieldPreference
 import me.zhanghai.compose.preference.TwoTargetIconButtonPreference
-import org.koin.compose.koinInject
 import java.io.File
 import kotlin.io.path.deleteIfExists
 import kotlin.io.path.outputStream
@@ -64,13 +60,12 @@ import kotlin.io.path.readLines
 
 @Serializable
 object AdvancedPreferencesScreen : Screen {
-  @OptIn(ExperimentalMaterial3Api::class)
   @Composable
   override fun Content() {
     val context = LocalContext.current
     val backStack = LocalBackStack.current
-    val preferences = koinInject<AdvancedPreferences>()
-    val fileManager = koinInject<FileManager>()
+    val preferences = App.graph.advancedPreferences
+    val fileManager = App.graph.fileManager
     val scope = rememberCoroutineScope()
     Scaffold(
       topBar = {
@@ -236,7 +231,7 @@ object AdvancedPreferencesScreen : Screen {
             summary = { Text(stringResource(R.string.pref_advanced_verbose_logging_summary)) },
           )
           var isConfirmDialogShown by remember { mutableStateOf(false) }
-          val mpvKtDatabase = koinInject<MpvKtDatabase>()
+          val mpvKtDatabase = App.graph.database
           Preference(
             title = { Text(stringResource(R.string.pref_advanced_clear_playback_history)) },
             onClick = { isConfirmDialogShown = true },

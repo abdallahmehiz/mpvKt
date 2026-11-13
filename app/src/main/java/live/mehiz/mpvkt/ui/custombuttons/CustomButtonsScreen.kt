@@ -4,10 +4,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.LocalUriHandler
+import dev.zacsweers.metrox.viewmodel.metroViewModel
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.serialization.Serializable
+import live.mehiz.mpvkt.App
 import live.mehiz.mpvkt.database.entities.CustomButtonEntity
-import live.mehiz.mpvkt.preferences.PlayerPreferences
 import live.mehiz.mpvkt.preferences.preference.collectAsState
 import live.mehiz.mpvkt.presentation.Screen
 import live.mehiz.mpvkt.presentation.custombuttons.CustomButtonsScreen
@@ -15,8 +16,6 @@ import live.mehiz.mpvkt.presentation.custombuttons.components.CustomButtonAddDia
 import live.mehiz.mpvkt.presentation.custombuttons.components.CustomButtonDeleteDialog
 import live.mehiz.mpvkt.presentation.custombuttons.components.CustomButtonEditDialog
 import live.mehiz.mpvkt.ui.utils.LocalBackStack
-import org.koin.compose.koinInject
-import org.koin.compose.viewmodel.koinViewModel
 
 @Serializable
 object CustomButtonsScreen : Screen {
@@ -24,8 +23,8 @@ object CustomButtonsScreen : Screen {
   override fun Content() {
     val backstack = LocalBackStack.current
     val uriHandler = LocalUriHandler.current
-    val viewModel = koinViewModel<CustomButtonsScreenViewModel>()
-    val playerPreferences = koinInject<PlayerPreferences>()
+    val viewModel = metroViewModel<CustomButtonsScreenViewModel>()
+    val playerPreferences = App.graph.playerPreferences
 
     val primaryButtonId by playerPreferences.primaryCustomButtonId.collectAsState()
     val customButtons by viewModel.customButtons.collectAsState()

@@ -1,10 +1,15 @@
 package live.mehiz.mpvkt.preferences
 
 import androidx.annotation.StringRes
+import dev.zacsweers.metro.AppScope
+import dev.zacsweers.metro.Inject
+import dev.zacsweers.metro.SingleIn
 import live.mehiz.mpvkt.R
 import live.mehiz.mpvkt.preferences.preference.PreferenceStore
 import live.mehiz.mpvkt.preferences.preference.getEnum
 
+@Inject
+@SingleIn(AppScope::class)
 class AudioPreferences(preferenceStore: PreferenceStore) {
   val preferredLanguages = preferenceStore.getString("audio_preferred_languages")
   val defaultAudioDelay = preferenceStore.getInt("audio_delay_default")

@@ -8,10 +8,15 @@ import androidx.compose.material.icons.filled.FormatAlignJustify
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.graphics.vector.ImageVector
+import dev.zacsweers.metro.AppScope
+import dev.zacsweers.metro.Inject
+import dev.zacsweers.metro.SingleIn
 import live.mehiz.mpvkt.preferences.preference.PreferenceStore
 import live.mehiz.mpvkt.preferences.preference.getEnum
 import live.mehiz.mpvkt.ui.player.controls.components.panels.SubtitlesBorderStyle
 
+@Inject
+@SingleIn(AppScope::class)
 class SubtitlesPreferences(preferenceStore: PreferenceStore) {
   val autoLoadExternal = preferenceStore.getBoolean("sub_autoload", true)
   val preferredLanguages = preferenceStore.getString("sub_preferred_languages")
@@ -51,10 +56,10 @@ enum class SubtitleJustification(val value: String, val icon: ImageVector) {
 
     companion object {
     fun byValue(value: String): SubtitleJustification = when (value) {
-        "left" -> SubtitleJustification.Left
-        "center" -> SubtitleJustification.Center
-        "right" -> SubtitleJustification.Right
-        else -> SubtitleJustification.Auto
+        "left" -> Left
+        "center" -> Center
+        "right" -> Right
+        else -> Auto
       }
   }
 }

@@ -24,8 +24,8 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.serialization.Serializable
+import live.mehiz.mpvkt.App
 import live.mehiz.mpvkt.R
-import live.mehiz.mpvkt.preferences.GesturePreferences
 import live.mehiz.mpvkt.preferences.preference.collectAsState
 import live.mehiz.mpvkt.presentation.Screen
 import live.mehiz.mpvkt.ui.player.CustomKeyCodes
@@ -35,14 +35,12 @@ import me.zhanghai.compose.preference.FooterPreference
 import me.zhanghai.compose.preference.ListPreference
 import me.zhanghai.compose.preference.PreferenceCategory
 import me.zhanghai.compose.preference.ProvidePreferenceLocals
-import org.koin.compose.koinInject
 
 @Serializable
 object GesturePreferencesScreen : Screen {
-  @OptIn(ExperimentalMaterial3Api::class)
   @Composable
   override fun Content() {
-    val preferences = koinInject<GesturePreferences>()
+    val preferences = App.graph.gesturePreferences
     val context = LocalContext.current
     val backstack = LocalBackStack.current
     Scaffold(

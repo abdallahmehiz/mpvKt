@@ -32,6 +32,7 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
+import live.mehiz.mpvkt.App
 import live.mehiz.mpvkt.R
 import live.mehiz.mpvkt.database.MpvKtDatabase
 import live.mehiz.mpvkt.database.entities.CustomButtonEntity
@@ -40,7 +41,6 @@ import live.mehiz.mpvkt.preferences.GesturePreferences
 import live.mehiz.mpvkt.preferences.PlayerPreferences
 import live.mehiz.mpvkt.ui.custombuttons.CustomButtonsUiState
 import live.mehiz.mpvkt.ui.custombuttons.getButtons
-import org.koin.java.KoinJavaComponent.inject
 import kotlin.getValue
 import kotlin.properties.ReadOnlyProperty
 import kotlin.reflect.KProperty
@@ -57,12 +57,12 @@ class PlayerViewModelFactory(private val mpv: MPV) : ViewModelProvider.Factory {
 
 @Suppress("TooManyFunctions")
 class PlayerViewModel(val mpv: MPV) : ViewModel() {
-  private val playerPreferences: PlayerPreferences by inject(PlayerPreferences::class.java)
-  private val gesturePreferences: GesturePreferences by inject(GesturePreferences::class.java)
-  private val audioPreferences: AudioPreferences by inject(AudioPreferences::class.java)
-  private val mpvKtDatabase: MpvKtDatabase by inject(MpvKtDatabase::class.java)
-  private val json: Json by inject(Json::class.java)
-  private val context: Context by inject(Context::class.java)
+  private val playerPreferences = App.graph.playerPreferences
+  private val gesturePreferences = App.graph.gesturePreferences
+  private val audioPreferences = App.graph.audioPreferences
+  private val mpvKtDatabase = App.graph.database
+  private val json: Json = App.graph.json
+  private val context: Context = App.graph.context
   private val audioManager = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
   private val inputMethodManager = context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
 

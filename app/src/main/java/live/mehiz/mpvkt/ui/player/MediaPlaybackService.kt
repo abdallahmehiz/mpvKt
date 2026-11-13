@@ -24,9 +24,8 @@ import androidx.media.session.MediaButtonReceiver
 import `is`.xyz.mpv.MPV
 import `is`.xyz.mpv.MPVNode
 import `is`.xyz.mpv.prop
+import live.mehiz.mpvkt.App
 import live.mehiz.mpvkt.R
-import live.mehiz.mpvkt.preferences.GesturePreferences
-import org.koin.android.ext.android.inject
 
 @Suppress("TooManyFunctions")
 class MediaPlaybackService :
@@ -44,7 +43,7 @@ class MediaPlaybackService :
     var mpv: MPV? = null
   }
 
-  private val gesturePreferences by inject<GesturePreferences>()
+  private val gesturePreferences = App.graph.gesturePreferences
 
   private val binder = MediaPlaybackBinder()
   private val mediaTitle: String?
@@ -285,11 +284,7 @@ class MediaPlaybackService :
       pauseMedia()
       abandonAudioFocus()
       mediaSession.isActive = false
-      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-        stopForeground(STOP_FOREGROUND_REMOVE)
-      } else {
-        stopForeground(true)
-      }
+      stopForeground(STOP_FOREGROUND_REMOVE)
       stopSelf()
     } catch (e: Exception) {
       Log.e(TAG, "Error stopping media", e)

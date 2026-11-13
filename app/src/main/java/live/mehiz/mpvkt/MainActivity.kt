@@ -25,17 +25,17 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.ui.NavDisplay
-import live.mehiz.mpvkt.preferences.AppearancePreferences
+import dev.zacsweers.metrox.viewmodel.LocalMetroViewModelFactory
+import live.mehiz.mpvkt.App
 import live.mehiz.mpvkt.preferences.preference.collectAsState
 import live.mehiz.mpvkt.presentation.Screen
 import live.mehiz.mpvkt.ui.home.HomeScreen
 import live.mehiz.mpvkt.ui.theme.DarkMode
 import live.mehiz.mpvkt.ui.theme.MpvKtTheme
 import live.mehiz.mpvkt.ui.utils.LocalBackStack
-import org.koin.android.ext.android.inject
 
 class MainActivity : ComponentActivity() {
-  private val appearancePreferences by inject<AppearancePreferences>()
+  private val appearancePreferences = App.graph.appearancePreferences
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
@@ -55,7 +55,10 @@ class MainActivity : ComponentActivity() {
   @Composable
   fun Navigator() {
     val backstack = rememberNavBackStack(HomeScreen)
-    CompositionLocalProvider(LocalBackStack provides backstack) {
+    CompositionLocalProvider(
+      LocalBackStack provides backstack,
+      LocalMetroViewModelFactory provides App.graph.metroViewModelFactory,
+    ) {
       NavDisplay(
         backStack = backstack,
         onBack = { backstack.removeLastOrNull() },

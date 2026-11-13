@@ -59,6 +59,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import live.mehiz.mpvkt.App
 import live.mehiz.mpvkt.BuildConfig
 import live.mehiz.mpvkt.MainActivity
 import live.mehiz.mpvkt.R
@@ -67,7 +68,6 @@ import live.mehiz.mpvkt.preferences.preference.collectAsState
 import live.mehiz.mpvkt.ui.theme.DarkMode
 import live.mehiz.mpvkt.ui.theme.MpvKtTheme
 import live.mehiz.mpvkt.ui.theme.spacing
-import org.koin.android.ext.android.inject
 import java.io.BufferedReader
 import java.io.File
 import java.io.InputStreamReader
@@ -76,7 +76,7 @@ class CrashActivity : ComponentActivity() {
 
   private val clipboardManager by lazy { getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager }
   private lateinit var logcat: String
-  private val appearancePreferences: AppearancePreferences by inject()
+  private val appearancePreferences = App.graph.appearancePreferences
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)

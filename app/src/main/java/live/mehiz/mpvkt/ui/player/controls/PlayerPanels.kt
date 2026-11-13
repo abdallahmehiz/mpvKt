@@ -15,7 +15,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import live.mehiz.mpvkt.preferences.PlayerPreferences
+import live.mehiz.mpvkt.App
 import live.mehiz.mpvkt.preferences.SubtitleJustification
 import live.mehiz.mpvkt.ui.player.DebandSettings
 import live.mehiz.mpvkt.ui.player.Debanding
@@ -27,7 +27,6 @@ import live.mehiz.mpvkt.ui.player.controls.components.panels.SubtitleDelayPanel
 import live.mehiz.mpvkt.ui.player.controls.components.panels.SubtitleSettingsPanel
 import live.mehiz.mpvkt.ui.player.controls.components.panels.SubtitlesBorderStyle
 import live.mehiz.mpvkt.ui.player.controls.components.panels.VideoSettingsPanel
-import org.koin.compose.koinInject
 
 @Composable
 fun PlayerPanels(
@@ -183,7 +182,7 @@ fun PlayerPanels(
 
 val CARDS_MAX_WIDTH = 420.dp
 val panelCardsColors: @Composable () -> CardColors = {
-  val playerPreferences = koinInject<PlayerPreferences>()
+  val playerPreferences = App.graph.playerPreferences
 
   val colors = CardDefaults.cardColors()
   colors.copy(

@@ -40,12 +40,12 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
-import com.github.k1rakishou.fsaf.FileManager
 import com.yubyf.truetypeparser.TTFFile
 import `is`.xyz.mpv.MPV
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import live.mehiz.mpvkt.App
 import live.mehiz.mpvkt.R
 import live.mehiz.mpvkt.preferences.SubtitleJustification
 import live.mehiz.mpvkt.preferences.SubtitlesPreferences
@@ -60,7 +60,6 @@ import me.zhanghai.compose.preference.ListPreference
 import me.zhanghai.compose.preference.ListPreferenceType
 import me.zhanghai.compose.preference.ProvidePreferenceLocals
 import me.zhanghai.compose.preference.preferenceTheme
-import org.koin.compose.koinInject
 
 @SuppressLint("MutableCollectionMutableState")
 @Composable
@@ -85,8 +84,8 @@ fun SubtitleSettingsTypographyCard(
     modifier: Modifier = Modifier,
 ) {
   val context = LocalContext.current
-  val preferences = koinInject<SubtitlesPreferences>()
-  val fileManager = koinInject<FileManager>()
+  val preferences = App.graph.subtitlesPreferences
+  val fileManager = App.graph.fileManager
   var isExpanded by remember { mutableStateOf(true) }
   val fonts by remember { mutableStateOf(mutableListOf(preferences.font.defaultValue())) }
   var fontsLoadingIndicator: (@Composable () -> Unit)? by remember {

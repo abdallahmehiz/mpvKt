@@ -13,6 +13,7 @@ plugins {
   alias(libs.plugins.detekt)
   alias(libs.plugins.about.libraries)
   alias(libs.plugins.kotlinx.serialization)
+  alias(libs.plugins.metro)
 }
 
 android {
@@ -138,9 +139,7 @@ dependencies {
 
   implementation(libs.mpv.lib)
 
-  implementation(platform(libs.koin.bom))
-  implementation(libs.bundles.koin)
-
+  implementation(libs.metrox.viewmodel.compose)
   implementation(libs.seeker)
   implementation(libs.compose.prefs)
   implementation(libs.bundles.about.libs)

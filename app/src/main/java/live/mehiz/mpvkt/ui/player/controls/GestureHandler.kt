@@ -41,9 +41,8 @@ import androidx.compose.ui.unit.sp
 import `is`.xyz.mpv.propFlow
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.update
+import live.mehiz.mpvkt.App
 import live.mehiz.mpvkt.R
-import live.mehiz.mpvkt.preferences.AudioPreferences
-import live.mehiz.mpvkt.preferences.PlayerPreferences
 import live.mehiz.mpvkt.preferences.preference.collectAsState
 import live.mehiz.mpvkt.presentation.components.LeftSideOvalShape
 import live.mehiz.mpvkt.presentation.components.RightSideOvalShape
@@ -52,7 +51,6 @@ import live.mehiz.mpvkt.ui.player.PlayerUpdates
 import live.mehiz.mpvkt.ui.player.PlayerViewModel
 import live.mehiz.mpvkt.ui.player.controls.components.DoubleTapSeekTriangles
 import live.mehiz.mpvkt.ui.theme.playerRippleConfiguration
-import org.koin.compose.koinInject
 
 @Suppress("CyclomaticComplexMethod", "MultipleEmitters")
 @Composable
@@ -61,8 +59,8 @@ fun GestureHandler(
     interactionSource: MutableInteractionSource,
     modifier: Modifier = Modifier,
 ) {
-  val playerPreferences = koinInject<PlayerPreferences>()
-  val audioPreferences = koinInject<AudioPreferences>()
+  val playerPreferences = App.graph.playerPreferences
+  val audioPreferences = App.graph.audioPreferences
   val panelShown by viewModel.panelShown.collectAsState()
   val allowGesturesInPanels by playerPreferences.allowGesturesInPanels.collectAsState()
   val paused by viewModel.mpv.propFlow<Boolean>("pause").collectAsState()

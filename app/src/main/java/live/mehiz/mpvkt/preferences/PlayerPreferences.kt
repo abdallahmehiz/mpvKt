@@ -1,10 +1,15 @@
 package live.mehiz.mpvkt.preferences
 
+import dev.zacsweers.metro.AppScope
+import dev.zacsweers.metro.Inject
+import dev.zacsweers.metro.SingleIn
 import live.mehiz.mpvkt.preferences.preference.PreferenceStore
 import live.mehiz.mpvkt.preferences.preference.getEnum
 import live.mehiz.mpvkt.ui.player.PlayerOrientation
 import live.mehiz.mpvkt.ui.player.VideoAspect
 
+@Inject
+@SingleIn(AppScope::class)
 class PlayerPreferences(preferenceStore: PreferenceStore) {
   val orientation = preferenceStore.getEnum("player_orientation", PlayerOrientation.SensorLandscape)
   val invertDuration = preferenceStore.getBoolean("invert_duration")

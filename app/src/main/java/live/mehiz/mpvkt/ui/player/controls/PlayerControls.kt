@@ -67,14 +67,10 @@ import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.update
+import live.mehiz.mpvkt.App
 import live.mehiz.mpvkt.R
-import live.mehiz.mpvkt.preferences.AdvancedPreferences
 import live.mehiz.mpvkt.preferences.AudioChannels
-import live.mehiz.mpvkt.preferences.AudioPreferences
-import live.mehiz.mpvkt.preferences.DecoderPreferences
-import live.mehiz.mpvkt.preferences.PlayerPreferences
 import live.mehiz.mpvkt.preferences.SubtitleJustification
-import live.mehiz.mpvkt.preferences.SubtitlesPreferences
 import live.mehiz.mpvkt.preferences.preference.collectAsState
 import live.mehiz.mpvkt.preferences.preference.deleteAndGet
 import live.mehiz.mpvkt.preferences.preference.minusAssign
@@ -90,7 +86,6 @@ import live.mehiz.mpvkt.ui.player.PlayerViewModel
 import live.mehiz.mpvkt.ui.player.Sheets
 import live.mehiz.mpvkt.ui.player.VideoAspect
 import live.mehiz.mpvkt.ui.player.VideoFilters
-import live.mehiz.mpvkt.ui.player.collectAsState
 import live.mehiz.mpvkt.ui.player.controls.components.BrightnessSlider
 import live.mehiz.mpvkt.ui.player.controls.components.ControlsButton
 import live.mehiz.mpvkt.ui.player.controls.components.MultipleSpeedPlayerUpdate
@@ -107,23 +102,21 @@ import live.mehiz.mpvkt.ui.player.execute
 import live.mehiz.mpvkt.ui.player.executeLongClick
 import live.mehiz.mpvkt.ui.theme.playerRippleConfiguration
 import live.mehiz.mpvkt.ui.theme.spacing
-import org.koin.compose.koinInject
 import kotlin.math.abs
 import kotlin.math.roundToInt
 
 @Suppress("CompositionLocalAllowlist")
 val LocalPlayerButtonsClickEvent = staticCompositionLocalOf { {} }
 
-@OptIn(ExperimentalAnimationGraphicsApi::class, ExperimentalMaterial3Api::class)
 @Composable
 @Suppress("CyclomaticComplexMethod", "ViewModelForwarding")
 fun PlayerControls(viewModel: PlayerViewModel, onBackPress: () -> Unit, modifier: Modifier = Modifier) {
   val spacing = MaterialTheme.spacing
-  val playerPreferences = koinInject<PlayerPreferences>()
-  val advancedPreferences = koinInject<AdvancedPreferences>()
-  val subtitlesPreferences = koinInject<SubtitlesPreferences>()
-  val decoderPreferences = koinInject<DecoderPreferences>()
-  val audioPreferences = koinInject<AudioPreferences>()
+  val playerPreferences = App.graph.playerPreferences
+  val advancedPreferences = App.graph.advancedPreferences
+  val subtitlesPreferences = App.graph.subtitlesPreferences
+  val decoderPreferences = App.graph.decoderPreferences
+  val audioPreferences = App.graph.audioPreferences
   val interactionSource = remember { MutableInteractionSource() }
   val controlsShown by viewModel.controlsShown.collectAsState()
   val areControlsLocked by viewModel.areControlsLocked.collectAsState()

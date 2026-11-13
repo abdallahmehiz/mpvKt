@@ -1,9 +1,14 @@
 package live.mehiz.mpvkt.preferences
 
+import dev.zacsweers.metro.AppScope
+import dev.zacsweers.metro.Inject
+import dev.zacsweers.metro.SingleIn
 import live.mehiz.mpvkt.preferences.preference.PreferenceStore
 import live.mehiz.mpvkt.preferences.preference.getEnum
 import live.mehiz.mpvkt.ui.player.Debanding
 
+@Inject
+@SingleIn(AppScope::class)
 class DecoderPreferences(preferenceStore: PreferenceStore) {
   val tryHWDecoding = preferenceStore.getBoolean("try_hw_dec", true)
   val gpuNext = preferenceStore.getBoolean("gpu_next")

@@ -2,6 +2,10 @@ package live.mehiz.mpvkt.ui.custombuttons
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import dev.zacsweers.metro.AppScope
+import dev.zacsweers.metro.ContributesIntoMap
+import dev.zacsweers.metro.Inject
+import dev.zacsweers.metrox.viewmodel.ViewModelKey
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -14,6 +18,9 @@ import live.mehiz.mpvkt.database.entities.CustomButtonEntity
 import live.mehiz.mpvkt.domain.custombuttons.repository.CustomButtonRepository
 import live.mehiz.mpvkt.preferences.PlayerPreferences
 
+@Inject
+@ViewModelKey
+@ContributesIntoMap(AppScope::class)
 class CustomButtonsScreenViewModel(
   private val customButtonsRepository: CustomButtonRepository,
   private val playerPreferences: PlayerPreferences,

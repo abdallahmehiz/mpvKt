@@ -54,6 +54,7 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import live.mehiz.mpvkt.App
 import live.mehiz.mpvkt.database.entities.CustomButtonEntity
 import live.mehiz.mpvkt.database.entities.PlaybackStateEntity
 import live.mehiz.mpvkt.domain.playbackstate.repository.PlaybackStateRepository
@@ -64,7 +65,6 @@ import live.mehiz.mpvkt.preferences.PlayerPreferences
 import live.mehiz.mpvkt.preferences.SubtitlesPreferences
 import live.mehiz.mpvkt.ui.player.controls.PlayerControls
 import live.mehiz.mpvkt.ui.theme.MpvKtTheme
-import org.koin.android.ext.android.inject
 import java.io.File
 
 @Suppress("TooManyFunctions", "LargeClass")
@@ -78,16 +78,16 @@ class PlayerActivity : AppCompatActivity() {
   }
 
   private val playerObserver by lazy { PlayerObserver(this) }
-  private val playbackStateRepository: PlaybackStateRepository by inject()
+  private val playbackStateRepository: PlaybackStateRepository = App.graph.playbackStateRepository
   val windowInsetsController by lazy { WindowCompat.getInsetsController(window, window.decorView) }
   val audioManager by lazy { getSystemService(AUDIO_SERVICE) as AudioManager }
   private var mediaSession: MediaSession? = null
-  private val playerPreferences: PlayerPreferences by inject()
-  private val audioPreferences: AudioPreferences by inject()
-  private val subtitlesPreferences: SubtitlesPreferences by inject()
-  private val advancedPreferences: AdvancedPreferences by inject()
-  private val gesturePreferences: GesturePreferences by inject()
-  private val fileManager: FileManager by inject()
+  private val playerPreferences: PlayerPreferences = App.graph.playerPreferences
+  private val audioPreferences: AudioPreferences = App.graph.audioPreferences
+  private val subtitlesPreferences: SubtitlesPreferences = App.graph.subtitlesPreferences
+  private val advancedPreferences: AdvancedPreferences = App.graph.advancedPreferences
+  private val gesturePreferences: GesturePreferences = App.graph.gesturePreferences
+  private val fileManager: FileManager = App.graph.fileManager
 
   private var fileName = ""
   private var mediaPlaybackService: MediaPlaybackService? = null

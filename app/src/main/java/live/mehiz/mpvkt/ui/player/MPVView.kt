@@ -11,14 +11,8 @@ import android.view.SurfaceHolder
 import `is`.xyz.mpv.BaseMPVView
 import `is`.xyz.mpv.KeyMapping
 import `is`.xyz.mpv.MPV
-import live.mehiz.mpvkt.preferences.AdvancedPreferences
-import live.mehiz.mpvkt.preferences.AudioPreferences
-import live.mehiz.mpvkt.preferences.DecoderPreferences
-import live.mehiz.mpvkt.preferences.PlayerPreferences
-import live.mehiz.mpvkt.preferences.SubtitlesPreferences
+import live.mehiz.mpvkt.App
 import live.mehiz.mpvkt.ui.player.controls.components.panels.toColorHexString
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
 import kotlin.collections.component2
 import kotlin.collections.iterator
 
@@ -26,14 +20,13 @@ class MPVView(context: Context, attributes: AttributeSet?) :
     BaseMPVView(
   context,
   attributes,
-),
-  KoinComponent {
+) {
 
-  private val audioPreferences: AudioPreferences by inject()
-  private val playerPreferences: PlayerPreferences by inject()
-  private val decoderPreferences: DecoderPreferences by inject()
-  private val advancedPreferences: AdvancedPreferences by inject()
-  private val subtitlesPreferences: SubtitlesPreferences by inject()
+  private val audioPreferences = App.graph.audioPreferences
+  private val playerPreferences = App.graph.playerPreferences
+  private val decoderPreferences = App.graph.decoderPreferences
+  private val advancedPreferences = App.graph.advancedPreferences
+  private val subtitlesPreferences = App.graph.subtitlesPreferences
 
   var isExiting = false
 

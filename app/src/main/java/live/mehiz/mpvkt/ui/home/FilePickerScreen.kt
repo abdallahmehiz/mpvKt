@@ -42,12 +42,11 @@ import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
-import com.github.k1rakishou.fsaf.FileManager
 import com.github.k1rakishou.fsaf.file.AbstractFile
 import `is`.xyz.mpv.Utils
 import kotlinx.serialization.Serializable
+import live.mehiz.mpvkt.App
 import live.mehiz.mpvkt.R
-import live.mehiz.mpvkt.preferences.SubtitlesPreferences
 import live.mehiz.mpvkt.presentation.Screen
 import live.mehiz.mpvkt.ui.player.PlayerActivity
 import live.mehiz.mpvkt.ui.player.audioExtensions
@@ -56,7 +55,6 @@ import live.mehiz.mpvkt.ui.player.videoExtensions
 import live.mehiz.mpvkt.ui.theme.spacing
 import live.mehiz.mpvkt.ui.utils.FilesComparator
 import live.mehiz.mpvkt.ui.utils.LocalBackStack
-import org.koin.compose.koinInject
 import java.lang.Long.signum
 import java.text.StringCharacterIterator
 import java.time.Instant
@@ -67,13 +65,12 @@ import kotlin.math.abs
 @Serializable
 data class FilePickerScreen(val uri: String) : Screen {
 
-  @OptIn(ExperimentalMaterial3Api::class)
   @Composable
   override fun Content() {
     val backstack = LocalBackStack.current
-    val fileManager = koinInject<FileManager>()
+    val fileManager = App.graph.fileManager
     val context = LocalContext.current
-    val subtitlesPreferences = koinInject<SubtitlesPreferences>()
+    val subtitlesPreferences = App.graph.subtitlesPreferences
     Scaffold(
       topBar = {
         TopAppBar(
@@ -128,7 +125,7 @@ data class FilePickerScreen(val uri: String) : Screen {
   @Composable
   fun FilePicker(directory: AbstractFile, onNavigate: (AbstractFile) -> Unit, modifier: Modifier = Modifier) {
     val navigator = LocalBackStack.current
-    val fileManager = koinInject<FileManager>()
+    val fileManager = App.graph.fileManager
     val fileList = fileManager.listFiles(directory).filterNot {
       !Utils.MEDIA_EXTENSIONS.contains(fileManager.getName(it).substringAfterLast('.')) &&
         fileManager.isFile(it) || fileManager.getName(it).startsWith('.')

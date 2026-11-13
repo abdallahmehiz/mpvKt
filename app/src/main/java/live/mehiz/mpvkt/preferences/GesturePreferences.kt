@@ -1,9 +1,14 @@
 package live.mehiz.mpvkt.preferences
 
+import dev.zacsweers.metro.AppScope
+import dev.zacsweers.metro.Inject
+import dev.zacsweers.metro.SingleIn
 import live.mehiz.mpvkt.preferences.preference.PreferenceStore
 import live.mehiz.mpvkt.preferences.preference.getEnum
 import live.mehiz.mpvkt.ui.player.SingleActionGesture
 
+@Inject
+@SingleIn(AppScope::class)
 class GesturePreferences(preferenceStore: PreferenceStore) {
   val doubleTapToSeekDuration = preferenceStore.getInt("double_tap_to_seek_duration", 10)
   val leftSingleActionGesture = preferenceStore.getEnum("left_double_tap_gesture", SingleActionGesture.Seek)

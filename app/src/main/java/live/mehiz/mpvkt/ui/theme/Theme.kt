@@ -15,10 +15,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.LocalContext
+import live.mehiz.mpvkt.App
 import live.mehiz.mpvkt.R
-import live.mehiz.mpvkt.preferences.AppearancePreferences
 import live.mehiz.mpvkt.preferences.preference.collectAsState
-import org.koin.compose.koinInject
 
 private val lightScheme = lightColorScheme(
   primary = primaryLight,
@@ -98,7 +97,7 @@ private val darkScheme = darkColorScheme(
 
 @Composable
 fun MpvKtTheme(content: @Composable () -> Unit) {
-  val preferences = koinInject<AppearancePreferences>()
+  val preferences = App.graph.appearancePreferences
   val darkMode by preferences.darkMode.collectAsState()
   val darkTheme = isSystemInDarkTheme()
   val dynamicColor by preferences.materialYou.collectAsState()

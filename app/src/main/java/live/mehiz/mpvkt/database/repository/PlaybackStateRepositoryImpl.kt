@@ -1,9 +1,14 @@
 package live.mehiz.mpvkt.database.repository
 
+import dev.zacsweers.metro.AppScope
+import dev.zacsweers.metro.Inject
+import dev.zacsweers.metro.SingleIn
 import live.mehiz.mpvkt.database.MpvKtDatabase
 import live.mehiz.mpvkt.database.entities.PlaybackStateEntity
 import live.mehiz.mpvkt.domain.playbackstate.repository.PlaybackStateRepository
 
+@Inject
+@SingleIn(AppScope::class)
 class PlaybackStateRepositoryImpl(private val database: MpvKtDatabase) : PlaybackStateRepository {
   override suspend fun upsert(playbackState: PlaybackStateEntity) {
     database.videoDataDao().upsert(playbackState)
