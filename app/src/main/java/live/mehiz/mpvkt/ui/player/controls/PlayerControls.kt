@@ -61,6 +61,8 @@ import androidx.constraintlayout.compose.Dimension
 import androidx.core.graphics.toColorInt
 import dev.vivvvek.seeker.Segment
 import `is`.xyz.mpv.Utils
+import `is`.xyz.mpv.prop
+import `is`.xyz.mpv.propFlow
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.delay
@@ -115,11 +117,7 @@ val LocalPlayerButtonsClickEvent = staticCompositionLocalOf { {} }
 @OptIn(ExperimentalAnimationGraphicsApi::class, ExperimentalMaterial3Api::class)
 @Composable
 @Suppress("CyclomaticComplexMethod", "ViewModelForwarding")
-fun PlayerControls(
-  viewModel: PlayerViewModel,
-  onBackPress: () -> Unit,
-  modifier: Modifier = Modifier,
-) {
+fun PlayerControls(viewModel: PlayerViewModel, onBackPress: () -> Unit, modifier: Modifier = Modifier) {
   val spacing = MaterialTheme.spacing
   val playerPreferences = koinInject<PlayerPreferences>()
   val advancedPreferences = koinInject<AdvancedPreferences>()

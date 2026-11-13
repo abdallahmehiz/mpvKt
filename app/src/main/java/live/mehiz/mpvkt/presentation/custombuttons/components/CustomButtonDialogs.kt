@@ -29,9 +29,9 @@ import kotlin.time.Duration.Companion.seconds
 
 @Composable
 fun CustomButtonAddDialog(
-  onDismissRequest: () -> Unit,
-  onAdd: (String, String, String) -> Unit,
-  buttonNames: ImmutableList<String>,
+    onDismissRequest: () -> Unit,
+    onAdd: (String, String, String) -> Unit,
+    buttonNames: ImmutableList<String>,
 ) {
   var title by remember { mutableStateOf("") }
   var content by remember { mutableStateOf("") }
@@ -48,7 +48,7 @@ fun CustomButtonAddDialog(
         onClick = {
           onAdd(title, content, longPressContent)
           onDismissRequest()
-        }
+        },
       ) {
         Text(text = stringResource(id = R.string.pref_custom_button_action_add))
       }
@@ -63,7 +63,7 @@ fun CustomButtonAddDialog(
     },
     text = {
       Column(
-        verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.small)
+        verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.small),
       ) {
         OutlinedTextField(
           modifier = Modifier
@@ -109,7 +109,7 @@ fun CustomButtonAddDialog(
           minLines = 3,
         )
       }
-    }
+    },
   )
 
   @Suppress("ForbiddenComment")
@@ -121,11 +121,7 @@ fun CustomButtonAddDialog(
 }
 
 @Composable
-fun CustomButtonDeleteDialog(
-  onDismissRequest: () -> Unit,
-  onDelete: () -> Unit,
-  title: String,
-) {
+fun CustomButtonDeleteDialog(onDismissRequest: () -> Unit, onDelete: () -> Unit, title: String) {
   AlertDialog(
     onDismissRequest = onDismissRequest,
     confirmButton = {
@@ -152,10 +148,10 @@ fun CustomButtonDeleteDialog(
 
 @Composable
 fun CustomButtonEditDialog(
-  onDismissRequest: () -> Unit,
-  onEdit: (String, String, String) -> Unit,
-  buttonNames: ImmutableList<String>,
-  initialState: CustomButtonEntity,
+    onDismissRequest: () -> Unit,
+    onEdit: (String, String, String) -> Unit,
+    buttonNames: ImmutableList<String>,
+    initialState: CustomButtonEntity,
 ) {
   var title by remember { mutableStateOf(initialState.title) }
   var content by remember { mutableStateOf(initialState.content) }
@@ -172,7 +168,7 @@ fun CustomButtonEditDialog(
         onClick = {
           onEdit(title, content, longPressContent)
           onDismissRequest()
-        }
+        },
       ) {
         Text(text = stringResource(id = R.string.generic_ok))
       }
@@ -195,7 +191,7 @@ fun CustomButtonEditDialog(
     },
     text = {
       Column(
-        verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.small)
+        verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.small),
       ) {
         OutlinedTextField(
           modifier = Modifier
@@ -243,7 +239,7 @@ fun CustomButtonEditDialog(
           maxLines = 6,
         )
       }
-    }
+    },
   )
 
   @Suppress("ForbiddenComment")

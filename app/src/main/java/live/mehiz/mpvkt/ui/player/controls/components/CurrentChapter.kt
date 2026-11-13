@@ -33,11 +33,7 @@ import `is`.xyz.mpv.Utils
 import live.mehiz.mpvkt.ui.theme.spacing
 
 @Composable
-fun CurrentChapter(
-  chapter: Segment,
-  modifier: Modifier = Modifier,
-  onClick: () -> Unit = {},
-) {
+fun CurrentChapter(chapter: Segment, modifier: Modifier = Modifier, onClick: () -> Unit = {}) {
   Box(
     modifier = modifier
       .clip(RoundedCornerShape(25))
@@ -62,7 +58,7 @@ fun CurrentChapter(
     ) { currentChapter ->
       Row(
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.extraSmall)
+        horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.extraSmall),
       ) {
         Icon(
           imageVector = Icons.Default.Bookmarks,
@@ -70,7 +66,7 @@ fun CurrentChapter(
           modifier = Modifier
             .padding(end = MaterialTheme.spacing.extraSmall)
             .size(16.dp),
-          tint = MaterialTheme.colorScheme.onBackground
+          tint = MaterialTheme.colorScheme.onBackground,
         )
         Text(
           text = Utils.prettyTime(currentChapter.start.toInt()),

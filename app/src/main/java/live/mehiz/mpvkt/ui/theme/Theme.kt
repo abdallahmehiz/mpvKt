@@ -114,7 +114,9 @@ fun MpvKtTheme(content: @Composable () -> Unit) {
     }
 
     darkMode == DarkMode.Dark -> darkScheme
+
     darkMode == DarkMode.Light -> lightScheme
+
     else -> if (darkTheme) darkScheme else lightScheme
   }
 

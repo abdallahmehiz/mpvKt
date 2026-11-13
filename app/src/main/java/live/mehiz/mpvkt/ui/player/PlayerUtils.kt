@@ -8,13 +8,12 @@ import `is`.xyz.mpv.MPVNode
 import `is`.xyz.mpv.Utils
 import kotlinx.serialization.json.Json
 
-internal fun Uri.openContentFd(context: Context): String? {
-  return context.contentResolver.openFileDescriptor(this, "r")?.detachFd()?.let {
+internal fun Uri.openContentFd(context: Context): String? =
+    context.contentResolver.openFileDescriptor(this, "r")?.detachFd()?.let {
     Utils.findRealPath(it)?.also { _ ->
       ParcelFileDescriptor.adoptFd(it).close()
     } ?: "fd://$it"
   }
-}
 
 internal fun Uri.resolveUri(context: Context): String? {
   val filepath = when (scheme) {

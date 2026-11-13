@@ -41,24 +41,20 @@ class SubtitlesPreferences(preferenceStore: PreferenceStore) {
   val defaultSecondarySubDelay = preferenceStore.getInt("sub_default_secondary_delay")
 }
 
-enum class SubtitleJustification(
-  val value: String,
-  val icon: ImageVector,
-) {
+enum class SubtitleJustification(val value: String, val icon: ImageVector) {
   Left("left", Icons.AutoMirrored.Default.FormatAlignLeft),
   Center("center", Icons.Default.FormatAlignCenter),
   Right("right", Icons.AutoMirrored.Default.FormatAlignRight),
   Auto("auto", Icons.Default.FormatAlignJustify)
+  ,
   ;
 
-  companion object {
-    fun byValue(value: String): SubtitleJustification {
-      return when (value) {
+    companion object {
+    fun byValue(value: String): SubtitleJustification = when (value) {
         "left" -> SubtitleJustification.Left
         "center" -> SubtitleJustification.Center
         "right" -> SubtitleJustification.Right
         else -> SubtitleJustification.Auto
       }
-    }
   }
 }

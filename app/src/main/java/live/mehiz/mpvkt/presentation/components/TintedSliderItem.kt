@@ -24,15 +24,15 @@ import kotlin.math.min
 
 @Composable
 fun TintedSliderItem(
-  label: String,
-  value: Int,
-  valueText: String,
-  onChange: (Int) -> Unit,
-  max: Int,
-  tint: Color,
-  modifier: Modifier = Modifier,
-  min: Int = 0,
-  icon: @Composable () -> Unit = {},
+    label: String,
+    value: Int,
+    valueText: String,
+    onChange: (Int) -> Unit,
+    max: Int,
+    tint: Color,
+    modifier: Modifier = Modifier,
+    min: Int = 0,
+    icon: @Composable () -> Unit = {},
 ) {
   val haptic = LocalHapticFeedback.current
 
@@ -67,22 +67,22 @@ fun TintedSliderItem(
       modifier = Modifier.weight(1.5f),
       valueRange = min.toFloat()..max.toFloat(),
       steps = max - min,
-      tint = tint
+      tint = tint,
     )
   }
 }
 
 @Composable
 fun TintedSlider(
-  value: Float,
-  onValueChange: (Float) -> Unit,
-  modifier: Modifier = Modifier,
-  enabled: Boolean = true,
-  valueRange: ClosedFloatingPointRange<Float> = 0f..1f,
-  @IntRange steps: Int = 0,
-  onValueChangeFinished: (() -> Unit)? = null,
-  tint: Color = MaterialTheme.colorScheme.primaryContainer,
-  interactionSource: MutableInteractionSource = MutableInteractionSource()
+    value: Float,
+    onValueChange: (Float) -> Unit,
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true,
+    valueRange: ClosedFloatingPointRange<Float> = 0f..1f,
+    @IntRange steps: Int = 0,
+    onValueChangeFinished: (() -> Unit)? = null,
+    tint: Color = MaterialTheme.colorScheme.primaryContainer,
+    interactionSource: MutableInteractionSource = MutableInteractionSource(),
 ) {
   Slider(
     value = value,
@@ -93,7 +93,7 @@ fun TintedSlider(
     steps = steps,
     onValueChangeFinished = onValueChangeFinished,
     colors = generateSliderColors(tint),
-    interactionSource = interactionSource
+    interactionSource = interactionSource,
   )
 }
 
@@ -103,7 +103,7 @@ private fun PreviewTintedSliderRed() {
   TintedSlider(
     0.5f,
     {},
-    tint = Color.Red
+    tint = Color.Red,
   )
 }
 
@@ -116,7 +116,7 @@ private fun PreviewTintedSliderItemRed() {
     "1",
     {},
     20,
-    tint = Color.Red
+    tint = Color.Red,
   )
 }
 
@@ -147,6 +147,6 @@ fun generateSliderColors(baseColor: Color): SliderColors {
     disabledActiveTrackColor = lighten(baseColor, 0.2f).copy(alpha = 0.5f),
     disabledActiveTickColor = lighten(baseColor, 0.4f).copy(alpha = 0.5f),
     disabledInactiveTrackColor = darken(baseColor, 0.2f).copy(alpha = 0.5f),
-    disabledInactiveTickColor = darken(baseColor, 0.4f).copy(alpha = 0.5f)
+    disabledInactiveTickColor = darken(baseColor, 0.4f).copy(alpha = 0.5f),
   )
 }

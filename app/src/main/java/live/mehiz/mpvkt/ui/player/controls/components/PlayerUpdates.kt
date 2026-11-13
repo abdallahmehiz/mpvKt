@@ -24,10 +24,7 @@ import live.mehiz.mpvkt.R
 import live.mehiz.mpvkt.ui.theme.spacing
 
 @Composable
-fun PlayerUpdate(
-  modifier: Modifier = Modifier,
-  content: @Composable () -> Unit = {},
-) {
+fun PlayerUpdate(modifier: Modifier = Modifier, content: @Composable () -> Unit = {}) {
   Box(
     modifier = modifier
       .clip(RoundedCornerShape(16.dp))
@@ -39,20 +36,14 @@ fun PlayerUpdate(
 }
 
 @Composable
-fun TextPlayerUpdate(
-  text: String,
-  modifier: Modifier = Modifier
-) {
+fun TextPlayerUpdate(text: String, modifier: Modifier = Modifier) {
   PlayerUpdate(modifier) {
     Text(text)
   }
 }
 
 @Composable
-fun MultipleSpeedPlayerUpdate(
-  currentSpeed: Float,
-  modifier: Modifier = Modifier
-) {
+fun MultipleSpeedPlayerUpdate(currentSpeed: Float, modifier: Modifier = Modifier) {
   PlayerUpdate(modifier) {
     Row(
       verticalAlignment = Alignment.Bottom,

@@ -23,10 +23,7 @@ import live.mehiz.mpvkt.R
  * Thanks @Quickdesh for allowing me to use it
  */
 @Composable
-fun DoubleTapSeekTriangles(
-  isForward: Boolean,
-  modifier: Modifier = Modifier
-) {
+fun DoubleTapSeekTriangles(isForward: Boolean, modifier: Modifier = Modifier) {
   val animationDuration = 750L
 
   val alpha1 = remember { Animatable(0f) }
@@ -56,9 +53,7 @@ fun DoubleTapSeekTriangles(
 }
 
 @Composable
-private fun DoubleTapArrow(
-  alpha: Float,
-) {
+private fun DoubleTapArrow(alpha: Float) {
   Icon(
     painter = painterResource(R.drawable.ic_play_seek_triangle),
     contentDescription = null,

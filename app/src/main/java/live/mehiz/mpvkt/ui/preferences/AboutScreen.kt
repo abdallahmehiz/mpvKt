@@ -12,7 +12,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -21,6 +20,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalClipboardManager
@@ -30,6 +30,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
+import com.mikepenz.aboutlibraries.ui.compose.android.produceLibraries
 import com.mikepenz.aboutlibraries.ui.compose.m3.LibrariesContainer
 import compose.icons.SimpleIcons
 import compose.icons.simpleicons.Github
@@ -45,7 +46,6 @@ import me.zhanghai.compose.preference.ProvidePreferenceLocals
 
 @Serializable
 object AboutScreen : Screen {
-  @OptIn(ExperimentalMaterial3Api::class)
   @Composable
   override fun Content() {
     val context = LocalContext.current
@@ -138,7 +138,6 @@ object AboutScreen : Screen {
 
 @Serializable
 object LibrariesScreen : Screen {
-  @OptIn(ExperimentalMaterial3Api::class)
   @Composable
   override fun Content() {
     val backstack = LocalBackStack.current
@@ -154,7 +153,11 @@ object LibrariesScreen : Screen {
         )
       },
     ) { paddingValues ->
-      LibrariesContainer(modifier = Modifier.padding(paddingValues))
+      val libraries by produceLibraries(R.raw.aboutlibraries)
+      LibrariesContainer(
+        libraries = libraries,
+        modifier = Modifier.padding(paddingValues),
+      )
     }
   }
 }

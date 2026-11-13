@@ -57,7 +57,7 @@ object GesturePreferencesScreen : Screen {
             }
           },
         )
-      }
+      },
     ) { padding ->
       ProvidePreferenceLocals {
         Column(
@@ -67,7 +67,7 @@ object GesturePreferencesScreen : Screen {
             .padding(padding),
         ) {
           PreferenceCategory(
-            title = { Text(text = stringResource(R.string.pref_gesture_double_tap_title)) }
+            title = { Text(text = stringResource(R.string.pref_gesture_double_tap_title)) },
           )
           val doubleTapSeekDuration by preferences.doubleTapToSeekDuration.collectAsState()
           ListPreference(
@@ -134,11 +134,11 @@ object GesturePreferencesScreen : Screen {
               }
 
               Text(text = annotatedString)
-            }
+            },
           )
 
           PreferenceCategory(
-            title = { Text(text = stringResource(R.string.pref_gesture_media_title)) }
+            title = { Text(text = stringResource(R.string.pref_gesture_media_title)) },
           )
 
           val mediaPreviousGesture by preferences.mediaPreviousGesture.collectAsState()
@@ -194,7 +194,7 @@ object GesturePreferencesScreen : Screen {
               }
 
               Text(text = annotatedString)
-            }
+            },
           )
         }
       }

@@ -14,7 +14,9 @@ import org.koin.core.annotation.KoinExperimentalAPI
 import org.koin.dsl.koinConfiguration
 
 @OptIn(KoinExperimentalAPI::class)
-class App : Application(), KoinStartup {
+class App :
+    Application(),
+    KoinStartup {
   override fun onCreate() {
     super.onCreate()
     Thread.setDefaultUncaughtExceptionHandler(GlobalExceptionHandler(applicationContext, CrashActivity::class.java))

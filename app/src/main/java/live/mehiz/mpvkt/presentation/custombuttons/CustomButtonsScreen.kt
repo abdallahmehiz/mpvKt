@@ -41,16 +41,16 @@ import live.mehiz.mpvkt.ui.theme.spacing
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CustomButtonsScreen(
-  buttons: List<CustomButtonEntity>,
-  primaryId: Int,
-  onClickAdd: () -> Unit,
-  onClickRename: (CustomButtonEntity) -> Unit,
-  onClickDelete: (CustomButtonEntity) -> Unit,
-  onClickMoveUp: (CustomButtonEntity) -> Unit,
-  onClickMoveDown: (CustomButtonEntity) -> Unit,
-  onTogglePrimary: (CustomButtonEntity) -> Unit,
-  onClickFaq: () -> Unit,
-  onNavigateBack: () -> Unit,
+    buttons: List<CustomButtonEntity>,
+    primaryId: Int,
+    onClickAdd: () -> Unit,
+    onClickRename: (CustomButtonEntity) -> Unit,
+    onClickDelete: (CustomButtonEntity) -> Unit,
+    onClickMoveUp: (CustomButtonEntity) -> Unit,
+    onClickMoveDown: (CustomButtonEntity) -> Unit,
+    onTogglePrimary: (CustomButtonEntity) -> Unit,
+    onClickFaq: () -> Unit,
+    onNavigateBack: () -> Unit,
 ) {
   val lazyListState = rememberLazyListState()
   Scaffold(
@@ -68,7 +68,7 @@ fun CustomButtonsScreen(
           IconButton(onClick = { onClickFaq() }) {
             Icon(Icons.AutoMirrored.Outlined.HelpOutline, null)
           }
-        }
+        },
       )
     },
     floatingActionButton = {
@@ -77,7 +77,7 @@ fun CustomButtonsScreen(
         icon = { Icon(Icons.Filled.Add, null) },
         text = { Text(text = stringResource(id = R.string.pref_custom_button_action_add)) },
       )
-    }
+    },
   ) { padding ->
     if (buttons.isEmpty()) {
       Column(
@@ -119,15 +119,15 @@ fun CustomButtonsScreen(
 
 @Composable
 private fun CustomButtonsContent(
-  customButtons: List<CustomButtonEntity>,
-  primaryId: Int,
-  lazyListState: LazyListState,
-  paddingValues: PaddingValues,
-  onClickRename: (CustomButtonEntity) -> Unit,
-  onClickDelete: (CustomButtonEntity) -> Unit,
-  onTogglePrimary: (CustomButtonEntity) -> Unit,
-  onMoveUp: (CustomButtonEntity) -> Unit,
-  onMoveDown: (CustomButtonEntity) -> Unit,
+    customButtons: List<CustomButtonEntity>,
+    primaryId: Int,
+    lazyListState: LazyListState,
+    paddingValues: PaddingValues,
+    onClickRename: (CustomButtonEntity) -> Unit,
+    onClickDelete: (CustomButtonEntity) -> Unit,
+    onTogglePrimary: (CustomButtonEntity) -> Unit,
+    onMoveUp: (CustomButtonEntity) -> Unit,
+    onMoveDown: (CustomButtonEntity) -> Unit,
 ) {
   LazyColumn(
     state = lazyListState,

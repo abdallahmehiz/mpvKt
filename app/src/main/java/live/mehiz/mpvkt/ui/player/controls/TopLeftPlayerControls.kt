@@ -13,18 +13,14 @@ import androidx.compose.ui.text.style.TextOverflow
 import live.mehiz.mpvkt.ui.player.controls.components.ControlsButton
 
 @Composable
-fun TopLeftPlayerControls(
-  mediaTitle: String,
-  onBackClick: () -> Unit,
-  modifier: Modifier = Modifier,
-) {
+fun TopLeftPlayerControls(mediaTitle: String, onBackClick: () -> Unit, modifier: Modifier = Modifier) {
   Row(
     modifier = modifier,
-    verticalAlignment = Alignment.CenterVertically
+    verticalAlignment = Alignment.CenterVertically,
   ) {
     ControlsButton(
       icon = Icons.AutoMirrored.Default.ArrowBack,
-      onClick = onBackClick
+      onClick = onBackClick,
     )
     Text(
       mediaTitle,

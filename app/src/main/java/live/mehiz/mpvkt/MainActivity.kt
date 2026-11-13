@@ -54,7 +54,7 @@ class MainActivity : ComponentActivity() {
 
   @Composable
   fun Navigator() {
-    val backstack = rememberNavBackStack<Screen>(HomeScreen)
+    val backstack = rememberNavBackStack(HomeScreen)
     CompositionLocalProvider(LocalBackStack provides backstack) {
       NavDisplay(
         backStack = backstack,

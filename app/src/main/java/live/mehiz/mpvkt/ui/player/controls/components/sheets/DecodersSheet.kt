@@ -7,20 +7,16 @@ import live.mehiz.mpvkt.R
 import live.mehiz.mpvkt.ui.player.Decoder
 
 @Composable
-fun DecodersSheet(
-  selectedDecoder: Decoder,
-  onSelect: (Decoder) -> Unit,
-  onDismissRequest: () -> Unit,
-) {
+fun DecodersSheet(selectedDecoder: Decoder, onSelect: (Decoder) -> Unit, onDismissRequest: () -> Unit) {
   GenericTracksSheet(
     Decoder.entries.minusElement(Decoder.Auto).toImmutableList(),
     track = {
       AudioTrackRow(
         title = stringResource(R.string.player_sheets_decoder_formatted, it.title, it.value),
         isSelected = selectedDecoder == it,
-        onClick = { onSelect(it) }
+        onClick = { onSelect(it) },
       )
     },
-    onDismissRequest = onDismissRequest
+    onDismissRequest = onDismissRequest,
   )
 }

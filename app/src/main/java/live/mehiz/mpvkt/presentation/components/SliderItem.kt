@@ -26,14 +26,14 @@ import live.mehiz.mpvkt.ui.theme.spacing
 
 @Composable
 fun SliderItem(
-  label: String,
-  value: Int,
-  valueText: String,
-  onChange: (Int) -> Unit,
-  max: Int,
-  modifier: Modifier = Modifier,
-  min: Int = 0,
-  icon: @Composable () -> Unit = {},
+    label: String,
+    value: Int,
+    valueText: String,
+    onChange: (Int) -> Unit,
+    max: Int,
+    modifier: Modifier = Modifier,
+    min: Int = 0,
+    icon: @Composable () -> Unit = {},
 ) {
   val haptic = LocalHapticFeedback.current
 
@@ -74,15 +74,15 @@ fun SliderItem(
 
 @Composable
 fun SliderItem(
-  label: String,
-  value: Float,
-  valueText: String,
-  onChange: (Float) -> Unit,
-  max: Float,
-  modifier: Modifier = Modifier,
-  steps: Int = 0,
-  min: Float = 0f,
-  icon: @Composable () -> Unit = {},
+    label: String,
+    value: Float,
+    valueText: String,
+    onChange: (Float) -> Unit,
+    max: Float,
+    modifier: Modifier = Modifier,
+    steps: Int = 0,
+    min: Float = 0f,
+    icon: @Composable () -> Unit = {},
 ) {
   val haptic = LocalHapticFeedback.current
 
@@ -123,14 +123,14 @@ fun SliderItem(
 
 @Composable
 fun VerticalSliderItem(
-  label: String,
-  value: Int,
-  valueText: String,
-  onChange: (Int) -> Unit,
-  max: Int,
-  modifier: Modifier = Modifier,
-  min: Int = 0,
-  icon: @Composable () -> Unit = {},
+    label: String,
+    value: Int,
+    valueText: String,
+    onChange: (Int) -> Unit,
+    max: Int,
+    modifier: Modifier = Modifier,
+    min: Int = 0,
+    icon: @Composable () -> Unit = {},
 ) {
   val haptic = LocalHapticFeedback.current
 
@@ -166,13 +166,7 @@ fun VerticalSliderItem(
 }
 
 @Composable
-fun VerticalSlider(
-  value: Int,
-  min: Int,
-  max: Int,
-  onValueChange: (Int) -> Unit,
-  modifier: Modifier = Modifier,
-) {
+fun VerticalSlider(value: Int, min: Int, max: Int, onValueChange: (Int) -> Unit, modifier: Modifier = Modifier) {
   Slider(
     modifier = modifier
       .graphicsLayer {

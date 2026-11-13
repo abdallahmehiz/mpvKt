@@ -36,7 +36,7 @@ private object MIGRATION3to4 : Migration(3, 4) {
         `index` INTEGER NOT NULL, 
         PRIMARY KEY(`id`)
       )
-      """.trimIndent()
+      """.trimIndent(),
     )
   }
 }
@@ -46,7 +46,7 @@ private object MIGRATION4to5 : Migration(4, 5) {
     db.execSQL(
       """
         ALTER TABLE CustomButtonEntity ADD COLUMN longPressContent TEXT NOT NULL DEFAULT ''
-      """.trimIndent()
+      """.trimIndent(),
     )
   }
 }

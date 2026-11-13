@@ -95,7 +95,7 @@ object HomeScreen : Screen {
           trailingIcon = {
             if (!isUrlValid) Icon(Icons.Filled.Info, null)
           },
-          isError = !isUrlValid
+          isError = !isUrlValid,
         )
         Button(
           onClick = { playFile(uri.text.toString(), context) },
@@ -155,10 +155,7 @@ object HomeScreen : Screen {
       PROTOCOLS.contains(uri.scheme)
   }
 
-  fun playFile(
-    filepath: String,
-    context: Context,
-  ) {
+  fun playFile(filepath: String, context: Context) {
     val i = Intent(Intent.ACTION_VIEW, filepath.toUri())
     i.setClass(context, PlayerActivity::class.java)
     context.startActivity(i)

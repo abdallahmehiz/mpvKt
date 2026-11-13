@@ -16,11 +16,7 @@ import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.LayoutDirection
 
 object RightSideOvalShape : Shape {
-  override fun createOutline(
-    size: Size,
-    layoutDirection: LayoutDirection,
-    density: Density
-  ): Outline {
+  override fun createOutline(size: Size, layoutDirection: LayoutDirection, density: Density): Outline {
     val path = Path().apply {
       moveTo(size.width, size.height)
       lineTo(size.width, 0f)
@@ -31,7 +27,7 @@ object RightSideOvalShape : Shape {
         -30f,
         size.height / 2,
         size.width / 10,
-        size.height
+        size.height,
       )
       close()
     }
@@ -40,11 +36,7 @@ object RightSideOvalShape : Shape {
 }
 
 object LeftSideOvalShape : Shape {
-  override fun createOutline(
-    size: Size,
-    layoutDirection: LayoutDirection,
-    density: Density
-  ): Outline {
+  override fun createOutline(size: Size, layoutDirection: LayoutDirection, density: Density): Outline {
     val path = Path().apply {
       moveTo(0f, 0f)
       lineTo(0f, size.height)
@@ -55,7 +47,7 @@ object LeftSideOvalShape : Shape {
         size.width,
         size.height / 2,
         size.width - size.width / 10,
-        0f
+        0f,
       )
       close()
     }
@@ -70,7 +62,7 @@ private fun PreviewRightSideOvalBox() {
     modifier = Modifier
       .fillMaxSize()
       .clip(RightSideOvalShape)
-      .background(Color.Red)
+      .background(Color.Red),
   ) {}
 }
 
@@ -81,6 +73,6 @@ private fun PreviewLeftSideOvalBox() {
     modifier = Modifier
       .fillMaxSize()
       .clip(LeftSideOvalShape)
-      .background(Color.Red)
+      .background(Color.Red),
   ) {}
 }

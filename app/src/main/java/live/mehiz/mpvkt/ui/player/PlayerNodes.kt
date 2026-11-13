@@ -5,10 +5,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class ChapterNode(
-  val time: Float,
-  val title: String,
-) {
+data class ChapterNode(val time: Float, val title: String) {
   fun toSegment(): Segment = Segment(title, time)
 }
 
@@ -59,7 +56,7 @@ data class TrackNode(
   @SerialName("replaygain-album-gain") val replayGainAlbumGain: Double? = null,
   @SerialName("dolby-vision-profile") val dolbyVisionProfile: Long? = null,
   @SerialName("dolby-vision-level") val dolbyVisionLevel: Long? = null,
-  val metadata: Map<String, String?>? = null
+  val metadata: Map<String, String?>? = null,
 ) {
   val isVideo = type == "video"
   val isAudio = type == "audio"

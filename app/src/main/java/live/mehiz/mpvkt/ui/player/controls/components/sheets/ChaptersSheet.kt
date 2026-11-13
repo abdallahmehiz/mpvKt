@@ -21,11 +21,11 @@ import live.mehiz.mpvkt.ui.theme.spacing
 
 @Composable
 fun ChaptersSheet(
-  chapters: ImmutableList<Segment>,
-  currentChapter: Segment,
-  onClick: (Segment) -> Unit,
-  onDismissRequest: () -> Unit,
-  modifier: Modifier = Modifier,
+    chapters: ImmutableList<Segment>,
+    currentChapter: Segment,
+    onClick: (Segment) -> Unit,
+    onDismissRequest: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
   GenericTracksSheet(
     chapters,
@@ -39,18 +39,12 @@ fun ChaptersSheet(
     },
     onDismissRequest = onDismissRequest,
     modifier = modifier
-      .padding(vertical = MaterialTheme.spacing.medium)
+      .padding(vertical = MaterialTheme.spacing.medium),
   )
 }
 
 @Composable
-fun ChapterTrack(
-  chapter: Segment,
-  index: Int,
-  selected: Boolean,
-  onClick: () -> Unit,
-  modifier: Modifier = Modifier
-) {
+fun ChapterTrack(chapter: Segment, index: Int, selected: Boolean, onClick: () -> Unit, modifier: Modifier = Modifier) {
   Row(
     modifier = modifier
       .fillMaxWidth()
@@ -64,7 +58,7 @@ fun ChapterTrack(
       fontWeight = if (selected) FontWeight.ExtraBold else FontWeight.Normal,
       maxLines = 1,
       modifier = Modifier.weight(1f),
-      overflow = TextOverflow.Ellipsis
+      overflow = TextOverflow.Ellipsis,
     )
     Text(
       Utils.prettyTime(chapter.start.toInt()),

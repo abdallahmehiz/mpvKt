@@ -20,37 +20,30 @@ class AndroidPreferenceStore(
 
   private val keyFlow = sharedPreferences.keyFlow
 
-  override fun getString(key: String, defaultValue: String): Preference<String> {
-    return StringPrimitive(sharedPreferences, keyFlow, key, defaultValue)
-  }
+  override fun getString(key: String, defaultValue: String): Preference<String> =
+      StringPrimitive(sharedPreferences, keyFlow, key, defaultValue)
 
-  override fun getLong(key: String, defaultValue: Long): Preference<Long> {
-    return LongPrimitive(sharedPreferences, keyFlow, key, defaultValue)
-  }
+  override fun getLong(key: String, defaultValue: Long): Preference<Long> =
+      LongPrimitive(sharedPreferences, keyFlow, key, defaultValue)
 
-  override fun getInt(key: String, defaultValue: Int): Preference<Int> {
-    return IntPrimitive(sharedPreferences, keyFlow, key, defaultValue)
-  }
+  override fun getInt(key: String, defaultValue: Int): Preference<Int> =
+      IntPrimitive(sharedPreferences, keyFlow, key, defaultValue)
 
-  override fun getFloat(key: String, defaultValue: Float): Preference<Float> {
-    return FloatPrimitive(sharedPreferences, keyFlow, key, defaultValue)
-  }
+  override fun getFloat(key: String, defaultValue: Float): Preference<Float> =
+      FloatPrimitive(sharedPreferences, keyFlow, key, defaultValue)
 
-  override fun getBoolean(key: String, defaultValue: Boolean): Preference<Boolean> {
-    return BooleanPrimitive(sharedPreferences, keyFlow, key, defaultValue)
-  }
+  override fun getBoolean(key: String, defaultValue: Boolean): Preference<Boolean> =
+      BooleanPrimitive(sharedPreferences, keyFlow, key, defaultValue)
 
-  override fun getStringSet(key: String, defaultValue: Set<String>): Preference<Set<String>> {
-    return StringSetPrimitive(sharedPreferences, keyFlow, key, defaultValue)
-  }
+  override fun getStringSet(key: String, defaultValue: Set<String>): Preference<Set<String>> =
+      StringSetPrimitive(sharedPreferences, keyFlow, key, defaultValue)
 
   override fun <T> getObject(
-    key: String,
-    defaultValue: T,
-    serializer: (T) -> String,
-    deserializer: (String) -> T,
-  ): Preference<T> {
-    return Object(
+      key: String,
+      defaultValue: T,
+      serializer: (T) -> String,
+      deserializer: (String) -> T,
+  ): Preference<T> = Object(
       preferences = sharedPreferences,
       keyFlow = keyFlow,
       key = key,
@@ -58,11 +51,8 @@ class AndroidPreferenceStore(
       serializer = serializer,
       deserializer = deserializer,
     )
-  }
 
-  override fun getAll(): Map<String, *> {
-    return sharedPreferences.all ?: emptyMap<String, Any>()
-  }
+  override fun getAll(): Map<String, *> = sharedPreferences.all ?: emptyMap<String, Any>()
 }
 
 private val SharedPreferences.keyFlow

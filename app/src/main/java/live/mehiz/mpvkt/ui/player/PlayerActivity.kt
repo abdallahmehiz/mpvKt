@@ -151,15 +151,19 @@ class PlayerActivity : AppCompatActivity() {
           is PlayerViewModel.Event.SetupCustomButtons -> {
             setupCustomButtons(event.buttons)
           }
+
           is PlayerViewModel.Event.ChangeBrightness -> {
             changeBrightnessTo(event.brightness)
           }
+
           is PlayerViewModel.Event.StretchVideo -> {
             windowManager.defaultDisplay.getRealMetrics(event.dm)
           }
+
           is PlayerViewModel.Event.SetControls -> {
             setControls(event.visible)
           }
+
           PlayerViewModel.Event.CycleRotation -> {
             cycleScreenRotations()
           }
@@ -221,7 +225,7 @@ class PlayerActivity : AppCompatActivity() {
     player.isExiting = true
     if (isFinishing) mpv.command("stop")
     mpv.removeObserver(playerObserver)
-    mpv.destroy()
+    mpv.destroySession()
 
     super.onDestroy()
   }
@@ -533,9 +537,9 @@ class PlayerActivity : AppCompatActivity() {
   }
 
   @Suppress("NestedBlockDepth")
-  private fun parsePathFromIntent(intent: Intent): String? {
-    return when (intent.action) {
+  private fun parsePathFromIntent(intent: Intent): String? = when (intent.action) {
       Intent.ACTION_VIEW -> intent.data?.resolveUri(this)
+
       Intent.ACTION_SEND -> {
         if (intent.hasExtra(Intent.EXTRA_STREAM)) {
           intent.getParcelableExtra<Uri>(Intent.EXTRA_STREAM)!!.resolveUri(this)
@@ -549,7 +553,6 @@ class PlayerActivity : AppCompatActivity() {
 
       else -> intent.getStringExtra("uri")
     }
-  }
 
   private fun getFileName(intent: Intent): String {
     val uri = if (intent.type == "text/plain") {
@@ -768,6 +771,7 @@ class PlayerActivity : AppCompatActivity() {
   private fun setOrientation() {
     requestedOrientation = when (playerPreferences.orientation.get()) {
       PlayerOrientation.Free -> ActivityInfo.SCREEN_ORIENTATION_SENSOR
+
       PlayerOrientation.Video -> if ((player.getVideoOutAspect() ?: 0.0) > 1.0) {
         ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
       } else {
@@ -775,10 +779,15 @@ class PlayerActivity : AppCompatActivity() {
       }
 
       PlayerOrientation.Portrait -> ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+
       PlayerOrientation.ReversePortrait -> ActivityInfo.SCREEN_ORIENTATION_REVERSE_PORTRAIT
+
       PlayerOrientation.SensorPortrait -> ActivityInfo.SCREEN_ORIENTATION_SENSOR_PORTRAIT
+
       PlayerOrientation.Landscape -> ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
+
       PlayerOrientation.ReverseLandscape -> ActivityInfo.SCREEN_ORIENTATION_REVERSE_PORTRAIT
+
       PlayerOrientation.SensorLandscape -> ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
     }
   }
@@ -796,11 +805,15 @@ class PlayerActivity : AppCompatActivity() {
       }
 
       KeyEvent.KEYCODE_DPAD_RIGHT -> viewModel.handleLeftDoubleTap()
+
       KeyEvent.KEYCODE_DPAD_LEFT -> viewModel.handleRightDoubleTap()
+
       KeyEvent.KEYCODE_SPACE -> viewModel.pauseUnpause()
+
       KeyEvent.KEYCODE_MEDIA_STOP -> finishAndRemoveTask()
 
       KeyEvent.KEYCODE_MEDIA_REWIND -> viewModel.handleLeftDoubleTap()
+
       KeyEvent.KEYCODE_MEDIA_FAST_FORWARD -> viewModel.handleRightDoubleTap()
 
       // other keys should be bound by the user in input.conf ig
@@ -828,7 +841,9 @@ class PlayerActivity : AppCompatActivity() {
           override fun onPlay() {
             when (playAction) {
               SingleActionGesture.None -> {}
+
               SingleActionGesture.Seek -> {}
+
               SingleActionGesture.PlayPause -> {
                 super.onPlay()
                 viewModel.unpause()
@@ -844,7 +859,9 @@ class PlayerActivity : AppCompatActivity() {
           override fun onPause() {
             when (playAction) {
               SingleActionGesture.None -> {}
+
               SingleActionGesture.Seek -> {}
+
               SingleActionGesture.PlayPause -> {
                 super.onPause()
                 viewModel.pause()
@@ -860,6 +877,7 @@ class PlayerActivity : AppCompatActivity() {
           override fun onSkipToPrevious() {
             when (previousAction) {
               SingleActionGesture.None -> {}
+
               SingleActionGesture.Seek -> {
                 viewModel.leftSeek()
               }
@@ -877,6 +895,7 @@ class PlayerActivity : AppCompatActivity() {
           override fun onSkipToNext() {
             when (nextAction) {
               SingleActionGesture.None -> {}
+
               SingleActionGesture.Seek -> {
                 viewModel.rightSeek()
               }

@@ -18,14 +18,14 @@ import kotlinx.coroutines.delay
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun RepeatingIconButton(
-  onClick: () -> Unit,
-  modifier: Modifier = Modifier,
-  enabled: Boolean = true,
-  interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
-  maxDelayMillis: Long = 750,
-  minDelayMillis: Long = 5,
-  delayDecayFactor: Float = .25f,
-  content: @Composable () -> Unit,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true,
+    interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
+    maxDelayMillis: Long = 750,
+    minDelayMillis: Long = 5,
+    delayDecayFactor: Float = .25f,
+    content: @Composable () -> Unit,
 ) {
   val currentClickListener by rememberUpdatedState(onClick)
   var pressed by remember { mutableStateOf(false) }
@@ -34,7 +34,6 @@ fun RepeatingIconButton(
     modifier = modifier.pointerInteropFilter {
       pressed = when (it.action) {
         MotionEvent.ACTION_DOWN -> true
-
         else -> false
       }
 
