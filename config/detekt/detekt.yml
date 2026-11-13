@@ -36,6 +36,42 @@ empty-blocks:
   EmptyCatchBlock:
     active: false
 
+# look at what a man must do for his 2 spaced indents...
 ktlint:
-  Indentation:
+  Indentation: &indent2
     indentSize: 2
+  AnnotationOnSeparateLine: *indent2
+  ArgumentListWrapping: *indent2
+  BinaryExpressionWrapping: *indent2
+  ChainMethodContinuation: *indent2
+  ChainWrapping: *indent2
+  ClassSignature: *indent2
+  CommentWrapping: *indent2
+  ConditionWrapping: *indent2
+  ContextReceiverListWrapping: *indent2
+  ContextReceiverMapping: *indent2
+  EnumWrapping: *indent2
+  ExpressionOperandWrapping: *indent2
+  FunctionExpressionBody: *indent2
+  FunctionLiteral: *indent2
+  FunctionSignature: *indent2
+  IfElseBracing: *indent2
+  IfElseWrapping: *indent2
+  KdocWrapping: *indent2
+  ModifierListSpacing: *indent2
+  MultiLineIfElse: *indent2
+  MultilineExpressionWrapping: *indent2
+  MultilineLoop: *indent2
+  NoEmptyFirstLineInClassBody: *indent2
+  NoSingleLineBlockComment: *indent2
+  ParameterListWrapping: *indent2
+  ParameterWrapping: *indent2
+  PropertyWrapping: *indent2
+  SpacingAroundCurly: *indent2
+  StatementWrapping: *indent2
+  StringTemplateIndent: *indent2
+  TryCatchFinallySpacing: *indent2
+  TypeArgumentListSpacing: *indent2
+  TypeParameterListSpacing: *indent2
+  WhenEntryBracing: *indent2
+  Wrapping: *indent2

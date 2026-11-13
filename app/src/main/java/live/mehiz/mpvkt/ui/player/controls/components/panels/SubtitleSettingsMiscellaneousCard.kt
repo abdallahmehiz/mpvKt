@@ -34,14 +34,14 @@ import me.zhanghai.compose.preference.SwitchPreference
 
 @Composable
 fun SubtitlesMiscellaneousCard(
-    overrideAssSubs: Boolean,
-    subScale: Float,
-    subPos: Int,
-    onOverrideAssSubsChange: (Boolean) -> Unit,
-    onSubScaleChange: (Float) -> Unit,
-    onSubPosChange: (Int) -> Unit,
-    onReset: () -> Unit,
-    modifier: Modifier = Modifier,
+  overrideAssSubs: Boolean,
+  subScale: Float,
+  subPos: Int,
+  onOverrideAssSubsChange: (Boolean) -> Unit,
+  onSubScaleChange: (Float) -> Unit,
+  onSubPosChange: (Int) -> Unit,
+  onReset: () -> Unit,
+  modifier: Modifier = Modifier,
 ) {
   var isExpanded by remember { mutableStateOf(true) }
   ExpandableCard(

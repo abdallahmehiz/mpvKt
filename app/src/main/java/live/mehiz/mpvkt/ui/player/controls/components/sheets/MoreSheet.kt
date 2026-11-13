@@ -62,20 +62,20 @@ import live.mehiz.mpvkt.ui.theme.spacing
 @OptIn(ExperimentalLayoutApi::class, ExperimentalFoundationApi::class)
 @Composable
 fun MoreSheet(
-    backgroundPlayback: Boolean,
-    statisticsPage: Int,
-    audioChannels: AudioChannels,
-    remainingTime: Int,
-    onStartTimer: (Int) -> Unit,
-    onBackgroundPlaybackChange: (Boolean) -> Unit,
-    onStatisticsPageChange: (Int) -> Unit,
-    onCustomButtonClick: (CustomButtonEntity) -> Unit,
-    onCustomButtonLongClick: (CustomButtonEntity) -> Unit,
-    onAudioChannelsChange: (AudioChannels) -> Unit,
-    onDismissRequest: () -> Unit,
-    onEnterFiltersPanel: () -> Unit,
-    customButtons: ImmutableList<CustomButtonEntity>,
-    modifier: Modifier = Modifier,
+  backgroundPlayback: Boolean,
+  statisticsPage: Int,
+  audioChannels: AudioChannels,
+  remainingTime: Int,
+  onStartTimer: (Int) -> Unit,
+  onBackgroundPlaybackChange: (Boolean) -> Unit,
+  onStatisticsPageChange: (Int) -> Unit,
+  onCustomButtonClick: (CustomButtonEntity) -> Unit,
+  onCustomButtonLongClick: (CustomButtonEntity) -> Unit,
+  onAudioChannelsChange: (AudioChannels) -> Unit,
+  onDismissRequest: () -> Unit,
+  onEnterFiltersPanel: () -> Unit,
+  customButtons: ImmutableList<CustomButtonEntity>,
+  modifier: Modifier = Modifier,
 ) {
   PlayerSheet(
     onDismissRequest,
@@ -218,10 +218,10 @@ fun MoreSheet(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TimePickerDialog(
-    onDismissRequest: () -> Unit,
-    onTimeSelect: (Int) -> Unit,
-    modifier: Modifier = Modifier,
-    remainingTime: Int = 0,
+  onDismissRequest: () -> Unit,
+  onTimeSelect: (Int) -> Unit,
+  modifier: Modifier = Modifier,
+  remainingTime: Int = 0,
 ) {
   Dialog(
     onDismissRequest = onDismissRequest,

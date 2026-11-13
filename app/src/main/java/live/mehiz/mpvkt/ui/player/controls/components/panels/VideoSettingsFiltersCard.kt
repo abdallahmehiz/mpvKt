@@ -29,11 +29,11 @@ import me.zhanghai.compose.preference.ProvidePreferenceLocals
 
 @Composable
 fun VideoSettingsFiltersCard(
-    isGpuNextEnabled: Boolean,
-    filterValue: (VideoFilters) -> Int,
-    onFilterValueChange: (VideoFilters, Int) -> Unit,
-    onReset: () -> Unit,
-    modifier: Modifier = Modifier,
+  isGpuNextEnabled: Boolean,
+  filterValue: (VideoFilters) -> Int,
+  onFilterValueChange: (VideoFilters, Int) -> Unit,
+  onReset: () -> Unit,
+  modifier: Modifier = Modifier,
 ) {
   var isExpanded by remember { mutableStateOf(true) }
 

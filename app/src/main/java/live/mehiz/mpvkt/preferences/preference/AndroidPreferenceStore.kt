@@ -39,10 +39,10 @@ class AndroidPreferenceStore(
     StringSetPrimitive(sharedPreferences, keyFlow, key, defaultValue)
 
   override fun <T> getObject(
-      key: String,
-      defaultValue: T,
-      serializer: (T) -> String,
-      deserializer: (String) -> T,
+    key: String,
+    defaultValue: T,
+    serializer: (T) -> String,
+    deserializer: (String) -> T,
   ): Preference<T> = Object(
     preferences = sharedPreferences,
     keyFlow = keyFlow,

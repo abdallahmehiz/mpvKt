@@ -29,9 +29,9 @@ import kotlin.time.Duration.Companion.seconds
 
 @Composable
 fun CustomButtonAddDialog(
-    onDismissRequest: () -> Unit,
-    onAdd: (String, String, String) -> Unit,
-    buttonNames: ImmutableList<String>,
+  onDismissRequest: () -> Unit,
+  onAdd: (String, String, String) -> Unit,
+  buttonNames: ImmutableList<String>,
 ) {
   var title by remember { mutableStateOf("") }
   var content by remember { mutableStateOf("") }
@@ -148,10 +148,10 @@ fun CustomButtonDeleteDialog(onDismissRequest: () -> Unit, onDelete: () -> Unit,
 
 @Composable
 fun CustomButtonEditDialog(
-    onDismissRequest: () -> Unit,
-    onEdit: (String, String, String) -> Unit,
-    buttonNames: ImmutableList<String>,
-    initialState: CustomButtonEntity,
+  onDismissRequest: () -> Unit,
+  onEdit: (String, String, String) -> Unit,
+  buttonNames: ImmutableList<String>,
+  initialState: CustomButtonEntity,
 ) {
   var title by remember { mutableStateOf(initialState.title) }
   var content by remember { mutableStateOf(initialState.content) }

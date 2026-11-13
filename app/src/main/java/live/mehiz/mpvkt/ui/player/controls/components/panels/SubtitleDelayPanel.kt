@@ -51,16 +51,16 @@ import kotlin.math.round
 
 @Composable
 fun SubtitleDelayPanel(
-    delayMs: Int,
-    secondaryDelayMs: Int,
-    speed: Double,
-    onSpeedChange: (Double) -> Unit,
-    onDelayChange: (Int) -> Unit,
-    onSecondaryDelayChange: (Int) -> Unit,
-    onApply: () -> Unit,
-    onReset: () -> Unit,
-    onDismissRequest: () -> Unit,
-    modifier: Modifier = Modifier,
+  delayMs: Int,
+  secondaryDelayMs: Int,
+  speed: Double,
+  onSpeedChange: (Double) -> Unit,
+  onDelayChange: (Int) -> Unit,
+  onSecondaryDelayChange: (Int) -> Unit,
+  onApply: () -> Unit,
+  onReset: () -> Unit,
+  onDismissRequest: () -> Unit,
+  modifier: Modifier = Modifier,
 ) {
   ConstraintLayout(
     modifier = modifier
@@ -100,16 +100,16 @@ fun SubtitleDelayPanel(
 
 @Composable
 fun SubtitleDelayCard(
-    delayMs: Int,
-    onDelayChange: (Int) -> Unit,
-    speed: Float,
-    onSpeedChange: (Float) -> Unit,
-    affectedSubtitle: SubtitleDelayType,
-    onTypeChange: (SubtitleDelayType) -> Unit,
-    onApply: () -> Unit,
-    onReset: () -> Unit,
-    onClose: () -> Unit,
-    modifier: Modifier = Modifier,
+  delayMs: Int,
+  onDelayChange: (Int) -> Unit,
+  speed: Float,
+  onSpeedChange: (Float) -> Unit,
+  affectedSubtitle: SubtitleDelayType,
+  onTypeChange: (SubtitleDelayType) -> Unit,
+  onApply: () -> Unit,
+  onReset: () -> Unit,
+  onClose: () -> Unit,
+  modifier: Modifier = Modifier,
 ) {
   DelayCard(
     delayMs = delayMs,
@@ -152,14 +152,14 @@ enum class SubtitleDelayType(@StringRes val title: Int) {
 
 @Composable
 fun DelayCard(
-    delayMs: Int,
-    onDelayChange: (Int) -> Unit,
-    onApply: () -> Unit,
-    onReset: () -> Unit,
-    title: @Composable () -> Unit,
-    delayType: DelayType,
-    modifier: Modifier = Modifier,
-    extraSettings: @Composable ColumnScope.() -> Unit = {},
+  delayMs: Int,
+  onDelayChange: (Int) -> Unit,
+  onApply: () -> Unit,
+  onReset: () -> Unit,
+  title: @Composable () -> Unit,
+  delayType: DelayType,
+  modifier: Modifier = Modifier,
+  extraSettings: @Composable ColumnScope.() -> Unit = {},
 ) {
   var delay by remember { mutableIntStateOf(delayMs) }
   val currentOnDelayChange by rememberUpdatedState(onDelayChange)
@@ -271,10 +271,10 @@ fun DelayCard(
 
 @Composable
 fun SubtitleDelayTitle(
-    affectedSubtitle: SubtitleDelayType,
-    onClose: () -> Unit,
-    onTypeChange: (SubtitleDelayType) -> Unit,
-    modifier: Modifier = Modifier,
+  affectedSubtitle: SubtitleDelayType,
+  onClose: () -> Unit,
+  onTypeChange: (SubtitleDelayType) -> Unit,
+  modifier: Modifier = Modifier,
 ) {
   Row(
     verticalAlignment = Alignment.Bottom,

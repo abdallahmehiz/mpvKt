@@ -53,7 +53,7 @@ enum class SubtitleJustification(val value: String, val icon: ImageVector) {
   Auto("auto", Icons.Default.FormatAlignJustify),
   ;
 
-    companion object {
+  companion object {
     fun byValue(value: String): SubtitleJustification = when (value) {
       "left" -> Left
       "center" -> Center

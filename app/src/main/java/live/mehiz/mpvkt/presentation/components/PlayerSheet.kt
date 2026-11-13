@@ -59,10 +59,10 @@ private val sheetAnimationSpec = tween<Float>(350)
 @Composable
 @Suppress("ModifierNotUsedAtRoot")
 fun PlayerSheet(
-    onDismissRequest: () -> Unit,
-    modifier: Modifier = Modifier,
-    tonalElevation: Dp = 1.dp,
-    content: @Composable () -> Unit,
+  onDismissRequest: () -> Unit,
+  modifier: Modifier = Modifier,
+  tonalElevation: Dp = 1.dp,
+  content: @Composable () -> Unit,
 ) {
   val scope = rememberCoroutineScope()
   val density = LocalDensity.current

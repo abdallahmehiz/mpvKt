@@ -570,13 +570,13 @@ fun PlayerControls(viewModel: PlayerViewModel, onBackPress: () -> Unit, modifier
 @Composable
 @Suppress("ViewModelForwarding")
 private fun PlayerSheetsHost(
-    viewModel: PlayerViewModel,
-    chapters: ImmutableList<Segment>,
-    currentChapter: Int,
-    decoder: Decoder,
-    playbackSpeed: Float,
-    onOpenSheet: (Sheets) -> Unit,
-    onOpenPanel: (Panels) -> Unit,
+  viewModel: PlayerViewModel,
+  chapters: ImmutableList<Segment>,
+  currentChapter: Int,
+  decoder: Decoder,
+  playbackSpeed: Float,
+  onOpenSheet: (Sheets) -> Unit,
+  onOpenPanel: (Panels) -> Unit,
 ) {
   val playerPreferences = App.graph.playerPreferences
   val playerManager = viewModel.playerManager

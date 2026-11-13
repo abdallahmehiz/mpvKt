@@ -15,10 +15,10 @@ interface PreferenceStore {
   fun getStringSet(key: String, defaultValue: Set<String> = emptySet()): Preference<Set<String>>
 
   fun <T> getObject(
-      key: String,
-      defaultValue: T,
-      serializer: (T) -> String,
-      deserializer: (String) -> T,
+    key: String,
+    defaultValue: T,
+    serializer: (T) -> String,
+    deserializer: (String) -> T,
   ): Preference<T>
 
   fun getAll(): Map<String, *>

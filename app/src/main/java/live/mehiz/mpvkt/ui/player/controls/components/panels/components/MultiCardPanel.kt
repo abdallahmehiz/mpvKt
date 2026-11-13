@@ -45,11 +45,11 @@ import live.mehiz.mpvkt.ui.theme.spacing
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun MultiCardPanel(
-    onDismissRequest: () -> Unit,
-    @StringRes titleRes: Int,
-    cardCount: Int,
-    modifier: Modifier = Modifier,
-    cards: @Composable (Int, Modifier) -> Unit,
+  onDismissRequest: () -> Unit,
+  @StringRes titleRes: Int,
+  cardCount: Int,
+  modifier: Modifier = Modifier,
+  cards: @Composable (Int, Modifier) -> Unit,
 ) {
   BackHandler(onBack = onDismissRequest)
   val orientation = LocalConfiguration.current.orientation

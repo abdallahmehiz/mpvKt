@@ -19,12 +19,12 @@ import kotlinx.collections.immutable.ImmutableList
 
 @Composable
 fun ExposedTextDropDownMenu(
-    selectedValue: String,
-    options: ImmutableList<String>,
-    label: String,
-    onValueChangedEvent: (String) -> Unit,
-    modifier: Modifier = Modifier,
-    leadingIcon: (@Composable () -> Unit)? = null,
+  selectedValue: String,
+  options: ImmutableList<String>,
+  label: String,
+  onValueChangedEvent: (String) -> Unit,
+  modifier: Modifier = Modifier,
+  leadingIcon: (@Composable () -> Unit)? = null,
 ) {
   var expanded by remember { mutableStateOf(false) }
 

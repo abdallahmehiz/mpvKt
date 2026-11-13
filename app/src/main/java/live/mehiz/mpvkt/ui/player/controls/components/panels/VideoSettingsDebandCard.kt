@@ -39,12 +39,12 @@ import me.zhanghai.compose.preference.ProvidePreferenceLocals
 
 @Composable
 fun VideoSettingsDebandCard(
-    deband: Debanding,
-    onDebandingChange: (Debanding) -> Unit,
-    debandSettingsValue: (DebandSettings) -> Int,
-    onDebandingSettingsChange: (DebandSettings, Int) -> Unit,
-    onReset: () -> Unit,
-    modifier: Modifier = Modifier,
+  deband: Debanding,
+  onDebandingChange: (Debanding) -> Unit,
+  debandSettingsValue: (DebandSettings) -> Int,
+  onDebandingSettingsChange: (DebandSettings, Int) -> Unit,
+  onReset: () -> Unit,
+  modifier: Modifier = Modifier,
 ) {
   var isExpanded by remember { mutableStateOf(true) }
 

@@ -61,24 +61,24 @@ import me.zhanghai.compose.preference.preferenceTheme
 @SuppressLint("MutableCollectionMutableState")
 @Composable
 fun SubtitleSettingsTypographyCard(
-    isBold: Boolean,
-    isItalic: Boolean,
-    justify: SubtitleJustification,
-    font: String,
-    fontSize: Int,
-    borderStyle: SubtitlesBorderStyle,
-    borderSize: Int,
-    shadowOffset: Int,
-    onIsBoldChange: (Boolean) -> Unit,
-    onIsItalicChange: (Boolean) -> Unit,
-    onJustificationChange: (SubtitleJustification) -> Unit,
-    onFontChange: (String) -> Unit,
-    onFontSizeChange: (Int) -> Unit,
-    onBorderStyleChange: (SubtitlesBorderStyle) -> Unit,
-    onBorderSizeChange: (Int) -> Unit,
-    onShadowOffsetChange: (Int) -> Unit,
-    onReset: () -> Unit,
-    modifier: Modifier = Modifier,
+  isBold: Boolean,
+  isItalic: Boolean,
+  justify: SubtitleJustification,
+  font: String,
+  fontSize: Int,
+  borderStyle: SubtitlesBorderStyle,
+  borderSize: Int,
+  shadowOffset: Int,
+  onIsBoldChange: (Boolean) -> Unit,
+  onIsItalicChange: (Boolean) -> Unit,
+  onJustificationChange: (SubtitleJustification) -> Unit,
+  onFontChange: (String) -> Unit,
+  onFontSizeChange: (Int) -> Unit,
+  onBorderStyleChange: (SubtitlesBorderStyle) -> Unit,
+  onBorderSizeChange: (Int) -> Unit,
+  onShadowOffsetChange: (Int) -> Unit,
+  onReset: () -> Unit,
+  modifier: Modifier = Modifier,
 ) {
   val context = LocalContext.current
   val preferences = App.graph.subtitlesPreferences
@@ -253,7 +253,7 @@ enum class SubtitlesBorderStyle(val value: String, @StringRes val titleRes: Int)
   BackgroundBox("background-box", R.string.player_sheets_subtitles_border_style_background_box),
   ;
 
-    companion object {
+  companion object {
     fun byValue(value: String): SubtitlesBorderStyle = when (value) {
       "outline-and-shadow" -> SubtitlesBorderStyle.OutlineAndShadow
       "opaque-box" -> SubtitlesBorderStyle.OpaqueBox

@@ -53,9 +53,9 @@ import live.mehiz.mpvkt.ui.theme.playerRippleConfiguration
 @Suppress("CyclomaticComplexMethod", "MultipleEmitters")
 @Composable
 fun GestureHandler(
-    viewModel: PlayerViewModel,
-    interactionSource: MutableInteractionSource,
-    modifier: Modifier = Modifier,
+  viewModel: PlayerViewModel,
+  interactionSource: MutableInteractionSource,
+  modifier: Modifier = Modifier,
 ) {
   val playerPreferences = App.graph.playerPreferences
   val audioPreferences = App.graph.audioPreferences
@@ -278,13 +278,13 @@ fun GestureHandler(
 
 @Composable
 fun DoubleTapToSeekOvals(
-    amount: Int,
-    text: String?,
-    showOvals: Boolean,
-    showSeekIcon: Boolean,
-    showSeekTime: Boolean,
-    interactionSource: MutableInteractionSource,
-    modifier: Modifier = Modifier,
+  amount: Int,
+  text: String?,
+  showOvals: Boolean,
+  showSeekIcon: Boolean,
+  showSeekTime: Boolean,
+  interactionSource: MutableInteractionSource,
+  modifier: Modifier = Modifier,
 ) {
   val alpha by animateFloatAsState(if (amount == 0) 0f else 0.2f, label = "double_tap_animation_alpha")
   Box(

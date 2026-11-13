@@ -45,12 +45,12 @@ import live.mehiz.mpvkt.ui.theme.spacing
 
 @Composable
 fun SubtitleSettingsColorsCard(
-    currentColor: Int,
-    currentColorType: SubColorType,
-    onColorChange: (Int) -> Unit,
-    onColorReset: (SubColorType) -> Unit,
-    onColorTypeChange: (SubColorType) -> Unit,
-    modifier: Modifier = Modifier,
+  currentColor: Int,
+  currentColorType: SubColorType,
+  onColorChange: (Int) -> Unit,
+  onColorReset: (SubColorType) -> Unit,
+  onColorTypeChange: (SubColorType) -> Unit,
+  modifier: Modifier = Modifier,
 ) {
   var isExpanded by remember { mutableStateOf(true) }
   ExpandableCard(

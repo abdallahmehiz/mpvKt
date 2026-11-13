@@ -46,7 +46,7 @@ enum class Decoder(val title: String, val value: String) {
   HWPlus("HW+", "mediacodec"),
   ;
 
-    companion object {
+  companion object {
     fun getDecoderFromValue(value: String): Decoder = Decoder.entries.first { it.value == value }
   }
 }

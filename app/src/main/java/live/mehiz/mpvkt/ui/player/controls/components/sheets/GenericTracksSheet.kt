@@ -30,12 +30,12 @@ import live.mehiz.mpvkt.ui.theme.spacing
 
 @Composable
 fun <T> GenericTracksSheet(
-    tracks: ImmutableList<T>,
-    onDismissRequest: () -> Unit,
-    modifier: Modifier = Modifier,
-    header: @Composable () -> Unit = {},
-    track: @Composable (T) -> Unit = {},
-    footer: @Composable () -> Unit = {},
+  tracks: ImmutableList<T>,
+  onDismissRequest: () -> Unit,
+  modifier: Modifier = Modifier,
+  header: @Composable () -> Unit = {},
+  track: @Composable (T) -> Unit = {},
+  footer: @Composable () -> Unit = {},
 ) {
   PlayerSheet(onDismissRequest) {
     Column(modifier) {
@@ -54,10 +54,10 @@ fun <T> GenericTracksSheet(
 
 @Composable
 fun AddTrackRow(
-    title: String,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier,
-    actions: @Composable RowScope.() -> Unit = {},
+  title: String,
+  onClick: () -> Unit,
+  modifier: Modifier = Modifier,
+  actions: @Composable RowScope.() -> Unit = {},
 ) {
   Row(
     modifier = modifier

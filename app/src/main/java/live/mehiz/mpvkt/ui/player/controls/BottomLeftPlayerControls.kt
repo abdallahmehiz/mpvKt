@@ -20,14 +20,14 @@ import live.mehiz.mpvkt.ui.player.controls.components.CurrentChapter
 
 @Composable
 fun BottomLeftPlayerControls(
-    playbackSpeed: Float,
-    currentChapter: Segment?,
-    showChapterIndicator: Boolean,
-    onLockControls: () -> Unit,
-    onCycleRotation: () -> Unit,
-    onPlaybackSpeedChange: (Float) -> Unit,
-    onOpenSheet: (Sheets) -> Unit,
-    modifier: Modifier = Modifier,
+  playbackSpeed: Float,
+  currentChapter: Segment?,
+  showChapterIndicator: Boolean,
+  onLockControls: () -> Unit,
+  onCycleRotation: () -> Unit,
+  onPlaybackSpeedChange: (Float) -> Unit,
+  onOpenSheet: (Sheets) -> Unit,
+  modifier: Modifier = Modifier,
 ) {
   Row(
     modifier = modifier.fillMaxWidth(),

@@ -165,13 +165,13 @@ data class FilePickerScreen(val uri: String) : Screen {
 
   @Composable
   fun FileListing(
-      name: String,
-      isDirectory: Boolean,
-      lastModified: Long?,
-      length: Long?,
-      onClick: () -> Unit,
-      modifier: Modifier = Modifier,
-      items: Int? = null,
+    name: String,
+    isDirectory: Boolean,
+    lastModified: Long?,
+    length: Long?,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    items: Int? = null,
   ) {
     var size: String? by remember { mutableStateOf(null) }
     var time: String? by remember { mutableStateOf(null) }
