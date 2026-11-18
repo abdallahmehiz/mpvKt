@@ -201,6 +201,7 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
     unregisterReceiver(noisyReceiver)
     mediaSession.release()
     abandonAudioFocus()
+    playerManager.thumbnailer.close()
     mpv.close()
     super.onDestroy()
   }
@@ -210,6 +211,7 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
     val path = getPlayableUri(intent) ?: return
     if (fileName.isNotBlank()) saveState()
     playIntent = intent
+    playerManager.thumbnailer.sourceUri = intent.data ?: intent.getParcelableExtra(Intent.EXTRA_STREAM)
     if (hasSurface) mpv.command("loadfile", path) else pendingFile = path
     requestAudioFocus()
     mediaSession.isActive = true

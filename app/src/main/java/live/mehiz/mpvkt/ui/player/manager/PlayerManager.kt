@@ -13,6 +13,7 @@ class PlayerManager(private val mpv: MPV, context: Context, graph: AppGraph, sco
   val audio = AudioSettings(mpv, context, graph.audioPreferences, scope)
   val video = VideoSettings(mpv, graph.decoderPreferences, graph.advancedPreferences, graph.playerPreferences, scope)
   val lua = LuaManager(mpv, playback, graph.playerPreferences, scope)
+  val thumbnailer = Thumbnailer(mpv, context, graph.decoderPreferences, scope)
 
   fun keypress(keyCode: String) {
     mpv.command("keypress", keyCode)

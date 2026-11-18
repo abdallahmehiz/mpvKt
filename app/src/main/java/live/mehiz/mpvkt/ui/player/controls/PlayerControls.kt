@@ -53,6 +53,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.zIndex
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import dev.vivvvek.seeker.Segment
@@ -79,6 +80,7 @@ import live.mehiz.mpvkt.ui.player.controls.components.ControlsButton
 import live.mehiz.mpvkt.ui.player.controls.components.MultipleSpeedPlayerUpdate
 import live.mehiz.mpvkt.ui.player.controls.components.SeekbarWithTimers
 import live.mehiz.mpvkt.ui.player.controls.components.TextPlayerUpdate
+import live.mehiz.mpvkt.ui.player.controls.components.ThumbnailPreview
 import live.mehiz.mpvkt.ui.player.controls.components.VolumeSlider
 import live.mehiz.mpvkt.ui.player.controls.components.panels.SubColorType
 import live.mehiz.mpvkt.ui.player.controls.components.sheets.toFixed
@@ -113,7 +115,12 @@ fun PlayerControls(viewModel: PlayerViewModel, onBackPress: () -> Unit, modifier
   val showDoubleTapOvals by playerPreferences.showDoubleTapOvals.collectAsState()
   val showSeekIcon by playerPreferences.showSeekIcon.collectAsState()
   val showSeekTime by playerPreferences.showSeekTimeWhileSeeking.collectAsState()
-  var isSeeking by remember { mutableStateOf(false) }
+  var seekbarDragPosition by remember { mutableStateOf<Float?>(null) }
+  val gestureSeekPosition = gestureSeekAmount?.let { (it.first + it.second).toFloat() }
+  val seekPreviewPosition = seekbarDragPosition ?: gestureSeekPosition
+  val thumbnailer = playerManager.thumbnailer
+  val thumbnailAspect by thumbnailer.aspect.collectAsState()
+  LaunchedEffect(seekPreviewPosition) { thumbnailer.request(seekPreviewPosition?.roundToInt()) }
   var resetControls by remember { mutableStateOf(true) }
   val seekText by viewModel.seekText.collectAsState()
   val currentChapter by playback.chapter.collectAsState()
@@ -143,10 +150,10 @@ fun PlayerControls(viewModel: PlayerViewModel, onBackPress: () -> Unit, modifier
   LaunchedEffect(
     controlsShown,
     paused,
-    isSeeking,
+    seekbarDragPosition,
     resetControls,
   ) {
-    if (controlsShown && !paused && !isSeeking) {
+    if (controlsShown && !paused && seekbarDragPosition == null) {
       delay(playerTimeToDisappear.toLong().milliseconds)
       viewModel.hideControls()
     }
@@ -189,6 +196,7 @@ fun PlayerControls(viewModel: PlayerViewModel, onBackPress: () -> Unit, modifier
         val (bottomRightControls, bottomLeftControls) = createRefs()
         val playerPauseButton = createRef()
         val seekbar = createRef()
+        val thumbnailPreview = createRef()
         val (playerUpdates) = createRefs()
 
         val isBrightnessSliderShown by viewModel.isBrightnessSliderShown.collectAsState()
@@ -402,20 +410,34 @@ fun PlayerControls(viewModel: PlayerViewModel, onBackPress: () -> Unit, modifier
           val readAhead by playback.readAhead.collectAsState()
           val preciseSeeking by playerPreferences.preciseSeeking.collectAsState()
           SeekbarWithTimers(
-            position = position.toFloat(),
+            position = seekPreviewPosition ?: position.toFloat(),
             duration = duration.toFloat(),
             readAheadValue = readAhead,
-            onValueChange = {
-              isSeeking = true
-              viewModel.seekTo(it.roundToInt(), preciseSeeking)
+            onValueChange = { seekbarDragPosition = it },
+            onValueChangeFinished = {
+              seekbarDragPosition?.let { viewModel.seekTo(it.roundToInt(), preciseSeeking) }
+              seekbarDragPosition = null
             },
-            onValueChangeFinished = { isSeeking = false },
             timersInverted = Pair(false, invertDuration),
             durationTimerOnCLick = { playerPreferences.invertDuration.set(!invertDuration) },
             positionTimerOnClick = {},
             chapters = chapters,
           )
         }
+        ThumbnailPreview(
+          thumbnailer = thumbnailer,
+          visible = seekPreviewPosition != null,
+          aspect = thumbnailAspect,
+          position = seekPreviewPosition ?: position.toFloat(),
+          duration = duration.toFloat(),
+          // later siblings (bottom buttons, title...) would otherwise draw over it
+          modifier = Modifier.zIndex(1f).constrainAs(thumbnailPreview) {
+            bottom.linkTo(seekbar.top, spacing.small)
+            start.linkTo(parent.start)
+            end.linkTo(parent.end)
+            width = Dimension.fillToConstraints
+          },
+        )
         val mediaTitle by playback.mediaTitle.collectAsState()
         AnimatedVisibility(
           controlsShown && !areControlsLocked,
