@@ -79,13 +79,16 @@ fun CustomButtonListItem(
         onClick = { onMoveUp(customButton) },
         enabled = canMoveUp,
       ) {
-        Icon(imageVector = Icons.Outlined.ArrowDropUp, contentDescription = null)
+        Icon(imageVector = Icons.Outlined.ArrowDropUp, contentDescription = stringResource(R.string.a11y_btn_move_up))
       }
       IconButton(
         onClick = { onMoveDown(customButton) },
         enabled = canMoveDown,
       ) {
-        Icon(imageVector = Icons.Outlined.ArrowDropDown, contentDescription = null)
+        Icon(
+          imageVector = Icons.Outlined.ArrowDropDown,
+          contentDescription = stringResource(R.string.a11y_btn_move_down),
+        )
       }
       Spacer(modifier = Modifier.weight(1f))
 
@@ -95,7 +98,7 @@ fun CustomButtonListItem(
         Icon(
           imageVector = starImage,
           tint = starColor,
-          contentDescription = null,
+          contentDescription = stringResource(R.string.a11y_btn_primary),
         )
       }
       IconButton(onClick = onRename) {

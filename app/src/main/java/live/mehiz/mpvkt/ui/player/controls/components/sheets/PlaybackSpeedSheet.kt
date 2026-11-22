@@ -71,7 +71,7 @@ fun PlaybackSpeedSheet(
         horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.medium),
       ) {
         FilledTonalIconButton(onClick = onResetPresets) {
-          Icon(Icons.Default.RestartAlt, null)
+          Icon(Icons.Default.RestartAlt, stringResource(R.string.a11y_btn_reset))
         }
         LazyRow(
           modifier = Modifier
@@ -96,7 +96,7 @@ fun PlaybackSpeedSheet(
           }
         }
         FilledTonalIconButton(onClick = { onAddSpeedPreset(speed.toFixed(2)) }) {
-          Icon(Icons.Default.Add, null)
+          Icon(Icons.Default.Add, stringResource(R.string.a11y_btn_add))
         }
       }
       ProvidePreferenceLocals {
@@ -119,7 +119,10 @@ fun PlaybackSpeedSheet(
           Text(text = stringResource(id = R.string.player_sheets_speed_make_default))
         }
         FilledIconButton(onClick = onResetDefault) {
-          Icon(imageVector = Icons.Default.RestartAlt, contentDescription = null)
+          Icon(
+            imageVector = Icons.Default.RestartAlt,
+            contentDescription = stringResource(R.string.a11y_btn_reset_speed),
+          )
         }
       }
     }

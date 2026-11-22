@@ -41,7 +41,7 @@ fun AudioTracksSheet(
         onAddAudioTrack,
         actions = {
           IconButton(onClick = onOpenDelayPanel) {
-            Icon(Icons.Default.MoreTime, null)
+            Icon(Icons.Default.MoreTime, stringResource(R.string.a11y_btn_audio_delay))
           }
         },
       )

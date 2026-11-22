@@ -64,6 +64,9 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.update
 import live.mehiz.mpvkt.App
 import live.mehiz.mpvkt.R
+import live.mehiz.mpvkt.accessibility.clearOverlaySemantics
+import live.mehiz.mpvkt.accessibility.rememberGesturesSuspended
+import live.mehiz.mpvkt.accessibility.rememberStatusAnnouncer
 import live.mehiz.mpvkt.preferences.preference.collectAsState
 import live.mehiz.mpvkt.preferences.preference.minusAssign
 import live.mehiz.mpvkt.preferences.preference.plusAssign
@@ -147,13 +150,19 @@ fun PlayerControls(viewModel: PlayerViewModel, onBackPress: () -> Unit, modifier
   }
   val customButton by viewModel.primaryButton.collectAsState()
 
+  val gesturesSuspended by rememberGesturesSuspended()
+
   LaunchedEffect(
     controlsShown,
     paused,
     seekbarDragPosition,
     resetControls,
+    gesturesSuspended,
   ) {
-    if (controlsShown && !paused && seekbarDragPosition == null) {
+    // Never fade the controls away from under a screen reader: they are the only way to operate
+    // the player once the gesture surface is handed over.
+    val canAutoHide = controlsShown && !paused && seekbarDragPosition == null
+    if (canAutoHide && !gesturesSuspended) {
       delay(playerTimeToDisappear.toLong().milliseconds)
       viewModel.hideControls()
     }
@@ -297,6 +306,23 @@ fun PlayerControls(viewModel: PlayerViewModel, onBackPress: () -> Unit, modifier
         val holdForMultipleSpeed by playerPreferences.holdForMultipleSpeed.collectAsState()
         val currentPlayerUpdate by viewModel.playerUpdate.collectAsState()
         val aspectRatio by playerManager.video.aspect.collectAsState()
+        // The bubble below is visual only; whatever it shows is spoken instead.
+        val statusAnnouncer = rememberStatusAnnouncer()
+        val aspectLabel = stringResource(aspectRatio.titleRes)
+        // Resolved here: reading a resource inside the effect would be a composable call from a
+        // coroutine.
+        val speedBoostText = stringResource(R.string.a11y_status_speed_boost)
+        val aspectText = stringResource(R.string.a11y_status_aspect, aspectLabel)
+        LaunchedEffect(currentPlayerUpdate, speedBoostText, aspectText) {
+          statusAnnouncer.announce(
+            when (val update = currentPlayerUpdate) {
+              PlayerUpdates.None -> null
+              PlayerUpdates.MultipleSpeed -> speedBoostText
+              PlayerUpdates.AspectRatio -> aspectText
+              is PlayerUpdates.ShowText -> update.value
+            },
+          )
+        }
         LaunchedEffect(currentPlayerUpdate, aspectRatio) {
           if (currentPlayerUpdate is PlayerUpdates.MultipleSpeed || currentPlayerUpdate is PlayerUpdates.None) {
             return@LaunchedEffect
@@ -308,7 +334,7 @@ fun PlayerControls(viewModel: PlayerViewModel, onBackPress: () -> Unit, modifier
           currentPlayerUpdate !is PlayerUpdates.None,
           enter = fadeIn(playerControlsEnterAnimationSpec()),
           exit = fadeOut(playerControlsExitAnimationSpec()),
-          modifier = Modifier.constrainAs(playerUpdates) {
+          modifier = Modifier.clearOverlaySemantics().constrainAs(playerUpdates) {
             linkTo(parent.start, parent.end)
             linkTo(parent.top, parent.bottom, bias = 0.2f)
           },
@@ -333,6 +359,7 @@ fun PlayerControls(viewModel: PlayerViewModel, onBackPress: () -> Unit, modifier
           ControlsButton(
             Icons.Filled.Lock,
             onClick = { viewModel.unlockControls() },
+            title = stringResource(R.string.a11y_btn_unlock),
           )
         }
         AnimatedVisibility(
@@ -384,7 +411,8 @@ fun PlayerControls(viewModel: PlayerViewModel, onBackPress: () -> Unit, modifier
                   onClick = viewModel::pauseUnpause,
                 )
                 .padding(MaterialTheme.spacing.medium),
-              contentDescription = null,
+              contentDescription =
+              stringResource(if (paused) R.string.a11y_btn_play else R.string.a11y_btn_pause),
             )
           }
         }

@@ -62,7 +62,7 @@ object HomeScreen : Screen {
           title = { Text(text = stringResource(id = R.string.app_name)) },
           actions = {
             IconButton(onClick = { backstack.add(PreferencesScreen) }) {
-              Icon(Icons.Default.Settings, null)
+              Icon(Icons.Default.Settings, stringResource(R.string.a11y_btn_settings))
             }
           },
           navigationIcon = {

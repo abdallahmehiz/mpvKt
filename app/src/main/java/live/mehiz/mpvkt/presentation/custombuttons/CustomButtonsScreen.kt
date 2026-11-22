@@ -1,5 +1,7 @@
 package live.mehiz.mpvkt.presentation.custombuttons
 
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -61,21 +63,25 @@ fun CustomButtonsScreen(
         },
         navigationIcon = {
           IconButton(onClick = { onNavigateBack() }) {
-            Icon(Icons.AutoMirrored.Default.ArrowBack, null)
+            Icon(Icons.AutoMirrored.Default.ArrowBack, stringResource(R.string.a11y_btn_back))
           }
         },
         actions = {
           IconButton(onClick = { onClickFaq() }) {
-            Icon(Icons.AutoMirrored.Outlined.HelpOutline, null)
+            Icon(Icons.AutoMirrored.Outlined.HelpOutline, stringResource(R.string.a11y_btn_help))
           }
         },
       )
     },
     floatingActionButton = {
+      val addLabel = stringResource(id = R.string.pref_custom_button_action_add)
       ExtendedFloatingActionButton(
         onClick = { onClickAdd() },
         icon = { Icon(Icons.Filled.Add, null) },
-        text = { Text(text = stringResource(id = R.string.pref_custom_button_action_add)) },
+        text = { Text(text = addLabel) },
+        // Stated explicitly: the icon contributes nothing to the merged node, and without this
+        // the button is announced by its icon alone in some readers.
+        modifier = Modifier.semantics { contentDescription = addLabel },
       )
     },
   ) { padding ->

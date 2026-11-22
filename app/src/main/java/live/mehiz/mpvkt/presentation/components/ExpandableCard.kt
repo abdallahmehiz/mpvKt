@@ -28,7 +28,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import live.mehiz.mpvkt.R
 import live.mehiz.mpvkt.ui.theme.spacing
 
 @SuppressLint("UnrememberedMutableState")
@@ -64,7 +66,13 @@ fun ExpandableCard(
         modifier = Modifier.rotate(rotationState),
         onClick = { onExpand(!isExpanded) },
       ) {
-        Icon(Icons.Default.ArrowDropDown, null)
+        Icon(
+          Icons.Default.ArrowDropDown,
+          contentDescription =
+          stringResource(
+            if (isExpanded) R.string.a11y_btn_collapse else R.string.a11y_btn_expand,
+          ),
+        )
       }
     }
     Box(Modifier.animateContentSize()) {

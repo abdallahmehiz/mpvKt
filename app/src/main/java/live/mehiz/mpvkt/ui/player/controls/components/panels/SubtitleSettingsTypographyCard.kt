@@ -138,7 +138,7 @@ fun SubtitleSettingsTypographyCard(
         ) {
           Icon(
             Icons.Default.FormatBold,
-            null,
+            stringResource(R.string.a11y_btn_bold),
             modifier = Modifier.size(32.dp),
           )
         }
@@ -148,7 +148,7 @@ fun SubtitleSettingsTypographyCard(
         ) {
           Icon(
             Icons.Default.FormatItalic,
-            null,
+            stringResource(R.string.a11y_btn_italic),
             modifier = Modifier.size(32.dp),
           )
         }
@@ -169,7 +169,7 @@ fun SubtitleSettingsTypographyCard(
                */
             },
           ) {
-            Icon(justification.icon, null)
+            Icon(justification.icon, stringResource(R.string.a11y_btn_alignment))
           }
         }
         Spacer(Modifier.weight(1f))

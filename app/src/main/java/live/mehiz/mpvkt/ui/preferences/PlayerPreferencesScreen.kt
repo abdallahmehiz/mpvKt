@@ -46,7 +46,7 @@ object PlayerPreferencesScreen : Screen {
           title = { Text(text = stringResource(id = R.string.pref_player)) },
           navigationIcon = {
             IconButton(onClick = backstack::removeLastOrNull) {
-              Icon(Icons.AutoMirrored.Outlined.ArrowBack, null)
+              Icon(Icons.AutoMirrored.Outlined.ArrowBack, stringResource(R.string.a11y_btn_back))
             }
           },
         )

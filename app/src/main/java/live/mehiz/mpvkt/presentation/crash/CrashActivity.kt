@@ -195,7 +195,7 @@ class CrashActivity : ComponentActivity() {
                 )
               },
             ) {
-              Icon(Icons.Default.ContentCopy, null)
+              Icon(Icons.Default.ContentCopy, stringResource(R.string.a11y_btn_copy_log))
             }
           }
           OutlinedButton(

@@ -106,7 +106,7 @@ fun MoreSheet(
           ) {
             Icon(
               if (backgroundPlayback) Icons.Default.Headset else Icons.Default.HeadsetOff,
-              null,
+              stringResource(R.string.a11y_btn_background_playback),
             )
           }
           var isSleepTimerDialogShown by remember { mutableStateOf(false) }
@@ -271,7 +271,7 @@ fun TimePickerDialog(
           IconButton(onClick = { currentLayoutType = if (currentLayoutType == 0) 1 else 0 }) {
             Icon(
               imageVector = if (currentLayoutType == 0) Icons.Outlined.Schedule else Icons.Default.KeyboardAlt,
-              contentDescription = null,
+              contentDescription = stringResource(R.string.a11y_btn_change_layout),
             )
           }
           Row {

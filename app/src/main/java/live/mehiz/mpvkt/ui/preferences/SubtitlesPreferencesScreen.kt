@@ -50,7 +50,7 @@ object SubtitlesPreferencesScreen : Screen {
           },
           navigationIcon = {
             IconButton(onClick = backstack::removeLastOrNull) {
-              Icon(Icons.AutoMirrored.Outlined.ArrowBack, null)
+              Icon(Icons.AutoMirrored.Outlined.ArrowBack, stringResource(R.string.a11y_btn_back))
             }
           },
         )

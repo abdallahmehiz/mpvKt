@@ -16,6 +16,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import live.mehiz.mpvkt.R
 import live.mehiz.mpvkt.database.entities.CustomButtonEntity
 import live.mehiz.mpvkt.ui.player.controls.components.ControlsButton
 import live.mehiz.mpvkt.ui.theme.spacing
@@ -56,12 +58,14 @@ fun BottomRightPlayerControls(
       ControlsButton(
         Icons.Default.PictureInPictureAlt,
         onClick = onPipClick,
+        title = stringResource(R.string.a11y_btn_pip),
       )
     }
 
     ControlsButton(
       Icons.Default.AspectRatio,
       onClick = onAspectClick,
+      title = stringResource(R.string.a11y_btn_aspect),
     )
   }
 }

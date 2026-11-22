@@ -9,6 +9,8 @@ import androidx.compose.material.icons.filled.Subtitles
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import live.mehiz.mpvkt.R
 import live.mehiz.mpvkt.ui.player.Decoder
 import live.mehiz.mpvkt.ui.player.controls.components.ControlsButton
 
@@ -46,22 +48,26 @@ fun TopRightPlayerControls(
       ControlsButton(
         Icons.Default.Bookmarks,
         onClick = onChaptersClick,
+        title = stringResource(R.string.a11y_btn_chapters),
       )
     }
     ControlsButton(
       Icons.Default.Subtitles,
       onClick = onSubtitlesClick,
       onLongClick = onSubtitlesLongClick,
+      title = stringResource(R.string.a11y_btn_subtitles),
     )
     ControlsButton(
       Icons.Default.Audiotrack,
       onClick = onAudioClick,
       onLongClick = onAudioLongClick,
+      title = stringResource(R.string.a11y_btn_audio_track),
     )
     ControlsButton(
       Icons.Default.MoreVert,
       onClick = onMoreClick,
       onLongClick = onMoreLongClick,
+      title = stringResource(R.string.a11y_btn_more),
     )
   }
 }

@@ -75,7 +75,7 @@ object AdvancedPreferencesScreen : Screen {
           },
           navigationIcon = {
             IconButton(onClick = backStack::removeLastOrNull) {
-              Icon(Icons.AutoMirrored.Default.ArrowBack, null)
+              Icon(Icons.AutoMirrored.Default.ArrowBack, stringResource(R.string.a11y_btn_back))
             }
           },
         )
