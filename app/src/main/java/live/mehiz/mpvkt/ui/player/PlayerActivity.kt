@@ -50,6 +50,8 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import live.mehiz.mpvkt.App
+import live.mehiz.mpvkt.accessibility.SubtitleAnnounceConfig
+import live.mehiz.mpvkt.accessibility.SubtitleAnnouncer
 import live.mehiz.mpvkt.ui.player.controls.PlayerControls
 import live.mehiz.mpvkt.ui.theme.MpvKtTheme
 
@@ -66,6 +68,22 @@ class PlayerActivity : AppCompatActivity() {
 
   val windowInsetsController by lazy { WindowCompat.getInsetsController(window, window.decorView) }
   private val playerPreferences = App.graph.playerPreferences
+
+  /**
+   * Speaks the current subtitle line. Preferences are read through a lambda so a settings change
+   * takes effect on the next cue instead of the next playback session.
+   */
+  private val subtitleAnnouncer by lazy {
+    SubtitleAnnouncer(this) {
+      val prefs = App.graph.accessibilityPreferences
+      SubtitleAnnounceConfig(
+        enabled = prefs.announceSubtitles.get(),
+        announceSecondary = prefs.announceSecondary.get(),
+        interruptOnNewLine = prefs.interruptOnNewLine.get(),
+        onlyWhenSubtitlesVisible = prefs.onlyWhenVisible.get(),
+      )
+    }
+  }
 
   private var loadIntentOnConnect = false
   private var pipRect: android.graphics.Rect? = null
@@ -99,6 +117,19 @@ class PlayerActivity : AppCompatActivity() {
   }
 
   private fun onPlayerReady(service: MediaPlaybackService) {
+    subtitleAnnouncer.attach(window.decorView)
+    // mpv resolves the cue; these three properties are all the announcer needs. They work the same
+    // for embedded tracks, external .srt/.vtt files and audio-only playback.
+    mpv.propFlow<String>("sub-text")
+      .onEach { subtitleAnnouncer.onPrimaryText(it) }
+      .launchIn(lifecycleScope)
+    mpv.propFlow<String>("secondary-sub-text")
+      .onEach { subtitleAnnouncer.onSecondaryText(it) }
+      .launchIn(lifecycleScope)
+    mpv.propFlow("sub-visibility", true)
+      .onEach { subtitleAnnouncer.onSubtitleVisibilityChanged(it) }
+      .launchIn(lifecycleScope)
+
     setOrientation()
     setContent {
       MpvKtTheme {
