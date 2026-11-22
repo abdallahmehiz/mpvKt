@@ -80,7 +80,7 @@ data class FilePickerScreen(val uri: String) : Screen {
                 backstack.removeAll { it is FilePickerScreen }
               },
             ) {
-              Icon(Icons.AutoMirrored.Default.ArrowBack, null)
+              Icon(Icons.AutoMirrored.Default.ArrowBack, stringResource(R.string.a11y_btn_back))
             }
           },
         )
@@ -101,8 +101,15 @@ data class FilePickerScreen(val uri: String) : Screen {
                   val subFileName = fileManager.getName(potentialSubFile)
                   val subFileNameWithoutExt = subFileName.substringBeforeLast('.')
                   val subFileExt = subFileName.substringAfterLast('.').lowercase()
-                  // Matching rule: File names have the same prefix and the extension is a subtitle format
-                  subFileNameWithoutExt.startsWith(videoNameWithoutExt) && subFileExt in subtitleExtensions
+                  // Two directions matter:
+                  //   <media base>.vtt  -> per-track subtitle
+                  //   RJ123456.vtt      -> one subtitle for a whole album of RJ123456_track01.mp3
+                  // The second layout is the usual one for voice works, and a one-way match misses it.
+                  val samePrefix = subFileNameWithoutExt.startsWith(videoNameWithoutExt)
+                  val mediaStartsWithSub =
+                    subFileNameWithoutExt.length >= MIN_SUBTITLE_REVERSE_MATCH &&
+                      videoNameWithoutExt.startsWith(subFileNameWithoutExt)
+                  (samePrefix || mediaStartsWithSub) && subFileExt in subtitleExtensions
                 }
               }.map { it.getFullPath() }
 
@@ -276,3 +283,8 @@ data class FilePickerScreen(val uri: String) : Screen {
     )
   }
 }
+
+/**
+ * Short names such as "1.vtt" would otherwise match every file in the folder by prefix.
+ */
+private const val MIN_SUBTITLE_REVERSE_MATCH = 4
