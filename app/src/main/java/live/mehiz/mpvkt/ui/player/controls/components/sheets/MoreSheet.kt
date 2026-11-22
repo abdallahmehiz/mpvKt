@@ -176,24 +176,20 @@ fun MoreSheet(
         ) {
           customButtons.forEach { button ->
 
-            val inputChipInteractionSource = remember { MutableInteractionSource() }
-
-            Box {
-              FilterChip(
-                onClick = {},
-                label = { Text(text = button.title) },
-                selected = false,
-                interactionSource = inputChipInteractionSource,
-              )
-              Box(
-                modifier = Modifier
-                  .matchParentSize()
-                  .combinedClickable(
-                    onClick = { onCustomButtonClick(button) },
-                    onLongClick = { onCustomButtonLongClick(button) },
-                    interactionSource = inputChipInteractionSource,
-                    indication = null,
-                  ),
+            // One node, for the same reason as the control bar button.
+            Surface(
+              modifier =
+                Modifier.combinedClickable(
+                  onClick = { onCustomButtonClick(button) },
+                  onLongClick = { onCustomButtonLongClick(button) },
+                ),
+              shape = MaterialTheme.shapes.small,
+              color = MaterialTheme.colorScheme.surfaceVariant,
+              contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
+            ) {
+              Text(
+                text = button.title,
+                modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
               )
             }
           }
