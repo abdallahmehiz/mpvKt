@@ -41,7 +41,7 @@ fun OutlinedNumericChooser(
     horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.smaller),
   ) {
     RepeatingIconButton(onClick = { onChange(value - step) }) {
-      Icon(Icons.Filled.RemoveCircle, null)
+      Icon(Icons.Filled.RemoveCircle, stringResource(R.string.a11y_btn_decrease))
     }
     var valueString by remember { mutableStateOf("$value") }
     LaunchedEffect(value) {
@@ -72,7 +72,7 @@ fun OutlinedNumericChooser(
       keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
     )
     RepeatingIconButton(onClick = { onChange(value + step) }) {
-      Icon(Icons.Filled.AddCircle, null)
+      Icon(Icons.Filled.AddCircle, stringResource(R.string.a11y_btn_increase))
     }
   }
 }
@@ -95,7 +95,7 @@ fun OutlinedNumericChooser(
     horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.smaller),
   ) {
     RepeatingIconButton(onClick = { onChange(value - step) }) {
-      Icon(Icons.Filled.RemoveCircle, null)
+      Icon(Icons.Filled.RemoveCircle, stringResource(R.string.a11y_btn_decrease))
     }
     var valueString by remember { mutableStateOf("$value") }
     LaunchedEffect(value) {
@@ -128,7 +128,7 @@ fun OutlinedNumericChooser(
       keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
     )
     RepeatingIconButton(onClick = { onChange(value + step) }) {
-      Icon(Icons.Filled.AddCircle, null)
+      Icon(Icons.Filled.AddCircle, stringResource(R.string.a11y_btn_increase))
     }
   }
 }

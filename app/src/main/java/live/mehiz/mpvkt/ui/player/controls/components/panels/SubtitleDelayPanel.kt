@@ -262,7 +262,7 @@ fun DelayCard(
           onClick = onReset,
           enabled = isDirectionPositive == null,
         ) {
-          Icon(Icons.Default.Refresh, null)
+          Icon(Icons.Default.Refresh, stringResource(R.string.a11y_btn_reset))
         }
       }
     }
@@ -312,7 +312,7 @@ fun SubtitleDelayTitle(
     IconButton(onClose) {
       Icon(
         Icons.Default.Close,
-        null,
+        stringResource(R.string.a11y_btn_close),
         modifier = Modifier.size(32.dp),
       )
     }

@@ -20,6 +20,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import live.mehiz.mpvkt.ui.player.controls.LocalPlayerButtonsClickEvent
@@ -55,11 +57,14 @@ fun ControlsButton(
         interactionSource,
         ripple(),
       )
-      .padding(MaterialTheme.spacing.medium),
+      .padding(MaterialTheme.spacing.medium)
+      // Stated on the clickable node itself: the icon below only merges into it, and merging is
+      // exactly what has failed elsewhere in this app.
+      .semantics { if (title != null) contentDescription = title },
   ) {
     Icon(
       icon,
-      title,
+      null,
       tint = color,
       modifier = Modifier.size(20.dp),
     )
@@ -96,7 +101,8 @@ fun ControlsButton(
         interactionSource,
         ripple(),
       )
-      .padding(MaterialTheme.spacing.medium),
+      .padding(MaterialTheme.spacing.medium)
+      .semantics { contentDescription = text },
   ) {
     Text(
       text,

@@ -45,10 +45,10 @@ fun SubtitlesSheet(
         onAddSubtitle,
         actions = {
           IconButton(onClick = onOpenSubtitleSettings) {
-            Icon(Icons.Default.Palette, null)
+            Icon(Icons.Default.Palette, stringResource(R.string.a11y_btn_subtitle_style))
           }
           IconButton(onClick = onOpenSubtitleDelay) {
-            Icon(Icons.Default.MoreTime, null)
+            Icon(Icons.Default.MoreTime, stringResource(R.string.a11y_btn_add))
           }
         },
       )

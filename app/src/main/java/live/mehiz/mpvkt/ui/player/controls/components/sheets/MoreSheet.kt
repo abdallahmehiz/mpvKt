@@ -4,7 +4,6 @@ import android.text.format.DateUtils
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -49,6 +48,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
@@ -106,7 +107,7 @@ fun MoreSheet(
           ) {
             Icon(
               if (backgroundPlayback) Icons.Default.Headset else Icons.Default.HeadsetOff,
-              null,
+              stringResource(R.string.a11y_btn_background_playback),
             )
           }
           var isSleepTimerDialogShown by remember { mutableStateOf(false) }
@@ -176,24 +177,22 @@ fun MoreSheet(
         ) {
           customButtons.forEach { button ->
 
-            val inputChipInteractionSource = remember { MutableInteractionSource() }
-
-            Box {
-              FilterChip(
-                onClick = {},
-                label = { Text(text = button.title) },
-                selected = false,
-                interactionSource = inputChipInteractionSource,
-              )
-              Box(
-                modifier = Modifier
-                  .matchParentSize()
-                  .combinedClickable(
-                    onClick = { onCustomButtonClick(button) },
-                    onLongClick = { onCustomButtonLongClick(button) },
-                    interactionSource = inputChipInteractionSource,
-                    indication = null,
-                  ),
+            // One node, for the same reason as the control bar button.
+            Surface(
+              modifier =
+              Modifier
+                .combinedClickable(
+                  onClick = { onCustomButtonClick(button) },
+                  onLongClick = { onCustomButtonLongClick(button) },
+                )
+                .semantics { contentDescription = button.title },
+              shape = MaterialTheme.shapes.small,
+              color = MaterialTheme.colorScheme.surfaceVariant,
+              contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
+            ) {
+              Text(
+                text = button.title,
+                modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
               )
             }
           }
@@ -271,7 +270,7 @@ fun TimePickerDialog(
           IconButton(onClick = { currentLayoutType = if (currentLayoutType == 0) 1 else 0 }) {
             Icon(
               imageVector = if (currentLayoutType == 0) Icons.Outlined.Schedule else Icons.Default.KeyboardAlt,
-              contentDescription = null,
+              contentDescription = stringResource(R.string.a11y_btn_change_layout),
             )
           }
           Row {

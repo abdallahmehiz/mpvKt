@@ -87,7 +87,7 @@ fun SubtitleSettingsColorsCard(
                 SubColorType.Border -> Icons.Default.BorderColor
                 SubColorType.Background -> Icons.Default.FormatColorFill
               },
-              null,
+              stringResource(R.string.a11y_btn_color_target),
             )
           }
         }

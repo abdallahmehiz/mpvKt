@@ -66,7 +66,7 @@ fun AudioDelayCardTitle(onClose: () -> Unit, modifier: Modifier = Modifier) {
     IconButton(onClose) {
       Icon(
         Icons.Default.Close,
-        null,
+        stringResource(R.string.a11y_btn_close),
         modifier = Modifier.size(32.dp),
       )
     }

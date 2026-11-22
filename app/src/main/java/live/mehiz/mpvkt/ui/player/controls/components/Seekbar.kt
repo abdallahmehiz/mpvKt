@@ -16,6 +16,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -25,6 +26,8 @@ import dev.vivvvek.seeker.Segment
 import `is`.xyz.mpv.Utils
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
+import live.mehiz.mpvkt.R
+import live.mehiz.mpvkt.accessibility.seekbarAccessibility
 import live.mehiz.mpvkt.ui.player.controls.LocalPlayerButtonsClickEvent
 import live.mehiz.mpvkt.ui.theme.spacing
 
@@ -65,7 +68,19 @@ fun SeekbarWithTimers(
       segments = chapters
         .filter { it.start in 0f..duration }
         .let { (if (it.isNotEmpty() && it[0].start != 0f) persistentListOf(Segment("", 0f)) + it else it) + it },
-      modifier = Modifier.weight(1f),
+      modifier =
+      Modifier
+        .weight(1f)
+        .seekbarAccessibility(
+          position = position,
+          duration = duration,
+          onSeek = onValueChange,
+          onSeekFinished = onValueChangeFinished,
+          contentLabel = stringResource(R.string.a11y_seekbar),
+          forwardLabel = stringResource(R.string.a11y_seek_forward, 10),
+          backLabel = stringResource(R.string.a11y_seek_back, 10),
+          startLabel = stringResource(R.string.a11y_seek_start),
+        ),
       colors = SeekerDefaults.seekerColors(
         progressColor = MaterialTheme.colorScheme.primary,
         thumbColor = MaterialTheme.colorScheme.primary,

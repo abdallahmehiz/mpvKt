@@ -16,6 +16,7 @@ import live.mehiz.mpvkt.database.repository.CustomButtonRepositoryImpl
 import live.mehiz.mpvkt.database.repository.PlaybackStateRepositoryImpl
 import live.mehiz.mpvkt.domain.custombuttons.repository.CustomButtonRepository
 import live.mehiz.mpvkt.domain.playbackstate.repository.PlaybackStateRepository
+import live.mehiz.mpvkt.preferences.AccessibilityPreferences
 import live.mehiz.mpvkt.preferences.AdvancedPreferences
 import live.mehiz.mpvkt.preferences.AppearancePreferences
 import live.mehiz.mpvkt.preferences.AudioPreferences
@@ -43,6 +44,7 @@ interface AppGraph : ViewModelGraph {
   val decoderPreferences: DecoderPreferences
   val advancedPreferences: AdvancedPreferences
   val gesturePreferences: GesturePreferences
+  val accessibilityPreferences: AccessibilityPreferences
 
   @Binds val CustomButtonRepositoryImpl.bind: CustomButtonRepository
 

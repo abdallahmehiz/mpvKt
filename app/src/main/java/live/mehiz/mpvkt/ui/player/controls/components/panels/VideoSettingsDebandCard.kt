@@ -75,7 +75,7 @@ fun VideoSettingsDebandCard(
               onCheckedChange = { _ -> onDebandingChange(it) },
             ) {
               when (it) {
-                Debanding.None -> Icon(Icons.Default.NotInterested, null)
+                Debanding.None -> Icon(Icons.Default.NotInterested, stringResource(R.string.a11y_btn_deband))
                 Debanding.CPU -> Icon(Icons.Default.Memory, null)
                 Debanding.GPU -> Icon(painterResource(R.drawable.expansion_card), null)
               }

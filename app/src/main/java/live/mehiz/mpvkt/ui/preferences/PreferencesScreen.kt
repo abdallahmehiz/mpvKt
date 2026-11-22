@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
+import androidx.compose.material.icons.outlined.Accessibility
 import androidx.compose.material.icons.outlined.Audiotrack
 import androidx.compose.material.icons.outlined.Code
 import androidx.compose.material.icons.outlined.Gesture
@@ -43,7 +44,7 @@ object PreferencesScreen : Screen {
           title = { Text(text = stringResource(R.string.pref_preferences)) },
           navigationIcon = {
             IconButton(onClick = backstack::removeLastOrNull) {
-              Icon(Icons.AutoMirrored.Outlined.ArrowBack, contentDescription = null)
+              Icon(Icons.AutoMirrored.Outlined.ArrowBack, contentDescription = stringResource(R.string.a11y_btn_back))
             }
           },
         )
@@ -82,6 +83,13 @@ object PreferencesScreen : Screen {
             summary = { Text(text = stringResource(id = R.string.pref_decoder_summary)) },
             icon = { Icon(Icons.Outlined.Memory, null) },
             onClick = { backstack.add(DecoderPreferencesScreen) },
+          )
+          preference(
+            key = "accessibility",
+            title = { Text(text = stringResource(id = R.string.pref_accessibility)) },
+            summary = { Text(text = stringResource(id = R.string.pref_accessibility_summary)) },
+            icon = { Icon(Icons.Outlined.Accessibility, null) },
+            onClick = { backstack.add(AccessibilityPreferencesScreen) },
           )
           preference(
             key = "subtitles",
