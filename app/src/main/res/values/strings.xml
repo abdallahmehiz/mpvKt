@@ -11,6 +11,8 @@
 
     <string name="home_pick_file">Pick a file</string>
     <string name="home_open_file_picker">Open file picker</string>
+    <string name="home_open_media_browser">Browse media</string>
+    <string name="media_access_grant">Allow media access</string>
     <string name="home_open_url">Open url</string>
     <string name="home_url_input_label">URL</string>
     <string name="home_invalid_protocol">Invalid protocol</string>

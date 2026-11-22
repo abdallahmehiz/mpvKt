@@ -10,6 +10,7 @@ import dev.zacsweers.metro.Provides
 import dev.zacsweers.metro.SingleIn
 import dev.zacsweers.metrox.viewmodel.ViewModelGraph
 import kotlinx.serialization.json.Json
+import live.mehiz.mpvkt.data.media.MediaRepository
 import live.mehiz.mpvkt.database.Migrations
 import live.mehiz.mpvkt.database.MpvKtDatabase
 import live.mehiz.mpvkt.database.repository.CustomButtonRepositoryImpl
@@ -19,6 +20,7 @@ import live.mehiz.mpvkt.domain.playbackstate.repository.PlaybackStateRepository
 import live.mehiz.mpvkt.preferences.AdvancedPreferences
 import live.mehiz.mpvkt.preferences.AppearancePreferences
 import live.mehiz.mpvkt.preferences.AudioPreferences
+import live.mehiz.mpvkt.preferences.BrowserPreferences
 import live.mehiz.mpvkt.preferences.DecoderPreferences
 import live.mehiz.mpvkt.preferences.GesturePreferences
 import live.mehiz.mpvkt.preferences.PlayerPreferences
@@ -35,6 +37,7 @@ interface AppGraph : ViewModelGraph {
   val database: MpvKtDatabase
   val customButtonRepository: CustomButtonRepository
   val playbackStateRepository: PlaybackStateRepository
+  val mediaRepository: MediaRepository
 
   val playerPreferences: PlayerPreferences
   val audioPreferences: AudioPreferences
@@ -43,6 +46,7 @@ interface AppGraph : ViewModelGraph {
   val decoderPreferences: DecoderPreferences
   val advancedPreferences: AdvancedPreferences
   val gesturePreferences: GesturePreferences
+  val fileManagerPreferences: BrowserPreferences
 
   @Binds val CustomButtonRepositoryImpl.bind: CustomButtonRepository
 
@@ -58,6 +62,10 @@ interface AppGraph : ViewModelGraph {
   @Provides
   @SingleIn(AppScope::class)
   fun provideFileManager(context: Context): FileManager = FileManager(context)
+
+  @Provides
+  @SingleIn(AppScope::class)
+  fun provideMediaRepository(context: Context): MediaRepository = MediaRepository(context)
 
   @Provides
   @SingleIn(AppScope::class)

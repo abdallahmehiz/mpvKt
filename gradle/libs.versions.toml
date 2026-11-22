@@ -9,6 +9,7 @@ detekt = "2.0.0-alpha.6"
 about-libs = "15.3.0"
 navigation3 = "1.2.1"
 kotlinx-serialization = "1.13.0"
+paging = "3.5.3"
 
 [libraries]
 androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activityCompose" }
@@ -28,8 +29,10 @@ mediasession = "androidx.media:media:1.8.0"
 androidx-navigation3-runtime = { module = "androidx.navigation3:navigation3-runtime", version.ref = "navigation3" }
 androidx-navigation3-ui = { module = "androidx.navigation3:navigation3-ui", version.ref = "navigation3" }
 androidx-documentfile = { group = "androidx.documentfile", name = "documentfile", version = "1.1.0" }
+paging-runtime = { module = "androidx.paging:paging-runtime", version.ref = "paging" }
+paging-compose = { module = "androidx.paging:paging-compose", version.ref = "paging" }
 
-mpv-lib = "io.github.abdallahmehiz:mpv-android-lib:0.2"
+mpv-lib = "io.github.abdallahmehiz:mpv-android-lib:0.2.2"
 metrox-viewmodel-compose = { module = "dev.zacsweers.metro:metrox-viewmodel-compose", version.ref = "metro" }
 seeker = "com.github.abdallahmehiz:seeker:2.0.1"
 
@@ -58,6 +61,7 @@ simple-icons = { module = "br.com.devsrsouza.compose.icons:simple-icons", versio
 [bundles]
 about-libs = ["about-libs-core", "about-libs-ui-m3"]
 compose-navigation3 = ["androidx-navigation3-runtime", "androidx-navigation3-ui"]
+paging = ["paging-runtime", "paging-compose"]
 
 [plugins]
 ksp = { id = "com.google.devtools.ksp", version = "2.3.13" }

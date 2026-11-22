@@ -143,6 +143,7 @@ dependencies {
   implementation(libs.seeker)
   implementation(libs.compose.prefs)
   implementation(libs.bundles.about.libs)
+  implementation(libs.bundles.paging)
   implementation(libs.simple.icons)
 
   implementation(libs.room.runtime)
