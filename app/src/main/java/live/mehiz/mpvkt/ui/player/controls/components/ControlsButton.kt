@@ -1,5 +1,7 @@
 package live.mehiz.mpvkt.ui.player.controls.components
 
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.indication
@@ -55,11 +57,14 @@ fun ControlsButton(
         interactionSource,
         ripple(),
       )
-      .padding(MaterialTheme.spacing.medium),
+      .padding(MaterialTheme.spacing.medium)
+      // Stated on the clickable node itself: the icon below only merges into it, and merging is
+      // exactly what has failed elsewhere in this app.
+      .semantics { if (title != null) contentDescription = title },
   ) {
     Icon(
       icon,
-      title,
+      null,
       tint = color,
       modifier = Modifier.size(20.dp),
     )
@@ -96,7 +101,8 @@ fun ControlsButton(
         interactionSource,
         ripple(),
       )
-      .padding(MaterialTheme.spacing.medium),
+      .padding(MaterialTheme.spacing.medium)
+      .semantics { contentDescription = text },
   ) {
     Text(
       text,

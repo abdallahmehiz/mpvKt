@@ -39,7 +39,9 @@ fun RepeatingIconButton(
 
       true
     },
-    onClick = {},
+    // A screen reader's activate gesture is a click, not a raw press, so the click has to
+    // perform one step itself; holding still repeats through the state below.
+    onClick = { currentClickListener() },
     enabled = enabled,
     interactionSource = interactionSource,
     content = content,
