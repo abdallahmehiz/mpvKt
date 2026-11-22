@@ -1,7 +1,5 @@
 package live.mehiz.mpvkt.ui.player.controls.components
 
-import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.indication
@@ -22,6 +20,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import live.mehiz.mpvkt.ui.player.controls.LocalPlayerButtonsClickEvent
