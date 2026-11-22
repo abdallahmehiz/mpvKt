@@ -1,5 +1,7 @@
 package live.mehiz.mpvkt.presentation.components
 
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.foundation.gestures.detectTapGestures
 import android.content.res.Configuration.ORIENTATION_LANDSCAPE
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.core.animateFloatAsState
@@ -120,11 +122,11 @@ fun PlayerSheet(
     Surface(
       modifier = Modifier
         .sizeIn(maxWidth = maxWidth, maxHeight = maxHeight)
-        .clickable(
-          interactionSource = remember { MutableInteractionSource() },
-          indication = null,
-          onClick = {},
-        )
+        // Swallows taps so they do not reach the scrim behind, without adding a clickable node
+        // that a screen reader would focus and find unlabelled and inert.
+        .pointerInput(Unit) {
+          detectTapGestures {}
+        }
         .nestedScroll(
           remember(anchoredDraggableState) {
             anchoredDraggableState.preUpPostDownNestedScrollConnection()
