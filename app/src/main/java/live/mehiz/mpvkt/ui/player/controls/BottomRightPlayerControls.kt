@@ -1,21 +1,20 @@
 package live.mehiz.mpvkt.ui.player.controls
 
-import androidx.compose.ui.unit.dp
-import androidx.compose.material3.Surface
 import android.annotation.SuppressLint
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AspectRatio
 import androidx.compose.material.icons.filled.PictureInPictureAlt
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import live.mehiz.mpvkt.R
 import live.mehiz.mpvkt.database.entities.CustomButtonEntity
 import live.mehiz.mpvkt.ui.player.controls.components.ControlsButton
@@ -40,12 +39,12 @@ fun BottomRightPlayerControls(
       // reader's activate gesture runs the button instead of hitting an empty onClick underneath.
       Surface(
         modifier =
-          Modifier
-            .padding(end = MaterialTheme.spacing.smaller)
-            .combinedClickable(
-              onClick = onCustomButtonClick,
-              onLongClick = onCustomButtonLongClick,
-            ),
+        Modifier
+          .padding(end = MaterialTheme.spacing.smaller)
+          .combinedClickable(
+            onClick = onCustomButtonClick,
+            onLongClick = onCustomButtonLongClick,
+          ),
         shape = MaterialTheme.shapes.small,
         color = MaterialTheme.colorScheme.secondaryContainer,
         contentColor = MaterialTheme.colorScheme.onSecondaryContainer,

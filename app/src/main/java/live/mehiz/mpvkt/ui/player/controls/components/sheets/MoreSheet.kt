@@ -4,7 +4,6 @@ import android.text.format.DateUtils
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -179,10 +178,10 @@ fun MoreSheet(
             // One node, for the same reason as the control bar button.
             Surface(
               modifier =
-                Modifier.combinedClickable(
-                  onClick = { onCustomButtonClick(button) },
-                  onLongClick = { onCustomButtonLongClick(button) },
-                ),
+              Modifier.combinedClickable(
+                onClick = { onCustomButtonClick(button) },
+                onLongClick = { onCustomButtonLongClick(button) },
+              ),
               shape = MaterialTheme.shapes.small,
               color = MaterialTheme.colorScheme.surfaceVariant,
               contentColor = MaterialTheme.colorScheme.onSurfaceVariant,

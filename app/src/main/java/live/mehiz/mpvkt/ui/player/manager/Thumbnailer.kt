@@ -116,8 +116,11 @@ class Thumbnailer(
     // local video only, like thumbfast's defaults: no network streams, audio files or cover art
     val file = when {
       path == null || (path.contains("://") && !path.startsWith("fd") && !path.startsWith("file://")) -> null
+
       mainMpv.getPropertyBoolean("demuxer-via-network") == true -> null
+
       mainMpv.getPropertyString("current-tracks/video/id") == null -> null
+
       mainMpv.getPropertyBoolean("current-tracks/video/image") == true -> null
 
       // our own fd, closed by mpv on unload
